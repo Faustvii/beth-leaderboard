@@ -1,7 +1,6 @@
 import { staticPlugin } from "@elysiajs/static";
 // import { swagger } from "@elysiajs/swagger";
 import { Elysia } from "elysia";
-import { authed } from "./auth/middleware";
 import { config } from "./config";
 import { api } from "./controllers/*";
 import { pages } from "./pages/*";
@@ -10,7 +9,6 @@ const app = new Elysia()
   // .use(swagger())
   // @ts-expect-error staticPlugin is not typed
   .use(staticPlugin())
-  .use(authed)
   .use(api)
   .use(pages)
   .onStart(() => {

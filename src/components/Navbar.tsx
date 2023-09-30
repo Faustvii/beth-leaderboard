@@ -41,7 +41,6 @@ export const NavbarHtml = ({ session, children }: PropsWithSession) => (
         </div>
       </div>
     </nav>
-
     {children}
   </>
 );

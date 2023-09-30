@@ -48,6 +48,13 @@ export const ctx = new Elysia({
         })
       : (a) => a,
   )
+  .derive(async (ctx) => {
+    const now = performance.now();
+    const authRequest = ctx.auth.handleRequest(ctx);
+    const session = await authRequest.validate();
+    console.log(`Authed in ${performance.now() - now}ms`);
+    return { session };
+  })
   .onStart(({ log }) => {
     if (log && config.env.NODE_ENV === "production") {
       log.info("Server started");

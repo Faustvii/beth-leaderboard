@@ -1,4 +1,4 @@
-/** @typedef  {import("prettier").Config} PrettierConfig */
+/** @typedef {import("prettier").Config} PrettierConfig */
 
 /** @type { PrettierConfig | SortImportsConfig } */
 const config = {

@@ -1,22 +1,24 @@
 import { Elysia } from "elysia";
-import { authed } from "../auth/middleware";
 import { BaseHtml } from "../components/base";
 import { HeaderHtml } from "../components/header";
-import { SearchHtml } from "../components/Search";
+import { LeaderboardTableHtml } from "../components/LeaderboardTable";
 import { ctx } from "../context";
 
-export const home = new Elysia()
-  .use(ctx)
-  .use(authed)
-  .get("/", ({ html, session }) => {
-    return html(() => (
-      <BaseHtml session={session}>
-        <HeaderHtml></HeaderHtml>
-        <div class="flex flex-col items-center py-3">
-          <span>1. Champ</span>
-          <span>2. Junior</span>
-        </div>
-        <SearchHtml></SearchHtml>
-      </BaseHtml>
-    ));
-  });
+export const home = new Elysia().use(ctx).get("/", ({ html, session }) => {
+  return html(() => (
+    <BaseHtml session={session}>
+      <HeaderHtml title="Leaderboard" />
+      <LeaderboardTableHtml page={1} rows={getRows(1)}></LeaderboardTableHtml>
+    </BaseHtml>
+  ));
+});
+
+function getRows(page: number) {
+  const rows = [];
+  if (page === 1) page = 0;
+  page = page * 10;
+  for (let i = 1; i <= 10; i++) {
+    rows.push({ rank: i + page, name: `test${i}`, elo: 3000 - i });
+  }
+  return rows;
+}

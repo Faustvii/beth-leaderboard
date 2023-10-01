@@ -1,13 +1,12 @@
 import "@kitajs/html/register";
-import { staticPlugin } from "@elysiajs/static";
 import { Elysia } from "elysia";
 import { config } from "./config";
 import { api } from "./controllers/*";
 import { pages } from "./pages/*";
+import { staticController } from "./staticFiles";
 
 const app = new Elysia()
-  // @ts-expect-error ts can't figure it out
-  .use(staticPlugin())
+  .use(staticController)
   .use(api)
   .use(pages)
   .onStart(() => {

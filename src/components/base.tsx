@@ -23,7 +23,7 @@ export const BaseHtml = ({ children, session }: PropsWithSession) => (
       {/* <script src="https://unpkg.com/htmx.org/dist/ext/response-targets.js"></script>
       <script src="https://unpkg.com/htmx.org/dist/ext/loading-states.js"></script>
       <script src="https://unpkg.com/hyperscript.org@0.9.11"></script> */}
-      <link href="/public/styles.css" rel="stylesheet" />
+      <link href="/static/styles.css" rel="stylesheet" />
       <link rel="icon" href="data:;base64,="></link>
       {/* <style>
         {`

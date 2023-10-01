@@ -1,7 +1,7 @@
-import { liveReloadScript } from "beth-stack/dev";
-import { type PropsWithChildren } from "beth-stack/jsx";
+import { type PropsWithChildren } from "@kitajs/html";
 import { type Session } from "lucia";
 import { config } from "../config";
+import { liveReloadScript } from "../lib/liveReloadScript";
 import { LoadingBarHtml } from "./LoadingBar";
 import { NavbarHtml } from "./Navbar";
 

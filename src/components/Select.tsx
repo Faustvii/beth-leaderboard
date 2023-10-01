@@ -1,4 +1,4 @@
-import { type PropsWithChildren } from "beth-stack/jsx";
+import { type PropsWithChildren } from "@kitajs/html";
 
 export const SelectHtml = ({ children }: PropsWithChildren) => (
   <>

@@ -1,4 +1,4 @@
-import { type PropsWithChildren } from "beth-stack/jsx";
+import { type PropsWithChildren } from "@kitajs/html";
 import { type Session } from "lucia";
 
 interface PropsWithSession extends PropsWithChildren {

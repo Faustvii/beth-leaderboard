@@ -25,13 +25,3 @@ export const home = new Elysia()
       </BaseHtml>
     ));
   });
-
-function getRows(page: number) {
-  const rows = [];
-  if (page === 1) page = 0;
-  page = page * 10;
-  for (let i = 1; i <= 10; i++) {
-    rows.push({ rank: i + page, name: `test${i}`, elo: 3000 - i });
-  }
-  return rows;
-}

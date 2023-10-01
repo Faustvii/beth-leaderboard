@@ -1,13 +1,27 @@
-import { blob, integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import {
+  blob,
+  index,
+  integer,
+  sqliteTable,
+  text,
+} from "drizzle-orm/sqlite-core";
 
-export const user = sqliteTable("user", {
-  id: text("id").primaryKey(),
-  name: text("name").notNull(),
-  email: text("email"),
-  picture: text("picture").notNull(),
-  elo: integer("elo").notNull().default(1500),
-  // other user attributes
-});
+export const user = sqliteTable(
+  "user",
+  {
+    id: text("id").primaryKey(),
+    name: text("name").notNull(),
+    email: text("email"),
+    picture: text("picture").notNull(),
+    elo: integer("elo").notNull().default(1500),
+    // other user attributes
+  },
+  (table) => {
+    return {
+      eloIdx: index("elo_idx").on(table.elo),
+    };
+  },
+);
 
 export const session = sqliteTable("user_session", {
   id: text("id").primaryKey(),

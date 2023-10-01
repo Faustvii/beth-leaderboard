@@ -1,3 +1,15 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 9999;
+  background-image: url("bar.svg");
+  /* background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCI+CiAgPHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iI2RkZCIgLz4KICA8cmVjdCB4PSIwIiB5PSIwIiB3aWR0aD0iNTAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiMwMDdiZmYiPgogICAgPGFuaW1hdGUgYXR0cmlidXRlTmFtZT0id2lkdGgiIGZyb209IjAiIHRvPSIxMDAlIiBkdXI9IjAuNXMiIHJlcGVhdENvdW50PSJpbmRlZmluaXRlIiAvPgogIDwvcmVjdD4KPC9zdmc+"); */
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+}

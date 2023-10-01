@@ -13,25 +13,24 @@ export const NavbarHtml = ({ session, children }: PropsWithSession) => (
           Crock it
         </span>
         <div>
-          <ul class="mt-4 flex flex-col rounded-lg border border-gray-100 bg-gray-50 p-4 font-medium dark:border-gray-700 dark:bg-gray-800 md:mt-0 md:flex-row md:space-x-8 md:border-0 md:bg-white md:p-0 md:dark:bg-gray-900">
+          <ul class="mt-2 flex flex-col rounded-lg bg-gray-50 font-medium dark:border-gray-700 dark:bg-gray-800 md:mt-0 md:flex-row md:space-x-8 md:border-0 md:bg-white md:p-0 md:dark:bg-gray-900">
             <li>
               {session ? (
                 <>
-                  <li>Hi! {session.user.name}</li>
-                  <li>
-                    <a
-                      href="/api/auth/signout"
-                      class="mt-4 rounded-lg bg-blue-500 px-4 py-2 text-white transition duration-200 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50"
-                    >
-                      Sign Out
-                    </a>
-                  </li>
+                  <a
+                    href="/api/auth/signout"
+                    hx-indicator=".progress-bar"
+                    class="mt-2 rounded-lg bg-blue-500 px-2 py-2 text-white transition duration-200 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50"
+                  >
+                    Sign Out
+                  </a>
                 </>
               ) : (
                 <a
                   href="/api/auth/signin/google"
+                  hx-indicator=".progress-bar"
                   hx-boost="false"
-                  class="mt-4 rounded-lg bg-blue-500 px-4 py-2 text-white transition duration-200 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50"
+                  class="mt-2 rounded-lg bg-blue-500 px-2 py-2 text-white transition duration-200 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50"
                 >
                   Sign In
                 </a>

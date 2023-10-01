@@ -1,4 +1,12 @@
 import { type HTTPStatusName } from "elysia/utils";
+import { config } from "../config";
+import { client } from "../db";
+
+export async function syncIfLocal() {
+  if (config.env.DATABASE_CONNECTION_TYPE === "local-replica") {
+    await client.sync();
+  }
+}
 
 export function redirect(
   {

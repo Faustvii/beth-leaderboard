@@ -5,24 +5,24 @@ import { matches } from "./matches";
 export { key, session, user } from "./auth";
 export { matches } from "./matches";
 
-export const userRelations = relations(user, ({ many }) => ({
-  matches: many(matches),
-}));
-
 export const matchRelations = relations(matches, ({ one }) => ({
   blackPlayerOne: one(user, {
+    relationName: "blackPlayerOne",
     fields: [matches.blackPlayerOne],
     references: [user.id],
   }),
   blackPlayerTwo: one(user, {
+    relationName: "blackPlayerTwo",
     fields: [matches.blackPlayerTwo],
     references: [user.id],
   }),
   whitePlayerOne: one(user, {
+    relationName: "whitePlayerOne",
     fields: [matches.whitePlayerOne],
     references: [user.id],
   }),
   whitePlayerTwo: one(user, {
+    relationName: "whitePlayerTwo",
     fields: [matches.whitePlayerTwo],
     references: [user.id],
   }),

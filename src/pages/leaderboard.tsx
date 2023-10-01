@@ -10,15 +10,16 @@ export const leaderboard = new Elysia({
   .use(ctx)
   .get("/page/:page", async ({ db, html, params: { page } }) => {
     const pageNumber = parseInt(page);
+    const pageSize = 15;
     const now = performance.now();
     const players = await db.query.user.findMany({
       orderBy: [desc(user.elo)],
-      limit: 10,
-      offset: (pageNumber - 1) * 10,
+      limit: pageSize,
+      offset: (pageNumber - 1) * pageSize,
     });
     console.log(`retrieved players in ${performance.now() - now}ms`);
     const rows = players.map((player, index) => ({
-      rank: index + (pageNumber - 1) * 10 + 1,
+      rank: index + (pageNumber - 1) * pageSize + 1,
       name: player.name,
       elo: player.elo,
     }));

@@ -12,7 +12,7 @@
     "db:generate": "bunx drizzle-kit generate:sqlite",
     "uno": "bunx --bun unocss",
     "uno:dev": "bunx --bun unocss --watch",
-    "tw": "bunx tailwindcss -i ./src/styles.css -o ./public/styles.css",
+    "tw": "bunx tailwindcss --minify -i ./src/styles.css -o ./public/styles.css",
     "tw:dev": "bunx tailwindcss -i ./src/styles.css -o ./public/styles.css --watch",
     "typecheck": "bunx --bun tsc",
     "format:check": "prettier --check .",

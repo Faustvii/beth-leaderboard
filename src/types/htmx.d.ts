@@ -1,9 +1,11 @@
+import { type App } from "../main";
+
 /* eslint-disable @typescript-eslint/no-unused-vars */
 type RoutesByType<
   Schema extends Record<string, never>, // Ensure keys are strings
   Type extends "get" | "post" | "put" | "delete" | "patch",
 > = RouterPattern<
-  RemoveSlash<
+  RemoveTrailingSlash<
     string &
       keyof {
         // Constrain to strings here
@@ -14,7 +16,7 @@ type RoutesByType<
   >
 >;
 
-type RemoveSlash<S extends string> = S extends `${infer T}/`
+type RemoveTrailingSlash<S extends string> = S extends `${infer T}/`
   ? T extends ""
     ? S
     : T
@@ -37,8 +39,7 @@ type DoesntStartWithApi<T extends string> = T extends `${"/api"}${infer Rest}`
   ? never
   : T;
 
-// eslint-disable-next-line @typescript-eslint/consistent-type-imports
-type Schema = import("../main").App["schema"];
+type Schema = App["schema"];
 
 type PostRoutes = RoutesByType<Schema, "post">;
 type GetRoutes = RoutesByType<Schema, "get">;
@@ -48,11 +49,11 @@ type PatchRoutes = RoutesByType<Schema, "patch">;
 
 declare namespace JSX {
   interface HtmlTag extends Htmx.Attributes {
-    ["hx-get"]?: StartsWithApi<GetRoutes>;
-    ["hx-post"]?: StartsWithApi<PostRoutes>;
-    ["hx-put"]?: StartsWithApi<PutRoutes>;
-    ["hx-delete"]?: StartsWithApi<DeleteRoutes>;
-    ["hx-patch"]?: StartsWithApi<PatchRoutes>;
+    ["hx-get"]?: GetRoutes;
+    ["hx-post"]?: PostRoutes;
+    ["hx-put"]?: PutRoutes;
+    ["hx-delete"]?: DeleteRoutes;
+    ["hx-patch"]?: PatchRoutes;
     _?: string;
   }
 }

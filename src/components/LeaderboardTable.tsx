@@ -26,13 +26,8 @@ export const LeaderboardTableHtml = ({
           </thead>
           <tbody id="nextPageData">
             {rows.map((row, index) => (
-              <LeaderboardRowHtml
-                {...row}
-                last={index === rows.length - 1}
-                page={page}
-              />
+              <LeaderboardRowHtml {...row} first={index === 0} page={page} />
             ))}
-            {/* <tr ></tr> */}
           </tbody>
         </table>
       </div>

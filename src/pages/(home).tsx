@@ -8,9 +8,9 @@ import { user } from "../db/schema";
 
 export const home = new Elysia()
   .use(ctx)
-  .get("/", async ({ db, html, session }) => {
+  .get("/", async ({ readDb, html, session }) => {
     const pageSize = 15;
-    const players = await db.query.user.findMany({
+    const players = await readDb.query.user.findMany({
       orderBy: [desc(user.elo)],
       limit: pageSize,
     });

@@ -2,13 +2,13 @@ export const LeaderboardRowHtml = ({
   rank,
   name,
   elo,
-  last,
+  first: last,
   page,
 }: {
   rank: number;
   name: string;
   elo: number;
-  last: boolean;
+  first: boolean;
   page: number;
 }) => (
   <>
@@ -17,8 +17,9 @@ export const LeaderboardRowHtml = ({
         class="border-b bg-white dark:border-gray-700 dark:bg-gray-800"
         hx-get={`/leaderboard/page/${page + 1}`}
         hx-indicator=".progress-bar"
-        hx-trigger="revealed"
-        hx-swap="afterend"
+        hx-trigger="intersect once"
+        hx-swap="beforeend"
+        hx-target={`#nextPageData`}
       >
         <td class="px-1 py-4 md:px-3 lg:px-6">{rank}.</td>
         <th

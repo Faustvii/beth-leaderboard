@@ -2,7 +2,7 @@ import { libsql } from "@lucia-auth/adapter-sqlite";
 import { google } from "@lucia-auth/oauth/providers";
 import { lucia, type Middleware } from "lucia";
 import { config } from "../config";
-import { client } from "../db";
+import { readClient, writeClient } from "../db";
 
 const envAliasMap = {
   production: "PROD",
@@ -39,10 +39,10 @@ export const elysia = (): Middleware<[ElysiaContext]> => {
   };
 };
 
-export const auth = lucia({
+export const readAuth = lucia({
   env: envAlias,
   middleware: elysia(),
-  adapter: libsql(client, {
+  adapter: libsql(readClient, {
     user: "user",
     key: "user_key",
     session: "user_session",
@@ -58,9 +58,29 @@ export const auth = lucia({
   },
 });
 
-export type Auth = typeof auth;
+export const writeAuth = lucia({
+  env: envAlias,
+  middleware: elysia(),
+  adapter: libsql(writeClient, {
+    user: "user",
+    key: "user_key",
+    session: "user_session",
+  }),
+  getUserAttributes: (data) => {
+    return {
+      id: data.id,
+      name: data.name,
+      email: data.email,
+      picture: data.picture,
+      elo: data.elo,
+    };
+  },
+});
 
-export const googleAuth = google(auth, {
+export type ReadAuth = typeof readAuth;
+export type WriteAuth = typeof writeAuth;
+
+export const googleAuth = google(writeAuth, {
   clientId: config.env.GOOGLE_CLIENT_ID,
   clientSecret: config.env.GOOGLE_CLIENT_SECRET,
   redirectUri: `${config.env.HOST_URL}/api/auth/google/callback`,

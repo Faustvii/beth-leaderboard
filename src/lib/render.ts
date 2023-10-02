@@ -1,7 +1,7 @@
 import type Elysia from "elysia";
 
 export function htmlRender() {
-  async function html<T extends () => JSX.Element>(
+  async function html<T extends (() => JSX.Element) | JSX.Element>(
     lazyHtml: T,
   ): Promise<Response> {
     return renderToStringResponse(lazyHtml);
@@ -12,16 +12,16 @@ export function htmlRender() {
   };
 }
 
-export function renderToString<T extends () => JSX.Element>(
+export function renderToString<T extends (() => JSX.Element) | JSX.Element>(
   lazyHtml: T,
-): JSX.Element {
-  const resultPromise = lazyHtml();
-  return resultPromise;
+): T extends () => infer R ? R : T {
+  const resultPromise = typeof lazyHtml === "function" ? lazyHtml() : lazyHtml;
+  return resultPromise as T extends () => infer R ? R : T;
 }
 
-export async function renderToStringResponse<T extends () => JSX.Element>(
-  lazyHtml: T,
-): Promise<Response> {
+export async function renderToStringResponse<
+  T extends (() => JSX.Element) | JSX.Element,
+>(lazyHtml: T): Promise<Response> {
   const result = await renderToString(lazyHtml);
   return new Response(result, {
     headers: {

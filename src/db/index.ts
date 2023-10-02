@@ -18,10 +18,28 @@ const options = {
   },
 } satisfies Record<typeof DATABASE_CONNECTION_TYPE, Config>;
 
-export const client = createClient(options[DATABASE_CONNECTION_TYPE]);
+export const readClient = createClient(options[DATABASE_CONNECTION_TYPE]);
 
 if (config.env.DATABASE_CONNECTION_TYPE === "local-replica") {
-  await client.sync();
+  await readClient.sync();
 }
 
-export const db = drizzle(client, { schema, logger: true });
+const remoteOptions = {
+  url: config.env.DATABASE_URL,
+  authToken: config.env.DATABASE_AUTH_TOKEN!,
+};
+let remoteDbClient = readClient;
+
+if (DATABASE_CONNECTION_TYPE !== "local") {
+  remoteDbClient = createClient(remoteOptions);
+}
+
+export const writeClient = remoteDbClient;
+export const writeDb = drizzle(remoteDbClient, {
+  schema,
+  logger: false,
+});
+export const readDb = drizzle(readClient, {
+  schema,
+  logger: false,
+});

@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/consistent-type-imports */
 /// <reference types="lucia" />
 declare namespace Lucia {
-  type Auth = import("../auth/index").Auth;
+  type Auth = import("../auth/index").ReadAuth;
   interface DatabaseUserAttributes {
     name: string;
     email?: string | null;

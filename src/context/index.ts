@@ -1,9 +1,9 @@
 import { cron } from "@elysiajs/cron";
 import { HoltLogger } from "@tlscipher/holt";
 import { Elysia } from "elysia";
-import { auth } from "../auth";
+import { readAuth, writeAuth } from "../auth";
 import { config } from "../config";
-import { client, db } from "../db";
+import { readClient, readDb, writeDb } from "../db";
 import { redirect } from "../lib";
 import { htmlRender } from "../lib/render";
 
@@ -12,10 +12,13 @@ export const ctx = new Elysia({
 })
   // @ts-expect-error ts can't figure out types
   .use(new HoltLogger().getLogger())
-  .decorate("db", db)
+  .decorate("readDb", readDb)
+  .decorate("writeDb", writeDb)
   .decorate("config", config)
-  .decorate("auth", auth)
+  .decorate("readAuth", readAuth)
+  .decorate("writeAuth", writeAuth)
   .decorate("redirect", redirect)
+  // .use(html())
   .use(htmlRender())
   .use(
     // @ts-expect-error ts can't figure out types
@@ -23,20 +26,17 @@ export const ctx = new Elysia({
       ? cron({
           name: "heartbeat",
           pattern: "*/2 * * * * *",
-          run() {
+          async run() {
             // const now = performance.now();
             // console.log("Syncing database...");
-            void client.sync().then(() => {
-              // console.log(`Database synced in ${performance.now() - now}ms`);
-            });
+            await readClient.sync();
+            // console.log(`Database synced in ${performance.now() - now}ms`);
           },
         })
       : (a) => a,
   )
   .derive(async (ctx) => {
-    const now = performance.now();
-    const authRequest = ctx.auth.handleRequest(ctx);
+    const authRequest = ctx.readAuth.handleRequest(ctx);
     const session = await authRequest.validate();
-    console.log(`Authed in ${performance.now() - now}ms`);
     return { session };
   });

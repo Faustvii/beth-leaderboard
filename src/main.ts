@@ -10,7 +10,7 @@ const app = new Elysia()
   .use(api)
   .use(pages)
   .onStart(() => {
-    if (config.env.NODE_ENV === "production") {
+    if (config.env.NODE_ENV === "development") {
       void fetch("http://localhost:3001/restart");
       console.log("Triggering Live Reload");
     }

@@ -3,7 +3,7 @@
   "module": "src/main.ts",
   "type": "module",
   "scripts": {
-    "dev": "concurrently \"bun run --hot src/main.ts\" \"bun run src/liveReload.ts\"",
+    "dev": "concurrently \"bun run --hot src/main.ts\" \"bun run src/liveReload.ts\" \"bun tw:dev\"",
     "liveReload": "bunx beth-stack",
     "start": "bun run uno && bun run src/main.ts",
     "db:push": "bunx drizzle-kit push:sqlite",

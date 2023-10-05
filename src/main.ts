@@ -1,12 +1,15 @@
 import "@kitajs/html/register";
 import { Elysia } from "elysia";
 import { config } from "./config";
+import { ctx } from "./context";
 import { api } from "./controllers/*";
 import { pages } from "./pages/*";
 import { staticController } from "./staticFiles";
+import { webSockets } from "./websockets/*";
 
 const app = new Elysia()
-  .use(staticController)
+  .use(webSockets)
+  .use(staticController) 
   .use(api)
   .use(pages)
   .onStart(() => {
@@ -19,7 +22,6 @@ const app = new Elysia()
     console.error(error);
   })
   .listen(3000);
-
 export type App = typeof app;
 
 console.log(

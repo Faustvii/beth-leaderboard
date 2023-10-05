@@ -3,10 +3,13 @@ import { type Session } from "lucia";
 import { config } from "../config";
 import { liveReloadScript } from "../lib/liveReloadScript";
 import { LoadingBarHtml } from "./LoadingBar";
+import { MainContainer } from "./MainContainer";
 import { NavbarHtml } from "./Navbar";
 
 const safeScript =
   config.env.NODE_ENV === "development" ? liveReloadScript() : "";
+
+const safe2 = liveReloadScript({ url: "ws://localhost:3000/queue" });
 
 interface PropsWithSession extends PropsWithChildren {
   session: Session | null;
@@ -22,9 +25,11 @@ export const BaseHtml = ({ children, session }: PropsWithSession) => (
         <meta name="theme-color" content="#000000" />
         <title>BETH Leaderboard</title>
         <script src="https://unpkg.com/htmx.org@1.9.6"></script>
+        <script src="https://unpkg.com/htmx.org@1.9.6/dist/ext/ws.js"></script>
         <link href="/static/styles.css" rel="stylesheet" />
         <link rel="icon" href="data:;base64,="></link>
         <script>{safeScript}</script>
+        {/* <script>{safe2}</script> */}
       </head>
       <body
         hx-boost="true"
@@ -32,7 +37,7 @@ export const BaseHtml = ({ children, session }: PropsWithSession) => (
       >
         <LoadingBarHtml />
         <NavbarHtml session={session} />
-        {children}
+        <MainContainer children={children} />
       </body>
     </html>
   </>

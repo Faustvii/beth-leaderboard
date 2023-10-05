@@ -14,7 +14,7 @@ export const ctx = new Elysia({
   .use(new HoltLogger().getLogger())
   .decorate("readDb", readDb)
   .decorate("writeDb", writeDb)
-  .decorate("config", config)
+  .decorate("config", config) 
   .decorate("readAuth", readAuth)
   .decorate("writeAuth", writeAuth)
   .decorate("redirect", redirect)

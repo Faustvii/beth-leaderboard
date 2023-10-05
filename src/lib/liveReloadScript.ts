@@ -8,7 +8,7 @@ export function liveReloadScript({
             let socket = new WebSocket(\"${url}\");
   
             socket.onopen = function(e) {
-              console.log("connected")
+              console.log("connected", e)
             };
 
             socket.onmessage = function(event) {

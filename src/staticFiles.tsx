@@ -1,5 +1,6 @@
 import { type BunFile } from "bun";
 import Elysia, { type Context } from "elysia";
+import { config } from "./config";
 import { ctx } from "./context";
 
 export const staticController = new Elysia({
@@ -24,6 +25,7 @@ async function etagFileServe(file: BunFile, ctx: Context) {
   }
   ctx.set.headers.etag = hash.toString();
   ctx.set.headers.age = `${Date.now() - file.lastModified}`;
-  ctx.set.headers["Cache-Control"] = "public, max-age=86400";
+  if (config.env.NODE_ENV === "production")
+    ctx.set.headers["Cache-Control"] = "public, max-age=86400";
   return file;
 }

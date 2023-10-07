@@ -12,7 +12,11 @@ export const staticController = new Elysia({
     return etagFileServe(file, ctx);
   })
   .get("/bar.svg", (ctx) => {
-    const file = Bun.file("public/bar.svg");
+    const file = Bun.file("public/bar.min.svg");
+    return etagFileServe(file, ctx);
+  })
+  .get("/crokinole.svg", (ctx) => {
+    const file = Bun.file("public/crokinole-c.min.svg");
     return etagFileServe(file, ctx);
   });
 

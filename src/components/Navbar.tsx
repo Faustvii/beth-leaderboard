@@ -3,7 +3,7 @@ import { type Session } from "lucia";
 import { AnchorButtonHtml } from "./Button";
 import "@kitajs/html/register";
 
-export type Page = "leaderboard" | "play" | "stats";
+export type Page = "leaderboard" | "play" | "stats" | "match";
 
 interface Props extends PropsWithChildren {
   session: Session | null;
@@ -41,7 +41,7 @@ export const NavbarHtml = ({ session, activePage }: Props) => (
     <nav class="rounded-b-lg bg-gray-800 ">
       <div class="mx-auto px-2 sm:px-6 lg:px-8">
         <div class="relative flex h-16 items-center justify-between">
-          <div class="absolute inset-y-0 left-0 flex items-center sm:hidden">
+          <div class="absolute inset-y-0 left-0 flex items-center lg:hidden">
             <button
               type="button"
               class="relative inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
@@ -78,7 +78,7 @@ export const NavbarHtml = ({ session, activePage }: Props) => (
               </svg>
             </button>
           </div>
-          <div class="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
+          <div class="flex flex-1 items-center justify-center lg:items-stretch lg:justify-start">
             <div class="flex flex-shrink-0 items-center">
               <img
                 class="h-8 w-auto "
@@ -86,7 +86,7 @@ export const NavbarHtml = ({ session, activePage }: Props) => (
                 alt="Crokinole"
               />
             </div>
-            <div class="hidden sm:ml-6 sm:block">
+            <div class="hidden lg:ml-6 lg:block">
               <div class="flex space-x-4">
                 {navBarButton(
                   "Leaderboard",
@@ -95,11 +95,12 @@ export const NavbarHtml = ({ session, activePage }: Props) => (
                   "/leaderboard",
                 )}
                 {navBarButton("Play", "play", activePage, "/play")}
+                {navBarButton("Log match", "match", activePage, "/match")}
                 {navBarButton("Stats", "stats", activePage)}
               </div>
             </div>
           </div>
-          <div class="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
+          <div class="absolute inset-y-0 right-0 flex items-center pr-2 lg:static lg:inset-auto lg:ml-6 lg:pr-0">
             {session ? (
               <>
                 <div class="relative ml-3">
@@ -146,7 +147,7 @@ export const NavbarHtml = ({ session, activePage }: Props) => (
         </div>
       </div>
 
-      <div class="hidden sm:hidden" id="mobile-menu">
+      <div class="hidden lg:hidden" id="mobile-menu">
         <div class="space-y-1 px-2 pb-3 pt-2">
           {navBarButton(
             "Leaderboard",
@@ -160,6 +161,13 @@ export const NavbarHtml = ({ session, activePage }: Props) => (
             "play",
             activePage,
             "/play",
+            "block rounded-md px-3 py-2 text-base font-medium text-white",
+          )}
+          {navBarButton(
+            "Log match",
+            "match",
+            activePage,
+            "/match",
             "block rounded-md px-3 py-2 text-base font-medium text-white",
           )}
           {navBarButton(
@@ -199,7 +207,8 @@ const navBarButton = (
       {...(href && { "hx-get": href })}
       hx-indicator=".progress-bar"
       hx-target="#mainContainer"
-      hx-hx-swap="innerHTML"
+      hx-swap="innerHTML"
+      hx-push-url="true"
       class={`${classes} ${
         isActivePage(page, activePage) ? "bg-gray-900" : ""
       }`}

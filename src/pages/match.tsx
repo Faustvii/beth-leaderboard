@@ -87,6 +87,8 @@ function maForm() {
         id="matchForm"
         enctype="multipart/form-data"
         // hx-target="#mainContainer"
+        hx-indicator=".progress-bar"
+        hx-sync="this:abort"
         hx-swap="outerHTML"
         hx-target="#matchForm"
       >
@@ -109,6 +111,7 @@ function maForm() {
             class="peer block w-full appearance-none border-0 border-b-2 border-gray-300 bg-transparent px-0 py-2.5 pl-10 text-sm text-gray-900 focus:border-blue-600 focus:outline-none focus:ring-0 dark:border-gray-600 dark:text-white dark:focus:border-blue-500"
             placeholder=" "
             autocomplete="off"
+            required="true"
           />
           <label
             for="player1"
@@ -151,6 +154,7 @@ function maForm() {
             name="player3"
             class="peer block w-full appearance-none border-0 border-b-2 border-gray-300 bg-transparent px-0 py-2.5 pl-10 text-sm text-gray-900 focus:border-blue-600 focus:outline-none focus:ring-0 dark:border-gray-600 dark:text-white dark:focus:border-blue-500"
             placeholder=" "
+            required="true"
             autocomplete="off"
           />
           <label
@@ -191,7 +195,7 @@ function maForm() {
             class="peer block w-full appearance-none border-0 border-b-2 border-gray-300 bg-transparent px-0 py-2.5 text-sm text-gray-900 focus:border-blue-600 focus:outline-none focus:ring-0 dark:border-gray-600 dark:text-white dark:focus:border-blue-500"
             required="true"
           >
-            <option disabled selected="true">
+            <option disabled value="" selected="true">
               Select a winner
             </option>
             <option value="white">White</option>
@@ -213,6 +217,8 @@ function maForm() {
             class="peer block w-full appearance-none border-0 border-b-2 border-gray-300 bg-transparent px-0 py-2.5 text-sm text-gray-900 focus:border-blue-600 focus:outline-none focus:ring-0 dark:border-gray-600 dark:text-white dark:focus:border-blue-500"
             placeholder=" "
             required="true"
+            min="0"
+            step="1"
           />
           <label
             for="point_difference"

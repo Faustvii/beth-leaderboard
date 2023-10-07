@@ -29,6 +29,7 @@ export const SearchHtml = ({
       placeholder=" "
       {...props}
       hx-trigger="keyup changed delay:300ms"
+      hx-sync="this:replace"
       hx-indicator=".progress-bar"
     />
     {/* </div> */}

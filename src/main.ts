@@ -1,7 +1,6 @@
 import "@kitajs/html/register";
 import { Elysia } from "elysia";
 import { config } from "./config";
-import { ctx } from "./context";
 import { api } from "./controllers/*";
 import { pages } from "./pages/*";
 import { staticController } from "./staticFiles";
@@ -9,7 +8,7 @@ import { webSockets } from "./websockets/*";
 
 const app = new Elysia()
   .use(webSockets)
-  .use(staticController) 
+  .use(staticController)
   .use(api)
   .use(pages)
   .onStart(() => {

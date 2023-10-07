@@ -1,21 +1,12 @@
 import { type PropsWithChildren } from "@kitajs/html";
-import { type Session } from "lucia";
 import { config } from "../config";
 import { liveReloadScript } from "../lib/liveReloadScript";
 import { LoadingBarHtml } from "./LoadingBar";
-import { MainContainer } from "./MainContainer";
-import { NavbarHtml } from "./Navbar";
 
 const safeScript =
   config.env.NODE_ENV === "development" ? liveReloadScript() : "";
 
-const safe2 = liveReloadScript({ url: "ws://localhost:3000/queue" });
-
-interface PropsWithSession extends PropsWithChildren {
-  session: Session | null;
-}
-
-export const BaseHtml = ({ children, session }: PropsWithSession) => (
+export const BaseHtml = ({ children }: PropsWithChildren) => (
   <>
     {"<!DOCTYPE html>"}
     <html lang="en">
@@ -29,15 +20,13 @@ export const BaseHtml = ({ children, session }: PropsWithSession) => (
         <link href="/static/styles.css" rel="stylesheet" />
         <link rel="icon" href="data:;base64,="></link>
         <script>{safeScript}</script>
-        {/* <script>{safe2}</script> */}
       </head>
       <body
         hx-boost="true"
         class="h-screen w-full place-items-center bg-gray-100 text-gray-900 dark:bg-gray-900 dark:text-gray-100"
       >
         <LoadingBarHtml />
-        <NavbarHtml session={session} />
-        <MainContainer children={children} />
+        {children}
       </body>
     </html>
   </>

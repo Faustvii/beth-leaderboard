@@ -30,3 +30,7 @@ export function redirect(
     set.redirect = url;
   }
 }
+
+export function isHxRequest(headers: Record<string, string | null>) {
+  return headers["hx-request"] === "true";
+}

@@ -1,8 +1,9 @@
 import { desc } from "drizzle-orm";
 import { Elysia } from "elysia";
-import { BaseHtml } from "../components/base";
 import { HeaderHtml } from "../components/header";
+import { LayoutHtml } from "../components/Layout";
 import { LeaderboardTableHtml } from "../components/LeaderboardTable";
+import { NavbarHtml } from "../components/Navbar";
 import { ctx } from "../context";
 import { user } from "../db/schema";
 
@@ -20,9 +21,10 @@ export const home = new Elysia()
       elo: player.elo,
     }));
     return html(() => (
-      <BaseHtml session={session}>
+      <LayoutHtml>
+        <NavbarHtml session={session} activePage="leaderboard" />
         <HeaderHtml title="Leaderboard" />
         <LeaderboardTableHtml page={1} rows={rows}></LeaderboardTableHtml>
-      </BaseHtml>
+      </LayoutHtml>
     ));
   });

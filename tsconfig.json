@@ -1,33 +1,22 @@
 {
   "compilerOptions": {
-    "lib": ["ESNext"],
+    "lib": ["esnext"],
     "module": "esnext",
     "target": "esnext",
     "moduleResolution": "bundler",
-    "moduleDetection": "force",
-    "allowImportingTsExtensions": true,
     "noEmit": true,
-    "composite": true,
+    "allowImportingTsExtensions": true,
+    "moduleDetection": "force",
+    "allowJs": true, // allow importing `.js` from `.ts`
+    "esModuleInterop": true, // allow default imports for CommonJS modules
     "strict": true,
-    "downlevelIteration": true,
     "skipLibCheck": true,
     "jsx": "react",
     "jsxFactory": "Html.createElement",
     "jsxFragmentFactory": "Html.Fragment",
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
-    "allowJs": true,
-    "types": [
-      "bun-types" // add Bun global
-    ],
-    // non bun init
+    "types": ["web", "@kitajs/html/htmx.d.ts", "bun-types"],
     "plugins": [{ "name": "@kitajs/ts-html-plugin" }],
-    "noUncheckedIndexedAccess": true,
-    // "noUnusedLocals": true,
-    // "noUnusedParameters": true,
-    "exactOptionalPropertyTypes": true,
-    "noFallthroughCasesInSwitch": true,
-    "noImplicitOverride": true
-    // "noImplicitReturns": true
   }
 }

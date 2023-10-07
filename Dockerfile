@@ -16,10 +16,6 @@ ENV LOG_LEVEL=info
 # Throw-away build stage to reduce size of final image
 FROM base as build
 
-# Install packages needed to build node modules
-# RUN apt-get update -qq && \
-#   apt-get install -y python-is-python3 pkg-config build-essential 
-
 # Install node modules
 COPY --link bun.lockb package.json ./
 RUN bun install --ci

@@ -6,7 +6,6 @@ export const authed = new Elysia({
 })
   .use(ctx)
   .derive(async (ctx) => {
-    console.log("NOOPE");
     const authRequest = ctx.readAuth.handleRequest(ctx);
     const session = await authRequest.validate();
     return { session };

@@ -6,13 +6,19 @@ import { LayoutHtml } from "../components/Layout";
 import { NavbarHtml } from "../components/Navbar";
 import { SearchHtml } from "../components/Search";
 import { ctx } from "../context";
-import { session, user } from "../db/schema";
-import { isHxRequest } from "../lib";
+import { user } from "../db/schema";
+import { isHxRequest, redirect } from "../lib";
 
 export const match = new Elysia({
   prefix: "/match",
 })
   .use(ctx)
+  .onBeforeHandle(({ session, headers, set }) => {
+    if (!session || !session.user) {
+      redirect({ set, headers }, "/api/auth/signin/google");
+      return true;
+    }
+  })
   .get("/", async ({ html, session, headers }) => {
     return html(() => MatchPage(session, headers));
   })

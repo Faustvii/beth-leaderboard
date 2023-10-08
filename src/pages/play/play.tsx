@@ -5,12 +5,18 @@ import { HeaderHtml } from "../../components/header";
 import { LayoutHtml } from "../../components/Layout";
 import { NavbarHtml } from "../../components/Navbar";
 import { ctx } from "../../context";
-import { isHxRequest } from "../../lib";
+import { isHxRequest, redirect } from "../../lib";
 
 export const play = new Elysia({
   prefix: "/play",
 })
   .use(ctx)
+  .onBeforeHandle(({ session, headers, set }) => {
+    if (!session || !session.user) {
+      redirect({ set, headers }, "/api/auth/signin/google");
+      return true;
+    }
+  })
   .get("/", ({ html, session, headers }) => html(PlayPage(session, headers)))
   .get("/1v1", ({ html }) => html(OneVsOne()))
   .get("/2v2", ({ html }) => html(TwoVsTwo()));

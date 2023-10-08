@@ -41,4 +41,5 @@ export const key = sqliteTable("user_key", {
   userId: text("user_id")
     .notNull()
     .references(() => user.id),
+  hashedPassword: text("hashed_password"),
 });

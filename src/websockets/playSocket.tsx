@@ -1,14 +1,14 @@
-import { Elysia, t } from "elysia";
+import { Elysia } from "elysia";
 import { type ElysiaWS } from "elysia/ws";
 import { type Session, type User } from "lucia";
 import { ctx } from "../context";
 
-// const wsConnections = new Set<ElysiaWS<any, any>>();
 const oneVsOneQueue: QueuedPlayer[] = [];
 const twovsTwoQueue: QueuedPlayer[] = [];
 
 interface QueuedPlayer {
   User: User;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   Connection: ElysiaWS<any, any>;
 }
 
@@ -66,7 +66,9 @@ function handleQueue(players: number, queue: QueuedPlayer[]) {
 export const playSocket = new Elysia()
   .use(ctx)
   .ws("/play/queue/1v1", {
+    //@ts-expect-error types?
     open(ws) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const session: Session | null = ws.data.session;
       if (!session?.user) {
         console.log("no user");
@@ -87,6 +89,7 @@ export const playSocket = new Elysia()
       oneVsOneQueue.push({ User: session.user, Connection: ws });
       handle1v1();
     },
+
     message(ws, message) {
       const session: Session | null = ws.data.session;
       if (!session?.user) {
@@ -97,6 +100,8 @@ export const playSocket = new Elysia()
     close(ws) {
       const session: Session | null = ws.data.session;
       // wsConnections.delete(ws);
+      console.log("ws closing");
+
       if (session?.user) {
         oneVsOneQueue.splice(
           oneVsOneQueue.findIndex((x) => x.User.name === session.user.name),
@@ -152,11 +157,13 @@ export const playSocket = new Elysia()
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const session: Session | null = ws.data.session;
       // wsConnections.delete(ws);
+      console.log("ws closing");
       if (session?.user) {
         twovsTwoQueue.splice(
           twovsTwoQueue.findIndex((x) => x.User.name === session.user.name),
           1,
         );
+        console.log("removed user from queue", session.user.name);
       }
       // ws.publish("1v1", {
       //   message: `${session?.user.name} has left the room`,

@@ -16,7 +16,7 @@
     "jsxFragmentFactory": "Html.Fragment",
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
-    "types": ["web", "@kitajs/html/htmx.d.ts", "bun-types"],
+    "types": ["bun-types", "@kitajs/html/htmx.d.ts", "web"],
     "plugins": [{ "name": "@kitajs/ts-html-plugin" }],
   }
 }

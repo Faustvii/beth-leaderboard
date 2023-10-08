@@ -15,6 +15,13 @@
       "when": 1696700512270,
       "tag": "0001_opposite_firestar",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1696752186134,
+      "tag": "0002_easy_blue_shield",
+      "breakpoints": true
     }
   ]
 }

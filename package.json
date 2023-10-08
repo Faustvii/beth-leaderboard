@@ -42,18 +42,18 @@
     "typescript": "^5.2.2"
   },
   "dependencies": {
-    "@elysiajs/cron": "^0.6.0",
-    "@elysiajs/static": "^0.6.0",
-    "@kitajs/html": "^3.0.1",
-    "@libsql/client": "0.3.6-pre.1",
+    "@elysiajs/cron": "^0.7.0",
+    "@elysiajs/static": "^0.7.1",
+    "@kitajs/html": "^3.0.2",
+    "@libsql/client": "0.3.6-pre.2",
     "@lucia-auth/adapter-sqlite": "^2.0.0",
     "@lucia-auth/oauth": "^3.3.0",
-    "@t3-oss/env-core": "^0.6.1",
-    "@tlscipher/holt": "1.1.0",
+    "@t3-oss/env-core": "^0.7.0",
+    "@tlscipher/holt": "1.1.1",
     "drizzle-orm": "^0.28.6",
     "drizzle-typebox": "^0.1.1",
     "elysia": "0.7.15",
-    "lucia": "^2.6.0",
-    "zod": "^3.22.2"
+    "lucia": "^2.7.1",
+    "zod": "3.22.2"
   }
 }

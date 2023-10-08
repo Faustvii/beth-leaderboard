@@ -24,8 +24,7 @@ export const match = new Elysia({
   })
   .get(
     "/search",
-    async ({ readDb, html, query: { player1, player2, player3, player4 } }) => {
-      const name = player1 || player2 || player3 || player4;
+    async ({ readDb, html, query: { name } }) => {
       const players = await readDb
         .select({ name: user.name, id: user.id })
         .from(user)
@@ -37,18 +36,60 @@ export const match = new Elysia({
     {
       query: t.Partial(
         t.Object({
-          player1: t.String(),
-          player2: t.String(),
-          player3: t.String(),
-          player4: t.String(),
+          name: t.String(),
         }),
       ),
     },
   )
-  .post("/", async ({ html, body, session, headers }) => {
-    console.log("body", body);
-    return html(maForm());
-  });
+  .post(
+    "/",
+    async ({ html, body, session, headers }) => {
+      console.log("valid body?", body);
+
+      return html(maForm());
+    },
+    {
+      beforeHandle: ({ body, html }) => {
+        const playerIds = [
+          body.white1Id,
+          body.white2Id,
+          body.black1Id,
+          body.black2Id,
+        ].filter((id) => id !== "");
+
+        const uniqueIds = new Set(playerIds);
+        if (uniqueIds.size !== playerIds.length) {
+          return new Response(
+            "The same player can't participate multiple times",
+            {
+              status: 400,
+            },
+          );
+          return html(
+            maForm("The same player can't participate multiple times"),
+          );
+        }
+        if (uniqueIds.size % 2 !== 0) {
+          return html(
+            maForm("You must have an even amount of players on each team"),
+          );
+        }
+        return;
+      },
+      body: t.Object({
+        white1Id: t.String({ minLength: 1 }),
+        white2Id: t.Optional(t.String()),
+        black1Id: t.String({ minLength: 1 }),
+        black2Id: t.Optional(t.String()),
+        match_winner: t.Enum({
+          White: "White",
+          Black: "Black",
+          Draw: "Draw",
+        }),
+        point_difference: t.String({ minLength: 1 }),
+      }),
+    },
+  );
 
 function matchSearchResults(results: { name: string; id: string }[]) {
   return (
@@ -85,23 +126,25 @@ function MatchForm(session: Session | null) {
   );
 }
 
-function maForm() {
+function maForm(error: string | null = null) {
   return (
     <>
       <form
         method="post"
         id="matchForm"
+        hx-ext="response-targets"
         enctype="multipart/form-data"
-        // hx-target="#mainContainer"
         hx-indicator=".progress-bar"
         hx-sync="this:abort"
-        hx-swap="outerHTML"
+        hx-swap="innerHTML"
         hx-target="#matchForm"
+        hx-params="not name"
+        hx-target-400="#errors"
       >
-        <input type="hidden" id="player1Id" name="player1Id" />
-        <input type="hidden" id="player2Id" name="player2Id" />
-        <input type="hidden" id="player3Id" name="player3Id" />
-        <input type="hidden" id="player4Id" name="player4Id" />
+        <input type="hidden" form="matchForm" id="white1Id" name="white1Id" />
+        <input type="hidden" form="matchForm" id="white2Id" name="white2Id" />
+        <input type="hidden" form="matchForm" id="black1Id" name="black1Id" />
+        <input type="hidden" form="matchForm" id="black2Id" name="black2Id" />
 
         <div class="group relative z-0 mb-6 w-full border-b">
           <span>White team</span>
@@ -111,9 +154,11 @@ function maForm() {
             hx-swap="innerHtml"
             hx-get="/match/search"
             hx-target="#players1"
+            form="matchForm"
+            hx-params="name"
+            name="name"
             list="players1"
             id="player1"
-            name="player1"
             class="peer block w-full appearance-none border-0 border-b-2 border-gray-300 bg-transparent px-0 py-2.5 pl-10 text-sm text-gray-900 focus:border-blue-600 focus:outline-none focus:ring-0 dark:border-gray-600 dark:text-white dark:focus:border-blue-500"
             placeholder=" "
             autocomplete="off"
@@ -131,9 +176,11 @@ function maForm() {
             hx-swap="innerHtml"
             hx-get="/match/search"
             hx-target="#players2"
+            form="matchForm"
+            hx-params="name"
+            name="name"
             list="players2"
             id="player2"
-            name="player2"
             class="peer block w-full appearance-none border-0 border-b-2 border-gray-300 bg-transparent px-0 py-2.5 pl-10 text-sm text-gray-900 focus:border-blue-600 focus:outline-none focus:ring-0 dark:border-gray-600 dark:text-white dark:focus:border-blue-500"
             placeholder=" "
             autocomplete="off"
@@ -155,9 +202,11 @@ function maForm() {
             hx-swap="innerHtml"
             hx-get="/match/search"
             hx-target="#players3"
+            form="matchForm"
+            hx-params="name"
+            name="name"
             list="players3"
             id="player3"
-            name="player3"
             class="peer block w-full appearance-none border-0 border-b-2 border-gray-300 bg-transparent px-0 py-2.5 pl-10 text-sm text-gray-900 focus:border-blue-600 focus:outline-none focus:ring-0 dark:border-gray-600 dark:text-white dark:focus:border-blue-500"
             placeholder=" "
             required="true"
@@ -175,9 +224,11 @@ function maForm() {
             hx-swap="innerHtml"
             hx-get="/match/search"
             hx-target="#players4"
+            form="matchForm"
+            hx-params="name"
+            name="name"
             list="players4"
             id="player4"
-            name="player4"
             class="peer block w-full appearance-none border-0 border-b-2 border-gray-300 bg-transparent px-0 py-2.5 pl-10 text-sm text-gray-900 focus:border-blue-600 focus:outline-none focus:ring-0 dark:border-gray-600 dark:text-white dark:focus:border-blue-500"
             placeholder=" "
             autocomplete="off"
@@ -197,6 +248,7 @@ function maForm() {
         <div class="group relative z-0 mb-6 w-full">
           <select
             name="match_winner"
+            form="matchForm"
             id="match_winner"
             class="peer block w-full appearance-none border-0 border-b-2 border-gray-300 bg-transparent px-0 py-2.5 text-sm text-gray-900 focus:border-blue-600 focus:outline-none focus:ring-0 dark:border-gray-600 dark:text-white dark:focus:border-blue-500"
             required="true"
@@ -204,9 +256,9 @@ function maForm() {
             <option disabled value="" selected="true">
               Select a winner
             </option>
-            <option value="white">White</option>
-            <option value="black">Black</option>
-            <option value="draw">Draw</option>
+            <option>White</option>
+            <option>Black</option>
+            <option>Draw</option>
           </select>
           <label
             for="match_winner"
@@ -218,6 +270,7 @@ function maForm() {
         <div class="group relative z-0 mb-6 w-full">
           <input
             type="number"
+            form="matchForm"
             name="point_difference"
             id="point_difference"
             class="peer block w-full appearance-none border-0 border-b-2 border-gray-300 bg-transparent px-0 py-2.5 text-sm text-gray-900 focus:border-blue-600 focus:outline-none focus:ring-0 dark:border-gray-600 dark:text-white dark:focus:border-blue-500"
@@ -240,6 +293,7 @@ function maForm() {
         >
           Submit match result
         </button>
+        <div id="errors" class="text-red-500"></div>
       </form>
 
       <datalist id="players1"></datalist>
@@ -250,22 +304,22 @@ function maForm() {
         {changeEventListener({
           id: "player1",
           datalistId: "players1",
-          targetId: "player1Id",
+          targetId: "white1Id",
         })}
         {changeEventListener({
           id: "player2",
           datalistId: "players2",
-          targetId: "player2Id",
+          targetId: "white2Id",
         })}
         {changeEventListener({
           id: "player3",
           datalistId: "players3",
-          targetId: "player3Id",
+          targetId: "black1Id",
         })}
         {changeEventListener({
           id: "player4",
           datalistId: "players4",
-          targetId: "player4Id",
+          targetId: "black2Id",
         })}
       </script>
     </>

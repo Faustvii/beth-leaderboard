@@ -96,7 +96,7 @@ export const NavbarHtml = ({ session, activePage }: Props) => (
                 )}
                 {navBarButton("Play", "play", activePage, "/play")}
                 {navBarButton("Log match", "match", activePage, "/match")}
-                {navBarButton("Stats", "stats", activePage)}
+                {navBarButton("Stats", "stats", activePage, "/stats")}
               </div>
             </div>
           </div>
@@ -192,7 +192,7 @@ export const NavbarHtml = ({ session, activePage }: Props) => (
             "Stats",
             "stats",
             activePage,
-            "",
+            "/stats",
             "block rounded-md px-3 py-2 text-base font-medium text-white",
           )}
         </div>

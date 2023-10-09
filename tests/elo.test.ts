@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, test } from "bun:test";
-import { calculateElo } from "../src/lib/elo";
+import { applyMatchResult, matchEloChange } from "../src/lib/elo";
 import { type EloConfig, type GameResult, type Team } from "../src/types/elo";
 
 describe("calculateElo", () => {
@@ -12,7 +12,7 @@ describe("calculateElo", () => {
 
   beforeEach(() => {
     team1 = {
-      id: "team1",
+      color: "White",
       players: [
         { id: "player1", elo: 1500 },
         { id: "player2", elo: 1400 },
@@ -20,7 +20,7 @@ describe("calculateElo", () => {
     };
 
     team2 = {
-      id: "team2",
+      color: "Black",
       players: [
         { id: "player3", elo: 1500 },
         { id: "player4", elo: 1400 },
@@ -38,7 +38,7 @@ describe("calculateElo", () => {
       outcome: "win",
       teams: [team1, team2],
     };
-    calculateElo(config, gameResult);
+    applyMatchResult(config, gameResult);
     expect(gameResult.teams[0].players[0]!.elo).toEqual(elo + expectedElo);
     expect(gameResult.teams[1].players[0]!.elo).toEqual(elo - expectedElo);
   });
@@ -53,7 +53,7 @@ describe("calculateElo", () => {
       outcome: "win",
       teams: [team1, team2],
     };
-    calculateElo(config, gameResult);
+    applyMatchResult(config, gameResult);
     expect(gameResult.teams[0].players[0]!.elo).toEqual(elo + expectedElo);
     expect(gameResult.teams[1].players[0]!.elo).toEqual(elo - expectedElo);
   });
@@ -68,19 +68,19 @@ describe("calculateElo", () => {
       outcome: "win",
       teams: [team1, team2],
     };
-    calculateElo(config, gameResult);
+    applyMatchResult(config, gameResult);
     expect(gameResult.teams[0].players[0]!.elo).toEqual(elo + expectedElo);
     expect(gameResult.teams[1].players[0]!.elo).toEqual(elo - expectedElo);
   });
 
   test("elo is rounded correctly", () => {
     team1 = {
-      id: "team1",
+      color: "White",
       players: [{ id: "player1", elo: 1400 }],
     };
 
     team2 = {
-      id: "team2",
+      color: "Black",
       players: [{ id: "player2", elo: 1600 }],
     };
     const gameResult: GameResult = {
@@ -91,7 +91,7 @@ describe("calculateElo", () => {
     const expectedElo = 49;
     const player1Elo = team1.players[0]!.elo;
     const player2Elo = team2.players[0]!.elo;
-    calculateElo(config, gameResult);
+    applyMatchResult(config, gameResult);
     expect(gameResult.teams[0].players[0]!.elo).toEqual(
       player1Elo + expectedElo,
     );
@@ -100,13 +100,39 @@ describe("calculateElo", () => {
     );
   });
 
+  test("elo change is positive value", () => {
+    team1 = {
+      color: "White",
+      players: [
+        { id: "player1", elo: 1029 },
+        { id: "player2", elo: 959 },
+      ],
+    };
+
+    team2 = {
+      color: "Black",
+      players: [
+        { id: "player2", elo: 1051 },
+        { id: "player2", elo: 828 },
+      ],
+    };
+
+    // results in elo change of 5
+    const gameResult: GameResult = {
+      outcome: "draw",
+      teams: [team1, team2],
+    };
+    const eloChange = matchEloChange(gameResult);
+    expect(eloChange).toBePositive();
+  });
+
   test("should update the Elo ratings of the winning team correctly", () => {
     const gameResult: GameResult = {
       outcome: "win",
       teams: [team1, team2],
     };
 
-    calculateElo(config, gameResult);
+    applyMatchResult(config, gameResult);
 
     expect(team1.players[0]!.elo).toBeGreaterThan(1500);
     expect(team1.players[1]!.elo).toBeGreaterThan(1400);
@@ -120,7 +146,7 @@ describe("calculateElo", () => {
       teams: [team1, team2],
     };
 
-    calculateElo(config, gameResult);
+    applyMatchResult(config, gameResult);
 
     expect(team1.players[0]!.elo).toBeLessThan(1500);
     expect(team1.players[1]!.elo).toBeLessThan(1400);
@@ -134,7 +160,7 @@ describe("calculateElo", () => {
       teams: [team1, team2],
     };
 
-    calculateElo(config, gameResult);
+    applyMatchResult(config, gameResult);
 
     expect(team1.players[0]!.elo).toBe(1500);
     expect(team1.players[1]!.elo).toBe(1400);

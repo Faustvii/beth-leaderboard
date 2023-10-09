@@ -8,7 +8,7 @@
     "start": "bun run uno && bun run src/main.ts",
     "db:push": "bunx drizzle-kit push:sqlite",
     "db:studio": "bunx drizzle-kit studio",
-    "db:seed": "bun run src/model/store/seed.ts",
+    "db:seed": "bun run src/db/seed.ts",
     "db:generate": "bunx drizzle-kit generate:sqlite",
     "uno": "bunx --bun unocss",
     "uno:dev": "bunx --bun unocss --watch",
@@ -54,6 +54,7 @@
     "drizzle-typebox": "^0.1.1",
     "elysia": "0.7.15",
     "lucia": "^2.7.1",
+    "tom-select": "^2.2.2",
     "zod": "3.22.2"
   }
 }

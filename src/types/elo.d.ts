@@ -4,7 +4,7 @@ export interface Player {
 }
 
 export interface Team {
-  id: string;
+  color: "White" | "Black";
   players: Player[];
 }
 

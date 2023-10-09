@@ -1,6 +1,6 @@
 import { type EloConfig, type GameResult, type Team } from "../types/elo";
 
-export function calculateElo(config: EloConfig, result: GameResult) {
+export function applyMatchResult(config: EloConfig, result: GameResult) {
   const [team1, team2] = result.teams;
   const outcome = result.outcome;
   const team1Elo = getTeamElo(team1);
@@ -45,17 +45,18 @@ function getExpectedScore(playerElo: number, opponentElo: number) {
   return 1 / (1 + Math.pow(10, (opponentElo - playerElo) / 400));
 }
 
-export function matchMaking(result: GameResult) {
+export function matchEloChange(result: GameResult) {
   const [team1, team2] = result.teams;
   const team1Elo = getTeamElo(team1);
   const team2Elo = getTeamElo(team2);
 
   const expectedScore = getExpectedScore(team1Elo, team2Elo);
-  const actualScore = 1;
+  const actualScore = result.outcome == "draw" ? 0.5 : 1;
   const kFactor = getKFactor(team1Elo);
 
   const eloChange = kFactor * (actualScore - expectedScore);
-  return eloChange;
+
+  return Math.abs(Math.round(eloChange));
 }
 
 function calculateNewElo(

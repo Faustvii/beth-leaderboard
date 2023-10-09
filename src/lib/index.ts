@@ -34,3 +34,26 @@ export function redirect(
 export function isHxRequest(headers: Record<string, string | null>) {
   return headers["hx-request"] === "true";
 }
+
+export function notEmpty<TValue>(
+  value: TValue | null | undefined,
+): value is TValue {
+  if (value === null || value === undefined) return false;
+  return true;
+}
+
+export async function measure<T>(
+  fn: () => Promise<T> | T,
+): Promise<{ result: T; elaspedTimeMs: number }> {
+  const now = performance.now();
+  const result = await Promise.resolve(fn());
+  return { result, elaspedTimeMs: performance.now() - now };
+}
+
+export function getUnixDateFromDate(date: Date) {
+  return new Date(
+    date.getFullYear(),
+    date.getMonth(),
+    date.getDate(),
+  ).getTime();
+}

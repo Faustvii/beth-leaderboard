@@ -10,7 +10,6 @@ import { htmlRender } from "../lib/render";
 export const ctx = new Elysia({
   name: "@app/ctx",
 })
-  // @ts-expect-error ts can't figure out types
   .use(new HoltLogger().getLogger())
   .decorate("readDb", readDb)
   .decorate("writeDb", writeDb)

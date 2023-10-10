@@ -6,7 +6,7 @@ import { LayoutHtml } from "../components/Layout";
 import { NavbarHtml } from "../components/Navbar";
 import { SearchHtml } from "../components/Search";
 import { ctx } from "../context";
-import { readClient, type readDb } from "../db";
+import { readClient } from "../db";
 import { matches, user } from "../db/schema";
 import { isHxRequest, notEmpty, redirect } from "../lib";
 import { applyMatchResult, matchEloChange } from "../lib/elo";
@@ -22,8 +22,8 @@ export const match = new Elysia({
       return true;
     }
   })
-  .get("/", async ({ html, session, headers, readDb }) => {
-    return html(() => MatchPage(session, headers, readDb));
+  .get("/", async ({ html, session, headers }) => {
+    return html(() => MatchPage(session, headers));
   })
   .get(
     "/search",
@@ -107,9 +107,22 @@ export const match = new Elysia({
         }
       });
       await readClient.sync();
-      return html(maForm(readDb));
+      return html(maForm());
     },
     {
+      error({ code, error }) {
+        switch (code) {
+          case "VALIDATION":
+            return new Response(
+              // the error type converts to a string no problem
+              // eslint-disable-next-line @typescript-eslint/no-base-to-string
+              `<div id="errors" class="text-red-500">${error}</div>`,
+              {
+                status: 400,
+              },
+            );
+        }
+      },
       beforeHandle: ({ body }) => {
         const playerIds = [
           body.white1Id,
@@ -121,16 +134,19 @@ export const match = new Elysia({
         const uniqueIds = new Set(playerIds);
         if (uniqueIds.size !== playerIds.length) {
           return new Response(
-            "The same player can't participate multiple times",
+            `<div id="errors" class="text-red-500">The same player can't participate multiple times</div>`,
             {
               status: 400,
             },
           );
         }
         if (uniqueIds.size % 2 !== 0) {
-          return new Response("You must have an even amount of players", {
-            status: 400,
-          });
+          return new Response(
+            `<div id="errors" class="text-red-500">The teams must have the same amount of players</div>`,
+            {
+              status: 400,
+            },
+          );
         }
         return;
       },
@@ -175,31 +191,29 @@ function matchSearchResults(results: { name: string; id: string }[]) {
 function MatchPage(
   session: Session | null,
   headers: Record<string, string | null>,
-  db: typeof readDb,
 ) {
   return (
     <>
       {isHxRequest(headers) ? (
-        MatchForm(session, db)
+        MatchForm(session)
       ) : (
-        <LayoutHtml>{MatchForm(session, db)}</LayoutHtml>
+        <LayoutHtml>{MatchForm(session)}</LayoutHtml>
       )}
     </>
   );
 }
 
-function MatchForm(session: Session | null, db: typeof readDb) {
+function MatchForm(session: Session | null) {
   return (
     <>
       <NavbarHtml session={session} activePage="match" />
       <HeaderHtml title="Log match" />
-      {maForm(db)}
+      {maForm()}
     </>
   );
 }
 
-async function maForm(db: typeof readDb) {
-  // const players = await db.select({ name: user.name, id: user.id }).from(user);
+async function maForm() {
   return (
     <>
       <form
@@ -244,24 +258,6 @@ async function maForm(db: typeof readDb) {
             White player 1
           </label>
         </div>
-        {/* <div class="group relative z-0 mb-6 w-full">
-          <select
-            name="tom-select"
-            form="matchForm"
-            id="tom-select"
-            class="tom-select peer block w-full appearance-none border-0 border-b-2 border-gray-300 bg-transparent px-0 py-2.5 text-sm text-gray-900 focus:border-blue-600 focus:outline-none focus:ring-0 dark:border-gray-600 dark:text-white dark:focus:border-blue-500"
-            required="true"
-          >
-            <option selected="true" disabled></option>
-            {matchSearchResults(players)}
-          </select>
-          <label
-            for="tom-select"
-            class="absolute top-3 -z-10 origin-[0] -translate-y-6 scale-75 transform text-sm text-gray-500 duration-300 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:left-0 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:font-medium peer-focus:text-blue-600 dark:text-gray-400 peer-focus:dark:text-blue-500"
-          >
-            Tom-select
-          </label>
-        </div> */}
         <div class="group relative z-0 mb-6 w-full">
           <SearchHtml
             hx-swap="innerHtml"

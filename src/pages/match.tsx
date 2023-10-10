@@ -114,9 +114,7 @@ export const match = new Elysia({
         switch (code) {
           case "VALIDATION":
             return new Response(
-              // the error type converts to a string no problem
-              // eslint-disable-next-line @typescript-eslint/no-base-to-string
-              `<div id="errors" class="text-red-500">${error}</div>`,
+              `<div id="errors" class="text-red-500">${error.message}</div>`,
               {
                 status: 400,
               },

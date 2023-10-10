@@ -14,9 +14,12 @@ export const matches = sqliteTable(
       .notNull()
       .references(() => user.id),
     blackPlayerTwo: text("black_player_two").references(() => user.id),
-    result: text("content", { enum: ["Black", "White", "Draw"] }).notNull(),
+    result: text("result", { enum: ["Black", "White", "Draw"] }).notNull(),
     scoreDiff: integer("score_diff", { mode: "number" }).notNull(),
-    eloChange: integer("elo_change", { mode: "number" }).notNull(),
+    whiteEloChange: integer("white_elo_change", { mode: "number" }).notNull(),
+    blackEloChange: integer("black_elo_change", { mode: "number" })
+      .notNull()
+      .default(0),
     createdAt: integer("createdAt", { mode: "timestamp" })
       .notNull()
       .$defaultFn(() => new Date()),

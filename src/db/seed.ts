@@ -71,16 +71,6 @@ for (let index = 0; index < 30; index++) {
     ],
   };
   const eloChange = matchEloChange(match);
-  if (eloChange < 0) {
-    console.log("negative elo change");
-    console.log(
-      match.teams.map((team) =>
-        team.players.map((player) => `${team.color}:${player.elo}`),
-      ),
-    );
-    console.log(eloChange);
-    // console.log(match);
-  }
   applyMatchResult({ eloFloor: 0 }, match);
 
   const matchInsert: newMatch = {
@@ -88,7 +78,8 @@ for (let index = 0; index < 30; index++) {
     blackPlayerOne: blackPlayerOne.id,
     result: result,
     scoreDiff: scoreDiff,
-    eloChange: eloChange,
+    whiteEloChange: eloChange.white,
+    blackEloChange: eloChange.black,
     whitePlayerTwo: whitePlayerTwo.id,
     blackPlayerTwo: blackPlayerTwo.id,
     createdAt: matchDate,

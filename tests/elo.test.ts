@@ -123,7 +123,56 @@ describe("calculateElo", () => {
       teams: [team1, team2],
     };
     const eloChange = matchEloChange(gameResult);
-    expect(eloChange).toBePositive();
+    expect(eloChange.white).toBeNegative();
+    expect(eloChange.black).toBePositive();
+  });
+
+  test("elo change is calculated correctly when different kFactors", () => {
+    team1 = {
+      color: "White",
+      players: [
+        { id: "player1", elo: 1850 },
+        // { id: "player2", elo: 1203 },
+      ],
+    };
+
+    team2 = {
+      color: "Black",
+      players: [
+        // { id: "player2", elo: 808 },
+        { id: "player2", elo: 756 },
+      ],
+    };
+
+    // results in elo change of 5
+    const gameResult: GameResult = {
+      outcome: "draw",
+      teams: [team1, team2],
+    };
+    const eloChange = matchEloChange(gameResult);
+    expect(eloChange.white).toBe(-16);
+    expect(eloChange.black).toBe(32);
+  });
+
+  test("should update the Elo ratings of the teams correctly when different kfactors", () => {
+    team1 = {
+      color: "White",
+      players: [{ id: "player1", elo: 1850 }],
+    };
+
+    team2 = {
+      color: "Black",
+      players: [{ id: "player2", elo: 1000 }],
+    };
+    const gameResult: GameResult = {
+      outcome: "loss",
+      teams: [team1, team2],
+    };
+
+    applyMatchResult(config, gameResult);
+
+    expect(team1.players[0]!.elo).toBe(1850 - 32);
+    expect(team2.players[0]!.elo).toBe(1000 + 64);
   });
 
   test("should update the Elo ratings of the winning team correctly", () => {

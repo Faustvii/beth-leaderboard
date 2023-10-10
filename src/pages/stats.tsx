@@ -104,7 +104,8 @@ async function biggestWin(
     blackPlayerTwo: string | null;
     result: "Black" | "White" | "Draw";
     scoreDiff: number;
-    eloChange: number;
+    whiteEloChange: number;
+    blackEloChange: number;
     createdAt: Date;
   }[],
 ) {

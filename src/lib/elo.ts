@@ -46,17 +46,26 @@ function getExpectedScore(playerElo: number, opponentElo: number) {
 }
 
 export function matchEloChange(result: GameResult) {
-  const [team1, team2] = result.teams;
-  const team1Elo = getTeamElo(team1);
-  const team2Elo = getTeamElo(team2);
+  const [whiteTeam, blackTeam] = result.teams;
+  const whiteElo = getTeamElo(whiteTeam);
+  const blackElo = getTeamElo(blackTeam);
 
-  const expectedScore = getExpectedScore(team1Elo, team2Elo);
-  const actualScore = result.outcome == "draw" ? 0.5 : 1;
-  const kFactor = getKFactor(team1Elo);
+  const whiteExpectedScore = getExpectedScore(whiteElo, blackElo);
+  const blackExpectedScore = getExpectedScore(blackElo, whiteElo);
+  const whiteActualScore =
+    result.outcome === "win" ? 1 : result.outcome === "loss" ? 0 : 0.5;
+  const blackActualScore =
+    result.outcome === "win" ? 0 : result.outcome === "loss" ? 1 : 0.5;
+  const whitekFactor = getKFactor(whiteElo);
+  const blackkFactor = getKFactor(blackElo);
 
-  const eloChange = kFactor * (actualScore - expectedScore);
-
-  return Math.abs(Math.round(eloChange));
+  const whiteeloChange = Math.round(
+    whitekFactor * (whiteActualScore - whiteExpectedScore),
+  );
+  const blackEloChange = Math.round(
+    blackkFactor * (blackActualScore - blackExpectedScore),
+  );
+  return { white: whiteeloChange, black: blackEloChange };
 }
 
 function calculateNewElo(

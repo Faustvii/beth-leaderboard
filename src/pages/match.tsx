@@ -85,12 +85,14 @@ export const match = new Elysia({
       const matchInsert: newMatch = {
         result: match_winner,
         scoreDiff: Number(point_difference),
-        eloChange: eloChange,
+        whiteEloChange: eloChange.white,
+        blackEloChange: eloChange.black,
         whitePlayerOne: white1Id,
-        whitePlayerTwo: white2Id,
+        whitePlayerTwo: white2Id ? white2Id : null,
         blackPlayerOne: black1Id,
-        blackPlayerTwo: black2Id,
+        blackPlayerTwo: black2Id ? black2Id : null,
       };
+      console.log(matchInsert);
 
       await writeDb.transaction(async (trx) => {
         await trx.insert(matches).values(matchInsert);

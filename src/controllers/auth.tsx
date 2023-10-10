@@ -4,7 +4,7 @@ import { parseCookie, serializeCookie } from "lucia/utils";
 import { googleAuth } from "../auth";
 import { config } from "../config";
 import { ctx } from "../context";
-import { syncIfLocal } from "../lib";
+import { syncIfLocal } from "../lib/dbHelpers";
 
 export const authController = new Elysia({
   prefix: "/auth",

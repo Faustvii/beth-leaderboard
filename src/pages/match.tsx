@@ -47,8 +47,6 @@ export const match = new Elysia({
   .post(
     "/",
     async ({ html, body, readDb, writeDb }) => {
-      console.log("valid body?", body);
-
       const { white1Id, white2Id, black1Id, black2Id } = body;
       const { match_winner, point_difference } = body;
 
@@ -92,7 +90,6 @@ export const match = new Elysia({
         blackPlayerOne: black1Id,
         blackPlayerTwo: black2Id ? black2Id : null,
       };
-      console.log(matchInsert);
 
       await writeDb.transaction(async (trx) => {
         await trx.insert(matches).values(matchInsert);

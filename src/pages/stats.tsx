@@ -6,8 +6,9 @@ import { LayoutHtml } from "../components/Layout";
 import { NavbarHtml } from "../components/Navbar";
 import { ctx } from "../context";
 import { type readDb } from "../db";
-import { matches } from "../db/schema";
-import { getUnixDateFromDate, isHxRequest, notEmpty } from "../lib";
+import { matches, user } from "../db/schema";
+import { isHxRequest, notEmpty } from "../lib";
+import MatchStatistics from "../lib/matchStatistics";
 
 export const stats = new Elysia({
   prefix: "/stats",
@@ -35,50 +36,34 @@ async function statsPage(
 
 async function page(db: typeof readDb, session: Session | null) {
   const matches = await db.query.matches.findMany();
+  const now = performance.now();
+  const matchesToday = MatchStatistics.gamesToday(matches);
+  const drawMatches = MatchStatistics.draws(matches);
+  const { date: dayWithMostGames, games: mostGamesOnOneDay } =
+    MatchStatistics.mostGamesInOneDay(matches);
 
-  // const { elaspedTimeMs: matchTime, result: matches } = await measure(() =>
-  //   db.query.matches.findMany(),
-  // );
-  // console.log("matches query took ", matchTime + "ms");
-  const matchesToday = matches.filter(
-    (mt) =>
-      getUnixDateFromDate(mt.createdAt) === getUnixDateFromDate(new Date()),
-  );
+  const { highestWinStreak, highestLoseStreak } =
+    MatchStatistics.highestStreak(matches);
+  const highestWinStreakPlayer = await db.query.user.findFirst({
+    where: eq(user.id, highestWinStreak.player),
+  });
 
-  const matchesPerDate = matches.reduce(
-    (acc, curr) => {
-      const date = new Date(
-        curr.createdAt.getFullYear(),
-        curr.createdAt.getMonth(),
-        curr.createdAt.getDate(),
-      ).getTime();
-      if (!acc[date]) {
-        acc[date] = 1;
-      } else {
-        acc[date] += 1;
-      }
-      return acc;
-    },
-    {} as Record<number, number>,
-  );
+  const biggestLosingStreakPlayer = await db.query.user.findFirst({
+    where: eq(user.id, highestLoseStreak.player),
+  });
 
-  const mostGamesOnOneDay = Math.max(...Object.values(matchesPerDate));
-  const drawMatches = matches.filter((mt) => mt.result === "Draw").length;
-
-  const dayWithMostGames = Number(
-    Object.keys(matchesPerDate).find(
-      (key) => matchesPerDate[Number(key)] === mostGamesOnOneDay,
-    ),
-  );
+  const colorWinRate = MatchStatistics.whichColorWinsTheMost(matches);
+  console.log("metrics took ", performance.now() - now + "ms  to run");
 
   return (
     <>
       <NavbarHtml session={session} activePage="stats" />
       <HeaderHtml title="Stats" />
+      <HeaderHtml title="Someone make this pretty" />
       <div class="flex flex-col items-center">
         <span class="p-4">Total Games played {matches.length}</span>
         <span class="p-4">There has been draws {drawMatches} times</span>
-        <span class="p-4">Games today {matchesToday.length}</span>
+        <span class="p-4">Games today {matchesToday}</span>
         {dayWithMostGames && (
           <span class="p-4">
             Most active day is{" "}
@@ -90,10 +75,29 @@ async function page(db: typeof readDb, session: Session | null) {
           </span>
         )}
         {biggestWin(db, matches)}
+        {highestWinStreakPlayer && (
+          <span class="p-4">
+            {highestWinStreakPlayer.name} has the highest win streak with{" "}
+            {highestWinStreak.streak} wins in a row
+          </span>
+        )}
+        {biggestLosingStreakPlayer && (
+          <span class="p-4">
+            {biggestLosingStreakPlayer.name} has the biggest losing streak with{" "}
+            {highestLoseStreak.streak} losses in a row
+          </span>
+        )}
+        {colorWinRate && (
+          <span class="p-4">
+            {colorWinRate.color} wins {colorWinRate.winPercentage.toFixed(2)}%
+            of the time
+          </span>
+        )}
       </div>
     </>
   );
 }
+
 async function biggestWin(
   db: typeof readDb,
   matchess: {

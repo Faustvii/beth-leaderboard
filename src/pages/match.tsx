@@ -23,7 +23,10 @@ export const match = new Elysia({
     }
   })
   .get("/", async ({ html, session, headers }) => {
-    return html(() => MatchPage(session, headers));
+    const isFirefoxMobile =
+      headers["user-agent"]?.includes("Firefox") &&
+      headers["user-agent"]?.includes("Mobile");
+    return html(() => MatchPage(session, headers, isFirefoxMobile));
   })
   .get(
     "/search",
@@ -186,24 +189,44 @@ function matchSearchResults(results: { name: string; id: string }[]) {
 function MatchPage(
   session: Session | null,
   headers: Record<string, string | null>,
+  isFirefoxMobile = false,
 ) {
   return (
     <>
       {isHxRequest(headers) ? (
-        MatchForm(session)
+        MatchForm(session, isFirefoxMobile)
       ) : (
-        <LayoutHtml>{MatchForm(session)}</LayoutHtml>
+        <LayoutHtml>{MatchForm(session, isFirefoxMobile)}</LayoutHtml>
       )}
     </>
   );
 }
 
-function MatchForm(session: Session | null) {
+function MatchForm(session: Session | null, isFirefoxMobile: boolean) {
   return (
     <>
       <NavbarHtml session={session} activePage="match" />
       <HeaderHtml title="Log match" />
-      {maForm()}
+      {isFirefoxMobile ? (
+        <div class="text-center">
+          <p>
+            Firefox mobile doesn't support the datalist element 😭 so you are
+            out of luck
+          </p>
+          <a
+            class="font-medium text-blue-600 hover:underline dark:text-blue-500"
+            href="https://bugzilla.mozilla.org/show_bug.cgi?id=1535985"
+          >
+            Firefox bugzilla
+          </a>
+          <p>
+            Help me implement a searchable input field so we can switch away
+            from datalist
+          </p>
+        </div>
+      ) : (
+        maForm()
+      )}
     </>
   );
 }

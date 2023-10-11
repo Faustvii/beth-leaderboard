@@ -47,7 +47,7 @@
     "@kitajs/html": "^3.0.2",
     "@libsql/client": "0.3.6-pre.2",
     "@lucia-auth/adapter-sqlite": "^2.0.0",
-    "@lucia-auth/oauth": "^3.3.0",
+    "@lucia-auth/oauth": "^3.3.1",
     "@t3-oss/env-core": "^0.7.0",
     "@tlscipher/holt": "1.1.1",
     "drizzle-orm": "^0.28.6",

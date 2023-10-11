@@ -1,5 +1,5 @@
 import { libsql } from "@lucia-auth/adapter-sqlite";
-import { google } from "@lucia-auth/oauth/providers";
+import { azureAD, google } from "@lucia-auth/oauth/providers";
 import { lucia, type Middleware } from "lucia";
 import { config } from "../config";
 import { readClient, writeClient } from "../db";
@@ -85,4 +85,12 @@ export const googleAuth = google(writeAuth, {
   clientSecret: config.env.GOOGLE_CLIENT_SECRET,
   redirectUri: `${config.env.HOST_URL}/api/auth/google/callback`,
   scope: ["profile", "email"],
+});
+
+export const azureAuth = azureAD(writeAuth, {
+  clientId: config.env.AZURE_CLIENT_ID,
+  clientSecret: config.env.AZURE_CLIENT_SECRET,
+  redirectUri: `${config.env.HOST_URL}/api/auth/azure/callback`,
+  tenant: config.env.AZURE_TENANT,
+  scope: ["openid email profile User.Read"],
 });

@@ -22,8 +22,14 @@ export const readClient = createClient(options[DATABASE_CONNECTION_TYPE]);
 
 if (config.env.DATABASE_CONNECTION_TYPE === "local-replica") {
   const now = performance.now();
-  await readClient.sync();
-  console.log("Database synced in", performance.now() - now, "ms");
+  readClient
+    .sync()
+    .then(() => {
+      console.log("Database synced in", performance.now() - now, "ms");
+    })
+    .catch((err) => {
+      console.log("Error syncing database", err);
+    });
 }
 
 const remoteOptions = {
@@ -43,5 +49,5 @@ export const writeDb = drizzle(remoteDbClient, {
 });
 export const readDb = drizzle(readClient, {
   schema,
-  logger: false,
+  logger: true,
 });

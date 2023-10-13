@@ -1,10 +1,11 @@
 import { eq } from "drizzle-orm";
+import { generateRandomString } from "lucia/utils";
 import { writeDb } from ".";
 import { applyMatchResult, matchEloChange } from "../lib/elo";
 import { type GameResult } from "../types/elo";
 import { matches, user } from "./schema";
 
-// type newPlayer = typeof user.$inferInsert;
+type newPlayer = typeof user.$inferInsert;
 type newMatch = typeof matches.$inferInsert;
 const startOfYear = new Date(new Date().getFullYear(), 0, 1).getTime();
 const endOfYear = new Date(new Date().getFullYear() + 1, 0, 1).getTime() - 1;
@@ -21,7 +22,7 @@ const endOfYear = new Date(new Date().getFullYear() + 1, 0, 1).getTime() - 1;
 //   await writeDb.insert(user).values(player);
 // }
 
-for (let index = 0; index < 30; index++) {
+for (let index = 0; index < 170; index++) {
   const players = await writeDb.query.user.findMany();
   if (index % 50 == 0) console.log("creating elo match " + index + " of 100");
 

@@ -71,7 +71,8 @@ export const authController = new Elysia({
     "/azure/callback",
     async ({ set, query, headers, writeAuth, redirect, readDb }) => {
       const { code, state } = query;
-
+      set.status = "Unauthorized";
+      return;
       const cookies = parseCookie(headers.cookie || "");
       const state_cookie = cookies.azure_auth_state;
       const verifier_cookie = cookies.azure_auth_code_verifier;
@@ -186,6 +187,13 @@ export const authController = new Elysia({
       try {
         const { createUser, getExistingUser, googleUser, createKey } =
           await googleAuth.validateCallback(code);
+
+        if (googleUser.hd !== "it-minds.dk") {
+          set.status = "Unauthorized";
+          return new Response("You must use an itminds account", {
+            status: 401,
+          });
+        }
 
         const getUser = async () => {
           const existingUser = await getExistingUser();

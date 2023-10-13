@@ -25,10 +25,15 @@ export const ctx = new Elysia({
       ? cron({
           name: "heartbeat",
           pattern: "*/2 * * * * *",
-          async run() {
+          run() {
             // const now = performance.now();
             // console.log("Syncing database...");
-            await readClient.sync();
+            readClient
+              .sync()
+              .then()
+              .catch((err) => {
+                console.log("Error syncing database", err);
+              });
             // console.log(`Database synced in ${performance.now() - now}ms`);
           },
         })

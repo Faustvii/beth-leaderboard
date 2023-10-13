@@ -2,7 +2,7 @@ import { getUnixDateFromDate, notEmpty } from ".";
 import { type Match } from "../db/schema/matches";
 
 class MatchStatistics {
-  static highestStreak(matches: Match[]) {
+  static highestStreak(matches: MatchWithPlayers[]) {
     matches.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
 
     const winStreaks: Record<string, Record<"White" | "Black", number>> = {};
@@ -17,36 +17,36 @@ class MatchStatistics {
       );
 
       for (const player of whitePlayers) {
-        if (!winStreaks[player]) {
-          winStreaks[player] = { White: 0, Black: 0 };
+        if (!winStreaks[player.id]) {
+          winStreaks[player.id] = { White: 0, Black: 0 };
         }
-        if (!loseStreaks[player]) {
-          loseStreaks[player] = { White: 0, Black: 0 };
+        if (!loseStreaks[player.id]) {
+          loseStreaks[player.id] = { White: 0, Black: 0 };
         }
 
         if (match.result === "White") {
-          winStreaks[player].White++;
-          loseStreaks[player].Black = 0;
+          winStreaks[player.id].White++;
+          loseStreaks[player.id].Black = 0;
         } else {
-          loseStreaks[player].White++;
-          winStreaks[player].Black = 0;
+          loseStreaks[player.id].White++;
+          winStreaks[player.id].Black = 0;
         }
       }
 
       for (const player of blackPlayers) {
-        if (!winStreaks[player]) {
-          winStreaks[player] = { White: 0, Black: 0 };
+        if (!winStreaks[player.id]) {
+          winStreaks[player.id] = { White: 0, Black: 0 };
         }
-        if (!loseStreaks[player]) {
-          loseStreaks[player] = { White: 0, Black: 0 };
+        if (!loseStreaks[player.id]) {
+          loseStreaks[player.id] = { White: 0, Black: 0 };
         }
 
         if (match.result === "Black") {
-          winStreaks[player].Black++;
-          loseStreaks[player].White = 0;
+          winStreaks[player.id].Black++;
+          loseStreaks[player.id].White = 0;
         } else {
-          loseStreaks[player].Black++;
-          winStreaks[player].White = 0;
+          loseStreaks[player.id].Black++;
+          winStreaks[player.id].White = 0;
         }
       }
     }
@@ -134,57 +134,57 @@ class MatchStatistics {
     return { date: new Date(dayWithMostGames), games: mostGamesOnOneDay };
   }
 
-  static mostGamesInOneDayByPlayer(matches: Match[]) {
-    const matchesPerDate = matches.reduce(
-      (acc, curr) => {
-        const date = new Date(
-          curr.createdAt.getFullYear(),
-          curr.createdAt.getMonth(),
-          curr.createdAt.getDate(),
-        ).getTime();
-        if (!acc[date]) {
-          acc[date] = {
-            [curr.whitePlayerOne]: 1,
-            [curr.whitePlayerTwo]: 1,
-            [curr.blackPlayerOne]: 1,
-            [curr.blackPlayerTwo]: 1,
-          };
-        } else {
-          acc[date][curr.whitePlayerOne] += 1;
-          acc[date][curr.whitePlayerTwo] += 1;
-          acc[date][curr.blackPlayerOne] += 1;
-          acc[date][curr.blackPlayerTwo] += 1;
-        }
-        return acc;
-      },
-      {} as Record<number, Record<string, number>>,
-    );
+  // static mostGamesInOneDayByPlayer(matches: Match[]) {
+  //   const matchesPerDate = matches.reduce(
+  //     (acc, curr) => {
+  //       const date = new Date(
+  //         curr.createdAt.getFullYear(),
+  //         curr.createdAt.getMonth(),
+  //         curr.createdAt.getDate(),
+  //       ).getTime();
+  //       if (!acc[date]) {
+  //         acc[date] = {
+  //           [curr.whitePlayerOne]: 1,
+  //           [curr.whitePlayerTwo]: 1,
+  //           [curr.blackPlayerOne]: 1,
+  //           [curr.blackPlayerTwo]: 1,
+  //         };
+  //       } else {
+  //         acc[date][curr.whitePlayerOne] += 1;
+  //         acc[date][curr.whitePlayerTwo] += 1;
+  //         acc[date][curr.blackPlayerOne] += 1;
+  //         acc[date][curr.blackPlayerTwo] += 1;
+  //       }
+  //       return acc;
+  //     },
+  //     {} as Record<number, Record<string, number>>,
+  //   );
 
-    const mostGamesOnOneDay = Math.max(
-      ...Object.values(matchesPerDate).map((date) =>
-        Math.max(...Object.values(date)),
-      ),
-    );
+  //   const mostGamesOnOneDay = Math.max(
+  //     ...Object.values(matchesPerDate).map((date) =>
+  //       Math.max(...Object.values(date)),
+  //     ),
+  //   );
 
-    const dayWithMostGames = Number(
-      Object.keys(matchesPerDate).find((key) => {
-        const date = matchesPerDate[Number(key)];
-        return Math.max(...Object.values(date)) === mostGamesOnOneDay;
-      }),
-    );
+  //   const dayWithMostGames = Number(
+  //     Object.keys(matchesPerDate).find((key) => {
+  //       const date = matchesPerDate[Number(key)];
+  //       return Math.max(...Object.values(date)) === mostGamesOnOneDay;
+  //     }),
+  //   );
 
-    const playerWithMostGames = Object.keys(
-      matchesPerDate[dayWithMostGames],
-    ).find(
-      (key) => matchesPerDate[dayWithMostGames][key] === mostGamesOnOneDay,
-    );
+  //   const playerWithMostGames = Object.keys(
+  //     matchesPerDate[dayWithMostGames],
+  //   ).find(
+  //     (key) => matchesPerDate[dayWithMostGames][key] === mostGamesOnOneDay,
+  //   );
 
-    return {
-      date: new Date(dayWithMostGames),
-      player: playerWithMostGames,
-      games: mostGamesOnOneDay,
-    };
-  }
+  //   return {
+  //     date: new Date(dayWithMostGames),
+  //     player: playerWithMostGames,
+  //     games: mostGamesOnOneDay,
+  //   };
+  // }
 
   static whichColorWinsTheMost(matches: Match[]): {
     color: "White" | "Black";
@@ -192,7 +192,7 @@ class MatchStatistics {
   } {
     const whiteWins = matches.filter((mt) => mt.result === "White").length;
     const blackWins = matches.filter((mt) => mt.result === "Black").length;
-    const totalGames = matches.length;
+    const totalGames = matches.filter((x) => x.result !== "Draw").length;
     const whiteWinPercentage = (whiteWins / totalGames) * 100;
     const blackWinPercentage = (blackWins / totalGames) * 100;
     return whiteWinPercentage > blackWinPercentage

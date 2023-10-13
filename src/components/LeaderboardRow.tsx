@@ -1,12 +1,14 @@
 export const LeaderboardRowHtml = ({
   rank,
   name,
+  picture,
   elo,
   first,
   page,
 }: {
   rank: number;
   name: string;
+  picture: string;
   elo: number;
   first: boolean;
   page: number;
@@ -26,6 +28,11 @@ export const LeaderboardRowHtml = ({
           scope="row"
           class="whitespace-nowrap px-1 py-4 font-medium text-gray-900 dark:text-white md:px-3 lg:px-6"
         >
+          <img
+            class="mr-1 inline-block h-6 w-6 rounded-full ring-2 ring-white dark:ring-gray-700 lg:mr-3 lg:h-8 lg:w-8"
+            src={`data:image/png;base64,${picture}`}
+            alt=""
+          />
           {name}
         </th>
         <td class="px-1 py-4 md:px-3 lg:px-6">{elo}</td>
@@ -37,6 +44,11 @@ export const LeaderboardRowHtml = ({
           scope="row"
           class="whitespace-nowrap px-1 py-4 font-medium text-gray-900 dark:text-white md:px-3 lg:px-6"
         >
+          <img
+            class="mr-1 inline-block h-6 w-6 rounded-full ring-2 ring-white dark:ring-gray-700 lg:mr-3 lg:h-8 lg:w-8"
+            src={`data:image/png;base64,${picture}`}
+            alt=""
+          />
           {name}
         </th>
         <td class="px-1 py-4 md:px-3 lg:px-6">{elo}</td>

@@ -175,3 +175,5 @@ local.sqlite-shm
 local.sqlite-wal
 
 beth-cache.sqlite
+
+src/db/data/*.csv

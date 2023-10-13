@@ -4,3 +4,14 @@ declare namespace JSX {
     _?: string;
   }
 }
+
+declare namespace Htmx {
+  type HxSync = `${string}:${
+    | "drop"
+    | "abort"
+    | "replace"
+    | "queue"
+    | "queue first"
+    | "queue last"
+    | "queue all"}`;
+}

@@ -114,7 +114,11 @@ export const NavbarHtml = ({ session, activePage }: Props) => (
                       <span class="absolute -inset-1.5"></span>
                       <img
                         class="h-8 w-8 rounded-full"
-                        src={session.user.picture}
+                        src={
+                          session.user.picture.includes("http")
+                            ? session.user.picture
+                            : `data:image/png;base64,${session.user.picture}`
+                        }
                         alt="Pic"
                       />
                     </button>

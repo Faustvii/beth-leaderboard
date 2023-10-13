@@ -1,4 +1,3 @@
-import { eq } from "drizzle-orm";
 import { Elysia } from "elysia";
 import { type Session } from "lucia";
 import { HeaderHtml } from "../components/header";
@@ -6,8 +5,7 @@ import { LayoutHtml } from "../components/Layout";
 import { NavbarHtml } from "../components/Navbar";
 import { ctx } from "../context";
 import { type readDb } from "../db";
-import { matches, user } from "../db/schema";
-import { isHxRequest, notEmpty } from "../lib";
+import { isHxRequest, measure, notEmpty } from "../lib";
 import MatchStatistics from "../lib/matchStatistics";
 
 export const stats = new Elysia({
@@ -35,7 +33,30 @@ async function statsPage(
 }
 
 async function page(db: typeof readDb, session: Session | null) {
-  const matches = await db.query.matches.findMany();
+  const { elaspedTimeMs, result: dbResult } = await measure(async () => {
+    const matches = await db.query.matches.findMany();
+    const players = await db.query.user.findMany({
+      columns: {
+        picture: false,
+        email: false,
+      },
+    });
+    return { matches, players };
+  });
+  console.log("stats page database calls", elaspedTimeMs, "ms");
+  const { matches, players } = dbResult;
+  const matchesWithPlayers = matches.map((match) => {
+    const matchWithPlayers: MatchWithPlayers = {
+      ...match,
+      blackPlayerOne: players.find((p) => p.id === match.blackPlayerOne)!,
+      blackPlayerTwo:
+        players.find((p) => p.id === match.blackPlayerTwo) || null,
+      whitePlayerOne: players.find((p) => p.id === match.whitePlayerOne)!,
+      whitePlayerTwo:
+        players.find((p) => p.id === match.whitePlayerTwo) || null,
+    };
+    return matchWithPlayers;
+  });
   const now = performance.now();
   const matchesToday = MatchStatistics.gamesToday(matches);
   const drawMatches = MatchStatistics.draws(matches);
@@ -43,14 +64,15 @@ async function page(db: typeof readDb, session: Session | null) {
     MatchStatistics.mostGamesInOneDay(matches);
 
   const { highestWinStreak, highestLoseStreak } =
-    MatchStatistics.highestStreak(matches);
-  const highestWinStreakPlayer = await db.query.user.findFirst({
-    where: eq(user.id, highestWinStreak.player),
-  });
+    MatchStatistics.highestStreak(matchesWithPlayers);
 
-  const biggestLosingStreakPlayer = await db.query.user.findFirst({
-    where: eq(user.id, highestLoseStreak.player),
-  });
+  const highestWinStreakPlayer = players.find(
+    (p) => p.id === highestWinStreak.player,
+  );
+
+  const biggestLosingStreakPlayer = players.find(
+    (x) => x.id === highestLoseStreak.player,
+  );
 
   const colorWinRate = MatchStatistics.whichColorWinsTheMost(matches);
   console.log("metrics took ", performance.now() - now + "ms  to run");
@@ -74,7 +96,7 @@ async function page(db: typeof readDb, session: Session | null) {
             with {mostGamesOnOneDay} games played
           </span>
         )}
-        {biggestWin(db, matches)}
+        {biggestWin(matchesWithPlayers)}
         {highestWinStreakPlayer && (
           <span class="p-4">
             {highestWinStreakPlayer.name} has the highest win streak with{" "}
@@ -98,45 +120,19 @@ async function page(db: typeof readDb, session: Session | null) {
   );
 }
 
-async function biggestWin(
-  db: typeof readDb,
-  matchess: {
-    id: number;
-    whitePlayerOne: string;
-    whitePlayerTwo: string | null;
-    blackPlayerOne: string;
-    blackPlayerTwo: string | null;
-    result: "Black" | "White" | "Draw";
-    scoreDiff: number;
-    whiteEloChange: number;
-    blackEloChange: number;
-    createdAt: Date;
-  }[],
-) {
-  const biggestWin = Math.max(...matchess.map((mt) => mt.scoreDiff));
-  const biggestWinMatch = matchess.find((mt) => mt.scoreDiff === biggestWin);
+async function biggestWin(matches: MatchWithPlayers[]) {
+  const biggestWin = Math.max(...matches.map((mt) => mt.scoreDiff));
+  const biggestWinMatch = matches.find((mt) => mt.scoreDiff === biggestWin);
   if (!biggestWinMatch) return <></>;
-  const now = performance.now();
-  const biggestDbWin = await db.query.matches.findFirst({
-    where: eq(matches.id, biggestWinMatch.id),
-    with: {
-      blackPlayerOne: true,
-      blackPlayerTwo: true,
-      whitePlayerOne: true,
-      whitePlayerTwo: true,
-    },
-  });
-  console.log("biggestDbWin query took ", performance.now() - now + "ms");
-  if (!biggestDbWin) return <></>;
 
   const biggestPlayers = {
     black: [
-      biggestDbWin.blackPlayerOne.name,
-      biggestDbWin.blackPlayerTwo?.name,
+      biggestWinMatch.blackPlayerOne.name,
+      biggestWinMatch.blackPlayerTwo?.name,
     ].filter(notEmpty),
     white: [
-      biggestDbWin.whitePlayerOne.name,
-      biggestDbWin.whitePlayerTwo?.name,
+      biggestWinMatch.whitePlayerOne.name,
+      biggestWinMatch.whitePlayerTwo?.name,
     ].filter(notEmpty),
   };
 

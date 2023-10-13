@@ -68,8 +68,7 @@ export const playSocket = new Elysia()
   .ws("/play/queue/1v1", {
     //@ts-expect-error types?
     open(ws) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      const session: Session | null = ws.data.session;
+      const session = ws.data.session;
       if (!session?.user) {
         console.log("no user");
         return ws.close();
@@ -91,14 +90,14 @@ export const playSocket = new Elysia()
     },
 
     message(ws, message) {
-      const session: Session | null = ws.data.session;
+      const session = ws.data.session;
       if (!session?.user) {
         return ws.close();
       }
       ws.send(message);
     },
     close(ws) {
-      const session: Session | null = ws.data.session;
+      const session = ws.data.session;
       // wsConnections.delete(ws);
       console.log("ws closing");
 
@@ -126,7 +125,7 @@ export const playSocket = new Elysia()
   })
   .ws("/play/queue/2v2", {
     open(ws) {
-      const session: Session | null = ws.data.session;
+      const session = ws.data.session;
       if (!session?.user) {
         console.log("no user");
         return ws.close();

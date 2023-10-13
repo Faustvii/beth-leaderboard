@@ -3,7 +3,7 @@
   "module": "src/main.ts",
   "type": "module",
   "scripts": {
-    "dev": "concurrently \"bun run --hot src/main.ts\" \"bun run src/liveReload.ts\" \"bun tw:dev\"",
+    "dev": "concurrently \"bun run --hot src/main.ts\" \"bun tw:dev\"",
     "liveReload": "bunx beth-stack",
     "start": "bun run uno && bun run src/main.ts",
     "db:push": "bunx drizzle-kit push:sqlite",
@@ -44,7 +44,7 @@
   "dependencies": {
     "@elysiajs/cron": "^0.7.0",
     "@elysiajs/static": "^0.7.1",
-    "@kitajs/html": "^3.0.2",
+    "@kitajs/html": "^3.0.3",
     "@libsql/client": "0.3.6-pre.2",
     "@lucia-auth/adapter-sqlite": "^2.0.0",
     "@lucia-auth/oauth": "^3.3.1",
@@ -52,9 +52,8 @@
     "@tlscipher/holt": "1.1.1",
     "drizzle-orm": "^0.28.6",
     "drizzle-typebox": "^0.1.1",
-    "elysia": "0.7.15",
+    "elysia": "0.7.16",
     "lucia": "^2.7.1",
-    "tom-select": "^2.2.2",
     "zod": "3.22.2"
   }
 }

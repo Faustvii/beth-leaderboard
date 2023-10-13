@@ -1,10 +1,5 @@
 import { type PropsWithChildren } from "@kitajs/html";
-import { config } from "../config";
-import { liveReloadScript } from "../lib/liveReloadScript";
 import { LoadingBarHtml } from "./LoadingBar";
-
-const safeScript =
-  config.env.NODE_ENV === "development" ? liveReloadScript() : "";
 
 export const BaseHtml = ({ children }: PropsWithChildren) => (
   <>
@@ -20,7 +15,6 @@ export const BaseHtml = ({ children }: PropsWithChildren) => (
         <script src="https://unpkg.com/htmx.org@1.9.6/dist/ext/response-targets.js"></script>
         <link href="/static/styles.css" rel="stylesheet" />
         <link rel="icon" href="data:;base64,="></link>
-        <script>{safeScript}</script>
       </head>
       <body
         hx-boost="true"

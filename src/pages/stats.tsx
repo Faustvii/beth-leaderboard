@@ -66,12 +66,17 @@ async function page(db: typeof readDb, session: Session | null) {
   const { highestWinStreak, highestLoseStreak } =
     MatchStatistics.highestStreak(matchesWithPlayers);
 
-  const highestWinStreakPlayer = players.find(
-    (p) => p.id === highestWinStreak.player,
+  const playerWithMostGames =
+    MatchStatistics.playerWithMostGames(matchesWithPlayers);
+
+  const playerWithHighestWinRate = MatchStatistics.playerWithWinrate(
+    matchesWithPlayers,
+    false,
   );
 
-  const biggestLosingStreakPlayer = players.find(
-    (x) => x.id === highestLoseStreak.player,
+  const playerWithLowestWinRate = MatchStatistics.playerWithWinrate(
+    matchesWithPlayers,
+    true,
   );
 
   const colorWinRate = MatchStatistics.whichColorWinsTheMost(matches);
@@ -97,16 +102,36 @@ async function page(db: typeof readDb, session: Session | null) {
           </span>
         )}
         {biggestWin(matchesWithPlayers)}
-        {highestWinStreakPlayer && (
+        {highestWinStreak && (
           <span class="p-4">
-            {highestWinStreakPlayer.name} has the highest win streak with{" "}
+            {highestWinStreak.player.name} has the highest win streak with{" "}
             {highestWinStreak.streak} wins in a row
           </span>
         )}
-        {biggestLosingStreakPlayer && (
+        {highestLoseStreak && (
           <span class="p-4">
-            {biggestLosingStreakPlayer.name} has the biggest losing streak with{" "}
+            {highestLoseStreak.player.name} has the biggest losing streak with{" "}
             {highestLoseStreak.streak} losses in a row
+          </span>
+        )}
+        {playerWithMostGames && (
+          <span class="p-4">
+            {playerWithMostGames.player.name} has played the most games with{" "}
+            {playerWithMostGames.games} games played
+          </span>
+        )}
+        {playerWithHighestWinRate && (
+          <span class="p-4">
+            {playerWithHighestWinRate.player.name} has the highest win rate with{" "}
+            {(playerWithHighestWinRate.winrate * 100).toFixed(2)}% over{" "}
+            {playerWithHighestWinRate.totalGames} games
+          </span>
+        )}
+        {playerWithLowestWinRate && (
+          <span class="p-4">
+            {playerWithLowestWinRate.player.name} has the lowest win rate with{" "}
+            {(playerWithLowestWinRate.winrate * 100).toFixed(2)}% over{" "}
+            {playerWithLowestWinRate.totalGames} games
           </span>
         )}
         {colorWinRate && (

@@ -122,9 +122,9 @@ describe("stats", () => {
       MatchStatistics.highestStreak(matches);
     //player 1 has 4 wins in a row
     //player 4 has 4 losses in a row
-    expect(highestWinStreak.player).toEqual("1");
+    expect(highestWinStreak.player.id).toEqual("1");
     expect(highestWinStreak.streak).toEqual(4);
-    expect(highestLoseStreak.player).toEqual("4");
+    expect(highestLoseStreak.player.id).toEqual("4");
     expect(highestLoseStreak.streak).toEqual(4);
   });
 });

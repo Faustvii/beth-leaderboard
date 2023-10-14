@@ -5,8 +5,13 @@ class MatchStatistics {
   static highestStreak(matches: MatchWithPlayers[]) {
     matches.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
 
-    const winStreaks: Record<string, Record<"White" | "Black", number>> = {};
-    const loseStreaks: Record<string, Record<"White" | "Black", number>> = {};
+    const winStreaks: Record<string, { Black: number; White: number }> = {};
+    const loseStreaks: Record<string, { Black: number; White: number }> = {};
+
+    let highestWinningPlayer: Player | null = null;
+    let highestWinningStreak = 0;
+    let highestLosingPlayer: Player | null = null;
+    let highestLosingStreak = 0;
 
     for (const match of matches) {
       const whitePlayers = [match.whitePlayerOne, match.whitePlayerTwo].filter(
@@ -51,17 +56,20 @@ class MatchStatistics {
       }
     }
 
-    let highestWinningPlayer = "";
-    let highestWinningStreak = 0;
-    let highestLosingPlayer = "";
-    let highestLosingStreak = 0;
-
     for (const player in winStreaks) {
       const playerWinStreak = winStreaks[player];
       const playerWinStreakTotal =
         playerWinStreak.Black + playerWinStreak.White;
       if (playerWinStreakTotal > highestWinningStreak) {
-        highestWinningPlayer = player;
+        highestWinningPlayer = matches
+          .flatMap((mt) => [
+            mt.whitePlayerOne,
+            mt.whitePlayerTwo,
+            mt.blackPlayerOne,
+            mt.blackPlayerTwo,
+          ])
+          .filter(notEmpty)
+          .find((pl) => pl.id === player)!;
         highestWinningStreak = playerWinStreakTotal;
       }
     }
@@ -71,18 +79,26 @@ class MatchStatistics {
       const playerLoseStreakTotal =
         playerLoseStreak.Black + playerLoseStreak.White;
       if (playerLoseStreakTotal > highestLosingStreak) {
-        highestLosingPlayer = player;
+        highestLosingPlayer = matches
+          .flatMap((mt) => [
+            mt.whitePlayerOne,
+            mt.whitePlayerTwo,
+            mt.blackPlayerOne,
+            mt.blackPlayerTwo,
+          ])
+          .filter(notEmpty)
+          .find((pl) => pl.id === player)!;
         highestLosingStreak = playerLoseStreakTotal;
       }
     }
 
     return {
       highestWinStreak: {
-        player: highestWinningPlayer,
+        player: highestWinningPlayer!,
         streak: highestWinningStreak,
       },
       highestLoseStreak: {
-        player: highestLosingPlayer,
+        player: highestLosingPlayer!,
         streak: highestLosingStreak,
       },
     };
@@ -132,6 +148,139 @@ class MatchStatistics {
     );
 
     return { date: new Date(dayWithMostGames), games: mostGamesOnOneDay };
+  }
+
+  static playerWithWinrate(
+    matches: MatchWithPlayers[],
+    lowest: boolean,
+  ): {
+    player: Player;
+    winrate: number;
+    totalGames: number;
+  } {
+    const players = matches
+      .flatMap((mt) => [
+        mt.whitePlayerOne,
+        mt.whitePlayerTwo,
+        mt.blackPlayerOne,
+        mt.blackPlayerTwo,
+      ])
+      .filter(notEmpty);
+
+    const playerWins = players.reduce(
+      (acc, curr) => {
+        if (!acc[curr.id]) {
+          acc[curr.id] = { wins: 0, total: 1 };
+        } else {
+          acc[curr.id].total += 1;
+        }
+        return acc;
+      },
+      {} as Record<string, { wins: number; total: number }>,
+    );
+
+    for (const match of matches) {
+      const whitePlayers = [match.whitePlayerOne, match.whitePlayerTwo].filter(
+        notEmpty,
+      );
+      const blackPlayers = [match.blackPlayerOne, match.blackPlayerTwo].filter(
+        notEmpty,
+      );
+
+      for (const player of whitePlayers) {
+        if (match.result === "White") {
+          playerWins[player.id].wins += 1;
+        }
+      }
+
+      for (const player of blackPlayers) {
+        if (match.result === "Black") {
+          playerWins[player.id].wins += 1;
+        }
+      }
+    }
+
+    const playerWinrates = Object.keys(playerWins).reduce(
+      (acc, curr) => {
+        const wins = playerWins[curr].wins;
+        const total = playerWins[curr].total;
+        const winrate = total === 0 ? 0 : wins / total;
+        acc[curr] = winrate;
+        return acc;
+      },
+      {} as Record<string, number>,
+    );
+
+    const filteredPlayers = players.filter((pl) => playerWins[pl.id].total > 1);
+
+    const sortedPlayers = filteredPlayers.sort((a, b) => {
+      if (lowest) {
+        return playerWinrates[a.id] - playerWinrates[b.id];
+      } else {
+        return playerWinrates[b.id] - playerWinrates[a.id];
+      }
+    });
+
+    const playerWithTargetWinrate = filteredPlayers.find(
+      (pl) => pl.id === sortedPlayers[0].id,
+    )!;
+    const targetWinrate = playerWinrates[sortedPlayers[0].id];
+    const playersWithSameWinrate = filteredPlayers.filter(
+      (pl) => playerWinrates[pl.id] === targetWinrate,
+    );
+    const playerWithMostGames = playersWithSameWinrate.reduce((acc, curr) => {
+      if (playerWins[curr.id].total > playerWins[acc.id].total) {
+        return curr;
+      } else {
+        return acc;
+      }
+    }, playersWithSameWinrate[0]);
+
+    return {
+      player:
+        playersWithSameWinrate.length === 1
+          ? playerWithTargetWinrate
+          : playerWithMostGames,
+      winrate: targetWinrate,
+      totalGames: playerWins[playerWithMostGames.id].total,
+    };
+  }
+
+  static playerWithMostGames(matches: MatchWithPlayers[]): {
+    player: Player;
+    games: number;
+  } {
+    const players = matches
+      .flatMap((mt) => [
+        mt.whitePlayerOne,
+        mt.whitePlayerTwo,
+        mt.blackPlayerOne,
+        mt.blackPlayerTwo,
+      ])
+      .filter(notEmpty);
+
+    const playerGames = players.reduce(
+      (acc, curr) => {
+        if (!acc[curr.id]) {
+          acc[curr.id] = 1;
+        } else {
+          acc[curr.id] += 1;
+        }
+        return acc;
+      },
+      {} as Record<string, number>,
+    );
+
+    const mostGames = Math.max(...Object.values(playerGames));
+
+    const playerWithMostGames = Object.keys(playerGames).find(
+      (key) => playerGames[key] === mostGames,
+    );
+
+    return {
+      player: players.find((pl) => pl.id === playerWithMostGames)!,
+      games: mostGames,
+    };
   }
 
   // static mostGamesInOneDayByPlayer(matches: Match[]) {

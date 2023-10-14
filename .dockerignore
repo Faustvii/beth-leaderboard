@@ -169,4 +169,5 @@ dist
 .pnp.\*
 
 
+src/db/data/*
 *.sqlite*

@@ -1,17 +1,32 @@
 import { describe, expect, test } from "bun:test";
-import { type Match } from "../src/db/schema/matches";
 import MatchStatistics from "../src/lib/matchStatistics";
 
 describe("stats", () => {
   test("should be able to calculate highest win&lose streaks", () => {
     const now = new Date().getTime();
-    const matches: Match[] = [
+    const matches: MatchWithPlayers[] = [
       {
         id: 1,
-        blackPlayerOne: "1",
-        blackPlayerTwo: "2",
-        whitePlayerOne: "3",
-        whitePlayerTwo: "4",
+        blackPlayerOne: {
+          id: "1",
+          name: "test",
+          elo: 1000,
+        },
+        blackPlayerTwo: {
+          id: "2",
+          name: "test",
+          elo: 1000,
+        },
+        whitePlayerOne: {
+          id: "3",
+          name: "test",
+          elo: 1000,
+        },
+        whitePlayerTwo: {
+          id: "4",
+          name: "test",
+          elo: 1000,
+        },
         result: "Black",
         scoreDiff: 1,
         whiteEloChange: 1,
@@ -20,10 +35,26 @@ describe("stats", () => {
       },
       {
         id: 2,
-        blackPlayerOne: "1",
-        blackPlayerTwo: "2",
-        whitePlayerOne: "3",
-        whitePlayerTwo: "4",
+        blackPlayerOne: {
+          id: "1",
+          name: "test",
+          elo: 1000,
+        },
+        blackPlayerTwo: {
+          id: "2",
+          name: "test",
+          elo: 1000,
+        },
+        whitePlayerOne: {
+          id: "3",
+          name: "test",
+          elo: 1000,
+        },
+        whitePlayerTwo: {
+          id: "4",
+          name: "test",
+          elo: 1000,
+        },
         result: "Black",
         scoreDiff: 1,
         whiteEloChange: 1,
@@ -32,10 +63,26 @@ describe("stats", () => {
       },
       {
         id: 3,
-        blackPlayerOne: "1",
-        blackPlayerTwo: "3",
-        whitePlayerOne: "2",
-        whitePlayerTwo: "4",
+        blackPlayerOne: {
+          id: "1",
+          name: "test",
+          elo: 1000,
+        },
+        blackPlayerTwo: {
+          id: "3",
+          name: "test",
+          elo: 1000,
+        },
+        whitePlayerOne: {
+          id: "2",
+          name: "test",
+          elo: 1000,
+        },
+        whitePlayerTwo: {
+          id: "4",
+          name: "test",
+          elo: 1000,
+        },
         result: "Black",
         scoreDiff: 1,
         whiteEloChange: 1,
@@ -44,10 +91,26 @@ describe("stats", () => {
       },
       {
         id: 4,
-        blackPlayerOne: "4",
-        blackPlayerTwo: "2",
-        whitePlayerOne: "3",
-        whitePlayerTwo: "1",
+        blackPlayerOne: {
+          id: "4",
+          name: "test",
+          elo: 1000,
+        },
+        blackPlayerTwo: {
+          id: "2",
+          name: "test",
+          elo: 1000,
+        },
+        whitePlayerOne: {
+          id: "3",
+          name: "test",
+          elo: 1000,
+        },
+        whitePlayerTwo: {
+          id: "1",
+          name: "test",
+          elo: 1000,
+        },
         result: "White",
         scoreDiff: 1,
         whiteEloChange: 1,

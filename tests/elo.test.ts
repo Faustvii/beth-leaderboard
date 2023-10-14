@@ -28,8 +28,8 @@ describe("calculateElo", () => {
     };
   });
 
-  test("kfactor should be 16 when above 2000", () => {
-    const elo = 2100;
+  test("kfactor should be 16 when above 2500", () => {
+    const elo = 2600;
     const kfactor = 16;
     const expectedElo = kfactor / 2;
     team1.players.forEach((player) => (player.elo = elo));
@@ -43,8 +43,23 @@ describe("calculateElo", () => {
     expect(gameResult.teams[1].players[0]!.elo).toEqual(elo - expectedElo);
   });
 
-  test("kfactor should be 32 when elo below 2000 and above 1700", () => {
-    const elo = 1701;
+  test("kfactor should be 24 when below 2500 and above 2300", () => {
+    const elo = 2350;
+    const kfactor = 24;
+    const expectedElo = kfactor / 2;
+    team1.players.forEach((player) => (player.elo = elo));
+    team2.players.forEach((player) => (player.elo = elo));
+    const gameResult: GameResult = {
+      outcome: "win",
+      teams: [team1, team2],
+    };
+    applyMatchResult(config, gameResult);
+    expect(gameResult.teams[0].players[0]!.elo).toEqual(elo + expectedElo);
+    expect(gameResult.teams[1].players[0]!.elo).toEqual(elo - expectedElo);
+  });
+
+  test("kfactor should be 32 when below 2300 and above 2100", () => {
+    const elo = 2150;
     const kfactor = 32;
     const expectedElo = kfactor / 2;
     team1.players.forEach((player) => (player.elo = elo));
@@ -58,8 +73,53 @@ describe("calculateElo", () => {
     expect(gameResult.teams[1].players[0]!.elo).toEqual(elo - expectedElo);
   });
 
-  test("kfactor should be 64 when elo below 1700", () => {
-    const elo = 1699;
+  test("kfactor should be 40 when elo below 2100 and above 1900", () => {
+    const elo = 1950;
+    const kfactor = 40;
+    const expectedElo = kfactor / 2;
+    team1.players.forEach((player) => (player.elo = elo));
+    team2.players.forEach((player) => (player.elo = elo));
+    const gameResult: GameResult = {
+      outcome: "win",
+      teams: [team1, team2],
+    };
+    applyMatchResult(config, gameResult);
+    expect(gameResult.teams[0].players[0]!.elo).toEqual(elo + expectedElo);
+    expect(gameResult.teams[1].players[0]!.elo).toEqual(elo - expectedElo);
+  });
+
+  test("kfactor should be 48 when elo below 1900 and above 1700", () => {
+    const elo = 1750;
+    const kfactor = 48;
+    const expectedElo = kfactor / 2;
+    team1.players.forEach((player) => (player.elo = elo));
+    team2.players.forEach((player) => (player.elo = elo));
+    const gameResult: GameResult = {
+      outcome: "win",
+      teams: [team1, team2],
+    };
+    applyMatchResult(config, gameResult);
+    expect(gameResult.teams[0].players[0]!.elo).toEqual(elo + expectedElo);
+    expect(gameResult.teams[1].players[0]!.elo).toEqual(elo - expectedElo);
+  });
+
+  test("kfactor should be 56 when elo below 1700 and above 1600", () => {
+    const elo = 1650;
+    const kfactor = 56;
+    const expectedElo = kfactor / 2;
+    team1.players.forEach((player) => (player.elo = elo));
+    team2.players.forEach((player) => (player.elo = elo));
+    const gameResult: GameResult = {
+      outcome: "win",
+      teams: [team1, team2],
+    };
+    applyMatchResult(config, gameResult);
+    expect(gameResult.teams[0].players[0]!.elo).toEqual(elo + expectedElo);
+    expect(gameResult.teams[1].players[0]!.elo).toEqual(elo - expectedElo);
+  });
+
+  test("kfactor should be 64 when elo below 1600", () => {
+    const elo = 1550;
     const kfactor = 64;
     const expectedElo = kfactor / 2;
     team1.players.forEach((player) => (player.elo = elo));
@@ -150,7 +210,7 @@ describe("calculateElo", () => {
       teams: [team1, team2],
     };
     const eloChange = matchEloChange(gameResult);
-    expect(eloChange.white).toBe(-16);
+    expect(eloChange.white).toBe(-24);
     expect(eloChange.black).toBe(32);
   });
 
@@ -170,8 +230,7 @@ describe("calculateElo", () => {
     };
 
     applyMatchResult(config, gameResult);
-
-    expect(team1.players[0]!.elo).toBe(1850 - 32);
+    expect(team1.players[0]!.elo).toBe(1850 - 48);
     expect(team2.players[0]!.elo).toBe(1000 + 64);
   });
 

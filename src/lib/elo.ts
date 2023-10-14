@@ -82,11 +82,11 @@ function calculateNewElo(
 }
 
 function getKFactor(elo: number) {
-  if (elo < 1700) {
-    return 64;
-  } else if (elo < 2000) {
-    return 32;
-  } else {
-    return 16;
-  }
+  if (elo > 2500) return 16;
+  if (elo > 2300) return 24;
+  if (elo > 2100) return 32;
+  if (elo > 1900) return 40;
+  if (elo > 1700) return 48;
+  if (elo > 1600) return 56;
+  return 64;
 }

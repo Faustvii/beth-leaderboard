@@ -5,8 +5,8 @@ class MatchStatistics {
   static highestStreak(matches: MatchWithPlayers[]) {
     matches.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
 
-    const winStreaks: Record<string, { Black: number; White: number }> = {};
-    const loseStreaks: Record<string, { Black: number; White: number }> = {};
+    const currentWinStreaks: Record<string, number> = {};
+    const currentLoseStreaks: Record<string, number> = {};
 
     let highestWinningPlayer: Player | null = null;
     let highestWinningStreak = 0;
@@ -22,73 +22,55 @@ class MatchStatistics {
       );
 
       for (const player of whitePlayers) {
-        if (!winStreaks[player.id]) {
-          winStreaks[player.id] = { White: 0, Black: 0 };
+        const playerId = player.id;
+        if (!currentWinStreaks[playerId]) {
+          currentWinStreaks[playerId] = 0;
         }
-        if (!loseStreaks[player.id]) {
-          loseStreaks[player.id] = { White: 0, Black: 0 };
+        if (!currentLoseStreaks[playerId]) {
+          currentLoseStreaks[playerId] = 0;
         }
 
         if (match.result === "White") {
-          winStreaks[player.id].White++;
-          loseStreaks[player.id].Black = 0;
+          currentWinStreaks[playerId]++;
+          currentLoseStreaks[playerId] = 0;
+          if (currentWinStreaks[playerId] > highestWinningStreak) {
+            highestWinningPlayer = player;
+            highestWinningStreak = currentWinStreaks[playerId];
+          }
         } else {
-          loseStreaks[player.id].White++;
-          winStreaks[player.id].Black = 0;
+          currentLoseStreaks[playerId]++;
+          currentWinStreaks[playerId] = 0;
+          if (currentLoseStreaks[playerId] > highestLosingStreak) {
+            highestLosingPlayer = player;
+            highestLosingStreak = currentLoseStreaks[playerId];
+          }
         }
       }
 
       for (const player of blackPlayers) {
-        if (!winStreaks[player.id]) {
-          winStreaks[player.id] = { White: 0, Black: 0 };
+        const playerId = player.id;
+        if (!currentWinStreaks[playerId]) {
+          currentWinStreaks[playerId] = 0;
         }
-        if (!loseStreaks[player.id]) {
-          loseStreaks[player.id] = { White: 0, Black: 0 };
+        if (!currentLoseStreaks[playerId]) {
+          currentLoseStreaks[playerId] = 0;
         }
 
         if (match.result === "Black") {
-          winStreaks[player.id].Black++;
-          loseStreaks[player.id].White = 0;
+          currentWinStreaks[playerId]++;
+          currentLoseStreaks[playerId] = 0;
+          if (currentWinStreaks[playerId] > highestWinningStreak) {
+            highestWinningPlayer = player;
+            highestWinningStreak = currentWinStreaks[playerId];
+          }
         } else {
-          loseStreaks[player.id].Black++;
-          winStreaks[player.id].White = 0;
+          currentLoseStreaks[playerId]++;
+          currentWinStreaks[playerId] = 0;
+          if (currentLoseStreaks[playerId] > highestLosingStreak) {
+            highestLosingPlayer = player;
+            highestLosingStreak = currentLoseStreaks[playerId];
+          }
         }
-      }
-    }
-
-    for (const player in winStreaks) {
-      const playerWinStreak = winStreaks[player];
-      const playerWinStreakTotal =
-        playerWinStreak.Black + playerWinStreak.White;
-      if (playerWinStreakTotal > highestWinningStreak) {
-        highestWinningPlayer = matches
-          .flatMap((mt) => [
-            mt.whitePlayerOne,
-            mt.whitePlayerTwo,
-            mt.blackPlayerOne,
-            mt.blackPlayerTwo,
-          ])
-          .filter(notEmpty)
-          .find((pl) => pl.id === player)!;
-        highestWinningStreak = playerWinStreakTotal;
-      }
-    }
-
-    for (const player in loseStreaks) {
-      const playerLoseStreak = loseStreaks[player];
-      const playerLoseStreakTotal =
-        playerLoseStreak.Black + playerLoseStreak.White;
-      if (playerLoseStreakTotal > highestLosingStreak) {
-        highestLosingPlayer = matches
-          .flatMap((mt) => [
-            mt.whitePlayerOne,
-            mt.whitePlayerTwo,
-            mt.blackPlayerOne,
-            mt.blackPlayerTwo,
-          ])
-          .filter(notEmpty)
-          .find((pl) => pl.id === player)!;
-        highestLosingStreak = playerLoseStreakTotal;
       }
     }
 

@@ -127,4 +127,57 @@ describe("stats", () => {
     expect(highestLoseStreak.player.id).toEqual("4");
     expect(highestLoseStreak.streak).toEqual(4);
   });
+
+  test("should reset streak when there are breaks in the streak", () => {
+    const now = new Date().getTime();
+    const matches: MatchWithPlayers[] = [];
+    for (let i = 0; i < 3; i++) {
+      const match = generateMatch(new Date(now + i * 5000));
+      match.id = i;
+      matches.push(match);
+    }
+    for (let i = 0; i < 2; i++) {
+      const match = generateMatch(new Date(now + (i + 25) * 5000));
+      match.id = i + 25;
+      match.result = "Black";
+      matches.push(match);
+    }
+    for (let i = 0; i < 2; i++) {
+      const match = generateMatch(new Date(now + (i + 45) * 5000));
+      match.id = i + 45;
+      match.result = "White";
+      matches.push(match);
+    }
+    const { highestLoseStreak, highestWinStreak } =
+      MatchStatistics.highestStreak(matches);
+    //player 1 has 3 wins in a row
+    //player 2 has 3 losses in a row
+    expect(highestWinStreak.player.id).toEqual("1");
+    expect(highestWinStreak.streak).toEqual(3);
+    expect(highestLoseStreak.player.id).toEqual("2");
+    expect(highestLoseStreak.streak).toEqual(3);
+  });
 });
+
+function generateMatch(createdAt: Date): MatchWithPlayers {
+  return {
+    id: 1,
+    whitePlayerOne: {
+      id: "1",
+      name: "test",
+      elo: 1000,
+    },
+    blackPlayerOne: {
+      id: "2",
+      name: "test",
+      elo: 1000,
+    },
+    blackPlayerTwo: null,
+    whitePlayerTwo: null,
+    result: "White",
+    scoreDiff: 1,
+    whiteEloChange: 1,
+    blackEloChange: 1,
+    createdAt: createdAt,
+  };
+}

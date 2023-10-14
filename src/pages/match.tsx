@@ -250,52 +250,36 @@ async function maForm() {
         <input type="hidden" form="matchForm" id="white2Id" name="white2Id" />
         <input type="hidden" form="matchForm" id="black1Id" name="black1Id" />
         <input type="hidden" form="matchForm" id="black2Id" name="black2Id" />
+        <script>
+          {function checkUserKeydown(event: Event) {
+            // Don't submit a search on enter or when selecting an entry with the mouse
+            return event instanceof KeyboardEvent && event.key !== "Enter";
+          }}
+        </script>
 
         <div class="group relative z-0 mb-6 w-full border-b">
           <span>White team</span>
         </div>
         <div class="group relative z-0 mb-6 w-full">
           <SearchHtml
-            hx-swap="innerHtml"
             hx-get="/match/search"
-            hx-target="#players1"
             form="matchForm"
-            hx-params="name"
-            name="name"
-            list="players1"
-            id="player1"
-            class="peer block w-full appearance-none border-0 border-b-2 border-gray-300 bg-transparent px-0 py-2.5 pl-10 text-sm text-gray-900 focus:border-blue-600 focus:outline-none focus:ring-0 dark:border-gray-600 dark:text-white dark:focus:border-blue-500"
-            placeholder=" "
-            autocomplete="off"
+            label="White player 1"
+            hx-trigger="keyup[checkUserKeydown.call(this, event)] changed delay:300ms"
+            outputField="white1Id"
+            dataListId="white1"
             required="true"
           />
-          <label
-            for="player1"
-            class="absolute top-3 -z-10 origin-[0] -translate-y-6 scale-75 transform pl-10 text-sm text-gray-500 duration-300 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:left-0 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:pl-0 peer-focus:font-medium peer-focus:text-blue-600 dark:text-gray-400 peer-focus:dark:text-blue-500"
-          >
-            White player 1
-          </label>
         </div>
         <div class="group relative z-0 mb-6 w-full">
           <SearchHtml
-            hx-swap="innerHtml"
             hx-get="/match/search"
-            hx-target="#players2"
             form="matchForm"
-            hx-params="name"
-            name="name"
-            list="players2"
-            id="player2"
-            class="peer block w-full appearance-none border-0 border-b-2 border-gray-300 bg-transparent px-0 py-2.5 pl-10 text-sm text-gray-900 focus:border-blue-600 focus:outline-none focus:ring-0 dark:border-gray-600 dark:text-white dark:focus:border-blue-500"
-            placeholder=" "
-            autocomplete="off"
+            label="White player 2 (Optional)"
+            hx-trigger="keyup[checkUserKeydown.call(this, event)] changed delay:300ms"
+            outputField="white2Id"
+            dataListId="white2"
           />
-          <label
-            for="player2"
-            class="absolute top-3 -z-10 origin-[0] -translate-y-6 scale-75 transform pl-10 text-sm text-gray-500 duration-300 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:left-0 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:pl-0 peer-focus:font-medium peer-focus:text-blue-600 dark:text-gray-400 peer-focus:dark:text-blue-500"
-          >
-            White player 2 (Optional)
-          </label>
         </div>
 
         <div class="group relative z-0 mb-6 w-full border-b">
@@ -304,46 +288,24 @@ async function maForm() {
 
         <div class="group relative z-0 mb-6 w-full">
           <SearchHtml
-            hx-swap="innerHtml"
             hx-get="/match/search"
-            hx-target="#players3"
-            form="matchForm"
-            hx-params="name"
-            name="name"
-            list="players3"
-            id="player3"
-            class="peer block w-full appearance-none border-0 border-b-2 border-gray-300 bg-transparent px-0 py-2.5 pl-10 text-sm text-gray-900 focus:border-blue-600 focus:outline-none focus:ring-0 dark:border-gray-600 dark:text-white dark:focus:border-blue-500"
-            placeholder=" "
             required="true"
-            autocomplete="off"
+            form="matchForm"
+            label="Black player 1"
+            outputField="black1Id"
+            hx-trigger="keyup[checkUserKeydown.call(this, event)] changed delay:300ms"
+            dataListId="black1"
           />
-          <label
-            for="player4"
-            class="absolute top-3 -z-10 origin-[0] -translate-y-6 scale-75 transform pl-10 text-sm text-gray-500 duration-300 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:left-0 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:pl-0 peer-focus:font-medium peer-focus:text-blue-600 dark:text-gray-400 peer-focus:dark:text-blue-500"
-          >
-            Black player 1
-          </label>
         </div>
         <div class="group relative z-0 mb-6 w-full">
           <SearchHtml
-            hx-swap="innerHtml"
             hx-get="/match/search"
-            hx-target="#players4"
             form="matchForm"
-            hx-params="name"
-            name="name"
-            list="players4"
-            id="player4"
-            class="peer block w-full appearance-none border-0 border-b-2 border-gray-300 bg-transparent px-0 py-2.5 pl-10 text-sm text-gray-900 focus:border-blue-600 focus:outline-none focus:ring-0 dark:border-gray-600 dark:text-white dark:focus:border-blue-500"
-            placeholder=" "
-            autocomplete="off"
+            label="Black player 2 (Optional)"
+            hx-trigger="keyup[checkUserKeydown.call(this, event)] changed delay:300ms"
+            outputField="black2Id"
+            dataListId="black2"
           />
-          <label
-            for="player4"
-            class="absolute top-3 -z-10 origin-[0] -translate-y-6 scale-75 transform pl-10 text-sm text-gray-500 duration-300 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:left-0 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:pl-0 peer-focus:font-medium peer-focus:text-blue-600 dark:text-gray-400 peer-focus:dark:text-blue-500"
-          >
-            Black player 2 (Optional)
-          </label>
         </div>
 
         <div class="group relative z-0 mb-6 w-full border-b">
@@ -400,58 +362,7 @@ async function maForm() {
           Submit match result
         </button>
         <div id="errors" class="text-red-500"></div>
-        <datalist id="players1"></datalist>
-        <datalist id="players2"></datalist>
-        <datalist id="players3"></datalist>
-        <datalist id="players4"></datalist>
-
-        <script>
-          {changeEventListener({
-            id: "player1",
-            datalistId: "players1",
-            targetId: "white1Id",
-          })}
-          {changeEventListener({
-            id: "player2",
-            datalistId: "players2",
-            targetId: "white2Id",
-          })}
-          {changeEventListener({
-            id: "player3",
-            datalistId: "players3",
-            targetId: "black1Id",
-          })}
-          {changeEventListener({
-            id: "player4",
-            datalistId: "players4",
-            targetId: "black2Id",
-          })}
-        </script>
       </form>
     </>
   );
-}
-
-function changeEventListener({
-  id,
-  datalistId,
-  targetId,
-}: {
-  id: string;
-  datalistId: string;
-  targetId: string;
-}): string {
-  return `
-    document.getElementById("${id}")?.addEventListener("change", function () {
-      // Get the selected option from the datalist
-      const selectedOption = document.querySelector(\`#${datalistId} option[value='\${this.value}']\`);
-
-      if (selectedOption) {
-        // Set the hidden input value to the selected option's data-id
-        document.getElementById("${targetId}").value = selectedOption.getAttribute("id") || "";
-      } else {
-        // Clear the hidden input value if no valid selection is made
-        document.getElementById("${targetId}").value = "";
-      }
-    });`;
 }

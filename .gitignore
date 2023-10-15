@@ -177,3 +177,4 @@ local.sqlite-wal
 beth-cache.sqlite
 
 src/db/data/*.csv
+public/user/*

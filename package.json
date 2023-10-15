@@ -54,6 +54,7 @@
     "drizzle-typebox": "^0.1.1",
     "elysia": "0.7.16",
     "lucia": "^2.7.1",
+    "sharp": "0.33.0-alpha.9",
     "zod": "3.22.2"
   }
 }

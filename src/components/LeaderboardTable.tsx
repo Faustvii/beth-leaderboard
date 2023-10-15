@@ -5,7 +5,7 @@ export const LeaderboardTableHtml = ({
   page,
 }: {
   page: number;
-  rows: { rank: number; name: string; elo: number }[];
+  rows: { userId: string; rank: number; name: string; elo: number }[];
 }) => (
   <>
     <div class="flex flex-col items-center justify-center">

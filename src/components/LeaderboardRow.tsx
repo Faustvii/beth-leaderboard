@@ -1,14 +1,14 @@
-export const LeaderboardRowHtml = ({
+export const LeaderboardRowHtml = async ({
+  userId,
   rank,
   name,
-  picture,
   elo,
   first,
   page,
 }: {
+  userId: string;
   rank: number;
   name: string;
-  picture: string;
   elo: number;
   first: boolean;
   page: number;
@@ -30,7 +30,8 @@ export const LeaderboardRowHtml = ({
         >
           <img
             class="mr-1 inline-block h-6 w-6 rounded-full ring-2 ring-white dark:ring-gray-700 lg:mr-3 lg:h-8 lg:w-8"
-            src={`data:image/png;base64,${picture}`}
+            src={`static/user/${userId}/small`}
+            loading="lazy"
             alt=""
           />
           {name}
@@ -46,7 +47,8 @@ export const LeaderboardRowHtml = ({
         >
           <img
             class="mr-1 inline-block h-6 w-6 rounded-full ring-2 ring-white dark:ring-gray-700 lg:mr-3 lg:h-8 lg:w-8"
-            src={`data:image/png;base64,${picture}`}
+            src={`static/user/${userId}/small`}
+            loading="lazy"
             alt=""
           />
           {name}

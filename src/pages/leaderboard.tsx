@@ -14,15 +14,18 @@ import { isHxRequest } from "../lib";
 export const playerPaginationQuery = async (page: number) => {
   const pageSize = 15;
   const players = await readDb.query.user.findMany({
+    columns: {
+      picture: false,
+    },
     orderBy: [desc(user.elo)],
     limit: pageSize,
     offset: (page - 1) * pageSize,
   });
   return players.map((player, index) => ({
+    userId: player.id,
     rank: index + (page - 1) * pageSize + 1,
     name: player.name,
     elo: player.elo,
-    picture: player.picture,
   }));
 };
 
@@ -55,7 +58,7 @@ export async function LeaderboardPage(
 
 function LeaderboardTable(
   session: Session | null,
-  rows: { rank: number; name: string; elo: number }[],
+  rows: { userId: string; rank: number; name: string; elo: number }[],
 ): JSX.Element {
   return (
     <>

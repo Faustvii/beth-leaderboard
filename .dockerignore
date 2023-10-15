@@ -170,4 +170,5 @@ dist
 
 
 src/db/data/*
+public/user/*
 *.sqlite*

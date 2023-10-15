@@ -10,7 +10,7 @@ interface Props extends PropsWithChildren {
   activePage: Page;
 }
 
-export const NavbarHtml = ({ session, activePage }: Props) => (
+export const NavbarHtml = async ({ session, activePage }: Props) => (
   <>
     <script>
       {function toggleMobileMenu() {
@@ -114,10 +114,11 @@ export const NavbarHtml = ({ session, activePage }: Props) => (
                       <span class="absolute -inset-1.5"></span>
                       <img
                         class="h-8 w-8 rounded-full"
+                        loading="lazy"
                         src={
                           session.user.picture.includes("http")
                             ? session.user.picture
-                            : `data:image/png;base64,${session.user.picture}`
+                            : `static/user/${session.user.id}/small`
                         }
                         alt="Pic"
                       />

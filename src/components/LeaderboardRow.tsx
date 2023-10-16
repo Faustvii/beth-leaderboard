@@ -30,7 +30,7 @@ export const LeaderboardRowHtml = async ({
         >
           <img
             class="mr-1 inline-block h-6 w-6 rounded-full ring-2 ring-white dark:ring-gray-700 lg:mr-3 lg:h-8 lg:w-8"
-            src={`static/user/${userId}/small`}
+            src={`/static/user/${userId}/small`}
             loading="lazy"
             alt=""
           />
@@ -47,7 +47,7 @@ export const LeaderboardRowHtml = async ({
         >
           <img
             class="mr-1 inline-block h-6 w-6 rounded-full ring-2 ring-white dark:ring-gray-700 lg:mr-3 lg:h-8 lg:w-8"
-            src={`static/user/${userId}/small`}
+            src={`/static/user/${userId}/small`}
             loading="lazy"
             alt=""
           />

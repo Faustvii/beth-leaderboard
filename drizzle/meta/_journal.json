@@ -43,6 +43,13 @@
       "when": 1696948686917,
       "tag": "0005_slippery_starjammers",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1697473117794,
+      "tag": "0006_fresh_hiroim",
+      "breakpoints": true
     }
   ]
 }

@@ -1,0 +1,1 @@
+CREATE INDEX `players_idx` ON `match` (`black_player_one`,`white_player_one`,`black_player_two`,`white_player_two`);

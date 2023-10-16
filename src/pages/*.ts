@@ -4,6 +4,7 @@ import { leaderboard } from "./leaderboard";
 import { login } from "./login";
 import { match } from "./match";
 import { play } from "./play/play";
+import { profile } from "./profile";
 import { stats } from "./stats";
 
 export const pages = new Elysia()
@@ -12,4 +13,5 @@ export const pages = new Elysia()
   .use(leaderboard)
   .use(stats)
   .use(play)
-  .use(match);
+  .use(match)
+  .use(profile);

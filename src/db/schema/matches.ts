@@ -27,9 +27,16 @@ export const matches = sqliteTable(
   (table) => {
     return {
       createdAtIdx: index("created_at_idx").on(table.createdAt),
+      playersIdx: index("players_idx").on(
+        table.blackPlayerOne,
+        table.whitePlayerOne,
+        table.blackPlayerTwo,
+        table.whitePlayerTwo,
+      ),
     };
   },
 );
+
 export type Match = typeof matches.$inferSelect;
 export type InsertMatch = typeof matches.$inferInsert;
 

@@ -4,60 +4,43 @@ import { HeaderHtml } from "../components/header";
 import { LayoutHtml } from "../components/Layout";
 import { NavbarHtml } from "../components/Navbar";
 import { ctx } from "../context";
-import { type readDb } from "../db";
+import { getMatchesWithPlayers } from "../db/queries/matchQueries";
 import { isHxRequest, measure, notEmpty } from "../lib";
-import MatchStatistics from "../lib/matchStatistics";
+import MatchStatistics, { mapToMatches } from "../lib/matchStatistics";
 
 export const stats = new Elysia({
   prefix: "/stats",
 })
   .use(ctx)
-  .get("/", async ({ readDb, html, session, headers }) => {
-    return html(() => statsPage(session, headers, readDb));
+  .get("/", async ({ html, session, headers }) => {
+    return html(() => statsPage(session, headers));
   });
 
 async function statsPage(
   session: Session | null,
   headers: Record<string, string | null>,
-  db: typeof readDb,
 ) {
   return (
     <>
       {isHxRequest(headers) ? (
-        page(db, session)
+        page(session)
       ) : (
-        <LayoutHtml>{page(db, session)}</LayoutHtml>
+        <LayoutHtml>{page(session)}</LayoutHtml>
       )}
     </>
   );
 }
 
-async function page(db: typeof readDb, session: Session | null) {
-  const { elaspedTimeMs, result: dbResult } = await measure(async () => {
-    const matches = await db.query.matches.findMany();
-    const players = await db.query.user.findMany({
-      columns: {
-        picture: false,
-        email: false,
-      },
-    });
-    return { matches, players };
-  });
+async function page(session: Session | null) {
+  const { elaspedTimeMs, result: matchesWithPlayers } = await measure(
+    async () => {
+      return await getMatchesWithPlayers();
+    },
+  );
   console.log("stats page database calls", elaspedTimeMs, "ms");
-  const { matches, players } = dbResult;
-  const matchesWithPlayers = matches.map((match) => {
-    const matchWithPlayers: MatchWithPlayers = {
-      ...match,
-      blackPlayerOne: players.find((p) => p.id === match.blackPlayerOne)!,
-      blackPlayerTwo:
-        players.find((p) => p.id === match.blackPlayerTwo) || null,
-      whitePlayerOne: players.find((p) => p.id === match.whitePlayerOne)!,
-      whitePlayerTwo:
-        players.find((p) => p.id === match.whitePlayerTwo) || null,
-    };
-    return matchWithPlayers;
-  });
+
   const now = performance.now();
+  const matches = mapToMatches(matchesWithPlayers);
   const matchesToday = MatchStatistics.gamesToday(matches);
   const drawMatches = MatchStatistics.draws(matches);
   const { date: dayWithMostGames, games: mostGamesOnOneDay } =

@@ -42,10 +42,6 @@ export async function measure<T>(
   return { result, elaspedTimeMs: performance.now() - now };
 }
 
-export function getUnixDateFromDate(date: Date) {
-  return new Date(
-    date.getFullYear(),
-    date.getMonth(),
-    date.getDate(),
-  ).getTime();
+export function getDatePartFromDate(date: Date) {
+  return date.toISOString().split("T")[0];
 }

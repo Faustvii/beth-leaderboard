@@ -254,6 +254,16 @@ class MatchStatistics {
     return matchesToday.length;
   }
 
+  static gamesYesterday(matches: Match[]) {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const matchesYesterday = matches.filter(
+      (mt) =>
+        getDatePartFromDate(mt.createdAt) === getDatePartFromDate(yesterday),
+    );
+    return matchesYesterday.length;
+  }
+
   static draws(matches: Match[] | MatchWithPlayers[]) {
     const drawMatches = matches.filter((mt) => mt.result === "Draw").length;
     return drawMatches;
@@ -428,18 +438,23 @@ class MatchStatistics {
     };
   }
 
-  static whichColorWinsTheMost(matches: Match[]): {
-    color: "White" | "Black";
-    winPercentage: number;
-  } {
+  static winsByResult(matches: Match[]) {
     const whiteWins = matches.filter((mt) => mt.result === "White").length;
     const blackWins = matches.filter((mt) => mt.result === "Black").length;
-    const totalGames = matches.filter((x) => x.result !== "Draw").length;
+    const totalGames = matches.length;
+    const numOfDraws = matches.filter((mt) => mt.result === "Draw").length;
     const whiteWinPercentage = (whiteWins / totalGames) * 100;
     const blackWinPercentage = (blackWins / totalGames) * 100;
-    return whiteWinPercentage > blackWinPercentage
-      ? { color: "White", winPercentage: whiteWinPercentage }
-      : { color: "Black", winPercentage: blackWinPercentage };
+
+    return {
+      blackWins: { wins: blackWins, procentage: blackWinPercentage },
+      whiteWins: { wins: whiteWins, procentage: whiteWinPercentage },
+      totalGames: totalGames,
+      numOfDraws: {
+        draws: numOfDraws,
+        procentage: (numOfDraws / totalGames) * 100,
+      },
+    };
   }
 
   private static getMatchTeams(match: MatchWithPlayers) {

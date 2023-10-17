@@ -3,6 +3,7 @@ import { type Session } from "lucia";
 import { AnchorButtonHtml } from "./Button";
 import "@kitajs/html/register";
 import { cn } from "../lib/utils";
+import { cn } from "../lib/utils";
 import { HxButton } from "./HxButton";
 
 export type Page = "leaderboard" | "play" | "stats" | "match" | "profile";
@@ -58,7 +59,7 @@ export const NavbarHtml = async ({ session, activePage }: Props) => {
           }
         }}
       </script>
-      <nav class=" ">
+      <nav class="border-b-[1px] border-[#ff8906]/50 ">
         <div class="mx-auto px-2 sm:px-6 lg:px-8">
           <div class="relative flex h-16 items-center justify-between">
             <div class="absolute inset-y-0 left-0 flex items-center lg:hidden">

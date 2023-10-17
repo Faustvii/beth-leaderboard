@@ -1,9 +1,11 @@
 import { type ChartConfiguration } from "chart.js";
+import { type ChartConfiguration } from "chart.js";
 import { Elysia } from "elysia";
 import { type Session } from "lucia";
 import { HeaderHtml } from "../components/header";
 import { LayoutHtml } from "../components/Layout";
 import { NavbarHtml } from "../components/Navbar";
+import { StatsCardHtml } from "../components/StatsCard";
 import { StatsCardHtml } from "../components/StatsCard";
 import { ctx } from "../context";
 import { getMatchesWithPlayers } from "../db/queries/matchQueries";
@@ -45,6 +47,7 @@ async function page(session: Session | null) {
   const matches = mapToMatches(matchesWithPlayers);
   const matchesToday = MatchStatistics.gamesToday(matches);
   const matchesYesterday = MatchStatistics.gamesYesterday(matches);
+  const matchesYesterday = MatchStatistics.gamesYesterday(matches);
   const { date: dayWithMostGames, games: mostGamesOnOneDay } =
     MatchStatistics.mostGamesInOneDay(matches);
 
@@ -65,7 +68,46 @@ async function page(session: Session | null) {
   );
 
   const gameResults = MatchStatistics.winsByResult(matches);
+  const gameResults = MatchStatistics.winsByResult(matches);
   console.log("metrics took ", performance.now() - now + "ms  to run");
+
+  const data = {
+    labels: ["White win", "Black win", "Draw"],
+    datasets: [
+      {
+        label: "Matches",
+        data: [
+          gameResults.whiteWins.wins,
+          gameResults.blackWins.wins,
+          gameResults.numOfDraws.draws,
+        ],
+        backgroundColor: ["#fffffe", "rgb(35, 43, 43)", "#ff8906"],
+        hoverOffset: 4,
+      },
+    ],
+  };
+
+  const config: ChartConfiguration = {
+    type: "doughnut",
+    data: data,
+    options: {
+      plugins: {
+        legend: {
+          display: false,
+          labels: {
+            color: "#fffffe",
+          },
+          position: "left",
+        },
+      },
+      elements: {
+        arc: {
+          borderWidth: 0,
+          // borderColor: "#ff8906",
+        },
+      },
+    },
+  };
 
   const data = {
     labels: ["White win", "Black win", "Draw"],
@@ -121,7 +163,7 @@ async function page(session: Session | null) {
               <span class="text-lg">Games Today</span>
             </div>
             <div class="flex flex-col items-center justify-center gap-2">
-              <span class="text-3xl font-bold">{matchesYesterday}</span>
+              <span class="text-3xl font-bold">0{matchesYesterday}</span>
               <span class="text-lg">Games Yesterday</span>
             </div>
           </>
@@ -230,6 +272,7 @@ async function page(session: Session | null) {
         </StatsCardHtml>
       </div>
       <div class="flex flex-col items-center"></div>
+      <div class="flex flex-col items-center"></div>
     </>
   );
 }
@@ -253,10 +296,18 @@ async function biggestWin(matches: MatchWithPlayers[]) {
   return (
     <span class="text-sm">
       On{" "}
+    <span class="text-sm">
+      On{" "}
       {biggestWinMatch.createdAt.toLocaleString("en-US", {
         day: "numeric",
         month: "long",
       })}
+      , the White team of{" "}
+      <span class="font-bold">{biggestPlayers.white.join(" & ")}</span> faced
+      off against the Black team of{" "}
+      <span class="font-bold">{biggestPlayers.black.join(" & ")}</span>. The{" "}
+      {biggestWinMatch.result.toLowerCase()} team triumphed with a {biggestWin}
+      -point difference.
       , the White team of{" "}
       <span class="font-bold">{biggestPlayers.white.join(" & ")}</span> faced
       off against the Black team of{" "}

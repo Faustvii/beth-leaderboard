@@ -20,6 +20,7 @@ export const LeaderboardRowHtml = async ({
       <tr
         class="border-b bg-white dark:border-gray-700 dark:bg-gray-800"
         hx-get={`/leaderboard/page/${page + 1}`}
+        _="on htmx:afterRequest remove @hx-trigger from me"
         hx-indicator=".progress-bar"
         hx-trigger="intersect once"
         hx-swap="beforeend"

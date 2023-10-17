@@ -98,11 +98,19 @@ export const NavbarHtml = async ({ session, activePage }: Props) => {
             </div>
             <div class="flex flex-1 items-center justify-center lg:items-stretch lg:justify-start">
               <div class="flex flex-shrink-0 items-center">
-                <img
-                  class="h-8 w-auto "
-                  src="/static/crokinole.svg"
-                  alt="Crokinole"
-                />
+                <button
+                  hx-get="/"
+                  hx-indicator=".progress-bar"
+                  hx-target="#mainContainer"
+                  hx-swap="innerHTML"
+                  hx-push-url="true"
+                >
+                  <img
+                    class="h-8 w-auto "
+                    src="/static/crokinole.svg"
+                    alt="Crokinole"
+                  />
+                </button>
               </div>
               <div class="hidden lg:ml-6 lg:block">
                 <div class="flex space-x-4">

@@ -147,7 +147,7 @@ export const NavbarHtml = async ({ session, activePage }: Props) => {
                       <ul>
                         {profileRoutes.map(({ name, route }) => (
                           <li>
-                            <a
+                            <button
                               hx-get={route}
                               class="rounded-md px-3 py-2 text-sm font-medium text-white"
                               role="menuitem"
@@ -158,7 +158,7 @@ export const NavbarHtml = async ({ session, activePage }: Props) => {
                               hx-push-url="true"
                             >
                               {name}
-                            </a>
+                            </button>
                           </li>
                         ))}
                         <li>

@@ -1,3 +1,5 @@
+import { HxButton } from "./HxButton";
+
 export const LeaderboardRowHtml = async ({
   userId,
   rank,
@@ -34,7 +36,7 @@ export const LeaderboardRowHtml = async ({
             loading="lazy"
             alt=""
           />
-          {name}
+          <HxButton hx-get={`/profile/${userId}`}>{name}</HxButton>
         </th>
         <td class="px-1 py-4 md:px-3 lg:px-6">{elo}</td>
       </tr>
@@ -51,7 +53,7 @@ export const LeaderboardRowHtml = async ({
             loading="lazy"
             alt=""
           />
-          {name}
+          <HxButton hx-get={`/profile/${userId}`}>{name}</HxButton>
         </th>
         <td class="px-1 py-4 md:px-3 lg:px-6">{elo}</td>
       </tr>

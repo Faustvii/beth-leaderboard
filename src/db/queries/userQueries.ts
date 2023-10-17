@@ -4,13 +4,13 @@ import { user } from "../schema";
 
 export const getUser = (id: string) =>
   readDb.query.user.findFirst({
-    where: eq(user.id, id),
-  });
-
-export const getUserNoPicture = (id: string) =>
-  readDb.query.user.findFirst({
-    where: eq(user.id, id),
     with: {
       picture: false,
     },
+    where: eq(user.id, id),
+  });
+
+export const getUserWithPicture = (id: string) =>
+  readDb.query.user.findFirst({
+    where: eq(user.id, id),
   });

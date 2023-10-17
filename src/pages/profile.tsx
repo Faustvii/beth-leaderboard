@@ -5,7 +5,7 @@ import { LayoutHtml } from "../components/Layout";
 import { NavbarHtml } from "../components/Navbar";
 import { ctx } from "../context";
 import { getMatchesWithPlayers } from "../db/queries/matchQueries";
-import { getUserNoPicture } from "../db/queries/userQueries";
+import { getUser } from "../db/queries/userQueries";
 import { isHxRequest, measure } from "../lib";
 import MatchStatistics, { mapToMatches } from "../lib/matchStatistics";
 
@@ -33,7 +33,7 @@ async function page(
   console.log(`player stats took ${elaspedTimeMs}ms to get from db`);
   let profileName = session.user.name;
   if (session.user.id !== userId) {
-    const user = await getUserNoPicture(userId);
+    const user = await getUser(userId);
     if (user) profileName = user.name;
   }
   const header =

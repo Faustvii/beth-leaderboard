@@ -6,7 +6,6 @@ declare namespace Lucia {
   interface DatabaseUserAttributes {
     name: string;
     email?: string | null;
-    picture: string;
     elo: number;
   }
   interface DatabaseSessionAttributes {}

@@ -127,11 +127,7 @@ export const NavbarHtml = async ({ session, activePage }: Props) => {
                         <img
                           class="h-8 w-8 rounded-full"
                           loading="lazy"
-                          src={
-                            session.user.picture.includes("http")
-                              ? session.user.picture
-                              : `/static/user/${session.user.id}/small`
-                          }
+                          src={`/static/user/${session.user.id}/small`}
                           alt="Pic"
                         />
                       </button>

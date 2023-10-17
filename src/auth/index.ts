@@ -1,6 +1,7 @@
 import { libsql } from "@lucia-auth/adapter-sqlite";
 import { azureAD, google } from "@lucia-auth/oauth/providers";
-import { lucia, type Middleware } from "lucia";
+import { lucia } from "lucia";
+import { elysia } from "lucia/middleware";
 import { config } from "../config";
 import { readClient, writeClient } from "../db";
 
@@ -22,23 +23,6 @@ export interface ElysiaContext {
   };
 }
 
-export const elysia = (): Middleware<[ElysiaContext]> => {
-  return ({ args }) => {
-    const [{ request, set }] = args;
-    return {
-      request,
-      setCookie: (cookie) => {
-        const setCookieHeader = set.headers["Set-Cookie"] ?? [];
-        const setCookieHeaders: string[] = Array.isArray(setCookieHeader)
-          ? setCookieHeader
-          : [setCookieHeader];
-        setCookieHeaders.push(cookie.serialize());
-        set.headers["Set-Cookie"] = setCookieHeaders;
-      },
-    };
-  };
-};
-
 export const readAuth = lucia({
   env: envAlias,
   middleware: elysia(),
@@ -52,7 +36,6 @@ export const readAuth = lucia({
       id: data.id,
       name: data.name,
       email: data.email,
-      picture: data.picture,
       elo: data.elo,
     };
   },
@@ -71,7 +54,6 @@ export const writeAuth = lucia({
       id: data.id,
       name: data.name,
       email: data.email,
-      picture: data.picture,
       elo: data.elo,
     };
   },

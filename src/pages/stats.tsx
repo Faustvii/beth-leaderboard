@@ -1,8 +1,10 @@
+import { type ChartConfiguration } from "chart.js";
 import { Elysia } from "elysia";
 import { type Session } from "lucia";
 import { HeaderHtml } from "../components/header";
 import { LayoutHtml } from "../components/Layout";
 import { NavbarHtml } from "../components/Navbar";
+import { StatsCardHtml } from "../components/StatsCard";
 import { ctx } from "../context";
 import { getMatchesWithPlayers } from "../db/queries/matchQueries";
 import { isHxRequest, measure, notEmpty } from "../lib";
@@ -42,7 +44,7 @@ async function page(session: Session | null) {
   const now = performance.now();
   const matches = mapToMatches(matchesWithPlayers);
   const matchesToday = MatchStatistics.gamesToday(matches);
-  const drawMatches = MatchStatistics.draws(matches);
+  const matchesYesterday = MatchStatistics.gamesYesterday(matches);
   const { date: dayWithMostGames, games: mostGamesOnOneDay } =
     MatchStatistics.mostGamesInOneDay(matches);
 
@@ -62,68 +64,172 @@ async function page(session: Session | null) {
     true,
   );
 
-  const colorWinRate = MatchStatistics.whichColorWinsTheMost(matches);
+  const gameResults = MatchStatistics.winsByResult(matches);
   console.log("metrics took ", performance.now() - now + "ms  to run");
+
+  const data = {
+    labels: ["White win", "Black win", "Draw"],
+    datasets: [
+      {
+        label: "Matches",
+        data: [
+          gameResults.whiteWins.wins,
+          gameResults.blackWins.wins,
+          gameResults.numOfDraws.draws,
+        ],
+        backgroundColor: ["#fffffe", "rgb(35, 43, 43)", "#ff8906"],
+        hoverOffset: 4,
+      },
+    ],
+  };
+
+  const config: ChartConfiguration = {
+    type: "doughnut",
+    data: data,
+    options: {
+      plugins: {
+        legend: {
+          display: false,
+          labels: {
+            color: "#fffffe",
+          },
+          position: "left",
+        },
+      },
+      elements: {
+        arc: {
+          borderWidth: 0,
+          // borderColor: "#ff8906",
+        },
+      },
+    },
+  };
 
   return (
     <>
       <NavbarHtml session={session} activePage="stats" />
-      <HeaderHtml title="Stats" />
-      <HeaderHtml title="Someone make this pretty" />
-      <div class="flex flex-col items-center">
-        <span class="p-4">Total Games played {matches.length}</span>
-        <span class="p-4">There has been draws {drawMatches} times</span>
-        <span class="p-4">Games today {matchesToday}</span>
-        {dayWithMostGames && (
-          <span class="p-4">
-            Most active day is{" "}
-            {new Date(dayWithMostGames).toLocaleString("en-US", {
-              day: "numeric",
-              month: "long",
-            })}{" "}
-            with {mostGamesOnOneDay} games played
-          </span>
-        )}
-        {biggestWin(matchesWithPlayers)}
-        {highestWinStreak && (
-          <span class="p-4">
-            {highestWinStreak.player.name} has the highest win streak with{" "}
-            {highestWinStreak.streak} wins in a row
-          </span>
-        )}
-        {highestLoseStreak && (
-          <span class="p-4">
-            {highestLoseStreak.player.name} has the biggest losing streak with{" "}
-            {highestLoseStreak.streak} losses in a row
-          </span>
-        )}
-        {playerWithMostGames && (
-          <span class="p-4">
-            {playerWithMostGames.player.name} has played the most games with{" "}
-            {playerWithMostGames.games} games played
-          </span>
-        )}
-        {playerWithHighestWinRate && (
-          <span class="p-4">
-            {playerWithHighestWinRate.player.name} has the highest win rate with{" "}
-            {(playerWithHighestWinRate.winrate * 100).toFixed(2)}% over{" "}
-            {playerWithHighestWinRate.totalGames} games
-          </span>
-        )}
-        {playerWithLowestWinRate && (
-          <span class="p-4">
-            {playerWithLowestWinRate.player.name} has the lowest win rate with{" "}
-            {(playerWithLowestWinRate.winrate * 100).toFixed(2)}% over{" "}
-            {playerWithLowestWinRate.totalGames} games
-          </span>
-        )}
-        {colorWinRate && (
-          <span class="p-4">
-            {colorWinRate.color} wins {colorWinRate.winPercentage.toFixed(2)}%
-            of the time
-          </span>
-        )}
+      <HeaderHtml title="Statistics" />
+      <div class="grid grid-cols-6 gap-3 text-white md:grid-cols-12">
+        <StatsCardHtml title="Games">
+          <>
+            <div class="flex flex-col items-center justify-center gap-2">
+              <span class="text-3xl font-bold">{gameResults.totalGames}</span>
+              <span class="text-lg">Total Games Played</span>
+            </div>
+            <div class="flex flex-col items-center justify-center gap-2">
+              <span class="text-3xl font-bold">{matchesToday}</span>
+              <span class="text-lg">Games Today</span>
+            </div>
+            <div class="flex flex-col items-center justify-center gap-2">
+              <span class="text-3xl font-bold">0{matchesYesterday}</span>
+              <span class="text-lg">Games Yesterday</span>
+            </div>
+          </>
+        </StatsCardHtml>
+        <StatsCardHtml title="Biggest win">
+          {biggestWin(matchesWithPlayers)}
+        </StatsCardHtml>
+        <StatsCardHtml title="Winrates">
+          <>
+            <div class="flex h-48 w-full items-center justify-center pt-5">
+              <canvas class="" id="chartDoughnut"></canvas>
+            </div>
+            <script>
+              {`new Chart(document.getElementById("chartDoughnut"), ${JSON.stringify(
+                config,
+              )})`}
+            </script>
+          </>
+        </StatsCardHtml>
+        <StatsCardHtml title="Winrate By Color">
+          <>
+            <div class="flex flex-col items-center justify-center gap-1">
+              <span class="text-5xl">{gameResults.whiteWins.wins}</span>
+              <span class="text-md">
+                {gameResults.whiteWins.procentage.toFixed(2)}%
+              </span>
+              <span class="text-xl">White wins</span>
+            </div>
+            <div class="flex flex-col items-center justify-center gap-1">
+              <span class="text-5xl">{gameResults.numOfDraws.draws}</span>
+              <span class="text-md">
+                {gameResults.numOfDraws.procentage.toFixed(2)}%
+              </span>
+              <span class="text-xl">Draws</span>
+            </div>
+            <div class="flex h-full flex-col items-center justify-center gap-1">
+              <span class="text-5xl">{gameResults.blackWins.wins}</span>
+              <span class="text-md">
+                {gameResults.blackWins.procentage.toFixed(2)}%
+              </span>
+              <span class="text-xl">Black wins</span>
+            </div>
+          </>
+        </StatsCardHtml>
+        <StatsCardHtml title="Most Games Played">
+          {playerWithMostGames && (
+            <span class="text-sm">
+              <b>{playerWithMostGames.player.name}</b> has played the most games
+              with <b>{playerWithMostGames.games} games played</b>
+            </span>
+          )}
+        </StatsCardHtml>
+        <StatsCardHtml title="Most Active Day">
+          {dayWithMostGames && (
+            <span class="text-sm">
+              <b>
+                {new Date(dayWithMostGames).toLocaleString("en-US", {
+                  day: "numeric",
+                  month: "long",
+                })}
+              </b>{" "}
+              was the most active day with{" "}
+              <b>{mostGamesOnOneDay} games played</b>
+            </span>
+          )}
+        </StatsCardHtml>
+        <StatsCardHtml title="Longest Win Streak">
+          {highestWinStreak && (
+            <span class="text-sm">
+              <b>{highestWinStreak.player.name}</b> has the longest win streak
+              with <b>{highestWinStreak.streak} wins in a row</b>
+            </span>
+          )}
+        </StatsCardHtml>
+        <StatsCardHtml title="Longest Losing Streak">
+          {highestLoseStreak && (
+            <span class="text-sm">
+              <b>{highestLoseStreak.player.name}</b> has the longest losing
+              streak with <b>{highestLoseStreak.streak} losses in a row</b>
+            </span>
+          )}
+        </StatsCardHtml>
+        <StatsCardHtml title="Highest Win Rate">
+          {playerWithHighestWinRate && (
+            <span class="text-sm">
+              <b>{playerWithHighestWinRate.player.name}</b> has the highest win
+              rate with{" "}
+              <b>
+                {(playerWithHighestWinRate.winrate * 100).toFixed(2)}% over{" "}
+                {playerWithHighestWinRate.totalGames} games
+              </b>
+            </span>
+          )}
+        </StatsCardHtml>
+        <StatsCardHtml title="Lowest Win Rate">
+          {playerWithLowestWinRate && (
+            <span class="text-sm">
+              <b>{playerWithLowestWinRate.player.name}</b> has the lowest win
+              rate with{" "}
+              <b>
+                {(playerWithLowestWinRate.winrate * 100).toFixed(2)}% over{" "}
+                {playerWithLowestWinRate.totalGames} games
+              </b>
+            </span>
+          )}
+        </StatsCardHtml>
       </div>
+      <div class="flex flex-col items-center"></div>
     </>
   );
 }
@@ -145,13 +251,18 @@ async function biggestWin(matches: MatchWithPlayers[]) {
   };
 
   return (
-    <span class="p-4">
-      Biggest win is {biggestWin} points between {biggestPlayers.white.join()} &{" "}
-      {biggestPlayers.black.join(", ")} on{" "}
+    <span class="text-sm">
+      On{" "}
       {biggestWinMatch.createdAt.toLocaleString("en-US", {
         day: "numeric",
         month: "long",
       })}
+      , the White team of{" "}
+      <span class="font-bold">{biggestPlayers.white.join(" & ")}</span> faced
+      off against the Black team of{" "}
+      <span class="font-bold">{biggestPlayers.black.join(" & ")}</span>. The{" "}
+      {biggestWinMatch.result.toLowerCase()} team triumphed with a {biggestWin}
+      -point difference.
     </span>
   );
 }

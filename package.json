@@ -50,11 +50,15 @@
     "@lucia-auth/oauth": "^3.3.1",
     "@t3-oss/env-core": "^0.7.0",
     "@tlscipher/holt": "1.1.1",
+    "@types/chart.js": "^2.9.38",
+    "chart.js": "^4.4.0",
+    "clsx": "^2.0.0",
     "drizzle-orm": "^0.28.6",
     "drizzle-typebox": "^0.1.1",
     "elysia": "0.7.16",
     "lucia": "^2.7.1",
     "sharp": "0.33.0-alpha.9",
+    "tailwind-merge": "^1.14.0",
     "zod": "3.22.2"
   }
 }

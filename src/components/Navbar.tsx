@@ -2,6 +2,7 @@ import { type PropsWithChildren } from "@kitajs/html";
 import { type Session } from "lucia";
 import { AnchorButtonHtml } from "./Button";
 import "@kitajs/html/register";
+import { cn } from "../lib/utils";
 import { HxButton } from "./HxButton";
 
 export type Page = "leaderboard" | "play" | "stats" | "match" | "profile";
@@ -57,7 +58,7 @@ export const NavbarHtml = async ({ session, activePage }: Props) => {
           }
         }}
       </script>
-      <nav class="rounded-b-lg bg-gray-800 ">
+      <nav class="border-b-[1px] border-[#ff8906]/50 ">
         <div class="mx-auto px-2 sm:px-6 lg:px-8">
           <div class="relative flex h-16 items-center justify-between">
             <div class="absolute inset-y-0 left-0 flex items-center lg:hidden">
@@ -108,7 +109,7 @@ export const NavbarHtml = async ({ session, activePage }: Props) => {
                 </HxButton>
               </div>
               <div class="hidden lg:ml-6 lg:block">
-                <div class="flex space-x-4">
+                <div class="flex w-full items-center justify-center space-x-4">
                   {pageRoutes.map(({ name, page, route }) =>
                     navBarButton(name, page, activePage, route),
                   )}
@@ -226,13 +227,15 @@ const navBarButton = (
   page: Page,
   activePage: Page,
   href?: string,
-  classes = "rounded-md px-3 py-2 text-sm font-medium text-white",
+  classes?: string,
 ) =>
   isActivePage(page, activePage) ? (
     <span
-      class={`${classes} ${
-        isActivePage(page, activePage) ? "bg-gray-900" : ""
-      }`}
+      class={cn(
+        "rounded px-3 py-2 text-sm font-bold text-white hover:bg-primary/50",
+        { "bg-primary hover:bg-primary": isActivePage(page, activePage) },
+        { classes: classes !== undefined },
+      )}
     >
       {text}
     </span>
@@ -243,9 +246,10 @@ const navBarButton = (
       hx-target="#mainContainer"
       hx-swap="innerHTML"
       hx-push-url="true"
-      class={`${classes} ${
-        isActivePage(page, activePage) ? "bg-gray-900" : ""
-      }`}
+      class={cn(
+        "rounded px-3 py-2 text-sm font-bold text-white hover:bg-primary/50",
+        { "bg-primary hover:bg-primary": isActivePage(page, activePage) },
+      )}
     >
       {text}
     </button>

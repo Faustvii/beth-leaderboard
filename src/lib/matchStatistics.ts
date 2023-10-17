@@ -91,7 +91,7 @@ class MatchStatistics {
     const hardestCount: Record<string, number> = {};
     const easiestCount: Record<string, number> = {};
 
-    for (const match of matches) {
+    for (const match of matches.filter((x) => x.result !== "Draw")) {
       const { whitePlayers, blackPlayers } = this.getMatchTeams(match);
       const currentTeam = this.getPlayersTeam(match, playerId);
       const opposingPlayers =

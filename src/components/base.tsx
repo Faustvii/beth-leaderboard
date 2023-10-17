@@ -15,7 +15,15 @@ export const BaseHtml = ({ children }: PropsWithChildren) => (
         <script src="https://unpkg.com/htmx.org@1.9.6/dist/ext/response-targets.js"></script>
         <script src="https://unpkg.com/hyperscript.org@0.9.11"></script>
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <link href="/static/styles.css" rel="stylesheet" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@100;300;400;500;600;700&display=swap"
+          rel="stylesheet"
+        />
+
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" />
         <link
@@ -28,12 +36,11 @@ export const BaseHtml = ({ children }: PropsWithChildren) => (
       <body
         hx-boost="true"
         class="
-        font-roboto-mono
         background-animate
         h-screen
         w-full
-        bg-slate-800
-        bg-gradient-to-b from-slate-700 via-slate-800 to-gray-900
+        bg-gradient-to-b
+        from-slate-700 via-slate-800 to-gray-900 font-roboto-mono
     "
       >
         <LoadingBarHtml />

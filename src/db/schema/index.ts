@@ -4,6 +4,7 @@ import { matches } from "./matches";
 
 export { key, session, user } from "./auth";
 export { matches } from "./matches";
+export { job_queue } from "./jobQueue";
 
 export const matchRelations = relations(matches, ({ one }) => ({
   blackPlayerOne: one(user, {

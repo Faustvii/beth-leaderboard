@@ -13,3 +13,9 @@ export async function resizeImage(
       return buf.toString("base64");
     });
 }
+
+export function isBase64(input: string) {
+  if (input.length % 4 !== 0) return false;
+  const invalidChars = /[^0-9a-zA-Z+/=]/g;
+  return !invalidChars.test(input);
+}

@@ -12,7 +12,9 @@ export const user = sqliteTable(
     id: text("id").primaryKey(),
     name: text("name").notNull(),
     email: text("email"),
-    picture: text("picture").notNull(),
+    picture: text("picture")
+      .notNull()
+      .$defaultFn(() => "/static/crokinole.svg"),
     elo: integer("elo").notNull().default(1500),
     // other user attributes
   },

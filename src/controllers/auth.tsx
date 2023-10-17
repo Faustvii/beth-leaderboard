@@ -141,7 +141,6 @@ export const authController = new Elysia({
               name: name,
               elo: 1500,
               email: normalizedAzureUser.email ?? null,
-              picture: normalizedAzureUser.picture,
             },
           });
 
@@ -217,7 +216,6 @@ export const authController = new Elysia({
               name: googleUser.name,
               elo: 1500,
               email: googleUser.email ?? null,
-              picture: googleUser.picture,
             },
           });
 

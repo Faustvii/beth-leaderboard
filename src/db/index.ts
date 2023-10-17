@@ -49,5 +49,5 @@ export const writeDb = drizzle(remoteDbClient, {
 });
 export const readDb = drizzle(readClient, {
   schema,
-  logger: true,
+  logger: false,
 });

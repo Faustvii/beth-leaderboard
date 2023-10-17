@@ -1,11 +1,10 @@
 import { type BunFile } from "bun";
-import { eq } from "drizzle-orm";
 import Elysia from "elysia";
 import { type HTTPStatusName } from "elysia/utils";
 import { config } from "./config";
 import { ctx } from "./context";
-import { user } from "./db/schema";
-import { resizeImage } from "./lib/userImages";
+import { getUserWithPicture } from "./db/queries/userQueries";
+import { isBase64, resizeImage } from "./lib/userImages";
 
 export const staticController = new Elysia({
   prefix: "/static",
@@ -25,42 +24,18 @@ export const staticController = new Elysia({
   })
   .get("/user/:id", async (ctx) => {
     const fileName = `public/user/${ctx.params.id}.webp`;
-    let file = Bun.file(fileName);
-    const exists = await file.exists();
-    if (!exists) {
-      const dbUser = await ctx.readDb.query.user.findFirst({
-        where: eq(user.id, ctx.params.id),
-      });
-      if (!dbUser) {
-        return new Response(null, { status: 404 });
-      }
-      const picture = dbUser.picture;
-      const pictureBuffer = Buffer.from(picture, "base64");
-      await Bun.write(fileName, pictureBuffer);
-      file = Bun.file(fileName);
-    }
-    return etagFileServe(file, ctx.set, ctx.headers);
+    const result = await userPicture(ctx.params.id, fileName);
+    if (result instanceof Response) return result;
+    return etagFileServe(result, ctx.set, ctx.headers);
   })
   .get("/user/:id/small", async (ctx) => {
     const fileName = `public/user/${ctx.params.id}-32x32.webp`;
-    let file = Bun.file(fileName);
-    const exists = await file.exists();
-    if (!exists) {
-      const dbUser = await ctx.readDb.query.user.findFirst({
-        where: eq(user.id, ctx.params.id),
-      });
-      if (!dbUser) {
-        return new Response(null, { status: 404 });
-      }
-      const picture = await resizeImage(dbUser.picture, {
-        width: 32,
-        height: 32,
-      });
-      const pictureBuffer = Buffer.from(picture, "base64");
-      await Bun.write(fileName, pictureBuffer);
-      file = Bun.file(fileName);
-    }
-    return etagFileServe(file, ctx.set, ctx.headers);
+    const result = await userPicture(ctx.params.id, fileName, {
+      width: 32,
+      height: 32,
+    });
+    if (result instanceof Response) return result;
+    return etagFileServe(result, ctx.set, ctx.headers);
   });
 
 async function etagFileServe(
@@ -84,5 +59,29 @@ async function etagFileServe(
   set.headers.age = `${Date.now() - file.lastModified}`;
   if (config.env.NODE_ENV === "production")
     set.headers["Cache-Control"] = "public, max-age=31536000";
+  return file;
+}
+
+async function userPicture(
+  id: string,
+  fileName: string,
+  resize?: { width: number; height: number },
+) {
+  let file = Bun.file(fileName);
+  const exists = await file.exists();
+  if (!exists) {
+    const dbUser = await getUserWithPicture(id);
+    if (!dbUser) {
+      return new Response(null, { status: 404 });
+    }
+    if (!isBase64(dbUser.picture))
+      return Bun.file("public/crokinole-c.min.svg");
+    const picture = resize
+      ? await resizeImage(dbUser.picture, { ...resize })
+      : dbUser.picture;
+    const pictureBuffer = Buffer.from(picture, "base64");
+    await Bun.write(fileName, pictureBuffer);
+    file = Bun.file(fileName);
+  }
   return file;
 }

@@ -2,6 +2,7 @@ import { type PropsWithChildren } from "@kitajs/html";
 import { type Session } from "lucia";
 import { AnchorButtonHtml } from "./Button";
 import "@kitajs/html/register";
+import { HxButton } from "./HxButton";
 
 export type Page = "leaderboard" | "play" | "stats" | "match" | "profile";
 
@@ -98,19 +99,13 @@ export const NavbarHtml = async ({ session, activePage }: Props) => {
             </div>
             <div class="flex flex-1 items-center justify-center lg:items-stretch lg:justify-start">
               <div class="flex flex-shrink-0 items-center">
-                <button
-                  hx-get="/"
-                  hx-indicator=".progress-bar"
-                  hx-target="#mainContainer"
-                  hx-swap="innerHTML"
-                  hx-push-url="true"
-                >
+                <HxButton hx-get="/">
                   <img
-                    class="h-8 w-auto "
+                    class="h-8 w-auto"
                     src="/static/crokinole.svg"
                     alt="Crokinole"
                   />
-                </button>
+                </HxButton>
               </div>
               <div class="hidden lg:ml-6 lg:block">
                 <div class="flex space-x-4">
@@ -151,18 +146,14 @@ export const NavbarHtml = async ({ session, activePage }: Props) => {
                       <ul>
                         {profileRoutes.map(({ name, route }) => (
                           <li>
-                            <button
+                            <HxButton
                               hx-get={route}
                               class="rounded-md px-3 py-2 text-sm font-medium text-white"
                               role="menuitem"
                               tabindex="-1"
-                              hx-indicator=".progress-bar"
-                              hx-target="#mainContainer"
-                              hx-swap="innerHTML"
-                              hx-push-url="true"
                             >
                               {name}
-                            </button>
+                            </HxButton>
                           </li>
                         ))}
                         <li>

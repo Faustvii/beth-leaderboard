@@ -58,7 +58,7 @@ export const NavbarHtml = async ({ session, activePage }: Props) => {
           }
         }}
       </script>
-      <nav class="border-b-[1px] border-[#ff8906]/50 ">
+      <nav class=" ">
         <div class="mx-auto px-2 sm:px-6 lg:px-8">
           <div class="relative flex h-16 items-center justify-between">
             <div class="absolute inset-y-0 left-0 flex items-center lg:hidden">

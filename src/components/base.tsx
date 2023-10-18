@@ -32,6 +32,7 @@ export const BaseHtml = ({ children }: PropsWithChildren) => (
         background-animate
         h-screen
         w-full
+        bg-slate-800
         bg-gradient-to-b from-slate-700 via-slate-800 to-gray-900
     "
       >

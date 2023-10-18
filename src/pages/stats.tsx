@@ -121,7 +121,7 @@ async function page(session: Session | null) {
               <span class="text-lg">Games Today</span>
             </div>
             <div class="flex flex-col items-center justify-center gap-2">
-              <span class="text-3xl font-bold">0{matchesYesterday}</span>
+              <span class="text-3xl font-bold">{matchesYesterday}</span>
               <span class="text-lg">Games Yesterday</span>
             </div>
           </>

@@ -216,6 +216,7 @@ export const authController = new Elysia({
               name: googleUser.name,
               elo: 1500,
               email: googleUser.email ?? null,
+              picture: googleUser.picture ?? null,
             },
           });
 

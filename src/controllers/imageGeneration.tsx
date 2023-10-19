@@ -1,9 +1,10 @@
 import cron from "@elysiajs/cron";
 import { and, eq, inArray, like, or } from "drizzle-orm";
 import Elysia from "elysia";
-import { readClient, readDb, writeDb } from "../db";
+import { readDb, writeDb } from "../db";
 import { job_queue, user } from "../db/schema";
 import { type JobQueue } from "../db/schema/jobQueue";
+import { syncIfLocal } from "../lib/dbHelpers";
 import { isBase64 } from "../lib/userImages";
 
 type newJob = typeof job_queue.$inferInsert;
@@ -46,7 +47,7 @@ export const imageGen = new Elysia()
           };
           await writeDb.insert(job_queue).values(newJob);
         }
-        await readClient.sync();
+        await syncIfLocal();
       },
     }),
   )

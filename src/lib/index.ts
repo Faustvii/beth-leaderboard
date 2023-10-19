@@ -41,7 +41,3 @@ export async function measure<T>(
   const result = await Promise.resolve(fn());
   return { result, elaspedTimeMs: performance.now() - now };
 }
-
-export function getDatePartFromDate(date: Date) {
-  return date.toISOString().split("T")[0];
-}

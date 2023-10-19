@@ -1,6 +1,12 @@
 import { getDatePartFromDate, notEmpty } from ".";
 import { type Match } from "../db/schema/matches";
 
+export enum RESULT {
+  WIN = "WIN",
+  LOSE = "LOSE",
+  DRAW = "DRAW",
+}
+
 class MatchStatistics {
   static highestStreak(matches: MatchWithPlayers[]) {
     let highestWinningPlayer: Player | null = null;
@@ -24,11 +30,11 @@ class MatchStatistics {
 
     return {
       highestWinStreak: {
-        player: highestWinningPlayer!,
+        player: highestWinningPlayer,
         streak: highestWinningStreak,
       },
       highestLoseStreak: {
-        player: highestLosingPlayer!,
+        player: highestLosingPlayer,
         streak: highestLosingStreak,
       },
     };
@@ -159,6 +165,57 @@ class MatchStatistics {
       hardestOpponent,
       easiestOpponent,
     };
+  }
+
+  static currentStreaksByPlayer(matches: Match[]) {
+    matches.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+
+    const playerStreaks: Record<
+      string,
+      { winStreak: number; loseStreak: number; results: RESULT[] }
+    > = {};
+
+    const players = matches
+      .flatMap((mt) => [
+        mt.whitePlayerOne,
+        mt.whitePlayerTwo,
+        mt.blackPlayerOne,
+        mt.blackPlayerTwo,
+      ])
+      .filter(notEmpty)
+      // Remove duplicates
+      .filter((value, index, self) => self.indexOf(value) === index);
+
+    players.forEach((player) => {
+      const playerMatches = matches
+        .filter(
+          (mt) =>
+            mt.whitePlayerOne === player ||
+            mt.whitePlayerTwo === player ||
+            mt.blackPlayerOne === player ||
+            mt.blackPlayerTwo === player,
+        )
+        .slice(0, 5);
+      for (const match of playerMatches) {
+        const team = this.getPlayersTeamByMatch(match, player);
+        if (!playerStreaks[player]) {
+          playerStreaks[player] = { winStreak: 0, loseStreak: 0, results: [] };
+        }
+        if (match.result == team) {
+          playerStreaks[player].winStreak++;
+          playerStreaks[player].loseStreak = 0;
+          playerStreaks[player].results.push(RESULT.WIN);
+        } else if (match.result === "Draw") {
+          playerStreaks[player].results.push(RESULT.DRAW);
+        } else {
+          playerStreaks[player].loseStreak++;
+          playerStreaks[player].winStreak = 0;
+          playerStreaks[player].results.push(RESULT.LOSE);
+        }
+      }
+    });
+
+    return playerStreaks;
   }
 
   static streaksByPlayer(matches: MatchWithPlayers[]) {
@@ -467,12 +524,35 @@ class MatchStatistics {
     return { whitePlayers, blackPlayers };
   }
 
+  private static getMatchTeamsByMatch(match: Match) {
+    const whitePlayers = [match.whitePlayerOne, match.whitePlayerTwo].filter(
+      notEmpty,
+    );
+    const blackPlayers = [match.blackPlayerOne, match.blackPlayerTwo].filter(
+      notEmpty,
+    );
+    return { whitePlayers, blackPlayers };
+  }
+
   private static getPlayersTeam(
     match: MatchWithPlayers,
     playerId: string,
   ): "White" | "Black" {
     const { whitePlayers } = this.getMatchTeams(match);
-    const currentTeam = whitePlayers.find((x) => x.id === playerId)
+    const currentTeam = whitePlayers.find(
+      (x) => (typeof x === "string" ? x : x.id) === playerId,
+    )
+      ? "White"
+      : "Black";
+    return currentTeam;
+  }
+
+  private static getPlayersTeamByMatch(
+    match: Match,
+    playerId: string,
+  ): "White" | "Black" {
+    const { whitePlayers } = this.getMatchTeamsByMatch(match);
+    const currentTeam = whitePlayers.find((x) => x === playerId)
       ? "White"
       : "Black";
     return currentTeam;

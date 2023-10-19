@@ -1,3 +1,4 @@
+import { type RESULT } from "../lib/matchStatistics";
 import { LeaderboardRowHtml } from "./LeaderboardRow";
 
 export const LeaderboardTableHtml = ({
@@ -5,7 +6,17 @@ export const LeaderboardTableHtml = ({
   page,
 }: {
   page: number;
-  rows: { userId: string; rank: number; name: string; elo: number }[];
+  rows: {
+    userId: string;
+    rank: number;
+    name: string;
+    elo: number;
+    latestPlayerResults: {
+      winStreak: number;
+      loseStreak: number;
+      results: RESULT[];
+    } | null;
+  }[];
 }) => (
   <>
     <div class="flex flex-col items-center justify-center">

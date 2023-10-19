@@ -168,7 +168,8 @@ class MatchStatistics {
   }
 
   static currentStreaksByPlayer(matches: Match[]) {
-    matches.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+    // sort matches so we get the latest first
+    matches.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 
     const playerStreaks: Record<
       string,
@@ -196,6 +197,12 @@ class MatchStatistics {
             mt.blackPlayerTwo === player,
         )
         .slice(0, 5);
+
+      //sort player matches so we get the latest last (for emoji order)
+      playerMatches.sort(
+        (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),
+      );
+
       for (const match of playerMatches) {
         const team = this.getPlayersTeamByMatch(match, player);
         if (!playerStreaks[player]) {

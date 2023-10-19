@@ -3,7 +3,6 @@ import { type Session } from "lucia";
 import { AnchorButtonHtml } from "./Button";
 import "@kitajs/html/register";
 import { cn } from "../lib/utils";
-import { cn } from "../lib/utils";
 import { HxButton } from "./HxButton";
 
 export type Page = "leaderboard" | "play" | "stats" | "match" | "profile";

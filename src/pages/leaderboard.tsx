@@ -9,6 +9,7 @@ import { NavbarHtml } from "../components/Navbar";
 import { ctx } from "../context";
 import { readDb } from "../db";
 import { matches, user } from "../db/schema";
+import { type Match } from "../db/schema/matches";
 import { isHxRequest } from "../lib";
 import MatchStatistics, { type RESULT } from "../lib/matchStatistics";
 
@@ -25,17 +26,23 @@ export const playerPaginationQuery = async (page: number) => {
 
   const playerIds = players.map((player) => player.id);
 
-  const matchesByPlayer = await readDb.query.matches.findMany({
-    orderBy: [desc(matches.createdAt)],
-    where: or(
-      inArray(matches.blackPlayerOne, playerIds),
-      inArray(matches.whitePlayerOne, playerIds),
-      inArray(matches.blackPlayerTwo, playerIds),
-      inArray(matches.whitePlayerTwo, playerIds),
-    ),
-  });
+  const matchesByPlayer: Match[] =
+    playerIds.length === 0
+      ? []
+      : await readDb.query.matches.findMany({
+          orderBy: [desc(matches.createdAt)],
+          where: or(
+            inArray(matches.blackPlayerOne, playerIds),
+            inArray(matches.whitePlayerOne, playerIds),
+            inArray(matches.blackPlayerTwo, playerIds),
+            inArray(matches.whitePlayerTwo, playerIds),
+          ),
+        });
 
-  const latestResults = MatchStatistics.currentStreaksByPlayer(matchesByPlayer);
+  const latestResults: Record<
+    string,
+    { winStreak: number; loseStreak: number; results: RESULT[] }
+  > = MatchStatistics.currentStreaksByPlayer(matchesByPlayer);
 
   return players.map((player, index) => ({
     userId: player.id,

@@ -6,9 +6,9 @@ import { LayoutHtml } from "../components/Layout";
 import { NavbarHtml } from "../components/Navbar";
 import { SearchHtml } from "../components/Search";
 import { ctx } from "../context";
-import { readClient } from "../db";
 import { matches, user } from "../db/schema";
 import { isHxRequest, notEmpty, redirect } from "../lib";
+import { syncIfLocal } from "../lib/dbHelpers";
 import { applyMatchResult, matchEloChange } from "../lib/elo";
 import { type GameResult } from "../types/elo";
 
@@ -106,7 +106,7 @@ export const match = new Elysia({
           }
         }
       });
-      await readClient.sync();
+      await syncIfLocal();
       return html(maForm());
     },
     {

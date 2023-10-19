@@ -1,5 +1,6 @@
-import { getDatePartFromDate, notEmpty } from ".";
+import { notEmpty } from ".";
 import { type Match } from "../db/schema/matches";
+import { getDatePartFromDate } from "./dateUtils";
 
 export enum RESULT {
   WIN = "WIN",
@@ -8,6 +9,38 @@ export enum RESULT {
 }
 
 class MatchStatistics {
+  static latestMatch(matches: Match[]) {
+    if (matches.length === 0) return [];
+    const latestMatches = matches.sort(
+      (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
+    );
+
+    const players = matches
+      .flatMap((mt) => [
+        mt.whitePlayerOne,
+        mt.whitePlayerTwo,
+        mt.blackPlayerOne,
+        mt.blackPlayerTwo,
+      ])
+      .filter(notEmpty)
+      .filter((value, index, self) => self.indexOf(value) === index);
+
+    const playersWithLastPlayed = players.map((player) => {
+      const playerMatches = latestMatches.filter(
+        (mt) =>
+          mt.whitePlayerOne === player ||
+          mt.whitePlayerTwo === player ||
+          mt.blackPlayerOne === player ||
+          mt.blackPlayerTwo === player,
+      );
+      if (playerMatches.length === 0)
+        return { player, lastPlayed: new Date(0) };
+      return { player, lastPlayed: playerMatches[0].createdAt };
+    });
+
+    return playersWithLastPlayed;
+  }
+
   static highestStreak(matches: MatchWithPlayers[]) {
     let highestWinningPlayer: Player | null = null;
     let highestWinningStreak = 0;
@@ -357,7 +390,8 @@ class MatchStatistics {
 
   static playerWinRate(matches: Match[], playerId: string) {
     const totalGames = matches.length;
-    if (totalGames === 0) return 0;
+    if (totalGames === 0)
+      return { wonGames: 0, draws: 0, lostGames: 0, winPercentage: 0 };
 
     const blackWins = matches.filter(
       (mt) =>
@@ -371,7 +405,14 @@ class MatchStatistics {
         (mt.whitePlayerOne === playerId || mt.whitePlayerTwo === playerId),
     ).length;
 
-    return ((blackWins + whiteWins) / totalGames) * 100;
+    const draws = matches.filter((mt) => mt.result === "Draw").length;
+
+    return {
+      winPercentage: ((blackWins + whiteWins) / totalGames) * 100,
+      wonGames: blackWins + whiteWins,
+      draws,
+      lostGames: totalGames - (blackWins + whiteWins),
+    };
   }
 
   static playerWithWinrate(
@@ -507,6 +548,34 @@ class MatchStatistics {
     const blackWins = matches.filter((mt) => mt.result === "Black").length;
     const totalGames = matches.length;
     const numOfDraws = matches.filter((mt) => mt.result === "Draw").length;
+    const whiteWinPercentage = (whiteWins / totalGames) * 100;
+    const blackWinPercentage = (blackWins / totalGames) * 100;
+
+    return {
+      blackWins: { wins: blackWins, procentage: blackWinPercentage },
+      whiteWins: { wins: whiteWins, procentage: whiteWinPercentage },
+      totalGames: totalGames,
+      numOfDraws: {
+        draws: numOfDraws,
+        procentage: (numOfDraws / totalGames) * 100,
+      },
+    };
+  }
+
+  static playerWinsByResult(matches: Match[], playerId: string) {
+    const whiteWins = matches.filter(
+      (mt) =>
+        mt.result === "White" &&
+        (mt.whitePlayerOne === playerId || mt.whitePlayerTwo === playerId),
+    ).length;
+    const blackWins = matches.filter(
+      (mt) =>
+        mt.result === "Black" &&
+        (mt.blackPlayerOne === playerId || mt.blackPlayerTwo === playerId),
+    ).length;
+    const numOfDraws = matches.filter((mt) => mt.result === "Draw").length;
+    const totalGames = blackWins + whiteWins + numOfDraws;
+
     const whiteWinPercentage = (whiteWins / totalGames) * 100;
     const blackWinPercentage = (blackWins / totalGames) * 100;
 

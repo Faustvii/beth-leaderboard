@@ -7,11 +7,13 @@ import { play } from "./play/play";
 import { profile } from "./profile";
 import { stats } from "./stats";
 
-export const pages = new Elysia()
+const publicPages = new Elysia()
   .use(home)
   .use(login)
   .use(leaderboard)
   .use(stats)
-  .use(play)
-  .use(match)
   .use(profile);
+
+const authPages = new Elysia().use(play).use(match);
+
+export const pages = new Elysia().use(publicPages).use(authPages);

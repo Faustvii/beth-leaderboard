@@ -1,8 +1,10 @@
+import { type ChartConfiguration } from "chart.js";
 import Elysia from "elysia";
 import { type Session } from "lucia";
 import { HeaderHtml } from "../components/header";
 import { LayoutHtml } from "../components/Layout";
 import { NavbarHtml } from "../components/Navbar";
+import { StatsCardHtml } from "../components/StatsCard";
 import { ctx } from "../context";
 import { getMatchesWithPlayers } from "../db/queries/matchQueries";
 import { getUser } from "../db/queries/userQueries";
@@ -25,19 +27,16 @@ async function page(
   headers: Record<string, string | null>,
   userId: string,
 ) {
-  if (!session?.user) throw new Error("no user");
-
   const { elaspedTimeMs, result: matchesWithPlayers } = await measure(() =>
     getMatchesWithPlayers(userId),
   );
   console.log(`player stats took ${elaspedTimeMs}ms to get from db`);
-  let profileName = session.user.name;
-  if (session.user.id !== userId) {
+  let profileName = "Your stats";
+  if (!session || (session && session.user.id !== userId)) {
     const user = await getUser(userId);
-    if (user) profileName = user.name;
+    if (user) profileName = `${user.name}'s stats`;
   }
-  const header =
-    session.user.id === userId ? "Your stats" : `${profileName}'s stats`;
+  const header = profileName;
 
   return isHxRequest(headers) ? (
     <>
@@ -59,12 +58,14 @@ const profileStats = (
   playerId: string,
 ) => {
   const playerMatches = mapToMatches(matchesWithPlayers);
+  const matchesToday = MatchStatistics.gamesToday(playerMatches);
+  const matchesYesterday = MatchStatistics.gamesYesterday(playerMatches);
 
-  const draws = MatchStatistics.draws(matchesWithPlayers);
-  const gamesInOneDay = MatchStatistics.mostGamesInOneDay(matchesWithPlayers);
-  const colorWinRates = MatchStatistics.winsByResult(playerMatches);
+  const colorWinRates = MatchStatistics.playerWinsByResult(
+    playerMatches,
+    playerId,
+  );
   const winRate = MatchStatistics.playerWinRate(playerMatches, playerId);
-  const gamesToday = MatchStatistics.gamesToday(matchesWithPlayers);
   const { highestLoseStreak, highestWinStreak } =
     MatchStatistics.getPlayersStreak(matchesWithPlayers, playerId);
 
@@ -76,51 +77,189 @@ const profileStats = (
 
   const eloChanges = MatchStatistics.test(matchesWithPlayers, playerId);
 
+  const colorWinrateData = {
+    labels: ["Won", "Lost", "Draw"],
+    datasets: [
+      {
+        label: "Matches",
+        data: [winRate.wonGames, winRate.lostGames, winRate.draws],
+        backgroundColor: ["#fffffe", "rgb(35, 43, 43)", "#ff8906"],
+        hoverOffset: 4,
+      },
+    ],
+  };
+
+  const colorWinrateConfig: ChartConfiguration = {
+    type: "doughnut",
+    data: colorWinrateData,
+    options: {
+      plugins: {
+        legend: {
+          display: false,
+          labels: {
+            color: "#fffffe",
+          },
+          position: "left",
+        },
+      },
+      elements: {
+        arc: {
+          borderWidth: 0,
+        },
+      },
+    },
+  };
+
+  const eloChangeData = {
+    labels: eloChanges.map((x) =>
+      x.date.toLocaleString("en-US", {
+        day: "numeric",
+        month: "long",
+      }),
+    ),
+
+    datasets: [
+      {
+        label: "Elo",
+        borderColor: "#ff8906",
+        data: eloChanges.map((x) => x.eloChange),
+        hoverOffset: 4,
+        pointBackgroundColor: [] as string[],
+        pointBorderColor: [] as string[],
+        tension: 0.1,
+      },
+    ],
+  };
+
+  eloChangeData.datasets[0].data.forEach(function (value) {
+    if (value >= 0) {
+      eloChangeData.datasets[0].pointBackgroundColor.push("#00FF00");
+      eloChangeData.datasets[0].pointBorderColor.push("#00FF00");
+    } else if (value < 0) {
+      eloChangeData.datasets[0].pointBackgroundColor.push("#FF0000");
+      eloChangeData.datasets[0].pointBorderColor.push("#FF0000");
+    }
+  });
+
+  const eloChangeConfig: ChartConfiguration = {
+    type: "line",
+    data: eloChangeData,
+    options: {
+      scales: {
+        y: {
+          ticks: {
+            color: "#fffffe",
+          },
+        },
+        x: {
+          ticks: {
+            color: "#fffffe",
+          },
+        },
+      },
+      plugins: {
+        legend: {
+          display: false,
+        },
+      },
+    },
+  };
+
   return (
-    <div class="flex flex-col items-center gap-3 text-xl text-white">
-      <div>You've played {matchesWithPlayers.length} games</div>
-      <div>You've had {draws} draw(s)</div>
-      <div>
-        The most games you've played on one day is {gamesInOneDay.games} on{" "}
-        {gamesInOneDay.date.toLocaleString("en-US", {
-          day: "numeric",
-          month: "long",
-        })}
-      </div>
-      <div>
-        You win {colorWinRates.blackWins.procentage.toFixed(2)}% of your games
-        as black and {colorWinRates.whiteWins.procentage.toFixed(2)}% of your
-        games as white
-      </div>
-      <div>your winrate is {winRate.toFixed(2)}%</div>
-      <div>games today {gamesToday}</div>
-      <div>
-        Top win streak {highestWinStreak} and top lose streak is{" "}
-        {highestLoseStreak}
-      </div>
-      <div>
-        you win the most against {easiestOpponent?.player.name}, you have beat
-        them {easiestOpponent?.games} times
-      </div>
-      <div>
-        you lose the most against {hardestOpponent?.player.name}, you have lost
-        to them {hardestOpponent?.games} times
-      </div>
-      <div>
-        {eloChanges
-          .filter((x) => x.eloChange !== 0)
-          .map((eloChange) => {
-            return (
-              <div>
-                {eloChange.date.toLocaleString("en-US", {
-                  day: "numeric",
-                  month: "long",
-                })}{" "}
-                your elo changed by {eloChange.eloChange}
-              </div>
-            );
-          })}
-      </div>
+    <div class="grid grid-cols-6 gap-3 text-white md:grid-cols-12">
+      <StatsCardHtml title="Games">
+        <>
+          <div class="flex flex-col items-center justify-center gap-2">
+            <span class="text-3xl font-bold">{playerMatches.length}</span>
+            <span class="text-lg">Total Games Played</span>
+          </div>
+          <div class="flex flex-col items-center justify-center gap-2">
+            <span class="text-3xl font-bold">{matchesToday}</span>
+            <span class="text-lg">Games Today</span>
+          </div>
+          <div class="flex flex-col items-center justify-center gap-2">
+            <span class="text-3xl font-bold">{matchesYesterday}</span>
+            <span class="text-lg">Games Yesterday</span>
+          </div>
+        </>
+      </StatsCardHtml>
+      <StatsCardHtml title="Biggest win">
+        <p>biggest win</p>
+        {/* {biggestWin(matchesWithPlayers)} */}
+      </StatsCardHtml>
+      <StatsCardHtml title="Winrate">
+        <>
+          <div class="flex h-48 w-full items-center justify-center pt-5">
+            <canvas class="" id="chartDoughnut"></canvas>
+            <span class="pl-2 text-sm">
+              {winRate.winPercentage.toFixed(2)}%
+            </span>
+          </div>
+          <script>
+            {`new Chart(document.getElementById("chartDoughnut"), ${JSON.stringify(
+              colorWinrateConfig,
+            )})`}
+          </script>
+        </>
+      </StatsCardHtml>
+      <StatsCardHtml title="Winrate By Color">
+        <>
+          <div class="flex flex-col items-center justify-center gap-1">
+            <span class="text-5xl">{colorWinRates.whiteWins.wins}</span>
+            <span class="text-md">
+              {colorWinRates.whiteWins.procentage.toFixed(2)}%
+            </span>
+            <span class="text-xl">White wins</span>
+          </div>
+          <div class="flex flex-col items-center justify-center gap-1">
+            <span class="text-5xl">{colorWinRates.numOfDraws.draws}</span>
+            <span class="text-md">
+              {colorWinRates.numOfDraws.procentage.toFixed(2)}%
+            </span>
+            <span class="text-xl">Draws</span>
+          </div>
+          <div class="flex h-full flex-col items-center justify-center gap-1">
+            <span class="text-5xl">{colorWinRates.blackWins.wins}</span>
+            <span class="text-md">
+              {colorWinRates.blackWins.procentage.toFixed(2)}%
+            </span>
+            <span class="text-xl">Black wins</span>
+          </div>
+        </>
+      </StatsCardHtml>
+      <StatsCardHtml title="Longest Win Streak">
+        <span class="text-sm">Top win streak {highestWinStreak}</span>
+      </StatsCardHtml>
+      <StatsCardHtml title="Longest Losing Streak">
+        <span class="text-sm">top lose streak is {highestLoseStreak}</span>
+      </StatsCardHtml>
+      <StatsCardHtml title="Match history?">
+        <span class="text-sm">You doing good...</span>
+      </StatsCardHtml>
+      <StatsCardHtml title="Elo changes">
+        <>
+          <div class="flex h-48 w-full items-center justify-center pt-5">
+            <canvas class="" id="eloChart"></canvas>
+          </div>
+          <script>
+            {`new Chart(document.getElementById("eloChart"), ${JSON.stringify(
+              eloChangeConfig,
+            )})`}
+          </script>
+        </>
+      </StatsCardHtml>
+      <StatsCardHtml title="Hardest opponent">
+        <span class="text-sm">
+          you lose the most against {hardestOpponent?.player.name}, you have
+          lost to them {hardestOpponent?.games} times
+        </span>
+      </StatsCardHtml>
+      <StatsCardHtml title="Easiest opponnent">
+        <span class="text-sm">
+          you win the most against {easiestOpponent?.player.name}, you have beat
+          them {easiestOpponent?.games} times
+        </span>
+      </StatsCardHtml>
     </div>
   );
 };

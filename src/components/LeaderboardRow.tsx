@@ -1,3 +1,4 @@
+import { isDateOlderThanNDays } from "../lib/dateUtils";
 import { RESULT } from "../lib/matchStatistics";
 import { HxButton } from "./HxButton";
 
@@ -8,6 +9,7 @@ export const LeaderboardRowHtml = async ({
   elo,
   first,
   page,
+  lastPlayed,
   latestPlayerResults,
 }: {
   userId: string;
@@ -16,6 +18,7 @@ export const LeaderboardRowHtml = async ({
   elo: number;
   first: boolean;
   page: number;
+  lastPlayed: Date;
   latestPlayerResults: {
     winStreak: number;
     loseStreak: number;
@@ -45,7 +48,11 @@ export const LeaderboardRowHtml = async ({
             class="grid grid-cols-12 items-center gap-3 whitespace-nowrap px-1 py-4 font-medium text-white md:flex md:px-3 lg:px-6"
           >
             <div class="col-span-2">
-              <WinLoseStreak streak={streak} isWinStreak={isWinStreak} />
+              <WinLoseStreak
+                lastPlayed={lastPlayed}
+                streak={streak}
+                isWinStreak={isWinStreak}
+              />
             </div>
             <img
               class="col-span-2 mr-1 inline-block h-8 w-8 rounded-full ring-2 ring-gray-700 lg:mr-3 lg:h-8 lg:w-8"
@@ -73,7 +80,11 @@ export const LeaderboardRowHtml = async ({
             class="grid grid-cols-12 items-center gap-3 whitespace-nowrap px-1 py-4 font-medium text-white md:flex md:px-3 lg:px-6"
           >
             <div class="col-span-2">
-              <WinLoseStreak streak={streak} isWinStreak={isWinStreak} />
+              <WinLoseStreak
+                lastPlayed={lastPlayed}
+                streak={streak}
+                isWinStreak={isWinStreak}
+              />
             </div>
             <img
               class="col-span-2 mr-1 inline-block h-8 w-8 rounded-full ring-2 ring-gray-700 lg:mr-3 lg:h-8 lg:w-8"
@@ -101,10 +112,15 @@ export const LeaderboardRowHtml = async ({
 export const WinLoseStreak = ({
   streak,
   isWinStreak,
+  lastPlayed,
 }: {
+  lastPlayed: Date | undefined;
   streak: number | undefined;
   isWinStreak: boolean;
 }) => {
+  if (lastPlayed && isDateOlderThanNDays(lastPlayed, 7)) {
+    return <span class="pr2 text-2xl">💤</span>;
+  }
   if (streak && streak === 5) {
     return <span class="pr-2 text-2xl">{isWinStreak ? "🤑" : "🗑️"}</span>;
   }

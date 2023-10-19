@@ -11,6 +11,7 @@ export const LeaderboardTableHtml = ({
     rank: number;
     name: string;
     elo: number;
+    lastPlayed: Date;
     latestPlayerResults: {
       winStreak: number;
       loseStreak: number;

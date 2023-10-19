@@ -38,10 +38,14 @@ export const playerPaginationQuery = async (page: number) => {
             inArray(matches.whitePlayerTwo, playerIds),
           ),
         });
-
+  const lastPlayed = MatchStatistics.latestMatch(matchesByPlayer);
   const latestResults: Record<
     string,
-    { winStreak: number; loseStreak: number; results: RESULT[] }
+    {
+      winStreak: number;
+      loseStreak: number;
+      results: RESULT[];
+    }
   > = MatchStatistics.currentStreaksByPlayer(matchesByPlayer);
 
   return players.map((player, index) => ({
@@ -49,6 +53,9 @@ export const playerPaginationQuery = async (page: number) => {
     rank: index + (page - 1) * pageSize + 1,
     name: player.name,
     elo: player.elo,
+    lastPlayed:
+      lastPlayed.find((match) => match.player === player.id)?.lastPlayed ||
+      new Date(0),
     latestPlayerResults: latestResults[player.id]
       ? latestResults[player.id]
       : null,
@@ -89,6 +96,7 @@ function LeaderboardTable(
     rank: number;
     name: string;
     elo: number;
+    lastPlayed: Date;
     latestPlayerResults: {
       winStreak: number;
       loseStreak: number;

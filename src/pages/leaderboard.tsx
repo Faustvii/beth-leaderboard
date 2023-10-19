@@ -1,4 +1,4 @@
-import { desc } from "drizzle-orm";
+import { desc, inArray, or } from "drizzle-orm";
 import { Elysia } from "elysia";
 import { type Session } from "lucia";
 import { HeaderHtml } from "../components/header";
@@ -8,8 +8,9 @@ import { LeaderboardTableHtml } from "../components/LeaderboardTable";
 import { NavbarHtml } from "../components/Navbar";
 import { ctx } from "../context";
 import { readDb } from "../db";
-import { user } from "../db/schema";
+import { matches, user } from "../db/schema";
 import { isHxRequest } from "../lib";
+import MatchStatistics, { type RESULT } from "../lib/matchStatistics";
 
 export const playerPaginationQuery = async (page: number) => {
   const pageSize = 15;
@@ -21,11 +22,29 @@ export const playerPaginationQuery = async (page: number) => {
     limit: pageSize,
     offset: (page - 1) * pageSize,
   });
+
+  const playerIds = players.map((player) => player.id);
+
+  const matchesByPlayer = await readDb.query.matches.findMany({
+    orderBy: [desc(matches.createdAt)],
+    where: or(
+      inArray(matches.blackPlayerOne, playerIds),
+      inArray(matches.whitePlayerOne, playerIds),
+      inArray(matches.blackPlayerTwo, playerIds),
+      inArray(matches.whitePlayerTwo, playerIds),
+    ),
+  });
+
+  const latestResults = MatchStatistics.currentStreaksByPlayer(matchesByPlayer);
+
   return players.map((player, index) => ({
     userId: player.id,
     rank: index + (page - 1) * pageSize + 1,
     name: player.name,
     elo: player.elo,
+    latestPlayerResults: latestResults[player.id]
+      ? latestResults[player.id]
+      : null,
   }));
 };
 
@@ -58,7 +77,17 @@ export async function LeaderboardPage(
 
 function LeaderboardTable(
   session: Session | null,
-  rows: { userId: string; rank: number; name: string; elo: number }[],
+  rows: {
+    userId: string;
+    rank: number;
+    name: string;
+    elo: number;
+    latestPlayerResults: {
+      winStreak: number;
+      loseStreak: number;
+      results: RESULT[];
+    } | null;
+  }[],
 ): JSX.Element {
   return (
     <>

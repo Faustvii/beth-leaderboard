@@ -258,7 +258,7 @@ async function maForm() {
         </script>
 
         <div class="group relative z-0 mb-6 w-full border-b">
-          <span>White team</span>
+          <span class="text-white">White team</span>
         </div>
         <div class="group relative z-0 mb-6 w-full">
           <SearchHtml
@@ -283,7 +283,7 @@ async function maForm() {
         </div>
 
         <div class="group relative z-0 mb-6 w-full border-b">
-          <span>Black team</span>
+          <span class="text-white">Black team</span>
         </div>
 
         <div class="group relative z-0 mb-6 w-full">
@@ -309,7 +309,7 @@ async function maForm() {
         </div>
 
         <div class="group relative z-0 mb-6 w-full border-b">
-          <span>Result</span>
+          <span class="text-white">Match result</span>
         </div>
 
         <div class="group relative z-0 mb-6 w-full">

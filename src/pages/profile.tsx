@@ -62,7 +62,7 @@ const profileStats = (
 
   const draws = MatchStatistics.draws(matchesWithPlayers);
   const gamesInOneDay = MatchStatistics.mostGamesInOneDay(matchesWithPlayers);
-  const colorWinRates = MatchStatistics.whichColorWinsTheMost(playerMatches);
+  const colorWinRates = MatchStatistics.winsByResult(playerMatches);
   const winRate = MatchStatistics.playerWinRate(playerMatches, playerId);
   const gamesToday = MatchStatistics.gamesToday(matchesWithPlayers);
   const { highestLoseStreak, highestWinStreak } =
@@ -77,7 +77,7 @@ const profileStats = (
   const eloChanges = MatchStatistics.test(matchesWithPlayers, playerId);
 
   return (
-    <div class="flex flex-col items-center">
+    <div class="flex flex-col items-center gap-3 text-xl text-white">
       <div>You've played {matchesWithPlayers.length} games</div>
       <div>You've had {draws} draw(s)</div>
       <div>
@@ -88,8 +88,9 @@ const profileStats = (
         })}
       </div>
       <div>
-        You win the most with {colorWinRates.color} (
-        {colorWinRates.winPercentage.toFixed(2)}%)
+        You win {colorWinRates.blackWins.procentage.toFixed(2)}% of your games
+        as black and {colorWinRates.whiteWins.procentage.toFixed(2)}% of your
+        games as white
       </div>
       <div>your winrate is {winRate.toFixed(2)}%</div>
       <div>games today {gamesToday}</div>

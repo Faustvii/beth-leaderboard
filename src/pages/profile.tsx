@@ -271,9 +271,7 @@ const profileStats = (
       <StatsCardHtml title="Elo changes">
         <>
           <div class="flex h-48 w-full items-center justify-center pt-5">
-            <div class="relative m-auto h-48 w-full">
-              <canvas id="eloChart"></canvas>
-            </div>
+            <canvas id="eloChart"></canvas>
           </div>
           <script>
             {`new Chart(document.getElementById("eloChart"), ${JSON.stringify(

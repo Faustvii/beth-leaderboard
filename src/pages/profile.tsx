@@ -254,11 +254,11 @@ const profileStats = (
         <span class="text-sm">top lose streak is {highestLoseStreak}</span>
       </StatsCardHtml>
       <StatsCardHtml title="Match history?">
-        <div class="flex h-48 flex-col gap-2 overflow-x-scroll">
+        <div class="flex max-h-48 snap-x snap-mandatory flex-col gap-2 overflow-y-auto">
           {matchHistory ? (
             matchHistory.map((history) => {
               return (
-                <span class="text-sm">
+                <span class="snap-start text-sm">
                   {winLossDrawIcon(history.result)} {matchOutput(history)}
                 </span>
               );

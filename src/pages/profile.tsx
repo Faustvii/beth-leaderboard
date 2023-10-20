@@ -372,7 +372,8 @@ function matchOutput({
       })}
       , <span class="font-bold">{whiteTeam.join(" & ")}</span> faced off against{" "}
       <span class="font-bold">{blackTeam.join(" & ")}</span> and{" "}
-      {result === RESULT.WIN ? "won" : "lost"} with {match.scoreDiff} points.
+      {result === RESULT.DRAW ? "tied" : result === RESULT.WIN ? "won" : "lost"}{" "}
+      with {match.scoreDiff} points.
     </span>
   );
 }

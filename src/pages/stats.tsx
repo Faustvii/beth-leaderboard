@@ -77,7 +77,7 @@ async function page(session: Session | null) {
           gameResults.blackWins.wins,
           gameResults.numOfDraws.draws,
         ],
-        backgroundColor: ["#fffffe", "rgb(35, 43, 43)", "#ff8906"],
+        backgroundColor: ["#fffffe", "rgb(35, 43, 43)", "#D3D3D3"],
         hoverOffset: 4,
       },
     ],
@@ -98,8 +98,8 @@ async function page(session: Session | null) {
       },
       elements: {
         arc: {
-          borderWidth: 0,
-          // borderColor: "#ff8906",
+          borderWidth: 2,
+          borderColor: "#ff8906",
         },
       },
     },

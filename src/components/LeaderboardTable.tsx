@@ -22,7 +22,7 @@ export const LeaderboardTableHtml = ({
     <div class="flex flex-col items-center justify-center">
       <div class="w-full overflow-x-auto rounded-lg shadow-md">
         <table class="w-full text-left text-sm text-gray-500 dark:text-gray-400">
-          <thead class="bg-gray-50 text-xs uppercase text-gray-700 dark:bg-gray-700 dark:text-gray-400">
+          <thead class=" bg-gray-700 text-xs uppercase text-gray-400">
             <tr>
               <th scope="col" class="px-1 py-3 pl-2 md:px-3 lg:px-6">
                 Rank

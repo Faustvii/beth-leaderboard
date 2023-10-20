@@ -58,7 +58,7 @@ function MatchMakePage(session: Session | null) {
       <NavbarHtml session={session} activePage="play" />
       <HeaderHtml title="Play" />
       <div class="flex flex-col items-center justify-center">
-        <h1 class="p-4 text-2xl font-semibold  text-gray-900 dark:text-white">
+        <h1 class="p-4 text-2xl font-semibold text-white">
           What would you like to queue for?
         </h1>
         <div class="flex-row justify-between">

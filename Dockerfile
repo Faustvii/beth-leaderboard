@@ -2,7 +2,7 @@
 
 # Adjust BUN_VERSION as desired
 ARG BUN_VERSION=1.0.6
-FROM oven/bun:${BUN_VERSION} as base
+FROM oven/bun:${BUN_VERSION}-slim as base
 
 LABEL fly_launch_runtime="Bun"
 
@@ -10,7 +10,7 @@ LABEL fly_launch_runtime="Bun"
 WORKDIR /app
 
 # Set production environment
-ENV NODE_ENV=production
+ENV NODE_ENV="production"
 ENV LOG_LEVEL=info
 
 # Throw-away build stage to reduce size of final image
@@ -18,10 +18,13 @@ FROM base as build
 
 # Install node modules
 COPY --link bun.lockb package.json ./
-RUN bun install --ci
+RUN bun install -p --ci
 
 # Copy application code
 COPY --link . .
+
+# Minify css
+RUN bun tw
 
 # Final stage for app image
 FROM base

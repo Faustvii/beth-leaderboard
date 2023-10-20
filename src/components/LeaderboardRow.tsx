@@ -139,10 +139,10 @@ export const LatestResults = ({
 }) => {
   return (
     <div class="flex gap-2">
-      {latestPlayerResults?.reverse().map((res) => {
+      {latestPlayerResults?.map((res) => {
         if (res === RESULT.WIN) {
           return <span>✅</span>;
-        } else if (res === RESULT.LOSE) {
+        } else if (res === RESULT.LOSS) {
           return <span>❌</span>;
         } else {
           return <span>⬜</span>;

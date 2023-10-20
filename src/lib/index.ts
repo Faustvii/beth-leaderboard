@@ -34,6 +34,10 @@ export function notEmpty<TValue>(
   return true;
 }
 
+export function unique<T>(value: T, index: number, self: T[]): boolean {
+  return self.indexOf(value) === index;
+}
+
 export async function measure<T>(
   fn: () => Promise<T> | T,
 ): Promise<{ result: T; elaspedTimeMs: number }> {

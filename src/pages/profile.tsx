@@ -6,10 +6,10 @@ import { LayoutHtml } from "../components/Layout";
 import { NavbarHtml } from "../components/Navbar";
 import { StatsCardHtml } from "../components/StatsCard";
 import { ctx } from "../context";
-import { getMatchesWithPlayers } from "../db/queries/matchQueries";
+import { getMatchesWithPlayersHighPerformance } from "../db/queries/matchQueries";
 import { getUser } from "../db/queries/userQueries";
-import { isHxRequest, measure } from "../lib";
-import MatchStatistics, { mapToMatches } from "../lib/matchStatistics";
+import { isHxRequest, measure, notEmpty } from "../lib";
+import MatchStatistics, { mapToMatches, RESULT } from "../lib/matchStatistics";
 
 export const profile = new Elysia({
   prefix: "/profile",
@@ -28,7 +28,7 @@ async function page(
   userId: string,
 ) {
   const { elaspedTimeMs, result: matchesWithPlayers } = await measure(() =>
-    getMatchesWithPlayers(userId),
+    getMatchesWithPlayersHighPerformance(userId),
   );
   console.log(`player stats took ${elaspedTimeMs}ms to get from db`);
   let profileName = "Your stats";
@@ -57,6 +57,7 @@ const profileStats = (
   matchesWithPlayers: MatchWithPlayers[],
   playerId: string,
 ) => {
+  const now = performance.now();
   const playerMatches = mapToMatches(matchesWithPlayers);
   const matchesToday = MatchStatistics.gamesToday(playerMatches);
   const matchesYesterday = MatchStatistics.gamesYesterday(playerMatches);
@@ -69,13 +70,20 @@ const profileStats = (
   const { highestLoseStreak, highestWinStreak } =
     MatchStatistics.getPlayersStreak(matchesWithPlayers, playerId);
 
-  const { easiestOpponent, hardestOpponent } =
+  const { easiestOpponents, hardestOpponents } =
     MatchStatistics.getPlayersEasiestAndHardestOpponents(
       matchesWithPlayers,
       playerId,
     );
 
+  const { win: biggestWin, loss: biggestLoss } =
+    MatchStatistics.biggestWinAndLoss(matchesWithPlayers, playerId);
+
   const eloChanges = MatchStatistics.test(matchesWithPlayers, playerId);
+  const matchHistory = MatchStatistics.getMatchHistory(
+    matchesWithPlayers,
+    playerId,
+  ).slice(0, 20);
 
   const colorWinrateData = {
     labels: ["Won", "Lost", "Draw"],
@@ -89,7 +97,7 @@ const profileStats = (
     ],
   };
 
-  const colorWinrateConfig: ChartConfiguration = {
+  const winrateConfig: ChartConfiguration = {
     type: "doughnut",
     data: colorWinrateData,
     options: {
@@ -157,6 +165,7 @@ const profileStats = (
           },
         },
       },
+      responsive: true,
       plugins: {
         legend: {
           display: false,
@@ -164,6 +173,7 @@ const profileStats = (
       },
     },
   };
+  console.log("metrics took ", performance.now() - now + "ms to run");
 
   return (
     <div class="grid grid-cols-6 gap-3 text-white md:grid-cols-12">
@@ -183,21 +193,31 @@ const profileStats = (
           </div>
         </>
       </StatsCardHtml>
-      <StatsCardHtml title="Biggest win">
-        <p>biggest win</p>
-        {/* {biggestWin(matchesWithPlayers)} */}
+      <StatsCardHtml title="Biggest win/loss">
+        <>
+          {biggestWin ? (
+            matchFaceoff(biggestWin)
+          ) : (
+            <span class="text-sm">No wins yet</span>
+          )}
+          {biggestLoss ? (
+            matchFaceoff(biggestLoss)
+          ) : (
+            <span class="text-sm">No losses yet</span>
+          )}
+        </>
       </StatsCardHtml>
       <StatsCardHtml title="Winrate">
         <>
           <div class="flex h-48 w-full items-center justify-center pt-5">
-            <canvas class="" id="chartDoughnut"></canvas>
-            <span class="pl-2 text-sm">
+            <canvas id="chartDoughnut"></canvas>
+            <span class="pl-3 text-sm">
               {winRate.winPercentage.toFixed(2)}%
             </span>
           </div>
           <script>
             {`new Chart(document.getElementById("chartDoughnut"), ${JSON.stringify(
-              colorWinrateConfig,
+              winrateConfig,
             )})`}
           </script>
         </>
@@ -234,12 +254,26 @@ const profileStats = (
         <span class="text-sm">top lose streak is {highestLoseStreak}</span>
       </StatsCardHtml>
       <StatsCardHtml title="Match history?">
-        <span class="text-sm">You doing good...</span>
+        <div class="flex h-48 flex-col gap-2 overflow-x-scroll">
+          {matchHistory ? (
+            matchHistory.map((history) => {
+              return (
+                <span class="text-sm">
+                  {winLossDrawIcon(history.result)} {matchOutput(history)}
+                </span>
+              );
+            })
+          ) : (
+            <span class="text-sm">No matches yet</span>
+          )}
+        </div>
       </StatsCardHtml>
       <StatsCardHtml title="Elo changes">
         <>
           <div class="flex h-48 w-full items-center justify-center pt-5">
-            <canvas class="" id="eloChart"></canvas>
+            <div class="relative m-auto h-48 w-full">
+              <canvas id="eloChart"></canvas>
+            </div>
           </div>
           <script>
             {`new Chart(document.getElementById("eloChart"), ${JSON.stringify(
@@ -248,18 +282,97 @@ const profileStats = (
           </script>
         </>
       </StatsCardHtml>
-      <StatsCardHtml title="Hardest opponent">
-        <span class="text-sm">
-          you lose the most against {hardestOpponent?.player.name}, you have
-          lost to them {hardestOpponent?.games} times
-        </span>
+      <StatsCardHtml title="Hardest opponents">
+        <>
+          {hardestOpponents.length !== 0 ? (
+            hardestOpponents.slice(0, 3).map((opponent) => (
+              <span class="text-sm">
+                Lost {opponent.games} times to {opponent.player.name}
+              </span>
+            ))
+          ) : (
+            <span class="text-sm">Everyone is easy</span>
+          )}
+        </>
       </StatsCardHtml>
-      <StatsCardHtml title="Easiest opponnent">
-        <span class="text-sm">
-          you win the most against {easiestOpponent?.player.name}, you have beat
-          them {easiestOpponent?.games} times
-        </span>
+      <StatsCardHtml title="Easiest opponnents">
+        <>
+          {easiestOpponents.length !== 0 ? (
+            easiestOpponents.slice(0, 3).map((opponent) => (
+              <span class="text-sm">
+                Won {opponent.games} times against {opponent.player.name}
+              </span>
+            ))
+          ) : (
+            <span class="text-sm">Everyone is hard</span>
+          )}
+        </>
       </StatsCardHtml>
     </div>
   );
 };
+
+function winLossDrawIcon(result: RESULT): string {
+  if (result === RESULT.WIN) {
+    return "✅";
+  } else if (result === RESULT.LOSS) {
+    return "❌";
+  } else {
+    return "⬜";
+  }
+}
+
+function matchFaceoff(biggestWin: {
+  match: MatchWithPlayers;
+  biggestPlayers: { black: string[]; white: string[] };
+}): JSX.Element {
+  return (
+    <span class="text-sm">
+      On{" "}
+      {biggestWin.match.createdAt.toLocaleString("en-US", {
+        day: "numeric",
+        month: "long",
+      })}
+      , the White team of{" "}
+      <span class="font-bold">
+        {biggestWin.biggestPlayers.white.join(" & ")}
+      </span>{" "}
+      faced off against the Black team of{" "}
+      <span class="font-bold">
+        {biggestWin.biggestPlayers.black.join(" & ")}
+      </span>
+      . The {biggestWin.match.result.toLowerCase()} team triumphed with a{" "}
+      {biggestWin.match.scoreDiff}
+      -point difference.
+    </span>
+  );
+}
+
+function matchOutput({
+  match,
+  result,
+}: {
+  match: MatchWithPlayers;
+  result: RESULT;
+}): JSX.Element {
+  const blackTeam = [
+    match.blackPlayerOne.name,
+    match.blackPlayerTwo?.name,
+  ].filter(notEmpty);
+  const whiteTeam = [
+    match.whitePlayerOne.name,
+    match.whitePlayerTwo?.name,
+  ].filter(notEmpty);
+  return (
+    <span class="text-sm">
+      On{" "}
+      {match.createdAt.toLocaleString("en-US", {
+        day: "numeric",
+        month: "long",
+      })}
+      , <span class="font-bold">{whiteTeam.join(" & ")}</span> faced off against{" "}
+      <span class="font-bold">{blackTeam.join(" & ")}</span> and{" "}
+      {result === RESULT.WIN ? "won" : "lost"} with {match.scoreDiff} points.
+    </span>
+  );
+}

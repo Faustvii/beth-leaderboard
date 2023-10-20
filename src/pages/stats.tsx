@@ -6,7 +6,7 @@ import { LayoutHtml } from "../components/Layout";
 import { NavbarHtml } from "../components/Navbar";
 import { StatsCardHtml } from "../components/StatsCard";
 import { ctx } from "../context";
-import { getMatchesWithPlayers } from "../db/queries/matchQueries";
+import { getMatchesWithPlayersHighPerformance } from "../db/queries/matchQueries";
 import { isHxRequest, measure, notEmpty } from "../lib";
 import MatchStatistics, { mapToMatches } from "../lib/matchStatistics";
 
@@ -36,7 +36,7 @@ async function statsPage(
 async function page(session: Session | null) {
   const { elaspedTimeMs, result: matchesWithPlayers } = await measure(
     async () => {
-      return await getMatchesWithPlayers();
+      return await getMatchesWithPlayersHighPerformance();
     },
   );
   console.log("stats page database calls", elaspedTimeMs, "ms");

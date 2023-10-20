@@ -27,15 +27,12 @@ export const ctx = new Elysia({
           name: "heartbeat",
           pattern: "*/2 * * * * *",
           run() {
-            // const now = performance.now();
-            // console.log("Syncing database...");
             readClient
               .sync()
               .then()
               .catch((err) => {
                 console.log("Error syncing database", err);
               });
-            // console.log(`Database synced in ${performance.now() - now}ms`);
           },
         })
       : (a) => a,

@@ -31,7 +31,7 @@ export const LeaderboardRowHtml = async ({
     <>
       {first ? (
         <tr
-          class="border-b bg-white dark:border-gray-700 dark:bg-gray-800"
+          class="border-b border-gray-700 bg-gray-800"
           hx-get={`/leaderboard/page/${page + 1}`}
           _="on htmx:afterRequest remove @hx-trigger from me"
           hx-indicator=".progress-bar"
@@ -42,13 +42,13 @@ export const LeaderboardRowHtml = async ({
           <td class="px-1 py-4 pl-2 md:px-3 lg:px-6">{rank}.</td>
           <th
             scope="row"
-            class="grid grid-cols-12 items-center gap-3 whitespace-nowrap px-1 py-4 font-medium text-gray-900 dark:text-white md:flex md:px-3 lg:px-6"
+            class="grid grid-cols-12 items-center gap-3 whitespace-nowrap px-1 py-4 font-medium text-white md:flex md:px-3 lg:px-6"
           >
             <div class="col-span-2">
               <WinLoseStreak streak={streak} isWinStreak={isWinStreak} />
             </div>
             <img
-              class="col-span-2 mr-1 inline-block h-8 w-8 rounded-full ring-2 ring-white dark:ring-gray-700 lg:mr-3 lg:h-8 lg:w-8"
+              class="col-span-2 mr-1 inline-block h-8 w-8 rounded-full ring-2 ring-gray-700 lg:mr-3 lg:h-8 lg:w-8"
               src={`/static/user/${userId}/small`}
               loading="lazy"
               alt=""
@@ -66,17 +66,17 @@ export const LeaderboardRowHtml = async ({
           <td class="px-1 py-4 md:px-3 lg:px-6">{elo}</td>
         </tr>
       ) : (
-        <tr class="border-b bg-white dark:border-gray-700 dark:bg-gray-800">
+        <tr class="border-b border-gray-700 bg-gray-800">
           <td class="px-1 py-4 pl-2 md:px-3 lg:px-6">{rank}.</td>
           <th
             scope="row"
-            class="grid grid-cols-12 items-center gap-3 whitespace-nowrap px-1 py-4 font-medium text-gray-900 dark:text-white md:flex md:px-3 lg:px-6"
+            class="grid grid-cols-12 items-center gap-3 whitespace-nowrap px-1 py-4 font-medium text-white md:flex md:px-3 lg:px-6"
           >
             <div class="col-span-2">
               <WinLoseStreak streak={streak} isWinStreak={isWinStreak} />
             </div>
             <img
-              class="col-span-2 mr-1 inline-block h-8 w-8 rounded-full ring-2 ring-white dark:ring-gray-700 lg:mr-3 lg:h-8 lg:w-8"
+              class="col-span-2 mr-1 inline-block h-8 w-8 rounded-full ring-2 ring-gray-700 lg:mr-3 lg:h-8 lg:w-8"
               src={`/static/user/${userId}/small`}
               loading="lazy"
               alt=""

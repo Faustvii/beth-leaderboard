@@ -272,10 +272,10 @@ class MatchStatistics {
             mt.blackPlayerTwo === player,
         )
         .slice(0, 5);
+
       playerMatches.sort(
         (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),
       );
-      if (player === "ou2zb3v8oaq1rym") console.log(playerMatches);
 
       for (const match of playerMatches) {
         const team = this.getPlayersTeamByMatch(match, player);
@@ -295,7 +295,6 @@ class MatchStatistics {
         }
       }
       playerStreaks[player].results = playerStreaks[player].results.reverse();
-      if (player === "ou2zb3v8oaq1rym") console.log(playerStreaks[player]);
     });
 
     return playerStreaks;

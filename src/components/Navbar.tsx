@@ -5,7 +5,13 @@ import "@kitajs/html/register";
 import { cn } from "../lib/utils";
 import { HxButton } from "./HxButton";
 
-export type Page = "leaderboard" | "play" | "stats" | "match" | "profile";
+export type Page =
+  | "leaderboard"
+  | "matchfeed"
+  | "play"
+  | "stats"
+  | "match"
+  | "profile";
 
 interface Props extends PropsWithChildren {
   session: Session | null;
@@ -20,6 +26,7 @@ interface NavbarRoute {
 
 const pageRoutes: NavbarRoute[] = [
   { name: "Leaderboard", page: "leaderboard", route: "/leaderboard" },
+  { name: "Matches", page: "matchfeed", route: "/matches" },
   { name: "Play", page: "play", route: "/play" },
   { name: "Log match", page: "match", route: "/match" },
   { name: "Stats", page: "stats", route: "/stats" },

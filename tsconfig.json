@@ -17,6 +17,7 @@
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
     "types": ["bun-types", "@kitajs/html/htmx.d.ts", "web"],
-    "plugins": [{ "name": "@kitajs/ts-html-plugin" }]
+    "plugins": [{ "name": "@kitajs/ts-html-plugin" }],
+    "noImplicitAny": true
   }
 }

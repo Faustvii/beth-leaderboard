@@ -3,6 +3,7 @@ import { home } from "./(home)";
 import { leaderboard } from "./leaderboard";
 import { login } from "./login";
 import { match } from "./match";
+import { matchfeed } from "./matchfeed";
 import { play } from "./play/play";
 import { profile } from "./profile";
 import { stats } from "./stats";
@@ -11,6 +12,7 @@ const publicPages = new Elysia()
   .use(home)
   .use(login)
   .use(leaderboard)
+  .use(matchfeed)
   .use(stats)
   .use(profile);
 

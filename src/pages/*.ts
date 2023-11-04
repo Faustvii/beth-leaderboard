@@ -6,11 +6,13 @@ import { match } from "./match";
 import { play } from "./play/play";
 import { profile } from "./profile";
 import { stats } from "./stats";
+import { tournament } from "./tournament/tournament";
 
 const publicPages = new Elysia()
   .use(home)
   .use(login)
   .use(leaderboard)
+  .use(tournament)
   .use(stats)
   .use(profile);
 

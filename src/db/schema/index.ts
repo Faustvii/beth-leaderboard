@@ -2,6 +2,16 @@ import { relations } from "drizzle-orm";
 import { user } from "./auth";
 import { matches } from "./matches";
 
+export {
+  torunamentTbl,
+  tournamentMatchTbl,
+  tournamentTeamTbl,
+  tournamentTeamMemberTbl,
+  tournamentTeamMemberRelations,
+  tournamentRelations,
+  tournamentTeamRelations,
+} from "./tournament";
+
 export { key, session, user } from "./auth";
 export { matches } from "./matches";
 export { job_queue } from "./jobQueue";

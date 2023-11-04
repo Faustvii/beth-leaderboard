@@ -44,7 +44,7 @@
     "@elysiajs/cron": "^0.7.0",
     "@elysiajs/static": "^0.7.1",
     "@kitajs/html": "^3.0.3",
-    "@libsql/client": "0.3.6",
+    "@libsql/client": "0.3.7-pre.2",
     "@lucia-auth/adapter-sqlite": "^2.0.0",
     "@lucia-auth/oauth": "^3.3.1",
     "@t3-oss/env-core": "^0.7.0",

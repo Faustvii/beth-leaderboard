@@ -57,6 +57,20 @@
       "when": 1697554592442,
       "tag": "0007_kind_roxanne_simpson",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "5",
+      "when": 1699126342114,
+      "tag": "0008_nostalgic_taskmaster",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "5",
+      "when": 1699127956985,
+      "tag": "0009_perfect_karma",
+      "breakpoints": true
     }
   ]
 }

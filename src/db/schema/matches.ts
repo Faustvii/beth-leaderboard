@@ -1,5 +1,4 @@
 import { index, integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
-import { createInsertSchema, createSelectSchema } from "drizzle-typebox";
 import { user } from ".";
 
 export const matches = sqliteTable(
@@ -39,6 +38,3 @@ export const matches = sqliteTable(
 
 export type Match = typeof matches.$inferSelect;
 export type InsertMatch = typeof matches.$inferInsert;
-
-export const insertTweetSchema = createInsertSchema(matches);
-export const selectTweetSchema = createSelectSchema(matches);

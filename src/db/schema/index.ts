@@ -10,6 +10,7 @@ export {
   tournamentTeamMemberRelations,
   tournamentRelations,
   tournamentTeamRelations,
+  tournamentMatchRelations,
 } from "./tournament";
 
 export { key, session, user } from "./auth";

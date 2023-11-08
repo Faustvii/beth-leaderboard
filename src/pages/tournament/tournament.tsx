@@ -1,11 +1,13 @@
 import { eq } from "drizzle-orm";
 import { Elysia } from "elysia";
+import { object } from "zod";
 import { HeaderHtml } from "../../components/header";
 import { LayoutHtml } from "../../components/Layout";
 import { NavbarHtml } from "../../components/Navbar";
 import { MatchupHtml } from "../../components/tournament/matchup";
 import { RoundHtml } from "../../components/tournament/round";
 import { ctx } from "../../context";
+import { getActiveTournament } from "../../db/queries/tournament/tournamentQueries";
 import { torunamentTbl } from "../../db/schema";
 import { type InsertTournament } from "../../db/schema/tournament/tournament";
 import {
@@ -15,38 +17,8 @@ import {
 
 export const tournament = new Elysia({ prefix: "/tournament" })
   .use(ctx)
-  .get("/", async ({ html, session, readDb, writeDb }) => {
-    const activeTournament = await readDb.query.torunamentTbl.findFirst({
-      where: eq(torunamentTbl.active, true),
-      with: {
-        matches: {
-          columns: {
-            team1: true,
-            team2: true,
-            result: true,
-            bracket: true,
-            round: true,
-          },
-        },
-        teams: {
-          columns: {
-            teamName: true,
-            teamElo: true,
-          },
-          with: {
-            members: {
-              with: {
-                user: {
-                  columns: {
-                    name: true,
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    });
+  .get("/", async ({ html, session, writeDb }) => {
+    const activeTournament = await getActiveTournament();
 
     if (!activeTournament) {
       const tournament: InsertTournament = {
@@ -117,6 +89,7 @@ export const tournament = new Elysia({ prefix: "/tournament" })
       await writeDb.insert(tournamentTeamTbl).values(teams);
     }
     if (!activeTournament) return;
+    // activeTournament.mode = "Single Elimination";
     // Add a team to test odd number of teams
     activeTournament.teams.push({
       teamName: "Team 11",
@@ -174,6 +147,14 @@ export const tournament = new Elysia({ prefix: "/tournament" })
         team2: "",
         matchNumber: 5,
       },
+      {
+        bracket: "Upper",
+        result: "Win",
+        round: 1,
+        team1: "Team 4",
+        team2: "Team 1",
+        matchNumber: 4,
+      },
     ];
     const bracket = initialSeeding(teams);
     const bracketWithResults = updateBracketWithResults(bracket, matches);
@@ -183,47 +164,39 @@ export const tournament = new Elysia({ prefix: "/tournament" })
         <NavbarHtml activePage="leaderboard" session={session} />
         <HeaderHtml title="Tournament" />
         <div class="flex p-5">
-          {Object.entries(bracketWithResults).map(([_, roundTeams]) => (
+          {Object.entries(bracketWithResults.Upper).map(([_, matches]) => (
             <RoundHtml>
-              {roundTeams.map((team) => (
+              {matches.map((match) => (
                 <MatchupHtml
-                  team1={team?.Team1?.teamName ?? ""}
-                  team2={team?.Team2?.teamName ?? ""}
-                  result={team?.Result}
+                  team1={match?.Team1?.teamName ?? ""}
+                  team2={match?.Team2?.teamName ?? ""}
+                  result={match?.Result}
+                  matchNumber={match.MatchNumber}
                 />
               ))}
             </RoundHtml>
           ))}
         </div>
-        <HeaderHtml title="Loser's bracket" />
-        <div class="flex p-5">
-          <div class="relative col-span-1 flex flex-col justify-around">
-            <MatchupHtml team1="Team A" team2="Team B" />
-            <MatchupHtml team1="Team C" team2="Team D" />
-            <MatchupHtml team1="Team E" team2="Team F" />
-            <MatchupHtml team1="Team 1" team2="Team 2" />
-            <MatchupHtml team1="Team 3" team2="Team 4" />
-            <MatchupHtml team1="Team 5" team2="Team 6" />
-            <MatchupHtml team1="Team 7" team2="Team 8" />
-            <MatchupHtml team1="Team 9" team2="Team 10" />
-          </div>
-
-          <div class="col-span-1 flex flex-col justify-around">
-            <MatchupHtml team1="Team A" team2="Team C" />
-            <MatchupHtml team1="Team E" team2="Team 1" />
-            <MatchupHtml team1="Team 3" team2="Team 5" />
-            <MatchupHtml team1="Team 7" team2="Team 9" />
-          </div>
-
-          <div class="col-span-1 flex flex-col justify-around">
-            <MatchupHtml team1="Team A" team2="Team E" />
-            <MatchupHtml team1="Team 3" team2="Team 7" />
-          </div>
-
-          <div class="col-span-1 flex flex-col justify-around">
-            <MatchupHtml team1="Team A" team2="Team 3" />
-          </div>
-        </div>
+        {activeTournament.mode === "Double Elimination" && (
+          <>
+            <HeaderHtml title="Loser's bracket" />
+            <div class="flex p-5">
+              {Object.entries(bracketWithResults.Lower).map(
+                ([_, roundTeams]) => (
+                  <RoundHtml>
+                    {roundTeams.map((team) => (
+                      <MatchupHtml
+                        team1={team?.Team1?.teamName ?? ""}
+                        team2={team?.Team2?.teamName ?? ""}
+                        result={team?.Result}
+                      />
+                    ))}
+                  </RoundHtml>
+                ),
+              )}
+            </div>
+          </>
+        )}
       </LayoutHtml>
     ));
   });
@@ -258,12 +231,17 @@ function calculateMatchesInRound(
 function initialSeeding(
   teams: TournamentTeam[],
   numRounds: number = calculateRounds(teams.length),
-): Record<string, TournamentMatch[]> {
+): {
+  Upper: Record<string, TournamentMatch[]>;
+  Lower: Record<string, TournamentMatch[]>;
+} {
   const teamsSortedByElo = teams.sort((a, b) => a.teamElo - b.teamElo);
-  const rounds: Record<string, TournamentMatch[]> = {};
+  const upperBracket: Record<string, TournamentMatch[]> = {};
+  // const lowerBracket: Record<string, TournamentMatch[]> = {};
+  //todo: Fix lower bracket generation
 
   for (let i = 0; i < numRounds; i++) {
-    const roundTeams: TournamentMatch[] = [];
+    const upperBracketTeams: TournamentMatch[] = [];
     const remainingTeams = [...teamsSortedByElo];
     const numMatchesInRound = calculateMatchesInRound(remainingTeams.length, i);
 
@@ -272,14 +250,14 @@ function initialSeeding(
       const team2 = remainingTeams.shift();
 
       if (i == 0) {
-        roundTeams.push({
+        upperBracketTeams.push({
           Team1: team1,
           Team2: team2,
           Result: "Unknown",
           MatchNumber: j,
         });
       } else {
-        roundTeams.push({
+        upperBracketTeams.push({
           Team1: undefined,
           Team2: undefined,
           Result: "Unknown",
@@ -288,14 +266,20 @@ function initialSeeding(
       }
     }
 
-    rounds[i + 1] = roundTeams;
+    upperBracket[i + 1] = upperBracketTeams;
   }
 
-  return rounds;
+  const lowerBracket = calculateLowerBracketStructure(upperBracket);
+  console.log(lowerBracket);
+
+  return { Upper: upperBracket, Lower: lowerBracket };
 }
 
 function updateBracketWithResults(
-  bracket: Record<string, TournamentMatch[]>,
+  brackets: {
+    Upper: Record<string, TournamentMatch[]>;
+    Lower: Record<string, TournamentMatch[]>;
+  },
   matchResults: {
     team1: string;
     team2: string;
@@ -304,49 +288,193 @@ function updateBracketWithResults(
     matchNumber: number;
     bracket: "Upper" | "Lower";
   }[],
+): {
+  Upper: Record<string, TournamentMatch[]>;
+  Lower: Record<string, TournamentMatch[]>;
+} {
+  const updatedBracket = { ...brackets };
+  const upperBracket = { ...updatedBracket.Upper };
+  const lowerBracket = { ...updatedBracket.Lower };
+
+  updateBracketWithMatchResults(
+    matchResults.filter((x) => x.bracket === "Upper"),
+    upperBracket,
+  );
+  // todo: fix lower bracket seeding & match results
+  test(matchResults, lowerBracket, upperBracket);
+
+  return updatedBracket;
+}
+
+interface TournamentMatch {
+  Team1?: TournamentTeam;
+  Team2?: TournamentTeam;
+  Result: "Win" | "Loss" | "Unknown";
+  MatchNumber: number;
+}
+
+interface TournamentTeam {
+  teamName: string;
+  teamElo: number;
+  members: {
+    userId: string | null;
+    teamId: number | null;
+    user: {
+      name: string;
+    } | null;
+  }[];
+}
+
+function test(
+  matchResults: {
+    team1: string;
+    team2: string;
+    result: "Win" | "Loss";
+    round: number;
+    matchNumber: number;
+    bracket: "Upper" | "Lower";
+  }[],
+  bracket: Record<string, TournamentMatch[]>,
+  upperBracket: Record<string, TournamentMatch[]>,
+) {
+  const upperBracketMatches = Object.values(upperBracket).reduce(
+    (total, roundMatches) => total + roundMatches.length,
+    0,
+  );
+
+  matchResults
+    .filter((x) => x.bracket === "Upper")
+    .forEach((match) => {
+      const { round, result, team1, team2, matchNumber } = match;
+      const roundName = `${round}`;
+      if (!bracket[roundName]) {
+        bracket[roundName] = [];
+      }
+      const lowerMatchNumber = calculateLowerBracketMatch(
+        matchNumber,
+        upperBracketMatches,
+      );
+      console.log(
+        `${team1} vs ${team2} - ${matchNumber} ${round} lowerMatch ${lowerMatchNumber}`,
+      );
+      if (bracket[roundName]?.[lowerMatchNumber]) {
+        if (result === "Loss") {
+          bracket[roundName][lowerMatchNumber].Team1 = {
+            teamName: team1,
+            teamElo: 0,
+            members: [],
+          };
+        } else {
+          bracket[roundName][lowerMatchNumber].Team2 = {
+            teamName: team2,
+            teamElo: 0,
+            members: [],
+          };
+        }
+        bracket[roundName][lowerMatchNumber].Result = "Unknown";
+      }
+    });
+}
+
+function calculateLowerBracketStructure(
+  upperBracket: Record<string, TournamentMatch[]>,
 ): Record<string, TournamentMatch[]> {
-  const updatedBracket = { ...bracket };
+  // // Calculate the total number of matches in the upper bracket
+  // const totalUpperBracketMatches = Object.values(upperBracket).reduce(
+  //   (total, roundMatches) => total + roundMatches.length,
+  //   0,
+  // );
 
-  // Group match results by round and bracket
-  const resultsByRound: Record<string, { match: number; team: string }[]> = {};
+  // Determine the number of rounds in the lower bracket (one less than the upper bracket's rounds)
+  const lowerBracketRounds = Object.keys(upperBracket).length - 1;
 
+  // Initialize the lower bracket structure
+  const lowerBracket: Record<string, TournamentMatch[]> = {};
+
+  // Generate and populate lower bracket matches
+  for (let roundNumber = 0; roundNumber < lowerBracketRounds; roundNumber++) {
+    const upperBracketRound = Object.keys(upperBracket)[roundNumber + 1]; // Add 1 to skip the first upper bracket round
+    const roundName = `${roundNumber + 1}`;
+    const lowerBracketRound: TournamentMatch[] = [];
+
+    // Calculate the number of matches in the current lower bracket round
+    const lowerBracketRoundMatches = upperBracket[upperBracketRound].length;
+
+    // Create lower bracket matches for the current round
+    for (
+      let matchNumber = 0;
+      matchNumber < lowerBracketRoundMatches;
+      matchNumber++
+    ) {
+      // Customize match properties as needed
+      const lowerBracketMatch: TournamentMatch = {
+        Result: "Unknown",
+        MatchNumber: matchNumber,
+      };
+
+      lowerBracketRound.push(lowerBracketMatch);
+    }
+
+    // Add the current lower bracket round to the lowerBracket object
+    lowerBracket[roundName] = lowerBracketRound;
+  }
+
+  return lowerBracket;
+}
+
+function calculateLowerBracketMatch(
+  upperBracketMatchNumber: number,
+  upperBracketMatches: number,
+) {
+  // Ensure it's not the final round of the upper bracket
+  if (upperBracketMatchNumber >= upperBracketMatches / 2) {
+    // Return -1 to indicate that this is the final round and there's no corresponding lower bracket match.
+    return -1;
+  }
+  // Calculate the corresponding lower bracket match
+  return Math.floor(upperBracketMatchNumber / 2);
+}
+
+function updateBracketWithMatchResults(
+  matchResults: {
+    team1: string;
+    team2: string;
+    result: "Win" | "Loss";
+    round: number;
+    matchNumber: number;
+    bracket: "Upper" | "Lower";
+  }[],
+  bracket: Record<string, TournamentMatch[]>,
+) {
   matchResults.forEach((match) => {
     const { round, result, team1, team2, matchNumber } = match;
     const roundName = `${round}`;
-    if (!resultsByRound[roundName]) {
-      resultsByRound[roundName] = [];
+
+    if (!bracket[roundName]) {
+      bracket[roundName] = [];
     }
 
-    if (!updatedBracket[roundName]) {
-      updatedBracket[roundName] = [];
-    }
-
-    if (updatedBracket[roundName]?.[matchNumber]) {
-      updatedBracket[roundName][matchNumber].Team1 = {
+    if (bracket[roundName]?.[matchNumber]) {
+      bracket[roundName][matchNumber].Team1 = {
         teamName: team1,
         teamElo: 0,
         members: [],
       };
-      updatedBracket[roundName][matchNumber].Team2 = {
+      bracket[roundName][matchNumber].Team2 = {
         teamName: team2,
         teamElo: 0,
         members: [],
       };
-      updatedBracket[roundName][matchNumber].Result = result;
-
-      resultsByRound[roundName].push({
-        match: matchNumber,
-        team: result === "Win" ? team1 : team2,
-      });
+      bracket[roundName][matchNumber].Result = result;
     }
   });
 
   // Generate matchups for subsequent rounds and maintain the structure
-  for (let i = 2; i <= Object.keys(updatedBracket).length; i++) {
+  for (let i = 2; i <= Object.keys(bracket).length; i++) {
     const roundName = `${i}`;
     const previousRoundName = `${i - 1}`;
-    const currentBracket = updatedBracket[roundName];
-    const previousBracket = updatedBracket[previousRoundName];
+    const currentBracket = bracket[roundName];
+    const previousBracket = bracket[previousRoundName];
 
     if (currentBracket && previousBracket) {
       for (let j = 0; j < currentBracket.length; j++) {
@@ -360,7 +488,6 @@ function updateBracketWithResults(
         }
         console.log(`round: ${roundName}, match: ${j}`);
         // console.log(previousMatchResult1, previousMatchResult2);
-
         if (
           previousMatchResult1?.Result !== "Unknown" &&
           previousMatchResult2?.Result !== "Unknown"
@@ -395,25 +522,4 @@ function updateBracketWithResults(
       }
     }
   }
-
-  return updatedBracket;
-}
-
-interface TournamentMatch {
-  Team1?: TournamentTeam;
-  Team2?: TournamentTeam;
-  Result: "Win" | "Loss" | "Unknown";
-  MatchNumber: number;
-}
-
-interface TournamentTeam {
-  teamName: string;
-  teamElo: number;
-  members: {
-    userId: string | null;
-    teamId: number | null;
-    user: {
-      name: string;
-    } | null;
-  }[];
 }

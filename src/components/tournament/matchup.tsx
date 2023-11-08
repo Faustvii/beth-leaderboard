@@ -1,10 +1,12 @@
 export const MatchupHtml = ({
   team1,
   team2,
+  matchNumber,
   result = "Unknown",
 }: {
   team1: string;
   team2: string;
+  matchNumber: number;
   result?: "Win" | "Loss" | "Unknown";
 }) => (
   <div class="m-1 h-12 w-48 overflow-hidden rounded-md">
@@ -29,6 +31,9 @@ export const MatchupHtml = ({
       } bg-gray-500`}
     >
       <span class="p-2">{team2}</span>
+    </div>
+    <div class="z-10 bg-gray-500 text-red-50">
+      <span class="float-right">{matchNumber}</span>
     </div>
   </div>
 );

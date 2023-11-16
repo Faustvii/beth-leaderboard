@@ -4,7 +4,7 @@ export const RoundHtml = ({
   children,
   ...props
 }: PropsWithChildren<JSX.HtmlAnchorTag>) => (
-  <div class="relative col-span-1 flex flex-col justify-around" {...props}>
+  <div class="col-span-1 flex flex-col justify-evenly" {...props}>
     {...children}
   </div>
 );

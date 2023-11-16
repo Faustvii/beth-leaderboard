@@ -1,6 +1,5 @@
-import { eq } from "drizzle-orm";
 import { Elysia } from "elysia";
-import { object } from "zod";
+import { number } from "zod";
 import { HeaderHtml } from "../../components/header";
 import { LayoutHtml } from "../../components/Layout";
 import { NavbarHtml } from "../../components/Navbar";
@@ -25,7 +24,7 @@ export const tournament = new Elysia({ prefix: "/tournament" })
         active: true,
         name: "Test Tournament",
         description: "This is a test tournament",
-        mode: "Double Elimination",
+        mode: "Single Elimination",
       };
       const tournamentId = (
         await writeDb
@@ -99,6 +98,8 @@ export const tournament = new Elysia({ prefix: "/tournament" })
     // teams are matched up based on elo with highest elo getting a bye in case of odd number of teams
     const teams = activeTournament.teams.sort((a, b) => a.teamElo - b.teamElo);
 
+    generateDoubleEliminationBracket(teams.length);
+
     const matches: {
       team1: string;
       team2: string;
@@ -158,11 +159,12 @@ export const tournament = new Elysia({ prefix: "/tournament" })
     ];
     const bracket = initialSeeding(teams);
     const bracketWithResults = updateBracketWithResults(bracket, matches);
+    activeTournament.mode = "Double Elimination";
 
     return html(() => (
       <LayoutHtml>
         <NavbarHtml activePage="leaderboard" session={session} />
-        <HeaderHtml title="Tournament" />
+        <HeaderHtml title="Upper Bracket" />
         <div class="flex p-5">
           {Object.entries(bracketWithResults.Upper).map(([_, matches]) => (
             <RoundHtml>
@@ -179,16 +181,17 @@ export const tournament = new Elysia({ prefix: "/tournament" })
         </div>
         {activeTournament.mode === "Double Elimination" && (
           <>
-            <HeaderHtml title="Loser's bracket" />
+            <HeaderHtml title="Lower bracket" />
             <div class="flex p-5">
               {Object.entries(bracketWithResults.Lower).map(
                 ([_, roundTeams]) => (
                   <RoundHtml>
-                    {roundTeams.map((team) => (
+                    {roundTeams.map((match) => (
                       <MatchupHtml
-                        team1={team?.Team1?.teamName ?? ""}
-                        team2={team?.Team2?.teamName ?? ""}
-                        result={team?.Result}
+                        team1={match?.Team1?.teamName ?? ""}
+                        team2={match?.Team2?.teamName ?? ""}
+                        result={match?.Result}
+                        matchNumber={match.MatchNumber}
                       />
                     ))}
                   </RoundHtml>
@@ -216,6 +219,50 @@ function calculateRounds(teams: number): number {
   const rounds = Math.log2(teams);
 
   return rounds;
+}
+
+function generateDoubleEliminationBracket(teams: number): void {
+  if (teams < 2) {
+    console.log("Please provide at least 2 teams.");
+    return;
+  }
+
+  // Ensure an even number of teams
+  if (teams % 2 !== 0) {
+    teams++;
+  }
+
+  const upperBracket: Record<number, number> = {};
+  const lowerBracket: Record<number, number> = {};
+
+  // Calculate the number of rounds in the upper bracket
+  const numRoundsUpper = Math.ceil(Math.log2(teams));
+
+  // Generate matches for each round in the upper bracket
+  for (let round = 1; round <= numRoundsUpper; round++) {
+    const matchesInRound = Math.ceil(teams / Math.pow(2, round));
+    upperBracket[round] = matchesInRound;
+  }
+
+  // Calculate the number of rounds in the lower bracket
+  const numRoundsLower = numRoundsUpper + 1;
+
+  // Generate matches for each round in the lower bracket
+  // half upper bracket in round
+  // half of previous bracket round
+  for (let round = 1; round <= numRoundsLower; round++) {
+    const matchesInRound =
+      round === 1
+        ? Math.ceil(teams / Math.pow(2, round))
+        : Math.ceil(upperBracket[round] / 2) +
+          Math.ceil(lowerBracket[round - 1] / 2);
+    lowerBracket[round] = matchesInRound;
+  }
+
+  // Print the results
+  console.log("Double Elimination Bracket");
+  console.log("Upper Bracket:", upperBracket);
+  console.log("Lower Bracket:", lowerBracket);
 }
 
 // Define a function to calculate the number of matches in a round
@@ -267,10 +314,10 @@ function initialSeeding(
     }
 
     upperBracket[i + 1] = upperBracketTeams;
+    // lowerBracket[i + 1] = lowerBracketTeams;
   }
 
-  const lowerBracket = calculateLowerBracketStructure(upperBracket);
-  console.log(lowerBracket);
+  const lowerBracket = calculateLowerBracketStructure(teams, upperBracket);
 
   return { Upper: upperBracket, Lower: lowerBracket };
 }
@@ -300,7 +347,6 @@ function updateBracketWithResults(
     matchResults.filter((x) => x.bracket === "Upper"),
     upperBracket,
   );
-  // todo: fix lower bracket seeding & match results
   test(matchResults, lowerBracket, upperBracket);
 
   return updatedBracket;
@@ -377,46 +423,55 @@ function test(
 }
 
 function calculateLowerBracketStructure(
+  teams: TournamentTeam[],
   upperBracket: Record<string, TournamentMatch[]>,
 ): Record<string, TournamentMatch[]> {
-  // // Calculate the total number of matches in the upper bracket
-  // const totalUpperBracketMatches = Object.values(upperBracket).reduce(
-  //   (total, roundMatches) => total + roundMatches.length,
-  //   0,
-  // );
-
-  // Determine the number of rounds in the lower bracket (one less than the upper bracket's rounds)
-  const lowerBracketRounds = Object.keys(upperBracket).length - 1;
-
-  // Initialize the lower bracket structure
+  // const lowerBracketRounds = Object.keys(upperBracket).length - 1;
+  let numberOfTeams = teams.length;
+  if (numberOfTeams % 2 !== 0) {
+    numberOfTeams++;
+  }
   const lowerBracket: Record<string, TournamentMatch[]> = {};
 
-  // Generate and populate lower bracket matches
-  for (let roundNumber = 0; roundNumber < lowerBracketRounds; roundNumber++) {
-    const upperBracketRound = Object.keys(upperBracket)[roundNumber + 1]; // Add 1 to skip the first upper bracket round
-    const roundName = `${roundNumber + 1}`;
-    const lowerBracketRound: TournamentMatch[] = [];
+  // Calculate the number of rounds in the upper bracket
+  const numRoundsUpper = Math.ceil(Math.log2(numberOfTeams));
 
-    // Calculate the number of matches in the current lower bracket round
-    const lowerBracketRoundMatches = upperBracket[upperBracketRound].length;
+  // Calculate the number of rounds in the lower bracket
+  const numRoundsLower = numRoundsUpper + 1;
 
-    // Create lower bracket matches for the current round
-    for (
-      let matchNumber = 0;
-      matchNumber < lowerBracketRoundMatches;
-      matchNumber++
-    ) {
-      // Customize match properties as needed
-      const lowerBracketMatch: TournamentMatch = {
+  // Generate matches for each round in the lower bracket
+  // for (let round = 1; round <= numRoundsLower; round++) {
+  //   const matchesInRound =
+  //     round === numRoundsLower
+  //       ? Math.ceil(teams / Math.pow(2, round + 1))
+  //       : Math.ceil(teams / Math.pow(2, round));
+  //   lowerBracket[round] = matchesInRound;
+  // }
+
+  // Generate matches for each round in the lower bracket
+
+  for (let round = 1; round <= numRoundsLower; round++) {
+    const upperBracketMatchesInRound = upperBracket[round]?.length ?? 0;
+    const lowerBracketPreviousRoundMatches =
+      lowerBracket[round - 1]?.length ?? 0;
+    const matchesInRound =
+      round == 1
+        ? Math.ceil(numberOfTeams / Math.pow(2, round)) / 2
+        : Math.ceil(
+            (upperBracketMatchesInRound + lowerBracketPreviousRoundMatches) / 2,
+          );
+    const matches: TournamentMatch[] = [];
+
+    for (let matchNumber = 0; matchNumber < matchesInRound; matchNumber++) {
+      matches.push({
+        Team1: undefined,
+        Team2: undefined,
         Result: "Unknown",
         MatchNumber: matchNumber,
-      };
-
-      lowerBracketRound.push(lowerBracketMatch);
+      });
     }
 
-    // Add the current lower bracket round to the lowerBracket object
-    lowerBracket[roundName] = lowerBracketRound;
+    lowerBracket[`${round}`] = matches;
   }
 
   return lowerBracket;
@@ -486,15 +541,15 @@ function updateBracketWithMatchResults(
           // Skip matches that already have results.
           continue;
         }
-        console.log(`round: ${roundName}, match: ${j}`);
-        // console.log(previousMatchResult1, previousMatchResult2);
+
         if (
-          previousMatchResult1?.Result !== "Unknown" &&
-          previousMatchResult2?.Result !== "Unknown"
+          previousMatchResult1?.Result === "Unknown" &&
+          previousMatchResult2?.Result === "Unknown"
         ) {
           // Skip matches where both previous matches have not been played yet.
           continue;
         }
+
         const previousMatchWinner =
           previousMatchResult1?.Result === "Unknown"
             ? undefined

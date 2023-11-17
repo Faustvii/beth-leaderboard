@@ -24,10 +24,7 @@ export const match = new Elysia({
     }
   })
   .get("/", async ({ html, session, headers }) => {
-    const isFirefoxMobile =
-      headers["user-agent"]?.includes("Firefox") &&
-      headers["user-agent"]?.includes("Mobile");
-    return html(() => MatchPage(session, headers, isFirefoxMobile));
+    return html(() => MatchPage(session, headers));
   })
   .get(
     "/search",
@@ -204,44 +201,24 @@ function matchSearchResults(results: { name: string; id: string }[]) {
 function MatchPage(
   session: Session | null,
   headers: Record<string, string | null>,
-  isFirefoxMobile = false,
 ) {
   return (
     <>
       {isHxRequest(headers) ? (
-        MatchForm(session, isFirefoxMobile)
+        MatchForm(session)
       ) : (
-        <LayoutHtml>{MatchForm(session, isFirefoxMobile)}</LayoutHtml>
+        <LayoutHtml>{MatchForm(session)}</LayoutHtml>
       )}
     </>
   );
 }
 
-function MatchForm(session: Session | null, isFirefoxMobile: boolean) {
+function MatchForm(session: Session | null) {
   return (
     <>
       <NavbarHtml session={session} activePage="match" />
       <HeaderHtml title="Log match" />
-      {isFirefoxMobile ? (
-        <div class="text-center">
-          <p>
-            Firefox mobile doesn't support the datalist element 😭 so you are
-            out of luck
-          </p>
-          <a
-            class="font-medium text-blue-500 hover:underline"
-            href="https://bugzilla.mozilla.org/show_bug.cgi?id=1535985"
-          >
-            Firefox bugzilla
-          </a>
-          <p>
-            Help me implement a searchable input field so we can switch away
-            from datalist
-          </p>
-        </div>
-      ) : (
-        maForm()
-      )}
+      maForm()
     </>
   );
 }

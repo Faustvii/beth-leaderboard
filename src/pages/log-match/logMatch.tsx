@@ -1,16 +1,17 @@
+import clsx from "clsx";
 import { eq, inArray, like } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { type Session } from "lucia";
-import { HeaderHtml } from "../components/header";
-import { LayoutHtml } from "../components/Layout";
-import { NavbarHtml } from "../components/Navbar";
-import { SearchHtml } from "../components/Search";
-import { ctx } from "../context";
-import { matches, user } from "../db/schema";
-import { isHxRequest, notEmpty, redirect } from "../lib";
-import { syncIfLocal } from "../lib/dbHelpers";
-import { applyMatchResult, matchEloChange } from "../lib/elo";
-import { type GameResult } from "../types/elo";
+import { HeaderHtml } from "../../components/header";
+import { LayoutHtml } from "../../components/Layout";
+import { NavbarHtml } from "../../components/Navbar";
+import { ctx } from "../../context";
+import { matches, user } from "../../db/schema";
+import { isHxRequest, notEmpty, redirect } from "../../lib";
+import { syncIfLocal } from "../../lib/dbHelpers";
+import { applyMatchResult, matchEloChange } from "../../lib/elo";
+import { type GameResult } from "../../types/elo";
+import { UserLookUp } from "./components/userLookup";
 
 export const match = new Elysia({
   prefix: "/match",
@@ -31,10 +32,11 @@ export const match = new Elysia({
   .get(
     "/search",
     async ({ readDb, html, query: { name } }) => {
+      if (name === "") return;
       const players = await readDb
         .select({ name: user.name, id: user.id })
         .from(user)
-        .limit(10)
+        .limit(5)
         .where(like(user.name, `%${name}%`));
 
       return html(() => matchSearchResults(players));
@@ -178,9 +180,22 @@ function matchSearchResults(results: { name: string; id: string }[]) {
   return (
     <>
       {results.map((result) => (
-        <option value={result.name} id={result.id}>
+        <button
+          id={result.id}
+          class={clsx(
+            [
+              "w-full p-3 pl-10 text-left hover:bg-primary/50 last:hover:rounded-b-lg",
+            ],
+            [
+              "focus-visible:outline-none focus-visible:ring focus-visible:ring-primary/50 last:focus-visible:rounded-b-lg",
+            ],
+          )}
+          value={result.name}
+          // _={`on click halt the event then put my id into #white1Id@value then set #white1-input's value to my value then add @hidden to #white1-results`}
+          _="on click halt the event then add @hidden to the closest <div/> then put my value into the value of the previous <input/> from me then put my id into the value of the next <input/>"
+        >
           {result.name}
-        </option>
+        </button>
       ))}
     </>
   );
@@ -246,73 +261,35 @@ async function maForm() {
         hx-params="not name"
         hx-target-400="#errors"
       >
-        <input type="hidden" form="matchForm" id="white1Id" name="white1Id" />
-        <input type="hidden" form="matchForm" id="white2Id" name="white2Id" />
-        <input type="hidden" form="matchForm" id="black1Id" name="black1Id" />
-        <input type="hidden" form="matchForm" id="black2Id" name="black2Id" />
-        <script>
-          {function checkUserKeydown(event: Event) {
-            // Don't submit a search on enter or when selecting an entry with the mouse
-            return event instanceof KeyboardEvent && event.key !== "Enter";
-          }}
-        </script>
-
-        <div class="group relative z-0 mb-6 w-full border-b">
+        {/* TODO: Use flex with gap instead */}
+        {/* White team */}
+        <div class="group relative mb-6 w-full border-b">
           <span class="text-white">White team</span>
         </div>
-        <div class="group relative z-0 mb-6 w-full">
-          <SearchHtml
-            hx-get="/match/search"
-            form="matchForm"
-            label="White player 1"
-            hx-trigger="keyup[checkUserKeydown.call(this, event)] changed delay:300ms"
-            outputField="white1Id"
-            dataListId="white1"
-            required="true"
-          />
+        <div class="group relative mb-6 w-full">
+          <UserLookUp label="White player 1" input="white1" required="true" />
         </div>
-        <div class="group relative z-0 mb-6 w-full">
-          <SearchHtml
-            hx-get="/match/search"
-            form="matchForm"
-            label="White player 2 (Optional)"
-            hx-trigger="keyup[checkUserKeydown.call(this, event)] changed delay:300ms"
-            outputField="white2Id"
-            dataListId="white2"
-          />
+        <div class="group relative mb-6 w-full">
+          <UserLookUp label="White player 2 (optional)" input="white2" />
         </div>
 
-        <div class="group relative z-0 mb-6 w-full border-b">
+        {/* Black team */}
+        <div class="group relative mb-6 w-full border-b">
           <span class="text-white">Black team</span>
         </div>
-
-        <div class="group relative z-0 mb-6 w-full">
-          <SearchHtml
-            hx-get="/match/search"
-            required="true"
-            form="matchForm"
-            label="Black player 1"
-            outputField="black1Id"
-            hx-trigger="keyup[checkUserKeydown.call(this, event)] changed delay:300ms"
-            dataListId="black1"
-          />
+        <div class="group relative mb-6 w-full">
+          <UserLookUp label="Black player 1" input="black1" required="true" />
         </div>
-        <div class="group relative z-0 mb-6 w-full">
-          <SearchHtml
-            hx-get="/match/search"
-            form="matchForm"
-            label="Black player 2 (Optional)"
-            hx-trigger="keyup[checkUserKeydown.call(this, event)] changed delay:300ms"
-            outputField="black2Id"
-            dataListId="black2"
-          />
+        <div class="group relative mb-6 w-full">
+          <UserLookUp label="Black player 2 (optional)" input="black2" />
         </div>
 
-        <div class="group relative z-0 mb-6 w-full border-b">
+        {/* Winner and points */}
+        <div class="group relative mb-6 w-full border-b">
           <span class="text-white">Match result</span>
         </div>
 
-        <div class="group relative z-0 mb-6 w-full">
+        <div class="group relative mb-6 w-full">
           <select
             name="match_winner"
             form="matchForm"
@@ -334,7 +311,7 @@ async function maForm() {
             Match Winner
           </label>
         </div>
-        <div class="group relative z-0 mb-6 w-full">
+        <div class="group relative mb-6 w-full">
           <input
             type="number"
             form="matchForm"
@@ -355,6 +332,7 @@ async function maForm() {
           </label>
         </div>
 
+        {/* Submit match */}
         <button
           type="submit"
           class="w-full rounded-lg bg-blue-600 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-800 sm:w-auto"

@@ -1,8 +1,8 @@
 import Elysia from "elysia";
 import { home } from "./(home)";
 import { leaderboard } from "./leaderboard";
+import { match } from "./log-match/logMatch";
 import { login } from "./login";
-import { match } from "./match";
 import { play } from "./play/play";
 import { profile } from "./profile";
 import { stats } from "./stats";

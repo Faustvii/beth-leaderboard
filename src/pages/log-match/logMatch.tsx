@@ -218,7 +218,7 @@ function MatchForm(session: Session | null) {
     <>
       <NavbarHtml session={session} activePage="match" />
       <HeaderHtml title="Log match" />
-      maForm()
+      {maForm()}
     </>
   );
 }

@@ -18,7 +18,7 @@ export const match = new Elysia({
   .use(ctx)
   .onBeforeHandle(({ session, headers, set }) => {
     if (!session || !session.user) {
-      redirect({ set, headers }, "/api/auth/signin/google");
+      redirect({ set, headers }, "/api/auth/signin/azure");
       return true;
     }
   })

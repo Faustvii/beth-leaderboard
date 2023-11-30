@@ -4,7 +4,7 @@ import { eq } from "drizzle-orm";
 import { Elysia } from "elysia";
 import { LuciaError } from "lucia";
 import { parseCookie, serializeCookie } from "lucia/utils";
-import { azureAuth, googleAuth } from "../auth";
+import { azureAuth } from "../auth";
 import { config } from "../config";
 import { ctx } from "../context";
 import { user as userSchema } from "../db/schema/auth";
@@ -32,18 +32,18 @@ export const authController = new Elysia({
     ctx.set.headers["Set-Cookie"] = sessionCookie.serialize();
     redirect(ctx, "/");
   })
-  .get("/signin/google", async ({ set }) => {
-    const [url, state] = await googleAuth.getAuthorizationUrl();
-    const stateCookie = serializeCookie("google_auth_state", state, {
-      maxAge: 60 * 60,
-      secure: config.env.NODE_ENV === "production",
-      httpOnly: true,
-      path: "/",
-    });
+  // .get("/signin/google", async ({ set }) => {
+  //   const [url, state] = await googleAuth.getAuthorizationUrl();
+  //   const stateCookie = serializeCookie("google_auth_state", state, {
+  //     maxAge: 60 * 60,
+  //     secure: config.env.NODE_ENV === "production",
+  //     httpOnly: true,
+  //     path: "/",
+  //   });
 
-    set.headers["Set-Cookie"] = stateCookie;
-    set.redirect = url.toString();
-  })
+  //   set.headers["Set-Cookie"] = stateCookie;
+  //   set.redirect = url.toString();
+  // })
   .get("/signin/azure", async ({ set }) => {
     const [url, codeVerifier, state] = await azureAuth.getAuthorizationUrl();
     const stateCookie = serializeCookie("azure_auth_state", state, {
@@ -71,8 +71,6 @@ export const authController = new Elysia({
     "/azure/callback",
     async ({ set, query, headers, writeAuth, redirect, readDb }) => {
       const { code, state } = query;
-      set.status = "Unauthorized";
-      return;
       const cookies = parseCookie(headers.cookie || "");
       const state_cookie = cookies.azure_auth_state;
       const verifier_cookie = cookies.azure_auth_code_verifier;
@@ -168,83 +166,83 @@ export const authController = new Elysia({
         }
       }
     },
-  )
-  .get(
-    "/google/callback",
-    async ({ set, query, headers, writeAuth, redirect, readDb }) => {
-      const { code, state } = query;
-
-      const cookies = parseCookie(headers.cookie || "");
-      const state_cookie = cookies.google_auth_state;
-
-      if (!state_cookie || !state || state_cookie !== state || !code) {
-        console.warn("Invalid state or code", { state, code });
-        set.status = "Unauthorized";
-        return;
-      }
-
-      try {
-        const { createUser, getExistingUser, googleUser, createKey } =
-          await googleAuth.validateCallback(code);
-
-        if (googleUser.hd !== "it-minds.dk") {
-          set.status = "Unauthorized";
-          return new Response("You must use an itminds account", {
-            status: 401,
-          });
-        }
-
-        const getUser = async () => {
-          const existingUser = await getExistingUser();
-          if (existingUser) return existingUser;
-
-          if (googleUser.email) {
-            console.log("linking existing user with google auth");
-            const existingDbUser = await readDb.query.user.findFirst({
-              where: eq(userSchema.email, googleUser.email),
-            });
-
-            if (existingDbUser) {
-              const existUser = writeAuth.transformDatabaseUser(existingDbUser);
-              await createKey(existUser.userId);
-              return existUser;
-            }
-          }
-
-          const user = await createUser({
-            attributes: {
-              name: googleUser.name,
-              elo: 1500,
-              email: googleUser.email ?? null,
-              picture: googleUser.picture ?? null,
-            },
-          });
-
-          return user;
-        };
-
-        const user = await getUser();
-        const session = await writeAuth.createSession({
-          userId: user.userId,
-          attributes: {},
-        });
-        const sessionCookie = writeAuth.createSessionCookie(session);
-        await syncIfLocal();
-
-        set.headers["Set-Cookie"] = sessionCookie.serialize();
-        redirect({ set, headers }, "/");
-      } catch (error) {
-        console.log(error, "Error in google auth callback");
-        if (error instanceof OAuthRequestError) {
-          set.status = "Unauthorized";
-          return;
-        } else {
-          set.status = "Internal Server Error";
-          return;
-        }
-      }
-    },
   );
+// .get(
+//   "/google/callback",
+//   async ({ set, query, headers, writeAuth, redirect, readDb }) => {
+//     const { code, state } = query;
+
+//     const cookies = parseCookie(headers.cookie || "");
+//     const state_cookie = cookies.google_auth_state;
+
+//     if (!state_cookie || !state || state_cookie !== state || !code) {
+//       console.warn("Invalid state or code", { state, code });
+//       set.status = "Unauthorized";
+//       return;
+//     }
+
+//     try {
+//       const { createUser, getExistingUser, googleUser, createKey } =
+//         await googleAuth.validateCallback(code);
+
+//       if (googleUser.hd !== "it-minds.dk") {
+//         set.status = "Unauthorized";
+//         return new Response("You must use an itminds account", {
+//           status: 401,
+//         });
+//       }
+
+//       const getUser = async () => {
+//         const existingUser = await getExistingUser();
+//         if (existingUser) return existingUser;
+
+//         if (googleUser.email) {
+//           console.log("linking existing user with google auth");
+//           const existingDbUser = await readDb.query.user.findFirst({
+//             where: eq(userSchema.email, googleUser.email),
+//           });
+
+//           if (existingDbUser) {
+//             const existUser = writeAuth.transformDatabaseUser(existingDbUser);
+//             await createKey(existUser.userId);
+//             return existUser;
+//           }
+//         }
+
+//         const user = await createUser({
+//           attributes: {
+//             name: googleUser.name,
+//             elo: 1500,
+//             email: googleUser.email ?? null,
+//             picture: googleUser.picture ?? null,
+//           },
+//         });
+
+//         return user;
+//       };
+
+//       const user = await getUser();
+//       const session = await writeAuth.createSession({
+//         userId: user.userId,
+//         attributes: {},
+//       });
+//       const sessionCookie = writeAuth.createSessionCookie(session);
+//       await syncIfLocal();
+
+//       set.headers["Set-Cookie"] = sessionCookie.serialize();
+//       redirect({ set, headers }, "/");
+//     } catch (error) {
+//       console.log(error, "Error in google auth callback");
+//       if (error instanceof OAuthRequestError) {
+//         set.status = "Unauthorized";
+//         return;
+//       } else {
+//         set.status = "Internal Server Error";
+//         return;
+//       }
+//     }
+//   },
+// );
 
 function normalizeAzureADUser(
   user: AzureADUser | AzurePersonalADUser,

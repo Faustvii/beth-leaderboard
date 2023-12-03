@@ -184,7 +184,6 @@ function matchSearchResults(results: { name: string; id: string }[]) {
             "focus-visible:outline-none focus-visible:ring focus-visible:ring-primary/50 last:focus-visible:rounded-b-lg",
           ])}
           value={result.name}
-          // _={`on click halt the event then put my id into #white1Id@value then set #white1-input's value to my value then add @hidden to #white1-results`}
           _="on click halt the event then add @hidden to the closest <div/> then put my value into the value of the previous <input/> from me then put my id into the value of the next <input/>"
         >
           {result.name}

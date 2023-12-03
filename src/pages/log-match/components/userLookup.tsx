@@ -51,11 +51,11 @@ export const UserLookUp = ({ ...props }: Props) => (
     {/* Results from search */}
     <div
       id={`${props.input}-results`}
-      class={clsx(
-        ["bg-slate-600 text-white"],
-        ["rounded-b-lg shadow-md shadow-slate-900/5"],
-        ["absolute z-50 w-full"],
-      )}
+      class={clsx([
+        "bg-slate-600 text-white",
+        "rounded-b-lg shadow-md shadow-slate-900/5",
+        "absolute z-50 w-full",
+      ])}
     />
     <input
       type="hidden"

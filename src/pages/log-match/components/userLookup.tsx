@@ -35,7 +35,7 @@ export const UserLookUp = ({ ...props }: Props) => (
         "focus:border-blue-500 focus:outline-none focus:ring-0",
       ])}
       {...props}
-      _="on focus remove @hidden from next <div/>"
+      _={`on focus remove @hidden from next <div/> then set the value on ${props.input}Id to null`}
     />
     <label
       for={`${props.input}-input`}

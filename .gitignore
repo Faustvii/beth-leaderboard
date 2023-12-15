@@ -179,3 +179,4 @@ beth-cache.sqlite
 src/db/data/*.csv
 public/user/*
 .env.production
+client_wal_index

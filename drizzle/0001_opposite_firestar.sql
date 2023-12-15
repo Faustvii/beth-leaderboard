@@ -1,1 +1,0 @@
-ALTER TABLE `user_key` DROP COLUMN `hashed_password`;

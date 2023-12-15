@@ -1,1 +1,0 @@
-ALTER TABLE `match` RENAME COLUMN `content` TO `result`;--> statement-breakpoint

@@ -1,1 +1,0 @@
-ALTER TABLE match ADD `elo_change` integer NOT NULL;

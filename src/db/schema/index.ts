@@ -1,30 +1,40 @@
 import { relations } from "drizzle-orm";
-import { user } from "./auth";
+import { userTbl } from "./auth";
 import { matches } from "./matches";
+import { seasonsTbl } from "./season";
 
-export { key, session, user } from "./auth";
+export { key, session, userTbl } from "./auth";
 export { matches } from "./matches";
 export { job_queue } from "./jobQueue";
+export { seasonsTbl } from "./season";
 
-export const matchRelations = relations(matches, ({ one }) => ({
-  blackPlayerOne: one(user, {
+export const matchPlayerRelations = relations(matches, ({ one }) => ({
+  blackPlayerOne: one(userTbl, {
     relationName: "blackPlayerOne",
     fields: [matches.blackPlayerOne],
-    references: [user.id],
+    references: [userTbl.id],
   }),
-  blackPlayerTwo: one(user, {
+  blackPlayerTwo: one(userTbl, {
     relationName: "blackPlayerTwo",
     fields: [matches.blackPlayerTwo],
-    references: [user.id],
+    references: [userTbl.id],
   }),
-  whitePlayerOne: one(user, {
+  whitePlayerOne: one(userTbl, {
     relationName: "whitePlayerOne",
     fields: [matches.whitePlayerOne],
-    references: [user.id],
+    references: [userTbl.id],
   }),
-  whitePlayerTwo: one(user, {
+  whitePlayerTwo: one(userTbl, {
     relationName: "whitePlayerTwo",
     fields: [matches.whitePlayerTwo],
-    references: [user.id],
+    references: [userTbl.id],
+  }),
+}));
+
+export const matchSeasonRelations = relations(matches, ({ one }) => ({
+  season: one(seasonsTbl, {
+    relationName: "season",
+    fields: [matches.seasonId],
+    references: [seasonsTbl.id],
   }),
 }));

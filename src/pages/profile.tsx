@@ -6,7 +6,7 @@ import { LayoutHtml } from "../components/Layout";
 import { NavbarHtml } from "../components/Navbar";
 import { StatsCardHtml } from "../components/StatsCard";
 import { ctx } from "../context";
-import { getMatchesWithPlayersHighPerformance } from "../db/queries/matchQueries";
+import { getMatchesWithPlayers } from "../db/queries/matchQueries";
 import { getUser } from "../db/queries/userQueries";
 import { isHxRequest, measure, notEmpty } from "../lib";
 import MatchStatistics, { mapToMatches, RESULT } from "../lib/matchStatistics";
@@ -28,7 +28,7 @@ async function page(
   userId: string,
 ) {
   const { elaspedTimeMs, result: matchesWithPlayers } = await measure(() =>
-    getMatchesWithPlayersHighPerformance(userId),
+    getMatchesWithPlayers(userId),
   );
   console.log(`player stats took ${elaspedTimeMs}ms to get from db`);
   let profileName = "Your stats";

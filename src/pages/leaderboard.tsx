@@ -8,22 +8,18 @@ import { LeaderboardTableHtml } from "../components/LeaderboardTable";
 import { NavbarHtml } from "../components/Navbar";
 import { ctx } from "../context";
 import { readDb } from "../db";
-import { matches, user } from "../db/schema";
+import { playerEloPaginationQuery } from "../db/queries/matchQueries";
+import { getActiveSeason } from "../db/queries/seasonQueries";
+import { matches } from "../db/schema";
 import { type Match } from "../db/schema/matches";
 import { isHxRequest } from "../lib";
 import MatchStatistics, { type RESULT } from "../lib/matchStatistics";
 
-export const playerPaginationQuery = async (page: number) => {
+const playerPaginationQuery = async (page: number) => {
   const pageSize = 15;
-  const players = await readDb.query.user.findMany({
-    columns: {
-      picture: false,
-    },
-    orderBy: [desc(user.elo)],
-    limit: pageSize,
-    offset: (page - 1) * pageSize,
-  });
+  const activeSeason = await getActiveSeason();
 
+  const players = await playerEloPaginationQuery(page, activeSeason?.id ?? 1);
   const playerIds = players.map((player) => player.id);
 
   const matchesByPlayer: Match[] =
@@ -52,7 +48,7 @@ export const playerPaginationQuery = async (page: number) => {
     userId: player.id,
     rank: index + (page - 1) * pageSize + 1,
     name: player.name,
-    elo: player.elo,
+    elo: 1500 + (players.find((p) => p.id === player.id)?.eloChange || 0),
     lastPlayed:
       lastPlayed.find((match) => match.player === player.id)?.lastPlayed ||
       new Date(0),

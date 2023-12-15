@@ -1,99 +1,44 @@
-import { generateRandomString } from "lucia/utils";
-import { writeDb } from ".";
-import { matches, user } from "./schema";
+import { readDb } from ".";
+import { playerEloQuery } from "./queries/matchQueries";
+import { type User } from "./schema/auth";
+import { matches, type InsertMatch } from "./schema/matches";
 
-type newPlayer = typeof user.$inferInsert;
-type newMatch = typeof matches.$inferInsert;
+const users = await readDb.query.userTbl.findMany();
+const mismatchedUsers: User[] = [];
+for (const user of users) {
+  const elo = await playerEloQuery(user.id, 1);
 
-const userEloFile = Bun.file("src/db/data/Statistics.csv");
-const userEloData = await userEloFile.text();
-const userEloLines = userEloData.split("\n");
-const userEloValues = userEloLines.slice(1).map((line) => line.split(","));
-const userElos = userEloValues.map((userElo) => {
-  return {
-    userId: userElo[1].replaceAll('"', ""),
-    elo: parseInt(userElo[2].replaceAll('"', "")),
-  };
-});
-
-const userFile = Bun.file("src/db/data/User.csv");
-const userData = await userFile.text();
-const userLines = userData.split("\n");
-const userValues = userLines.slice(1).map((line) => line.split(","));
-const playersToMigrate: Record<string, newPlayer> = {};
-
-userValues.map((user) => {
-  const player: newPlayer = {
-    id: generateRandomString(15),
-    name: user[1].replaceAll('"', ""),
-    elo:
-      userElos.find((x) => x.userId === user[0].replaceAll('"', ""))?.elo ?? 1,
-    picture: user[4].replaceAll('"', ""),
-    email: user[2].replaceAll('"', ""),
-  };
-  playersToMigrate[user[0].replaceAll('"', "")] = player;
-});
-
-const userGameFile = Bun.file("src/db/data/UserGame.csv");
-const userGameData = await userGameFile.text();
-const userGameLines = userGameData.split("\n");
-const userGameValues = userGameLines.slice(1).map((line) => line.split(","));
-const gamePlayers = userGameValues.map((userGame) => {
-  return {
-    gameId: userGame[2].replaceAll('"', "").replace("\r", ""),
-    color: userGame[0].replaceAll('"', "") === "WHITE" ? "White" : "Black",
-    userId: userGame[1].replaceAll('"', ""),
-  };
-});
-
-const gameFile = Bun.file("src/db/data/Game.csv");
-const gameData = await gameFile.text();
-const gameLines = gameData.split("\n");
-const gameValues = gameLines.slice(1).map((line) => line.split(","));
-const matchesToMigrate: newMatch[] = gameValues.map((game) => {
-  const gameResult = game[2].replaceAll('"', "");
-  const gameId = game[0].replaceAll('"', "");
-  const players = gamePlayers.filter((x) => x.gameId === gameId);
-  const whitePlayers = players.filter((x) => x.color === "White");
-  const blackPlayers = players.filter((x) => x.color === "Black");
-  const match: newMatch = {
-    scoreDiff: parseInt(game[3].replaceAll('"', "")),
-    createdAt: new Date(game[5].replaceAll('"', "")),
-    result:
-      gameResult === "DRAW"
-        ? "Draw"
-        : gameResult === "WHITE"
-        ? "White"
-        : "Black",
-    whitePlayerOne: playersToMigrate[whitePlayers[0].userId].id,
-    whitePlayerTwo:
-      whitePlayers.length == 2
-        ? playersToMigrate[whitePlayers[1].userId].id
-        : null,
-    blackPlayerOne: playersToMigrate[blackPlayers[0].userId].id,
-    blackPlayerTwo:
-      blackPlayers.length == 2
-        ? playersToMigrate[blackPlayers[1].userId].id
-        : null,
-    whiteEloChange: 0,
-    blackEloChange: 0,
-  };
-  return match;
-});
-
-// console.log(matchesToMigrate);
-
-// console.log("migrating players", playersToMigrate);
-
-for (const player of Object.values(playersToMigrate)) {
-  await writeDb
-    .insert(user)
-    .values(player)
-    .onConflictDoUpdate({ target: user.id, set: { elo: player.elo } });
-  await Bun.sleep(250);
+  if (elo !== user.elo) {
+    mismatchedUsers.push(user);
+  }
 }
+console.log(`${mismatchedUsers.length} users have incorrect elo`);
 
-for (const match of matchesToMigrate) {
-  await writeDb.insert(matches).values(match).onConflictDoNothing();
-  await Bun.sleep(250);
+for (let i = 0; i < mismatchedUsers.length; i += 2) {
+  const user1 = mismatchedUsers[i];
+  const user2 = mismatchedUsers[i + 1];
+  const eloUser1 = await playerEloQuery(user1.id, 1);
+  const eloUser2 = await playerEloQuery(user2.id, 1);
+  console.log(
+    `${user1.name} elo is ${eloUser1} but should be ${
+      user1.elo
+    } to get there we need to change it by ${user1.elo - eloUser1}`,
+  );
+  console.log(
+    `${user2.name} elo is ${eloUser2} but should be ${
+      user2.elo
+    } to get there we need to change it by ${user2.elo - eloUser2}`,
+  );
+
+  const newMatch: InsertMatch = {
+    blackPlayerOne: user1.id,
+    whitePlayerOne: user2.id,
+    result: "Draw",
+    scoreDiff: 0,
+    blackEloChange: user1.elo - eloUser1,
+    whiteEloChange: user2.elo - eloUser2,
+    seasonId: 1,
+    createdAt: new Date(2023, 1, 1),
+  };
+  await readDb.insert(matches).values(newMatch);
 }

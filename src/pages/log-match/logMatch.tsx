@@ -6,7 +6,8 @@ import { HeaderHtml } from "../../components/header";
 import { LayoutHtml } from "../../components/Layout";
 import { NavbarHtml } from "../../components/Navbar";
 import { ctx } from "../../context";
-import { matches, user } from "../../db/schema";
+import { getActiveSeason } from "../../db/queries/seasonQueries";
+import { matches, userTbl } from "../../db/schema";
 import { isHxRequest, notEmpty, redirect } from "../../lib";
 import { syncIfLocal } from "../../lib/dbHelpers";
 import { applyMatchResult, matchEloChange } from "../../lib/elo";
@@ -31,10 +32,10 @@ export const match = new Elysia({
     async ({ readDb, html, query: { name } }) => {
       if (name === "") return;
       const players = await readDb
-        .select({ name: user.name, id: user.id })
-        .from(user)
+        .select({ name: userTbl.name, id: userTbl.id })
+        .from(userTbl)
         .limit(5)
-        .where(like(user.name, `%${name}%`));
+        .where(like(userTbl.name, `%${name}%`));
 
       return html(() => matchSearchResults(players));
     },
@@ -55,8 +56,8 @@ export const match = new Elysia({
       const playerArray = [white1Id, white2Id, black1Id, black2Id].filter(
         notEmpty,
       );
-      const players = await readDb.query.user.findMany({
-        where: inArray(user.id, playerArray),
+      const players = await readDb.query.userTbl.findMany({
+        where: inArray(userTbl.id, playerArray),
         columns: {
           id: true,
           elo: true,
@@ -82,6 +83,15 @@ export const match = new Elysia({
       applyMatchResult({ eloFloor: 0 }, match);
 
       type newMatch = typeof matches.$inferInsert;
+      const activeSeason = await getActiveSeason();
+      if (!activeSeason) {
+        return new Response(
+          `<div id="errors" class="text-red-500">There is no active season</div>`,
+          {
+            status: 400,
+          },
+        );
+      }
       const matchInsert: newMatch = {
         result: match_winner,
         scoreDiff: Number(point_difference),
@@ -91,6 +101,7 @@ export const match = new Elysia({
         whitePlayerTwo: white2Id ? white2Id : null,
         blackPlayerOne: black1Id,
         blackPlayerTwo: black2Id ? black2Id : null,
+        seasonId: activeSeason.id,
       };
 
       await writeDb.transaction(async (trx) => {
@@ -99,9 +110,9 @@ export const match = new Elysia({
         for (const team of match.teams) {
           for (const player of team.players) {
             await trx
-              .update(user)
+              .update(userTbl)
               .set({ elo: player.elo })
-              .where(eq(user.id, player.id));
+              .where(eq(userTbl.id, player.id));
           }
         }
       });
@@ -239,7 +250,7 @@ async function maForm() {
           <span class="text-white">White team</span>
         </div>
         <div class="group relative mb-6 w-full">
-          <UserLookUp label="White player 1" input="white1" required="true" />
+          <UserLookUp label="White player 1" input="white1" required={true} />
         </div>
         <div class="group relative mb-6 w-full">
           <UserLookUp label="White player 2 (optional)" input="white2" />
@@ -250,7 +261,7 @@ async function maForm() {
           <span class="text-white">Black team</span>
         </div>
         <div class="group relative mb-6 w-full">
-          <UserLookUp label="Black player 1" input="black1" required="true" />
+          <UserLookUp label="Black player 1" input="black1" required={true} />
         </div>
         <div class="group relative mb-6 w-full">
           <UserLookUp label="Black player 2 (optional)" input="black2" />
@@ -267,9 +278,9 @@ async function maForm() {
             form="matchForm"
             id="match_winner"
             class="peer block w-full appearance-none border-0 border-b-2 border-gray-300 bg-transparent px-0 py-2.5 text-sm   text-white focus:border-blue-500 focus:outline-none focus:ring-0"
-            required="true"
+            required={true}
           >
-            <option disabled value="" selected="true">
+            <option disabled value="" selected={true}>
               Select a winner
             </option>
             <option>White</option>
@@ -291,7 +302,7 @@ async function maForm() {
             id="point_difference"
             class="peer block w-full appearance-none border-0 border-b-2  border-gray-600 bg-transparent px-0 py-2.5   text-sm text-white focus:border-blue-500 focus:outline-none focus:ring-0"
             placeholder=" "
-            required="true"
+            required={true}
             min="0"
             max="960"
             step="5"

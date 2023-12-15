@@ -132,6 +132,28 @@ export const playerEloQuery = async (userId: string, seasonId: number) => {
   return (playerElo[0]?.total_elo_change ?? 0) + 1500;
 };
 
+export const playersEloQuery = async (userIds: string[], seasonId: number) => {
+  const result = eloChangeSubquery(seasonId);
+  const playerElo = await readDb
+    .with(result)
+    .select()
+    .from(result)
+    .where(inArray(result.player_id, userIds));
+  return playerElo.map((elo) => ({
+    id: elo.player_id,
+    elo: (elo.total_elo_change ?? 0) + 1500,
+  }));
+};
+
+export const getAllPlayersWithElo = async (seasonId: number) => {
+  const result = eloChangeSubquery(seasonId);
+  const playerElo = await readDb.with(result).select().from(result);
+  return playerElo.map((elo) => ({
+    id: elo.player_id,
+    elo: (elo.total_elo_change ?? 0) + 1500,
+  }));
+};
+
 export const playerEloPaginationQuery = async (
   page: number,
   seasonId: number,
@@ -148,7 +170,7 @@ export const playerEloPaginationQuery = async (
       .offset((page - 1) * pageSize),
   );
 
-  return await readDb
+  const playerEloChanges = await readDb
     .with(pageResult)
     .select({
       id: pageResult.player_id,
@@ -157,4 +179,10 @@ export const playerEloPaginationQuery = async (
     })
     .from(pageResult)
     .innerJoin(userTbl, eq(pageResult.player_id, userTbl.id));
+
+  return playerEloChanges.map((elo) => ({
+    id: elo.id,
+    name: elo.name,
+    elo: (elo.eloChange ?? 0) + 1500,
+  }));
 };

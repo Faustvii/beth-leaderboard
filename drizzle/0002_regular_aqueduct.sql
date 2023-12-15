@@ -10,9 +10,9 @@ CREATE TABLE `new_match` (
     "white_elo_change" integer NOT NULL,
     `black_elo_change` integer NOT NULL,
     `seasonId` integer NOT NULL REFERENCES season(id)
-)--> statement-breakpoint
+);--> statement-breakpoint
 
-insert into "season" ("id", "name", "startAt", "endAt") values (null, "Season 1", 1672527600, 1704063600) --> statement-breakpoint
+insert into "season" ("id", "name", "startAt", "endAt") values (null, "Season 1", 1672527600, 1704063600);--> statement-breakpoint
 
 INSERT INTO new_match (
         white_player_one,
@@ -41,5 +41,5 @@ FROM match;--> statement-breakpoint
 ALTER TABLE match RENAME TO old_match;--> statement-breakpoint
 ALTER TABLE new_match RENAME TO match;--> statement-breakpoint
 
-DROP TABLE old_match;
+DROP TABLE old_match;--> statement-breakpoint
 CREATE INDEX `match_seasons_idx` ON `match` (`seasonId`);

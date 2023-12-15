@@ -43,6 +43,3 @@ export const matches = sqliteTable(
 
 export type Match = typeof matches.$inferSelect;
 export type InsertMatch = typeof matches.$inferInsert;
-
-// export const insertMatchSchema = createInsertSchema(matches);
-// export const selectMatchSchema = createSelectSchema(matches);

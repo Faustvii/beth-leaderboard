@@ -5,7 +5,6 @@
   "scripts": {
     "dev": "concurrently \"bun run --hot src/main.ts\" \"bun tw:dev\"",
     "start": "concurrently \"bun tw\" \"bun run src/main.ts\"",
-    "db:push": "bunx drizzle-kit push:sqlite",
     "db:studio": "bunx drizzle-kit studio",
     "db:seed": "bun run src/db/seed.ts",
     "db:generate": "bunx drizzle-kit generate:sqlite",

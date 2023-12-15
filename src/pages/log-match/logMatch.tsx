@@ -1,11 +1,12 @@
 import clsx from "clsx";
-import { eq, inArray, like } from "drizzle-orm";
+import { like } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { type Session } from "lucia";
 import { HeaderHtml } from "../../components/header";
 import { LayoutHtml } from "../../components/Layout";
 import { NavbarHtml } from "../../components/Navbar";
 import { ctx } from "../../context";
+import { playersEloQuery } from "../../db/queries/matchQueries";
 import { getActiveSeason } from "../../db/queries/seasonQueries";
 import { matches, userTbl } from "../../db/schema";
 import { isHxRequest, notEmpty, redirect } from "../../lib";
@@ -49,20 +50,24 @@ export const match = new Elysia({
   )
   .post(
     "/",
-    async ({ html, body, readDb, writeDb }) => {
+    async ({ html, body, writeDb }) => {
       const { white1Id, white2Id, black1Id, black2Id } = body;
       const { match_winner, point_difference } = body;
+      const activeSeason = await getActiveSeason();
+      if (!activeSeason) {
+        return new Response(
+          `<div id="errors" class="text-red-500">There is no active season</div>`,
+          {
+            status: 400,
+          },
+        );
+      }
 
       const playerArray = [white1Id, white2Id, black1Id, black2Id].filter(
         notEmpty,
       );
-      const players = await readDb.query.userTbl.findMany({
-        where: inArray(userTbl.id, playerArray),
-        columns: {
-          id: true,
-          elo: true,
-        },
-      });
+
+      const players = await playersEloQuery(playerArray, activeSeason.id);
 
       const whiteTeam = players.filter(
         (player) => player.id === white1Id || player.id === white2Id,
@@ -83,15 +88,7 @@ export const match = new Elysia({
       applyMatchResult({ eloFloor: 0 }, match);
 
       type newMatch = typeof matches.$inferInsert;
-      const activeSeason = await getActiveSeason();
-      if (!activeSeason) {
-        return new Response(
-          `<div id="errors" class="text-red-500">There is no active season</div>`,
-          {
-            status: 400,
-          },
-        );
-      }
+
       const matchInsert: newMatch = {
         result: match_winner,
         scoreDiff: Number(point_difference),
@@ -104,18 +101,7 @@ export const match = new Elysia({
         seasonId: activeSeason.id,
       };
 
-      await writeDb.transaction(async (trx) => {
-        await trx.insert(matches).values(matchInsert);
-
-        for (const team of match.teams) {
-          for (const player of team.players) {
-            await trx
-              .update(userTbl)
-              .set({ elo: player.elo })
-              .where(eq(userTbl.id, player.id));
-          }
-        }
-      });
+      await writeDb.insert(matches).values(matchInsert);
       await syncIfLocal();
       return html(maForm());
     },

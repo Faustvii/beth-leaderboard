@@ -1,8 +1,8 @@
-import { eq } from "drizzle-orm";
 import { generateRandomString } from "lucia/utils";
-import { readDb } from ".";
+import { readDb, writeDb } from ".";
 import { applyMatchResult, matchEloChange } from "../lib/elo";
 import { type GameResult } from "../types/elo";
+import { playerEloQuery } from "./queries/matchQueries";
 import { getActiveSeason } from "./queries/seasonQueries";
 import { matches, seasonsTbl, userTbl } from "./schema";
 import { type InsertSeason } from "./schema/season";
@@ -26,7 +26,7 @@ if (!activeSeason) {
   await readDb.insert(seasonsTbl).values(season);
 }
 
-for (let index = 0; index < 200; index++) {
+for (let index = 0; index < 100; index++) {
   const player: newPlayer = {
     id: generateRandomString(15),
     name: `Player ${index}`,
@@ -37,14 +37,29 @@ for (let index = 0; index < 200; index++) {
   await readDb.insert(userTbl).values(player);
 }
 
-for (let index = 0; index < 15000; index++) {
-  const players = await readDb.query.userTbl.findMany();
-  if (index % 50 == 0) console.log("creating elo match " + index + " of 100");
+for (let index = 0; index < 1000; index++) {
+  const players = await readDb.query.userTbl.findMany({
+    columns: {
+      id: true,
+    },
+  });
+  if (index % 50 == 0) console.log("creating elo match " + index + " of 1000");
 
-  const whitePlayerOne = players[Math.floor(Math.random() * players.length)];
-  const whitePlayerTwo = players[Math.floor(Math.random() * players.length)];
-  const blackPlayerOne = players[Math.floor(Math.random() * players.length)];
-  const blackPlayerTwo = players[Math.floor(Math.random() * players.length)];
+  const playerIds = [
+    players[Math.floor(Math.random() * players.length)].id,
+    players[Math.floor(Math.random() * players.length)].id,
+    players[Math.floor(Math.random() * players.length)].id,
+    players[Math.floor(Math.random() * players.length)].id,
+  ];
+
+  const eloPlayers = playerIds.map(async (id) => ({
+    id: id,
+    elo: await playerEloQuery(id, activeSeason?.id ?? 1),
+  }));
+  const whitePlayerOne = await eloPlayers[0];
+  const whitePlayerTwo = await eloPlayers[1];
+  const blackPlayerOne = await eloPlayers[2];
+  const blackPlayerTwo = await eloPlayers[3];
   // Generate a random date within this year
   const matchDate = new Date(
     startOfYear + Math.random() * (endOfYear - startOfYear),
@@ -99,19 +114,8 @@ for (let index = 0; index < 15000; index++) {
     whitePlayerTwo: whitePlayerTwo.id,
     blackPlayerTwo: blackPlayerTwo.id,
     createdAt: matchDate,
-    seasonId: 1,
+    seasonId: activeSeason?.id ?? 1,
   };
 
-  await readDb.transaction(async (trx) => {
-    await trx.insert(matches).values(matchInsert);
-
-    for (const team of match.teams) {
-      for (const player of team.players) {
-        await trx
-          .update(userTbl)
-          .set({ elo: player.elo })
-          .where(eq(userTbl.id, player.id));
-      }
-    }
-  });
+  await writeDb.insert(matches).values(matchInsert);
 }

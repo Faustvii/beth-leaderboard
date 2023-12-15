@@ -48,7 +48,7 @@ const playerPaginationQuery = async (page: number) => {
     userId: player.id,
     rank: index + (page - 1) * pageSize + 1,
     name: player.name,
-    elo: 1500 + (players.find((p) => p.id === player.id)?.eloChange || 0),
+    elo: player.elo,
     lastPlayed:
       lastPlayed.find((match) => match.player === player.id)?.lastPlayed ||
       new Date(0),

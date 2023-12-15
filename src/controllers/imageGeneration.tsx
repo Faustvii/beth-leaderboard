@@ -1,26 +1,29 @@
 import cron from "@elysiajs/cron";
 import { and, eq, inArray, like, or } from "drizzle-orm";
 import Elysia from "elysia";
+import { config } from "../config";
 import { readDb, writeDb } from "../db";
-import { job_queue, user } from "../db/schema";
+import { job_queue, userTbl } from "../db/schema";
 import { type JobQueue } from "../db/schema/jobQueue";
 import { syncIfLocal } from "../lib/dbHelpers";
 import { isBase64 } from "../lib/userImages";
 
 type newJob = typeof job_queue.$inferInsert;
+
 export const imageGen = new Elysia()
   .use(
     cron({
       name: "imageGen-queue",
-      pattern: "*/5 * * * * *",
+      pattern:
+        config.env.NODE_ENV !== "production" ? "0 0 31 2 *" : "*/5 * * * * *",
       async run() {
-        const usersMissingPictures = await readDb.query.user.findMany({
+        const usersMissingPictures = await readDb.query.userTbl.findMany({
           columns: {
             id: true,
           },
           where: or(
-            eq(user.picture, "/static/crokinole.svg"),
-            like(user.picture, "http%"),
+            eq(userTbl.picture, "/static/crokinole.svg"),
+            like(userTbl.picture, "http%"),
           ),
         });
         if (usersMissingPictures.length <= 0) return;
@@ -54,7 +57,8 @@ export const imageGen = new Elysia()
   .use(
     cron({
       name: "imageGen-worker",
-      pattern: "*/5 * * * * *",
+      pattern:
+        config.env.NODE_ENV !== "production" ? "0 0 31 2 *" : "*/5 * * * * *",
       async run() {
         const usersMissingPictures = await readDb.query.job_queue.findMany({
           where: and(
@@ -79,7 +83,8 @@ export const imageGen = new Elysia()
   .use(
     cron({
       name: "imageGen-cleanup",
-      pattern: "0 0 23 * * *",
+      pattern:
+        config.env.NODE_ENV !== "production" ? "0 0 31 2 *" : "0 0 23 * * *",
       async run() {
         await writeDb
           .delete(job_queue)
@@ -92,6 +97,7 @@ export const imageGen = new Elysia()
 
 const generateImageForUser = async (userId: string, job: JobQueue) => {
   try {
+    if (config.env.NODE_ENV !== "production") return;
     console.log("Generating image for user", userId);
     const controller = new AbortController();
     const timeoutSeconds = 1000 * 600;
@@ -107,9 +113,9 @@ const generateImageForUser = async (userId: string, job: JobQueue) => {
     if (!isBase64(base64Image)) throw new Error("Not a base64 image");
     await writeDb.transaction(async (trx) => {
       await trx
-        .update(user)
+        .update(userTbl)
         .set({ picture: base64Image })
-        .where(eq(user.id, userId));
+        .where(eq(userTbl.id, userId));
       await trx
         .update(job_queue)
         .set({ status: "complete" })

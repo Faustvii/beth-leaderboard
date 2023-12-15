@@ -7,7 +7,7 @@ import { parseCookie, serializeCookie } from "lucia/utils";
 import { azureAuth } from "../auth";
 import { config } from "../config";
 import { ctx } from "../context";
-import { user as userSchema } from "../db/schema/auth";
+import { userTbl as userSchema } from "../db/schema/auth";
 import { syncIfLocal } from "../lib/dbHelpers";
 
 export const authController = new Elysia({
@@ -119,7 +119,7 @@ export const authController = new Elysia({
           }
           if (normalizedAzureUser.email) {
             console.log("linking existing user with azureAd");
-            const existingDbUser = await readDb.query.user.findFirst({
+            const existingDbUser = await readDb.query.userTbl.findFirst({
               where: eq(userSchema.email, normalizedAzureUser.email),
             });
 
@@ -199,7 +199,7 @@ export const authController = new Elysia({
 
 //         if (googleUser.email) {
 //           console.log("linking existing user with google auth");
-//           const existingDbUser = await readDb.query.user.findFirst({
+//           const existingDbUser = await readDb.query.userTbl.findFirst({
 //             where: eq(userSchema.email, googleUser.email),
 //           });
 

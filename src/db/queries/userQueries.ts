@@ -1,16 +1,16 @@
 import { eq } from "drizzle-orm";
 import { readDb } from "..";
-import { user } from "../schema";
+import { userTbl } from "../schema";
 
 export const getUser = (id: string) =>
-  readDb.query.user.findFirst({
+  readDb.query.userTbl.findFirst({
     with: {
       picture: false,
     },
-    where: eq(user.id, id),
+    where: eq(userTbl.id, id),
   });
 
 export const getUserWithPicture = (id: string) =>
-  readDb.query.user.findFirst({
-    where: eq(user.id, id),
+  readDb.query.userTbl.findFirst({
+    where: eq(userTbl.id, id),
   });

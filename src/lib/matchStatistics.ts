@@ -592,6 +592,12 @@ class MatchStatistics {
     );
 
     const filteredPlayers = players.filter((pl) => playerWins[pl.id].total > 1);
+    if (filteredPlayers.length === 0)
+      return {
+        player: { name: "N/A", elo: 0, id: "" },
+        winrate: 0,
+        totalGames: 0,
+      };
 
     const sortedPlayers = filteredPlayers.sort((a, b) => {
       if (lowest) {

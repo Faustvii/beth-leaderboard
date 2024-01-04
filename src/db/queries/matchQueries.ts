@@ -4,16 +4,25 @@ import { readDb } from "..";
 import { notEmpty, unique } from "../../lib";
 import { matches, userTbl } from "../schema";
 
-export const getMatchesWithPlayers = async (userId?: string) => {
+export const getMatchesWithPlayers = async (
+  seasonId?: number,
+  userId?: string,
+) => {
   const result = await readDb.query.matches.findMany({
-    where: userId
-      ? or(
-          eq(matches.blackPlayerOne, userId),
-          eq(matches.blackPlayerTwo, userId),
-          eq(matches.whitePlayerOne, userId),
-          eq(matches.whitePlayerTwo, userId),
-        )
-      : undefined,
+    where:
+      userId && seasonId
+        ? and(
+            eq(matches.seasonId, seasonId),
+            or(
+              eq(matches.blackPlayerOne, userId),
+              eq(matches.blackPlayerTwo, userId),
+              eq(matches.whitePlayerOne, userId),
+              eq(matches.whitePlayerTwo, userId),
+            ),
+          )
+        : seasonId
+          ? eq(matches.seasonId, seasonId)
+          : undefined,
   });
 
   const userIds = result
@@ -139,6 +148,26 @@ export const playersEloQuery = async (userIds: string[], seasonId: number) => {
     .select()
     .from(result)
     .where(inArray(result.player_id, userIds));
+  // None of the players have played any matches
+  if (playerElo.length === 0) {
+    return userIds.map((id) => ({
+      id,
+      elo: 1500,
+    }));
+  }
+  // Some of the players haven't played any matches
+  if (playerElo.length !== userIds.length) {
+    const missingIds = userIds.filter(
+      (id) => !playerElo.find((elo) => elo.player_id === id),
+    );
+    playerElo.push(
+      ...missingIds.map((id) => ({
+        player_id: id,
+        total_elo_change: 0,
+      })),
+    );
+  }
+
   return playerElo.map((elo) => ({
     id: elo.player_id,
     elo: (elo.total_elo_change ?? 0) + 1500,

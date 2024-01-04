@@ -7,6 +7,7 @@ import { NavbarHtml } from "../components/Navbar";
 import { StatsCardHtml } from "../components/StatsCard";
 import { ctx } from "../context";
 import { getMatchesWithPlayers } from "../db/queries/matchQueries";
+import { getActiveSeason } from "../db/queries/seasonQueries";
 import { getUser } from "../db/queries/userQueries";
 import { isHxRequest, measure, notEmpty } from "../lib";
 import MatchStatistics, { mapToMatches, RESULT } from "../lib/matchStatistics";
@@ -27,8 +28,9 @@ async function page(
   headers: Record<string, string | null>,
   userId: string,
 ) {
+  const activeSeason = await getActiveSeason();
   const { elaspedTimeMs, result: matchesWithPlayers } = await measure(() =>
-    getMatchesWithPlayers(userId),
+    getMatchesWithPlayers(activeSeason?.id, userId),
   );
   console.log(`player stats took ${elaspedTimeMs}ms to get from db`);
   let profileName = "Your stats";

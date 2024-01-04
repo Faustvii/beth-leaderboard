@@ -85,6 +85,7 @@ export const match = new Elysia({
       };
 
       const eloChange = matchEloChange(match);
+      console.log("eloChange", eloChange);
       applyMatchResult({ eloFloor: 0 }, match);
 
       type newMatch = typeof matches.$inferInsert;

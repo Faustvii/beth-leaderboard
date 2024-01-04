@@ -1,4 +1,4 @@
-import { desc, inArray, or } from "drizzle-orm";
+import { and, desc, eq, inArray, or } from "drizzle-orm";
 import { Elysia } from "elysia";
 import { type Session } from "lucia";
 import { HeaderHtml } from "../components/header";
@@ -18,8 +18,9 @@ import MatchStatistics, { type RESULT } from "../lib/matchStatistics";
 const playerPaginationQuery = async (page: number) => {
   const pageSize = 15;
   const activeSeason = await getActiveSeason();
+  const activeSeasonId = activeSeason?.id ?? 1;
 
-  const players = await playerEloPaginationQuery(page, activeSeason?.id ?? 1);
+  const players = await playerEloPaginationQuery(page, activeSeasonId);
   const playerIds = players.map((player) => player.id);
 
   const matchesByPlayer: Match[] =
@@ -27,11 +28,14 @@ const playerPaginationQuery = async (page: number) => {
       ? []
       : await readDb.query.matches.findMany({
           orderBy: [desc(matches.createdAt)],
-          where: or(
-            inArray(matches.blackPlayerOne, playerIds),
-            inArray(matches.whitePlayerOne, playerIds),
-            inArray(matches.blackPlayerTwo, playerIds),
-            inArray(matches.whitePlayerTwo, playerIds),
+          where: and(
+            eq(matches.seasonId, activeSeasonId),
+            or(
+              inArray(matches.blackPlayerOne, playerIds),
+              inArray(matches.whitePlayerOne, playerIds),
+              inArray(matches.blackPlayerTwo, playerIds),
+              inArray(matches.whitePlayerTwo, playerIds),
+            ),
           ),
         });
   const lastPlayed = MatchStatistics.latestMatch(matchesByPlayer);

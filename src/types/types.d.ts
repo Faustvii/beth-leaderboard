@@ -8,6 +8,7 @@ interface MatchWithPlayers {
   scoreDiff: number;
   whiteEloChange: number;
   blackEloChange: number;
+  seasonId: number;
   createdAt: Date;
 }
 

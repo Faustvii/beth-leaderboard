@@ -7,6 +7,7 @@ import { NavbarHtml } from "../components/Navbar";
 import { StatsCardHtml } from "../components/StatsCard";
 import { ctx } from "../context";
 import { getMatchesWithPlayers } from "../db/queries/matchQueries";
+import { getActiveSeason } from "../db/queries/seasonQueries";
 import { isHxRequest, measure, notEmpty } from "../lib";
 import MatchStatistics, { mapToMatches } from "../lib/matchStatistics";
 
@@ -34,9 +35,10 @@ async function statsPage(
 }
 
 async function page(session: Session | null) {
+  const activeSeason = await getActiveSeason();
   const { elaspedTimeMs, result: matchesWithPlayers } = await measure(
     async () => {
-      return await getMatchesWithPlayers();
+      return await getMatchesWithPlayers(activeSeason?.id);
     },
   );
   console.log("stats page database calls", elaspedTimeMs, "ms");

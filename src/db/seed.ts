@@ -45,14 +45,14 @@ for (let index = 0; index < 1000; index++) {
   });
   if (index % 50 == 0) console.log("creating elo match " + index + " of 1000");
 
-  const playerIds = [
+  const userIds = [
     players[Math.floor(Math.random() * players.length)].id,
     players[Math.floor(Math.random() * players.length)].id,
     players[Math.floor(Math.random() * players.length)].id,
     players[Math.floor(Math.random() * players.length)].id,
   ];
 
-  const eloPlayers = playerIds.map(async (id) => ({
+  const eloPlayers = userIds.map(async (id) => ({
     id: id,
     elo: await playerEloQuery(id, activeSeason?.id ?? 1),
   }));

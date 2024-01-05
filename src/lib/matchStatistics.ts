@@ -9,9 +9,9 @@ export enum RESULT {
 }
 
 class MatchStatistics {
-  static getMatchHistory(matches: MatchWithPlayers[], playerId: string) {
+  static getMatchHistory(matches: MatchWithPlayers[], userId: string) {
     const matchHistories = this.getMatchHistories(matches);
-    const playerMatchHistory = matchHistories[playerId];
+    const playerMatchHistory = matchHistories[userId];
     return playerMatchHistory.sort(
       (a, b) => b.match.createdAt.getTime() - a.match.createdAt.getTime(),
     );
@@ -126,10 +126,10 @@ class MatchStatistics {
     };
   }
 
-  static getPlayersStreak(matches: MatchWithPlayers[], playerId: string) {
+  static getPlayersStreak(matches: MatchWithPlayers[], userId: string) {
     const streaks = this.streaksByPlayer(matches);
     const playerStreak = streaks.find(
-      (streak) => streak.player.id === playerId,
+      (streak) => streak.player.id === userId,
     );
 
     return playerStreak
@@ -140,9 +140,9 @@ class MatchStatistics {
       : { highestStreak: 0, loseStreak: 0 };
   }
 
-  static getPlayersEloTrend(matches: MatchWithPlayers[], playerId: string) {
+  static getPlayersEloTrend(matches: MatchWithPlayers[], userId: string) {
     return matches.map((mt) => {
-      const currentTeam = this.getPlayersTeam(mt, playerId);
+      const currentTeam = this.getPlayersTeam(mt, userId);
       const eloChange =
         currentTeam === "White" ? mt.whiteEloChange : mt.blackEloChange;
 
@@ -153,11 +153,11 @@ class MatchStatistics {
     });
   }
 
-  static test(matches: MatchWithPlayers[], playerId: string) {
+  static test(matches: MatchWithPlayers[], userId: string) {
     const eloChangeByDay: Record<string, number> = {};
 
     matches.forEach((mt) => {
-      const currentTeam = this.getPlayersTeam(mt, playerId);
+      const currentTeam = this.getPlayersTeam(mt, userId);
       const eloChange =
         currentTeam === "White" ? mt.whiteEloChange : mt.blackEloChange;
 
@@ -178,7 +178,7 @@ class MatchStatistics {
 
   static getPlayersEasiestAndHardestOpponents(
     matches: MatchWithPlayers[],
-    playerId: string,
+    userId: string,
   ) {
     const hardestOpponents: Record<string, { player: Player; games: number }> =
       {};
@@ -187,7 +187,7 @@ class MatchStatistics {
 
     for (const match of matches.filter((x) => x.result !== "Draw")) {
       const { whitePlayers, blackPlayers } = this.getMatchTeams(match);
-      const currentTeam = this.getPlayersTeam(match, playerId);
+      const currentTeam = this.getPlayersTeam(match, userId);
       const opposingPlayers =
         currentTeam == "Black" ? whitePlayers : blackPlayers;
 
@@ -300,10 +300,10 @@ class MatchStatistics {
     return playerStreaks;
   }
 
-  static biggestWinAndLoss(matches: MatchWithPlayers[], playerId: string) {
+  static biggestWinAndLoss(matches: MatchWithPlayers[], userId: string) {
     const { wins, losses } = this.splitMatchesIntoWinsLossesAndDraws(
       matches,
-      playerId,
+      userId,
     );
     const biggestWin = Math.max(...wins.map((mt) => mt.scoreDiff));
     const biggestWinMatch = wins.find((mt) => mt.scoreDiff === biggestWin);
@@ -359,13 +359,13 @@ class MatchStatistics {
 
   private static splitMatchesIntoWinsLossesAndDraws(
     matches: MatchWithPlayers[],
-    playerId: string,
+    userId: string,
   ) {
     const wins: MatchWithPlayers[] = [];
     const losses: MatchWithPlayers[] = [];
     const draws: MatchWithPlayers[] = [];
     for (const match of matches) {
-      const currentTeam = this.getPlayersTeam(match, playerId);
+      const currentTeam = this.getPlayersTeam(match, userId);
       if (match.result === currentTeam) {
         wins.push(match);
       } else if (match.result === "Draw") {
@@ -394,64 +394,64 @@ class MatchStatistics {
       const { whitePlayers, blackPlayers } = this.getMatchTeams(match);
 
       for (const player of whitePlayers) {
-        const playerId = player.id;
-        if (!playerStreaks[playerId]) {
-          playerStreaks[playerId] = { winStreak: 0, loseStreak: 0 };
+        const userId = player.id;
+        if (!playerStreaks[userId]) {
+          playerStreaks[userId] = { winStreak: 0, loseStreak: 0 };
         }
 
         if (match.result === "White") {
-          playerStreaks[playerId].winStreak++;
-          playerStreaks[playerId].loseStreak = 0;
+          playerStreaks[userId].winStreak++;
+          playerStreaks[userId].loseStreak = 0;
         } else {
-          playerStreaks[playerId].loseStreak++;
-          playerStreaks[playerId].winStreak = 0;
+          playerStreaks[userId].loseStreak++;
+          playerStreaks[userId].winStreak = 0;
         }
 
-        if (!result[playerId]) {
-          result[playerId] = {
+        if (!result[userId]) {
+          result[userId] = {
             player: player,
             highestWinStreak: 0,
             highestLoseStreak: 0,
           };
         }
-        result[playerId].highestWinStreak = Math.max(
-          result[playerId].highestWinStreak,
-          playerStreaks[playerId].winStreak,
+        result[userId].highestWinStreak = Math.max(
+          result[userId].highestWinStreak,
+          playerStreaks[userId].winStreak,
         );
-        result[playerId].highestLoseStreak = Math.max(
-          result[playerId].highestLoseStreak,
-          playerStreaks[playerId].loseStreak,
+        result[userId].highestLoseStreak = Math.max(
+          result[userId].highestLoseStreak,
+          playerStreaks[userId].loseStreak,
         );
       }
 
       for (const player of blackPlayers) {
-        const playerId = player.id;
-        if (!playerStreaks[playerId]) {
-          playerStreaks[playerId] = { winStreak: 0, loseStreak: 0 };
+        const userId = player.id;
+        if (!playerStreaks[userId]) {
+          playerStreaks[userId] = { winStreak: 0, loseStreak: 0 };
         }
 
         if (match.result === "Black") {
-          playerStreaks[playerId].winStreak++;
-          playerStreaks[playerId].loseStreak = 0;
+          playerStreaks[userId].winStreak++;
+          playerStreaks[userId].loseStreak = 0;
         } else {
-          playerStreaks[playerId].loseStreak++;
-          playerStreaks[playerId].winStreak = 0;
+          playerStreaks[userId].loseStreak++;
+          playerStreaks[userId].winStreak = 0;
         }
 
-        if (!result[playerId]) {
-          result[playerId] = {
+        if (!result[userId]) {
+          result[userId] = {
             player: player,
             highestWinStreak: 0,
             highestLoseStreak: 0,
           };
         }
-        result[playerId].highestWinStreak = Math.max(
-          result[playerId].highestWinStreak,
-          playerStreaks[playerId].winStreak,
+        result[userId].highestWinStreak = Math.max(
+          result[userId].highestWinStreak,
+          playerStreaks[userId].winStreak,
         );
-        result[playerId].highestLoseStreak = Math.max(
-          result[playerId].highestLoseStreak,
-          playerStreaks[playerId].loseStreak,
+        result[userId].highestLoseStreak = Math.max(
+          result[userId].highestLoseStreak,
+          playerStreaks[userId].loseStreak,
         );
       }
     }
@@ -508,7 +508,7 @@ class MatchStatistics {
     return { date: new Date(dayWithMostGames), games: mostGamesOnOneDay };
   }
 
-  static playerWinRate(matches: Match[], playerId: string) {
+  static playerWinRate(matches: Match[], userId: string) {
     const totalGames = matches.length;
     if (totalGames === 0)
       return { wonGames: 0, draws: 0, lostGames: 0, winPercentage: 0 };
@@ -516,13 +516,13 @@ class MatchStatistics {
     const blackWins = matches.filter(
       (mt) =>
         mt.result === "Black" &&
-        (mt.blackPlayerOne === playerId || mt.blackPlayerTwo === playerId),
+        (mt.blackPlayerOne === userId || mt.blackPlayerTwo === userId),
     ).length;
 
     const whiteWins = matches.filter(
       (mt) =>
         mt.result === "White" &&
-        (mt.whitePlayerOne === playerId || mt.whitePlayerTwo === playerId),
+        (mt.whitePlayerOne === userId || mt.whitePlayerTwo === userId),
     ).length;
 
     const draws = matches.filter((mt) => mt.result === "Draw").length;
@@ -688,16 +688,16 @@ class MatchStatistics {
     };
   }
 
-  static playerWinsByResult(matches: Match[], playerId: string) {
+  static playerWinsByResult(matches: Match[], userId: string) {
     const whiteWins = matches.filter(
       (mt) =>
         mt.result === "White" &&
-        (mt.whitePlayerOne === playerId || mt.whitePlayerTwo === playerId),
+        (mt.whitePlayerOne === userId || mt.whitePlayerTwo === userId),
     ).length;
     const blackWins = matches.filter(
       (mt) =>
         mt.result === "Black" &&
-        (mt.blackPlayerOne === playerId || mt.blackPlayerTwo === playerId),
+        (mt.blackPlayerOne === userId || mt.blackPlayerTwo === userId),
     ).length;
     const numOfDraws = matches.filter((mt) => mt.result === "Draw").length;
     const totalGames = blackWins + whiteWins + numOfDraws;
@@ -738,13 +738,13 @@ class MatchStatistics {
     return { whitePlayers, blackPlayers };
   }
 
-  private static getPlayersTeam(
+  public static getPlayersTeam(
     match: MatchWithPlayers,
-    playerId: string,
+    userId: string,
   ): "White" | "Black" {
     const { whitePlayers } = this.getMatchTeams(match);
     const currentTeam = whitePlayers.find(
-      (x) => (typeof x === "string" ? x : x.id) === playerId,
+      (x) => (typeof x === "string" ? x : x.id) === userId,
     )
       ? "White"
       : "Black";
@@ -753,10 +753,10 @@ class MatchStatistics {
 
   private static getPlayersTeamByMatch(
     match: Match,
-    playerId: string,
+    userId: string,
   ): "White" | "Black" {
     const { whitePlayers } = this.getMatchTeamsByMatch(match);
-    const currentTeam = whitePlayers.find((x) => x === playerId)
+    const currentTeam = whitePlayers.find((x) => x === userId)
       ? "White"
       : "Black";
     return currentTeam;

@@ -1,6 +1,6 @@
 import { type ChartConfiguration } from "chart.js";
 import Elysia from "elysia";
-import { type Session } from "lucia";
+import { User, type Session } from "lucia";
 import { HeaderHtml } from "../components/header";
 import { LayoutHtml } from "../components/Layout";
 import { NavbarHtml } from "../components/Navbar";
@@ -57,7 +57,7 @@ async function page(
 
 const profileStats = (
   matchesWithPlayers: MatchWithPlayers[],
-  playerId: string,
+  userId: string,
 ) => {
   const now = performance.now();
   const playerMatches = mapToMatches(matchesWithPlayers);
@@ -66,25 +66,25 @@ const profileStats = (
 
   const colorWinRates = MatchStatistics.playerWinsByResult(
     playerMatches,
-    playerId,
+    userId,
   );
-  const winRate = MatchStatistics.playerWinRate(playerMatches, playerId);
+  const winRate = MatchStatistics.playerWinRate(playerMatches, userId);
   const { highestLoseStreak, highestWinStreak } =
-    MatchStatistics.getPlayersStreak(matchesWithPlayers, playerId);
+    MatchStatistics.getPlayersStreak(matchesWithPlayers, userId);
 
   const { easiestOpponents, hardestOpponents } =
     MatchStatistics.getPlayersEasiestAndHardestOpponents(
       matchesWithPlayers,
-      playerId,
+      userId,
     );
 
   const { win: biggestWin, loss: biggestLoss } =
-    MatchStatistics.biggestWinAndLoss(matchesWithPlayers, playerId);
+    MatchStatistics.biggestWinAndLoss(matchesWithPlayers, userId);
 
-  const eloChanges = MatchStatistics.test(matchesWithPlayers, playerId);
+  const eloChanges = MatchStatistics.test(matchesWithPlayers, userId);
   const matchHistory = MatchStatistics.getMatchHistory(
     matchesWithPlayers,
-    playerId,
+    userId,
   ).slice(0, 20);
 
   const colorWinrateData = {
@@ -255,13 +255,13 @@ const profileStats = (
       <StatsCardHtml title="Longest Losing Streak">
         <span class="text-sm">top lose streak is {highestLoseStreak}</span>
       </StatsCardHtml>
-      <StatsCardHtml title="Match history?">
+      <StatsCardHtml title="Match history">
         <div class="flex max-h-48 snap-x snap-mandatory flex-col gap-2 overflow-y-auto">
           {matchHistory ? (
             matchHistory.map((history) => {
               return (
                 <span class="snap-start text-sm">
-                  {winLossDrawIcon(history.result)} {matchOutput(history)}
+                  {winLossDrawIcon(history.result)} {matchOutput(history, userId)}
                 </span>
               );
             })
@@ -348,13 +348,15 @@ function matchFaceoff(biggestWin: {
   );
 }
 
-function matchOutput({
+async function matchOutput({
   match,
   result,
 }: {
   match: MatchWithPlayers;
   result: RESULT;
-}): JSX.Element {
+},
+userId: string,
+): Promise<JSX.Element> {
   const blackTeam = [
     match.blackPlayerOne.name,
     match.blackPlayerTwo?.name,
@@ -363,17 +365,37 @@ function matchOutput({
     match.whitePlayerOne.name,
     match.whitePlayerTwo?.name,
   ].filter(notEmpty);
-  return (
-    <span class="text-sm">
-      On{" "}
-      {match.createdAt.toLocaleString("en-US", {
-        day: "numeric",
-        month: "long",
-      })}
-      , <span class="font-bold">{whiteTeam.join(" & ")}</span> faced off against{" "}
-      <span class="font-bold">{blackTeam.join(" & ")}</span> and{" "}
-      {result === RESULT.DRAW ? "tied" : result === RESULT.WIN ? "won" : "lost"}{" "}
-      with {match.scoreDiff} points.
-    </span>
-  );
+
+  const firstSide = MatchStatistics.getPlayersTeam(match, userId)
+  if(firstSide === "Black")
+  {
+    return (
+      <span class="text-sm">
+        On{" "}
+        {match.createdAt.toLocaleString("en-US", {
+          day: "numeric",
+          month: "long",
+        })},{" "}
+        <span class="font-bold">{blackTeam.join(" & ")}</span> faced off against{" "}
+        <span class="font-bold">{whiteTeam.join(" & ")}</span> and{" "}
+        {result === RESULT.DRAW ? "tied" : result === RESULT.WIN ? "won" : "lost"}{" "}
+        with {match.scoreDiff} points.
+      </span>
+    );
+  }
+  else{
+    return (
+      <span class="text-sm">
+        On{" "}
+        {match.createdAt.toLocaleString("en-US", {
+          day: "numeric",
+          month: "long",
+        })},{" "}
+        <span class="font-bold">{whiteTeam.join(" & ")}</span> faced off against{" "}
+        <span class="font-bold">{blackTeam.join(" & ")}</span> and{" "}
+        {result === RESULT.DRAW ? "tied" : result === RESULT.WIN ? "won" : "lost"}{" "}
+        with {match.scoreDiff} points.
+      </span>
+    );
+  }
 }

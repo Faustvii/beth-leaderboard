@@ -119,15 +119,15 @@ export const match = new Elysia({
         }
       },
       beforeHandle: ({ body }) => {
-        const playerIds = [
+        const userIds = [
           body.white1Id,
           body.white2Id,
           body.black1Id,
           body.black2Id,
         ].filter((id) => id !== "");
 
-        const uniqueIds = new Set(playerIds);
-        if (uniqueIds.size !== playerIds.length) {
+        const uniqueIds = new Set(userIds);
+        if (uniqueIds.size !== userIds.length) {
           return new Response(
             `<div id="errors" class="text-red-500">The same player can't participate multiple times</div>`,
             {

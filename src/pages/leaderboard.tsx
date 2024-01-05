@@ -21,20 +21,20 @@ const playerPaginationQuery = async (page: number) => {
   const activeSeasonId = activeSeason?.id ?? 1;
 
   const players = await playerEloPaginationQuery(page, activeSeasonId);
-  const playerIds = players.map((player) => player.id);
+  const userIds = players.map((player) => player.id);
 
   const matchesByPlayer: Match[] =
-    playerIds.length === 0
+    userIds.length === 0
       ? []
       : await readDb.query.matches.findMany({
           orderBy: [desc(matches.createdAt)],
           where: and(
             eq(matches.seasonId, activeSeasonId),
             or(
-              inArray(matches.blackPlayerOne, playerIds),
-              inArray(matches.whitePlayerOne, playerIds),
-              inArray(matches.blackPlayerTwo, playerIds),
-              inArray(matches.whitePlayerTwo, playerIds),
+              inArray(matches.blackPlayerOne, userIds),
+              inArray(matches.whitePlayerOne, userIds),
+              inArray(matches.blackPlayerTwo, userIds),
+              inArray(matches.whitePlayerTwo, userIds),
             ),
           ),
         });

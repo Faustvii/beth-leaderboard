@@ -1,6 +1,6 @@
 import { type ChartConfiguration } from "chart.js";
 import Elysia from "elysia";
-import { User, type Session } from "lucia";
+import { type Session } from "lucia";
 import { HeaderHtml } from "../components/header";
 import { LayoutHtml } from "../components/Layout";
 import { NavbarHtml } from "../components/Navbar";
@@ -348,7 +348,7 @@ function matchFaceoff(biggestWin: {
   );
 }
 
-async function matchOutput({
+function matchOutput({
   match,
   result,
 }: {
@@ -356,7 +356,7 @@ async function matchOutput({
   result: RESULT;
 },
 userId: string,
-): Promise<JSX.Element> {
+): JSX.Element {
   const blackTeam = [
     match.blackPlayerOne.name,
     match.blackPlayerTwo?.name,
@@ -366,36 +366,20 @@ userId: string,
     match.whitePlayerTwo?.name,
   ].filter(notEmpty);
 
-  const firstSide = MatchStatistics.getPlayersTeam(match, userId)
-  if(firstSide === "Black")
-  {
-    return (
+  const userTeam = MatchStatistics.getPlayersTeam(match, userId)
+  const firstTeam = userTeam === "Black" ?  blackTeam : whiteTeam;
+  const lastTeam = userTeam === "Black" ? whiteTeam : blackTeam;
+  return (
       <span class="text-sm">
         On{" "}
         {match.createdAt.toLocaleString("en-US", {
           day: "numeric",
           month: "long",
         })},{" "}
-        <span class="font-bold">{blackTeam.join(" & ")}</span> faced off against{" "}
-        <span class="font-bold">{whiteTeam.join(" & ")}</span> and{" "}
+        <span class="font-bold">{firstTeam.join(" & ")}</span> faced off against{" "}
+        <span class="font-bold">{lastTeam.join(" & ")}</span> and{" "}
         {result === RESULT.DRAW ? "tied" : result === RESULT.WIN ? "won" : "lost"}{" "}
         with {match.scoreDiff} points.
       </span>
     );
-  }
-  else{
-    return (
-      <span class="text-sm">
-        On{" "}
-        {match.createdAt.toLocaleString("en-US", {
-          day: "numeric",
-          month: "long",
-        })},{" "}
-        <span class="font-bold">{whiteTeam.join(" & ")}</span> faced off against{" "}
-        <span class="font-bold">{blackTeam.join(" & ")}</span> and{" "}
-        {result === RESULT.DRAW ? "tied" : result === RESULT.WIN ? "won" : "lost"}{" "}
-        with {match.scoreDiff} points.
-      </span>
-    );
-  }
 }

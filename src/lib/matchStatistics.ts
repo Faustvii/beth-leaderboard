@@ -128,9 +128,7 @@ class MatchStatistics {
 
   static getPlayersStreak(matches: MatchWithPlayers[], userId: string) {
     const streaks = this.streaksByPlayer(matches);
-    const playerStreak = streaks.find(
-      (streak) => streak.player.id === userId,
-    );
+    const playerStreak = streaks.find((streak) => streak.player.id === userId);
 
     return playerStreak
       ? {

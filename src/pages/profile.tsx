@@ -261,7 +261,8 @@ const profileStats = (
             matchHistory.map((history) => {
               return (
                 <span class="snap-start text-sm">
-                  {winLossDrawIcon(history.result)} {matchOutput(history, userId)}
+                  {winLossDrawIcon(history.result)}{" "}
+                  {matchOutput(history, userId)}
                 </span>
               );
             })
@@ -348,14 +349,15 @@ function matchFaceoff(biggestWin: {
   );
 }
 
-function matchOutput({
-  match,
-  result,
-}: {
-  match: MatchWithPlayers;
-  result: RESULT;
-},
-userId: string,
+function matchOutput(
+  {
+    match,
+    result,
+  }: {
+    match: MatchWithPlayers;
+    result: RESULT;
+  },
+  userId: string,
 ): JSX.Element {
   const blackTeam = [
     match.blackPlayerOne.name,
@@ -366,20 +368,20 @@ userId: string,
     match.whitePlayerTwo?.name,
   ].filter(notEmpty);
 
-  const userTeam = MatchStatistics.getPlayersTeam(match, userId)
-  const firstTeam = userTeam === "Black" ?  blackTeam : whiteTeam;
+  const userTeam = MatchStatistics.getPlayersTeam(match, userId);
+  const firstTeam = userTeam === "Black" ? blackTeam : whiteTeam;
   const lastTeam = userTeam === "Black" ? whiteTeam : blackTeam;
   return (
-      <span class="text-sm">
-        On{" "}
-        {match.createdAt.toLocaleString("en-US", {
-          day: "numeric",
-          month: "long",
-        })},{" "}
-        <span class="font-bold">{firstTeam.join(" & ")}</span> faced off against{" "}
-        <span class="font-bold">{lastTeam.join(" & ")}</span> and{" "}
-        {result === RESULT.DRAW ? "tied" : result === RESULT.WIN ? "won" : "lost"}{" "}
-        with {match.scoreDiff} points.
-      </span>
-    );
+    <span class="text-sm">
+      On{" "}
+      {match.createdAt.toLocaleString("en-US", {
+        day: "numeric",
+        month: "long",
+      })}
+      , <span class="font-bold">{firstTeam.join(" & ")}</span> faced off against{" "}
+      <span class="font-bold">{lastTeam.join(" & ")}</span> and{" "}
+      {result === RESULT.DRAW ? "tied" : result === RESULT.WIN ? "won" : "lost"}{" "}
+      with {match.scoreDiff} points.
+    </span>
+  );
 }

@@ -1,4 +1,5 @@
 import { notEmpty, unique } from ".";
+import { getMatchesWithPlayers } from "../db/queries/matchQueries";
 import { type Match } from "../db/schema/matches";
 import { getDatePartFromDate } from "./dateUtils";
 
@@ -15,6 +16,15 @@ class MatchStatistics {
     return playerMatchHistory.sort(
       (a, b) => b.match.createdAt.getTime() - a.match.createdAt.getTime(),
     );
+  }
+
+  /**
+   * Gets all matches sorted by most recently registered match.
+   *
+   * @returns matches lol?
+   */
+  static getMatches() {
+    return getMatchesWithPlayers();
   }
 
   static getMatchHistories(matches: MatchWithPlayers[]) {

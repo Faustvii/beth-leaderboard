@@ -43,6 +43,8 @@ async function page(session: Session | null) {
   );
   console.log("stats page database calls", elaspedTimeMs, "ms");
 
+  const globalMatchHistory = await getMatchesWithPlayers();
+  console.log(globalMatchHistory);
   const now = performance.now();
   const matches = mapToMatches(matchesWithPlayers);
   const matchesToday = MatchStatistics.gamesToday(matches);
@@ -230,6 +232,21 @@ async function page(session: Session | null) {
             </span>
           )}
         </StatsCardHtml>
+        <StatsCardHtml title="Latest games">
+          <>
+            <div class="flex flex-col justify-center gap-2">
+              {globalMatchHistory ? (
+                globalMatchHistory.slice(0, 10).map((match) => (
+                  <>
+                    <PrettyMatch match={match} />
+                  </>
+                ))
+              ) : (
+                <span class="text-sm">No matches yet</span>
+              )}
+            </div>
+          </>
+        </StatsCardHtml>
       </div>
       <div class="flex flex-col items-center"></div>
     </>
@@ -268,3 +285,45 @@ async function biggestWin(matches: MatchWithPlayers[]) {
     </span>
   );
 }
+
+interface PrettyMatchProps {
+  match: MatchWithPlayers;
+}
+const PrettyMatch = ({ match }: PrettyMatchProps) => {
+  const teamPlayers = {
+    black: [match.blackPlayerOne.name, match.blackPlayerTwo?.name].filter(
+      notEmpty,
+    ),
+    white: [match.whitePlayerOne.name, match.whitePlayerTwo?.name].filter(
+      notEmpty,
+    ),
+  };
+  if (match.result === "Draw") {
+    return <p>we fucking drew kekw</p>;
+  } else {
+    if (match.result === "Black") {
+      return (
+        <span
+          class="text-balance"
+          style={`font-size: ${match.scoreDiff / 10 + 14}px`}
+        >
+          <span class="font-bold">{teamPlayers.black.join(" & ")}</span> won
+          against the smol p p losers{" "}
+          <span class="font-bold">{teamPlayers.white.join(" & ")}</span>
+          <span>{match.scoreDiff}</span>
+        </span>
+      );
+    } else {
+      return (
+        <span
+          class="text-balance"
+          style={`font-size: ${match.scoreDiff / 10 + 14}px`}
+        >
+          <span class="font-bold">{teamPlayers.white.join(" & ")}</span> won
+          against the big D losers{" "}
+          <span class="font-bold">{teamPlayers.black.join(" & ")}</span>
+        </span>
+      );
+    }
+  }
+};

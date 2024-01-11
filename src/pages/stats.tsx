@@ -9,6 +9,7 @@ import { ctx } from "../context";
 import { getMatchesWithPlayers } from "../db/queries/matchQueries";
 import { getActiveSeason } from "../db/queries/seasonQueries";
 import { isHxRequest, measure, notEmpty } from "../lib";
+import { getDatePartFromDate } from "../lib/dateUtils";
 import MatchStatistics, { mapToMatches } from "../lib/matchStatistics";
 
 export const stats = new Elysia({
@@ -43,7 +44,10 @@ async function page(session: Session | null) {
   );
   console.log("stats page database calls", elaspedTimeMs, "ms");
 
-  const globalMatchHistory = await getMatchesWithPlayers();
+  const globalMatchHistory = matchesWithPlayers
+    .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+    .slice(0, 20)
+    .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   console.log(globalMatchHistory);
   const now = performance.now();
   const matches = mapToMatches(matchesWithPlayers);
@@ -236,7 +240,7 @@ async function page(session: Session | null) {
           <>
             <div class="flex flex-col justify-center gap-2">
               {globalMatchHistory ? (
-                globalMatchHistory.slice(0, 10).map((match) => (
+                globalMatchHistory.map((match) => (
                   <>
                     <PrettyMatch match={match} />
                   </>
@@ -298,32 +302,160 @@ const PrettyMatch = ({ match }: PrettyMatchProps) => {
       notEmpty,
     ),
   };
-  if (match.result === "Draw") {
-    return <p>we fucking drew kekw</p>;
-  } else {
-    if (match.result === "Black") {
+  let winners;
+  let losers;
+  switch (match.result) {
+    case "Draw": {
       return (
         <span
           class="text-balance"
-          style={`font-size: ${match.scoreDiff / 10 + 14}px`}
+          style={`font-size: ${match.scoreDiff / 20 + 14}px`}
         >
-          <span class="font-bold">{teamPlayers.black.join(" & ")}</span> won
-          against the smol p p losers{" "}
-          <span class="font-bold">{teamPlayers.white.join(" & ")}</span>
-          <span>{match.scoreDiff}</span>
-        </span>
-      );
-    } else {
-      return (
-        <span
-          class="text-balance"
-          style={`font-size: ${match.scoreDiff / 10 + 14}px`}
-        >
-          <span class="font-bold">{teamPlayers.white.join(" & ")}</span> won
-          against the big D losers{" "}
-          <span class="font-bold">{teamPlayers.black.join(" & ")}</span>
+          <span class="font-bold">
+            {matchhistoryDateToString(match.createdAt)}
+          </span>{" "}
+          <span class="font-bold"> {teamPlayers.white.join(" & ")}</span>{" "}
+          {"&#128511;"} drew {"&#128511;"} with{" "}
+          <span class="font-bold"> {teamPlayers.black.join(" & ")}</span>
         </span>
       );
     }
+    case "White": {
+      winners = teamPlayers.white.join(" & ");
+      losers = teamPlayers.black.join(" & ");
+      console.log(winners);
+      break;
+    }
+    case "Black": {
+      winners = teamPlayers.black.join(" & ");
+      losers = teamPlayers.white.join(" & ");
+      break;
+    }
   }
+  return (
+    <span
+      class="text-balance"
+      style={`font-size: ${match.scoreDiff / 40 + 14}px`}
+    >
+      <span class="font-bold">{matchhistoryDateToString(match.createdAt)}</span>{" "}
+      <span class="font-bold">{winners}</span>{" "}
+      {fancyInBetweenText(match.scoreDiff, losers)}
+    </span>
+  );
 };
+
+function matchhistoryDateToString(date: Date) {
+  const milisecondsBetween =
+    new Date(getDatePartFromDate(new Date())).getTime() -
+    new Date(getDatePartFromDate(date)).getTime();
+  const daysBetween = milisecondsBetween / (1000 * 60 * 60 * 24);
+  switch (daysBetween) {
+    case 0: {
+      return "Twoday:";
+    }
+    case 1: {
+      return "Yesterday:";
+    }
+    default: {
+      return (
+        date.toLocaleDateString("en-us", {
+          weekday: "long",
+          month: "long",
+          day: "numeric",
+        }) + ":"
+      );
+    }
+  }
+}
+
+function fancyInBetweenText(scoreDiff: number, losers: string) {
+  switch (true) {
+    case scoreDiff > 200:
+      return (
+        "cleaned the floor winning by " +
+        scoreDiff +
+        " points humiliating " +
+        losers +
+        " for life"
+      );
+    case scoreDiff > 180:
+      return "won by " + scoreDiff + " using their feet against" + losers;
+    case scoreDiff > 160:
+      return (
+        "needs to call an &#128511 ambulance &#128511 for " +
+        losers +
+        " as they lost by " +
+        scoreDiff +
+        " points"
+      );
+    case scoreDiff > 140:
+      return "tryharded way too hard on " + losers + " winning by " + scoreDiff;
+    case scoreDiff > 120:
+      return (
+        "absolutely scooby doo doo'd " +
+        losers +
+        " by winning with " +
+        scoreDiff
+      );
+    case scoreDiff > 100:
+      return (
+        "found their inner Slater-power and smashed " +
+        losers +
+        " winnning by " +
+        scoreDiff
+      );
+    case scoreDiff > 80:
+      return (
+        "took a well deserved breather while winning against " +
+        losers +
+        " with " +
+        scoreDiff +
+        " points"
+      );
+    case scoreDiff > 60:
+      return (
+        "comfortably manhandled " +
+        losers +
+        " winning with " +
+        scoreDiff +
+        " points"
+      );
+    case scoreDiff > 50:
+      return (
+        "got an undeserved victory against " +
+        losers +
+        " winning by pathetic " +
+        scoreDiff +
+        " points"
+      );
+    case scoreDiff > 40:
+      return (
+        "won a hard fought battle against " +
+        losers +
+        " with " +
+        scoreDiff +
+        " points"
+      );
+    case scoreDiff > 30:
+      return (
+        "won by simply being better against " +
+        losers +
+        " winning by " +
+        scoreDiff +
+        " points"
+      );
+    case scoreDiff >= 20:
+      return (
+        "won by sheer luck against " + losers + " with " + scoreDiff + " points"
+      );
+    case scoreDiff >= 5:
+      return (
+        "got the tightest of tightest wins against " +
+        losers +
+        "winning by " +
+        scoreDiff
+      );
+    default:
+      return "won ? against ";
+  }
+}

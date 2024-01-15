@@ -18,11 +18,11 @@ if (!activeSeason) {
   const startAt = new Date(now.getFullYear(), 0, 1);
   const endAt = new Date(now.getFullYear() + 1, 0, 1);
   const season: InsertSeason = {
-    name: "Season 1",
+    name: `Season ${now.getFullYear()}}`,
     startAt: startAt,
     endAt: endAt,
   };
-  console.log("Creating season 1", season);
+  console.log("Creating season", season);
   await readDb.insert(seasonsTbl).values(season);
 }
 

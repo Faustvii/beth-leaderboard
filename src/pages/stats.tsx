@@ -1,6 +1,7 @@
 import { type ChartConfiguration } from "chart.js";
 import { Elysia } from "elysia";
 import { type Session } from "lucia";
+import { array } from "zod";
 import { HeaderHtml } from "../components/header";
 import { LayoutHtml } from "../components/Layout";
 import { NavbarHtml } from "../components/Navbar";
@@ -302,15 +303,12 @@ const PrettyMatch = ({ match }: PrettyMatchProps) => {
       notEmpty,
     ),
   };
-  let winners;
-  let losers;
+  let winners: string[];
+  let losers: string[];
   switch (match.result) {
     case "Draw": {
       return (
-        <span
-          class="text-balance"
-          style={`font-size: ${match.scoreDiff / 20 + 14}px`}
-        >
+        <span class="text-balance">
           <span class="font-bold">
             {matchhistoryDateToString(match.createdAt)}
           </span>{" "}
@@ -321,14 +319,13 @@ const PrettyMatch = ({ match }: PrettyMatchProps) => {
       );
     }
     case "White": {
-      winners = teamPlayers.white.join(" & ");
-      losers = teamPlayers.black.join(" & ");
-      console.log(winners);
+      winners = teamPlayers.white;
+      losers = teamPlayers.black;
       break;
     }
     case "Black": {
-      winners = teamPlayers.black.join(" & ");
-      losers = teamPlayers.white.join(" & ");
+      winners = teamPlayers.black;
+      losers = teamPlayers.white;
       break;
     }
   }
@@ -338,8 +335,22 @@ const PrettyMatch = ({ match }: PrettyMatchProps) => {
       style={`font-size: ${match.scoreDiff / 40 + 14}px`}
     >
       <span class="font-bold">{matchhistoryDateToString(match.createdAt)}</span>{" "}
-      <span class="font-bold">{winners}</span>{" "}
-      {fancyInBetweenText(match.scoreDiff, losers)}
+      <span
+        class="font-bold"
+        style={`color: #5${(winners.join(" ").length % 16).toString(16)}a${(
+          winners.join(" ").length % 16
+        ).toString(16)}`}
+      >
+        {winners.join(" & ")}
+      </span>{" "}
+      {fancyInBetweenText(match.scoreDiff, losers.join(" & "))}{" "}
+      <span> gaining </span>
+      <span class="font-bold"> {Math.abs(match.blackEloChange)} elo</span>
+      {checkForFarming(
+        teamPlayers.white,
+        teamPlayers.black,
+        match.whiteEloChange,
+      )}
     </span>
   );
 };
@@ -452,10 +463,26 @@ function fancyInBetweenText(scoreDiff: number, losers: string) {
       return (
         "got the tightest of tightest wins against " +
         losers +
-        "winning by " +
+        " winning by " +
         scoreDiff
       );
     default:
       return "won ? against ";
   }
+}
+
+function checkForFarming(
+  winners: string[],
+  losers: string[],
+  matchEloChange: number,
+) {
+  const knownFarmers = "Christina Damsgaard Lind";
+  if (winners.includes(knownFarmers) && Math.abs(matchEloChange) < 20) {
+    return "🧑‍🌾";
+  }
+  if (losers.includes(knownFarmers) && Math.abs(matchEloChange) > 40) {
+    return "🤦‍♂️🧑‍🌾";
+  }
+  const emojiArray: string[] = ["🥳", "😂", "🤷‍♂️", "😎", "🫅"];
+  return emojiArray[Math.floor(Math.random() * emojiArray.length)];
 }

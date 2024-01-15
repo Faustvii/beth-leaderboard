@@ -69,7 +69,7 @@ jobs:
         with:
           context: ./
           file: ./Dockerfile
-          push: true
+          push: false
           tags: |
-            ghcr.io/faustvii/beth-leaderboard:${{ github.ref == 'refs/heads/main' && 'latest' || 'pr-' }}${{ github.ref == 'refs/heads/main' && '' || github.event.number }}${{ github.ref == 'refs/heads/main' || '-latest' }}
+            ghcr.io/faustvii/beth-leaderboard:${{ github.ref == 'refs/heads/main' && 'latest' || 'pr-' }}${{ github.ref == 'refs/heads/main' && '' || github.event.number }}${{ github.ref == 'refs/heads/main' && '' || '-latest' }}
             ${{ github.ref == 'refs/heads/main' && 'ghcr.io/faustvii/beth-leaderboard:' || '' }}${{ github.ref == 'refs/heads/main' && github.sha || '' }}

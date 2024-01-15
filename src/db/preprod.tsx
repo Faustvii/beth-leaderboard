@@ -89,7 +89,7 @@ async function SeedMatches(
       Math.random() > 0.9 ? "Draw" : Math.random() > 0.5 ? "Black" : "White";
     //960 is 4 rounds of only 20 shots and all misses for opposite team
     const scoreDiff =
-      result === "Draw" ? 0 : Math.min(Math.floor(Math.random() * 20) * 5, 960);
+      result === "Draw" ? 0 : Math.min(Math.floor(Math.random() * 40) * 5, 960);
     const match: GameResult = {
       outcome:
         result === "Black" ? "loss" : result === "White" ? "win" : "draw",

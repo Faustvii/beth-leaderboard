@@ -349,7 +349,7 @@ function matchFaceoff(biggestWin: {
   );
 }
 
-export function matchOutput(
+function matchOutput(
   {
     match,
     result,

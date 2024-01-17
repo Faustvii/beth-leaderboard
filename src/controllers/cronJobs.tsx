@@ -1,3 +1,4 @@
+import { mkdir } from "node:fs/promises";
 import cron from "@elysiajs/cron";
 import { and, eq, inArray, like, or } from "drizzle-orm";
 import Elysia from "elysia";
@@ -28,8 +29,10 @@ export const cronJobs = new Elysia()
       pattern: "0 0 31 2 *",
       async run() {
         const users = await getUsers();
+        console.log("Generating image assets for users", users.length);
+        await mkdir("public/user", { recursive: true });
         for (const user of users) {
-          await generateImageAssetForUser(user.id);
+          await generateImageAssetForUser(user.id, user.name);
         }
       },
     }),
@@ -154,36 +157,39 @@ const generateImageForUser = async (userId: string, job: JobQueue) => {
   }
 };
 
-const generateImageAssetForUser = async (userId: string) => {
+const generateImageAssetForUser = async (userId: string, name: string) => {
   const fileName = `public/user/${userId}-32x32.webp`;
   const fullSizeFileName = `public/user/${userId}.webp`;
-  await userPicture(userId, fileName, {
+  await userPicture(name, userId, fileName, {
     width: 32,
     height: 32,
   });
-  await userPicture(userId, fullSizeFileName);
+  await userPicture(name, userId, fullSizeFileName);
 };
 
 async function userPicture(
+  userName: string,
   id: string,
   fileName: string,
   resize?: { width: number; height: number },
 ) {
-  let file = Bun.file(fileName);
+  const file = Bun.file(fileName);
   const exists = await file.exists();
   if (!exists) {
     const dbUser = await getUserWithPicture(id);
     if (!dbUser) {
       return new Response(null, { status: 404 });
     }
-    if (!isBase64(dbUser.picture))
-      return Bun.file("public/crokinole-c.min.svg");
+    console.log("Generating image asset for user", userName);
+    if (!isBase64(dbUser.picture)) {
+      const crokPic = Bun.file("public/crokinole-c.min.svg");
+      await Bun.write(fileName, crokPic);
+      return;
+    }
     const picture = resize
       ? await resizeImage(dbUser.picture, { ...resize })
       : dbUser.picture;
     const pictureBuffer = Buffer.from(picture, "base64");
     await Bun.write(fileName, pictureBuffer);
-    file = Bun.file(fileName);
   }
-  return file;
 }

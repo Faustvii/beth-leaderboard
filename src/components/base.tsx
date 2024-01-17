@@ -23,7 +23,16 @@ export const BaseHtml = ({ children }: PropsWithChildren) => (
           rel="stylesheet"
         />
 
-        <link rel="icon" href="data:;base64,="></link>
+        <link rel="icon" href="/public/favicon-16x16.png" sizes="16x16" />
+        <link rel="icon" href="/public/favicon-32x32.png" sizes="32x32" />
+        <link rel="icon" href="/public/favicon-192x192.png" sizes="192x192" />
+        <link rel="icon" href="/public/favicon-512x512.png" sizes="512x512" />
+
+        <link
+          rel="shortcut icon"
+          sizes="192x192"
+          href="/public/favicon-192x192.png"
+        />
       </head>
       <body
         hx-boost="true"

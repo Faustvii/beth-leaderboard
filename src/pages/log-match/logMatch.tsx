@@ -25,12 +25,12 @@ export const match = new Elysia({
       return true;
     }
   })
-  .get("/", async ({ html, session, headers }) => {
-    return html(() => MatchPage(session, headers));
+  .get("/", async ({ session, headers }) => {
+    return  MatchPage(session, headers);
   })
   .get(
     "/search",
-    async ({ readDb, html, query: { name } }) => {
+    async ({ readDb, query: { name } }) => {
       if (name === "") return;
       const players = await readDb
         .select({ name: userTbl.name, id: userTbl.id })
@@ -38,7 +38,7 @@ export const match = new Elysia({
         .limit(5)
         .where(like(userTbl.name, `%${name}%`));
 
-      return html(() => matchSearchResults(players));
+      return matchSearchResults(players);
     },
     {
       query: t.Partial(
@@ -193,7 +193,7 @@ function matchSearchResults(results: { name: string; id: string }[]) {
 
 function MatchPage(
   session: Session | null,
-  headers: Record<string, string | null>,
+  headers: ElysiaHeader,
 ) {
   return (
     <>

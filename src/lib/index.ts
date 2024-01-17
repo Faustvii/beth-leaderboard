@@ -1,11 +1,11 @@
-import { type HTTPStatusName } from "elysia/utils";
+import { HTTPStatusName } from "elysia/dist/utils";
 
 export function redirect(
   {
     set,
     headers,
   }: {
-    headers: Record<string, string | null>;
+    headers: ElysiaHeader;
     set: {
       headers: Record<string, string> & {
         "Set-Cookie"?: string | string[];
@@ -23,7 +23,7 @@ export function redirect(
   }
 }
 
-export function isHxRequest(headers: Record<string, string | null>) {
+export function isHxRequest(headers: ElysiaHeader) {
   return headers["hx-request"] === "true";
 }
 

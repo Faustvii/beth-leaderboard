@@ -1,7 +1,7 @@
 import { Elysia } from "elysia";
-import { type ElysiaWS } from "elysia/ws";
 import { type Session, type User } from "lucia";
 import { ctx } from "../context";
+import { ElysiaWS } from "elysia/dist/ws";
 
 const oneVsOneQueue: QueuedPlayer[] = [];
 const twovsTwoQueue: QueuedPlayer[] = [];
@@ -9,7 +9,7 @@ const twovsTwoQueue: QueuedPlayer[] = [];
 interface QueuedPlayer {
   User: User;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  Connection: ElysiaWS<any, any>;
+  Connection: ElysiaWS<any, any, any>;
 }
 
 function handle1v1() {
@@ -124,6 +124,7 @@ export const playSocket = new Elysia()
     // }),
   })
   .ws("/play/queue/2v2", {
+    //@ts-expect-error types?
     open(ws) {
       const session = ws.data.session;
       if (!session?.user) {

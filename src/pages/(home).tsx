@@ -4,6 +4,6 @@ import { LeaderboardPage } from "./leaderboard";
 
 export const home = new Elysia()
   .use(ctx)
-  .get("/", async ({ headers, html, session }) => {
-    return html(() => LeaderboardPage(session, headers));
+  .get("/", async ({ headers, session }) => {
+    return LeaderboardPage(session, headers);
   });

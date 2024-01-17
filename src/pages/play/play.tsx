@@ -17,9 +17,9 @@ export const play = new Elysia({
       return true;
     }
   })
-  .get("/", ({ html, session, headers }) => html(PlayPage(session, headers)))
-  .get("/1v1", ({ html }) => html(OneVsOne()))
-  .get("/2v2", ({ html }) => html(TwoVsTwo()));
+  .get("/", ({ session, headers }) => PlayPage(session, headers))
+  .get("/1v1", () => OneVsOne())
+  .get("/2v2", () => TwoVsTwo());
 
 function OneVsOne() {
   return (
@@ -37,10 +37,7 @@ function TwoVsTwo() {
   );
 }
 
-export async function PlayPage(
-  session: Session | null,
-  headers: Record<string, string | null>,
-) {
+export async function PlayPage(session: Session | null, headers: ElysiaHeader) {
   return (
     <>
       {isHxRequest(headers) ? (

@@ -103,7 +103,7 @@ export const NavbarHtml = async ({ session, activePage }: Props) => {
                 <HxButton hx-get="/">
                   <img
                     class="h-8 w-auto"
-                    src="/static/crokinole.svg"
+                    src="/public/crokinole-c.min.svg"
                     alt="Crokinole"
                   />
                 </HxButton>
@@ -131,7 +131,7 @@ export const NavbarHtml = async ({ session, activePage }: Props) => {
                         <img
                           class="h-8 w-8 rounded-full"
                           loading="lazy"
-                          src={`/static/user/${session.user.id}/small`}
+                          src={`/public/user/${session.user.id}-32x32.webp`}
                           alt="Pic"
                         />
                       </button>

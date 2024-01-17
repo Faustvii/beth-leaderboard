@@ -66,16 +66,14 @@ export const leaderboard = new Elysia({
   prefix: "/leaderboard",
 })
   .use(ctx)
-  .get("/", async ({ html, session, headers }) => {
-    return html(() => LeaderboardPage(session, headers));
+  .get("/", async ({ session, headers }) => {
+    return LeaderboardPage(session, headers);
   })
-  .get("/page/:page", ({ html, params: { page } }) =>
-    html(PagedLeaderboard(page)),
-  );
+  .get("/page/:page", ({ params: { page } }) => PagedLeaderboard(page));
 
 export async function LeaderboardPage(
   session: Session | null,
-  headers: Record<string, string | null>,
+  headers: ElysiaHeader,
 ) {
   const rows = await playerPaginationQuery(1);
   return (

@@ -16,16 +16,16 @@ export const profile = new Elysia({
   prefix: "/profile",
 })
   .use(ctx)
-  .get("/", ({ html, session, headers }) => {
-    return html(page(session, headers, session?.user?.id ?? ""));
+  .get("/", ({ session, headers }) => {
+    return page(session, headers, session?.user?.id ?? "");
   })
-  .get("/:userId", ({ html, params, headers, session }) => {
-    return html(page(session, headers, params.userId));
+  .get("/:userId", ({ params, headers, session }) => {
+    return page(session, headers, params.userId);
   });
 
 async function page(
   session: Session | null,
-  headers: Record<string, string | null>,
+  headers: ElysiaHeader,
   userId: string,
 ) {
   const activeSeason = await getActiveSeason();

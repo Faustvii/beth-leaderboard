@@ -1,0 +1,1 @@
+type ElysiaHeader = Record<string, string | undefined>;

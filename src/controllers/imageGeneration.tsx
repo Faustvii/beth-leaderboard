@@ -3,14 +3,27 @@ import { and, eq, inArray, like, or } from "drizzle-orm";
 import Elysia from "elysia";
 import { config } from "../config";
 import { readDb, writeDb } from "../db";
+import { getUsers, getUserWithPicture } from "../db/queries/userQueries";
 import { job_queue, userTbl } from "../db/schema";
 import { type JobQueue } from "../db/schema/jobQueue";
 import { syncIfLocal } from "../lib/dbHelpers";
-import { isBase64 } from "../lib/userImages";
+import { isBase64, resizeImage } from "../lib/userImages";
 
 type newJob = typeof job_queue.$inferInsert;
 
 export const imageGen = new Elysia()
+  .use(
+    cron({
+      name: "generate-image-assets",
+      pattern: "0 0 31 2 *",
+      async run() {
+        const users = await getUsers();
+        for (const user of users) {
+          await generateImageAssetForUser(user.id);
+        }
+      },
+    }),
+  )
   .use(
     cron({
       name: "imageGen-queue",
@@ -22,7 +35,7 @@ export const imageGen = new Elysia()
             id: true,
           },
           where: or(
-            eq(userTbl.picture, "/static/crokinole.svg"),
+            eq(userTbl.picture, "/public/crokinole-c.min.svg"),
             like(userTbl.picture, "http%"),
           ),
         });
@@ -130,3 +143,37 @@ const generateImageForUser = async (userId: string, job: JobQueue) => {
       .where(eq(job_queue.id, job.id));
   }
 };
+
+const generateImageAssetForUser = async (userId: string) => {
+  const fileName = `public/user/${userId}-32x32.webp`;
+  const fullSizeFileName = `public/user/${userId}.webp`;
+  await userPicture(userId, fileName, {
+    width: 32,
+    height: 32,
+  });
+  await userPicture(userId, fullSizeFileName);
+};
+
+async function userPicture(
+  id: string,
+  fileName: string,
+  resize?: { width: number; height: number },
+) {
+  let file = Bun.file(fileName);
+  const exists = await file.exists();
+  if (!exists) {
+    const dbUser = await getUserWithPicture(id);
+    if (!dbUser) {
+      return new Response(null, { status: 404 });
+    }
+    if (!isBase64(dbUser.picture))
+      return Bun.file("public/crokinole-c.min.svg");
+    const picture = resize
+      ? await resizeImage(dbUser.picture, { ...resize })
+      : dbUser.picture;
+    const pictureBuffer = Buffer.from(picture, "base64");
+    await Bun.write(fileName, pictureBuffer);
+    file = Bun.file(fileName);
+  }
+  return file;
+}

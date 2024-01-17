@@ -10,6 +10,14 @@ export const getUser = (id: string) =>
     where: eq(userTbl.id, id),
   });
 
+  export const getUsers = () => {
+    return readDb.query.userTbl.findMany({
+      with: {
+        picture: false,
+      },
+    });
+  }
+
 export const getUserWithPicture = (id: string) =>
   readDb.query.userTbl.findFirst({
     where: eq(userTbl.id, id),

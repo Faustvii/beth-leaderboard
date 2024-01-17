@@ -236,7 +236,7 @@ async function page(session: Session | null) {
             </span>
           )}
         </StatsCardHtml>
-        <StatsCardHtml title="Latest games">
+        <StatsCardHtml title="Latest games" doubleSize>
           <>
             <div class="flex flex-col justify-center gap-2">
               {globalMatchHistory ? (
@@ -336,9 +336,9 @@ const PrettyMatch = ({ match }: PrettyMatchProps) => {
       <span class="font-bold">{matchhistoryDateToString(match.createdAt)}</span>{" "}
       <span
         class="font-bold"
-        style={`color: #5${(winners.join(" ").length % 16).toString(16)}a${(
-          winners.join(" ").length % 16
-        ).toString(16)}`}
+        style={`color: #${(winners.join(" ").length % 14).toString(16)}${(
+          winners.join(" ").length % 14
+        ).toString(16)}fafa`}
       >
         {winners.join(" & ")}
       </span>{" "}
@@ -475,11 +475,10 @@ function checkForFarming(
   losers: string[],
   matchEloChange: number,
 ) {
-  const knownFarmers = "Christina Damsgaard Lind";
-  if (winners.includes(knownFarmers) && Math.abs(matchEloChange) < 20) {
+  if (Math.abs(matchEloChange) < 20) {
     return "🧑‍🌾";
   }
-  if (losers.includes(knownFarmers) && Math.abs(matchEloChange) > 40) {
+  if (Math.abs(matchEloChange) > 39) {
     return "🤦‍♂️🧑‍🌾";
   }
   const emojiArray: string[] = ["🥳", "😂", "🤷‍♂️", "😎", "🫅"];

@@ -389,7 +389,7 @@ function fancyInBetweenText(scoreDiff: number, losers: string) {
         " for life"
       );
     case scoreDiff > 180:
-      return "won by " + scoreDiff + " using their feet against" + losers;
+      return "won by " + scoreDiff + " using their feet against " + losers;
     case scoreDiff > 160:
       return (
         "needs to call an &#128511 ambulance &#128511 for " +

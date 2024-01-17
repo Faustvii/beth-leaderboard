@@ -55,7 +55,7 @@ async function SeedMatches(
   activeSeason: typeof seasonsTbl.$inferSelect,
 ) {
   const startOfYear = new Date(new Date().getFullYear(), 0, 1).getTime();
-  const endOfYear = new Date(new Date().getFullYear() + 1, 0, 1).getTime() - 1;
+  const now = new Date().getTime();
   for (let index = 0; index < 1000; index++) {
     const players = await db.query.userTbl.findMany({
       columns: {
@@ -80,9 +80,9 @@ async function SeedMatches(
     const whitePlayerTwo = await eloPlayers[1];
     const blackPlayerOne = await eloPlayers[2];
     const blackPlayerTwo = await eloPlayers[3];
-    // Generate a random date within this year
+    // Generate a random date within between start of year and now
     const matchDate = new Date(
-      startOfYear + Math.random() * (endOfYear - startOfYear),
+      startOfYear + Math.random() * (now - startOfYear),
     );
 
     const result =

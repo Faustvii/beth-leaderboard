@@ -32,6 +32,7 @@ describe("stats", () => {
         whiteEloChange: 1,
         blackEloChange: 1,
         createdAt: new Date(now - 1000),
+        seasonId: 2,
       },
       {
         id: 2,
@@ -60,6 +61,7 @@ describe("stats", () => {
         whiteEloChange: 1,
         blackEloChange: 1,
         createdAt: new Date(now - 999),
+        seasonId: 2,
       },
       {
         id: 3,
@@ -88,6 +90,7 @@ describe("stats", () => {
         whiteEloChange: 1,
         blackEloChange: 1,
         createdAt: new Date(now - 998),
+        seasonId: 2,
       },
       {
         id: 4,
@@ -116,15 +119,16 @@ describe("stats", () => {
         whiteEloChange: 1,
         blackEloChange: 1,
         createdAt: new Date(now - 997),
+        seasonId: 2,
       },
     ];
     const { highestLoseStreak, highestWinStreak } =
       MatchStatistics.highestStreak(matches);
     //player 1 has 4 wins in a row
     //player 4 has 4 losses in a row
-    expect(highestWinStreak.player.id).toEqual("1");
+    expect(highestWinStreak.player?.id).toEqual("1");
     expect(highestWinStreak.streak).toEqual(4);
-    expect(highestLoseStreak.player.id).toEqual("4");
+    expect(highestLoseStreak.player?.id).toEqual("4");
     expect(highestLoseStreak.streak).toEqual(4);
   });
 
@@ -152,9 +156,9 @@ describe("stats", () => {
       MatchStatistics.highestStreak(matches);
     //player 1 has 3 wins in a row
     //player 2 has 3 losses in a row
-    expect(highestWinStreak.player.id).toEqual("1");
+    expect(highestWinStreak.player?.id).toEqual("1");
     expect(highestWinStreak.streak).toEqual(3);
-    expect(highestLoseStreak.player.id).toEqual("2");
+    expect(highestLoseStreak.player?.id).toEqual("2");
     expect(highestLoseStreak.streak).toEqual(3);
   });
 });
@@ -179,5 +183,6 @@ function generateMatch(createdAt: Date): MatchWithPlayers {
     whiteEloChange: 1,
     blackEloChange: 1,
     createdAt: createdAt,
+    seasonId: 2,
   };
 }

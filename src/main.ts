@@ -5,7 +5,6 @@ import { Elysia } from "elysia";
 import { config } from "./config";
 import { api } from "./controllers/*";
 import { writeDb } from "./db";
-import { SeedPreprod } from "./db/preprod";
 import { pages } from "./pages/*";
 import { webSockets } from "./websockets/*";
 
@@ -29,15 +28,24 @@ console.log(
   `app is listening on http://${app.server?.hostname}:${app.server?.port}`,
 );
 
-await app.store.cron["generate-image-assets"].trigger();
+await startUpTasks(app);
 
-while (app.store.cron["generate-image-assets"].isBusy()) {
-  await Bun.sleep(1000);
-  console.log("waiting for user image asset generation cron job to finish");
-}
-console.log("user image asset generation cron job finished");
-app.store.cron["generate-image-assets"].stop();
+async function startUpTasks(app: App) {
+  const seedCron = app.store.cron["seed-database"];
+  const imageCron = app.store.cron["generate-image-assets"];
+  if (config.env.NODE_ENV === "preprod") {
+    await seedCron.trigger();
+    while (seedCron.isBusy()) {
+      await Bun.sleep(1000);
+      console.log("waiting for database seeding cron job to finish");
+    }
+  }
 
-if (config.env.NODE_ENV === "preprod") {
-  await SeedPreprod(writeDb);
+  await imageCron.trigger();
+  while (imageCron.isBusy()) {
+    await Bun.sleep(1000);
+    console.log("waiting for user image asset generation cron job to finish");
+  }
+  console.log("user image asset generation cron job finished");
+  imageCron.stop();
 }

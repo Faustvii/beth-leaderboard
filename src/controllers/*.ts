@@ -1,9 +1,9 @@
 import Elysia from "elysia";
 import { authController } from "./auth";
-import { imageGen } from "./imageGeneration";
+import { cronJobs } from "./cronJobs";
 
 export const api = new Elysia({
   prefix: "/api",
 })
   .use(authController)
-  .use(imageGen);
+  .use(cronJobs);

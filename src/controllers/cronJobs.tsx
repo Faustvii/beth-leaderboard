@@ -3,6 +3,7 @@ import { and, eq, inArray, like, or } from "drizzle-orm";
 import Elysia from "elysia";
 import { config } from "../config";
 import { readDb, writeDb } from "../db";
+import { SeedPreprod } from "../db/preprod";
 import { getUsers, getUserWithPicture } from "../db/queries/userQueries";
 import { job_queue, userTbl } from "../db/schema";
 import { type JobQueue } from "../db/schema/jobQueue";
@@ -11,7 +12,16 @@ import { isBase64, resizeImage } from "../lib/userImages";
 
 type newJob = typeof job_queue.$inferInsert;
 
-export const imageGen = new Elysia()
+export const cronJobs = new Elysia()
+  .use(
+    cron({
+      name: "seed-database",
+      pattern: "0 0 31 2 *",
+      async run() {
+        await SeedPreprod(writeDb);
+      },
+    }),
+  )
   .use(
     cron({
       name: "generate-image-assets",

@@ -11,15 +11,21 @@ export const play = new Elysia({
   prefix: "/play",
 })
   .use(ctx)
-  .onBeforeHandle(({ session, headers, set }) => {
-    if (!session || !session.user) {
-      redirect({ set, headers }, "/api/auth/signin/azure");
-      return true;
-    }
-  })
-  .get("/", ({ session, headers }) => PlayPage(session, headers))
-  .get("/1v1", () => OneVsOne())
-  .get("/2v2", () => TwoVsTwo());
+  .guard(
+    {
+      beforeHandle: ({ session, headers, set }) => {
+        if (!session || !session.user) {
+          redirect({ set, headers }, "/api/auth/signin/azure");
+          return true;
+        }
+      },
+    },
+    (app) =>
+      app
+        .get("/", ({ session, headers }) => PlayPage(session, headers))
+        .get("/1v1", () => OneVsOne())
+        .get("/2v2", () => TwoVsTwo()),
+  );
 
 function OneVsOne() {
   return (

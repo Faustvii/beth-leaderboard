@@ -4,6 +4,7 @@ import { Elysia } from "elysia";
 import { readAuth, writeAuth } from "../auth";
 import { config } from "../config";
 import { readClient, readDb, writeDb } from "../db";
+import { getActiveSeason } from "../db/queries/seasonQueries";
 import { redirect } from "../lib";
 import { htmlRender } from "../lib/render";
 
@@ -40,5 +41,14 @@ export const ctx = new Elysia({
   .derive(async (ctx) => {
     const authRequest = ctx.readAuth.handleRequest(ctx);
     const session = await authRequest.validate();
+    return { session };
+  })
+  .derive(async (x) => {
+    let seasonId = 0;
+    if (x.headers.route?.endsWith("2")) {
+      seasonId = 2;
+    } else {
+      seasonId = await getActiveSeason();
+    }
     return { session };
   });

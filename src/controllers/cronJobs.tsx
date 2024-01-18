@@ -148,6 +148,7 @@ const generateImageForUser = async (userId: string, job: JobQueue) => {
         .where(eq(job_queue.id, job.id));
     });
     console.log("Image generated for user", userId);
+    await generateImageAssetForUser(userId, userId);
   } catch (error) {
     console.error(`error during image generation`, error);
     await writeDb
@@ -175,14 +176,14 @@ async function userPicture(
 ) {
   const file = Bun.file(fileName);
   const exists = await file.exists();
+  const dbUser = await getUserWithPicture(id);
+  if (!dbUser) {
+    return new Response(null, { status: 404 });
+  }
   if (!exists) {
-    const dbUser = await getUserWithPicture(id);
-    if (!dbUser) {
-      return new Response(null, { status: 404 });
-    }
     console.log("Generating image asset for user", userName);
     if (!isBase64(dbUser.picture)) {
-      const crokPic = Bun.file("public/crokinole-c.min.svg");
+      const crokPic = Bun.file("public/favicon-512x512.png");
       await Bun.write(fileName, crokPic);
       return;
     }
@@ -191,5 +192,22 @@ async function userPicture(
       : dbUser.picture;
     const pictureBuffer = Buffer.from(picture, "base64");
     await Bun.write(fileName, pictureBuffer);
+  } else {
+    // check if image is the same as the base64 image on the user
+    // if resize is set, we need to compare the original image
+    let fileBuffer = await file.arrayBuffer();
+    if (resize) {
+      const fullSizeFile = Bun.file(`public/user/${id}.webp`);
+      fileBuffer = await fullSizeFile.arrayBuffer();
+    }
+    const fileBase64 = Buffer.from(fileBuffer).toString("base64");
+    if (fileBase64 !== dbUser.picture && isBase64(dbUser.picture)) {
+      console.log("Generating image asset for user", userName);
+      const picture = resize
+        ? await resizeImage(dbUser.picture, { ...resize })
+        : dbUser.picture;
+      const pictureBuffer = Buffer.from(picture, "base64");
+      await Bun.write(fileName, pictureBuffer);
+    }
   }
 }

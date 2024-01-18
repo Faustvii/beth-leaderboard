@@ -14,7 +14,7 @@ export const userTbl = sqliteTable(
     email: text("email"),
     picture: text("picture")
       .notNull()
-      .$defaultFn(() => "/static/crokinole.svg"),
+      .$defaultFn(() => "/public/crokinole-c.min.svg"),
     elo: integer("elo").notNull().default(1500),
     // other user attributes
   },

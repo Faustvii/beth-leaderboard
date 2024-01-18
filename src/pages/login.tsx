@@ -6,8 +6,8 @@ import { ctx } from "../context";
 
 export const login = new Elysia({ prefix: "/login" })
   .use(ctx)
-  .get("/", async ({ html, session }) => {
-    return html(() => (
+  .get("/", async ({ session }) => {
+    return (
       <LayoutHtml>
         <NavbarHtml session={session} activePage="leaderboard" />
         <HeaderHtml title="Leaderboard" />
@@ -19,5 +19,5 @@ export const login = new Elysia({ prefix: "/login" })
           Login with azure
         </a>
       </LayoutHtml>
-    ));
+    );
   });

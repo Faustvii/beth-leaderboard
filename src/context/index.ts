@@ -5,7 +5,7 @@ import { readAuth, writeAuth } from "../auth";
 import { config } from "../config";
 import { readClient, readDb, writeDb } from "../db";
 import { redirect } from "../lib";
-import { htmlRender } from "../lib/render";
+import { html } from "@elysiajs/html";
 
 export const ctx = new Elysia({
   name: "@app/ctx",
@@ -18,8 +18,7 @@ export const ctx = new Elysia({
   .decorate("readAuth", readAuth)
   .decorate("writeAuth", writeAuth)
   .decorate("redirect", redirect)
-  // .use(html())
-  .use(htmlRender())
+  .use(html())
   .use(
     // @ts-expect-error ts can't figure out types
     config.env.DATABASE_CONNECTION_TYPE === "local-replica"

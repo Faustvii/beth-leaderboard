@@ -6,7 +6,7 @@
   position: fixed;
   top: 0;
   z-index: 9999;
-  background-image: url("bar.svg");
+  background-image: url("/public/bar.min.svg");
   background-repeat: no-repeat;
   background-size: 100% 100%;
 }

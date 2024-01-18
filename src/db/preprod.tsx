@@ -44,6 +44,7 @@ async function SeedPlayers(db: typeof readDb) {
       name: `Player ${index}`,
       elo: 1500,
       email: "fake@fake.crokinole",
+      picture: "/public/crokinole-c.min.svg",
     };
 
     await db.insert(userTbl).values(player);

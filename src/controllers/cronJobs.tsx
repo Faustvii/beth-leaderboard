@@ -1,16 +1,42 @@
+import { mkdir } from "node:fs/promises";
 import cron from "@elysiajs/cron";
 import { and, eq, inArray, like, or } from "drizzle-orm";
 import Elysia from "elysia";
 import { config } from "../config";
 import { readDb, writeDb } from "../db";
+import { SeedPreprod } from "../db/preprod";
+import { getUsers, getUserWithPicture } from "../db/queries/userQueries";
 import { job_queue, userTbl } from "../db/schema";
 import { type JobQueue } from "../db/schema/jobQueue";
 import { syncIfLocal } from "../lib/dbHelpers";
-import { isBase64 } from "../lib/userImages";
+import { isBase64, resizeImage } from "../lib/userImages";
 
 type newJob = typeof job_queue.$inferInsert;
 
-export const imageGen = new Elysia()
+export const cronJobs = new Elysia()
+  .use(
+    cron({
+      name: "seed-database",
+      pattern: "0 0 31 2 *",
+      async run() {
+        await SeedPreprod(writeDb);
+      },
+    }),
+  )
+  .use(
+    cron({
+      name: "generate-image-assets",
+      pattern: "0 0 31 2 *",
+      async run() {
+        const users = await getUsers();
+        console.log("Generating image assets for users", users.length);
+        await mkdir("public/user", { recursive: true });
+        for (const user of users) {
+          await generateImageAssetForUser(user.id, user.name);
+        }
+      },
+    }),
+  )
   .use(
     cron({
       name: "imageGen-queue",
@@ -22,7 +48,7 @@ export const imageGen = new Elysia()
             id: true,
           },
           where: or(
-            eq(userTbl.picture, "/static/crokinole.svg"),
+            eq(userTbl.picture, "/public/crokinole-c.min.svg"),
             like(userTbl.picture, "http%"),
           ),
         });
@@ -122,6 +148,7 @@ const generateImageForUser = async (userId: string, job: JobQueue) => {
         .where(eq(job_queue.id, job.id));
     });
     console.log("Image generated for user", userId);
+    await generateImageAssetForUser(userId, userId);
   } catch (error) {
     console.error(`error during image generation`, error);
     await writeDb
@@ -130,3 +157,57 @@ const generateImageForUser = async (userId: string, job: JobQueue) => {
       .where(eq(job_queue.id, job.id));
   }
 };
+
+const generateImageAssetForUser = async (userId: string, name: string) => {
+  const fileName = `public/user/${userId}-32x32.webp`;
+  const fullSizeFileName = `public/user/${userId}.webp`;
+  await userPicture(name, userId, fileName, {
+    width: 32,
+    height: 32,
+  });
+  await userPicture(name, userId, fullSizeFileName);
+};
+
+async function userPicture(
+  userName: string,
+  id: string,
+  fileName: string,
+  resize?: { width: number; height: number },
+) {
+  const file = Bun.file(fileName);
+  const exists = await file.exists();
+  const dbUser = await getUserWithPicture(id);
+  if (!dbUser) {
+    return new Response(null, { status: 404 });
+  }
+  if (!exists) {
+    console.log("Generating image asset for user", userName);
+    if (!isBase64(dbUser.picture)) {
+      const crokPic = Bun.file("public/favicon-512x512.png");
+      await Bun.write(fileName, crokPic);
+      return;
+    }
+    const picture = resize
+      ? await resizeImage(dbUser.picture, { ...resize })
+      : dbUser.picture;
+    const pictureBuffer = Buffer.from(picture, "base64");
+    await Bun.write(fileName, pictureBuffer);
+  } else {
+    // check if image is the same as the base64 image on the user
+    // if resize is set, we need to compare the original image
+    let fileBuffer = await file.arrayBuffer();
+    if (resize) {
+      const fullSizeFile = Bun.file(`public/user/${id}.webp`);
+      fileBuffer = await fullSizeFile.arrayBuffer();
+    }
+    const fileBase64 = Buffer.from(fileBuffer).toString("base64");
+    if (fileBase64 !== dbUser.picture && isBase64(dbUser.picture)) {
+      console.log("Generating image asset for user", userName);
+      const picture = resize
+        ? await resizeImage(dbUser.picture, { ...resize })
+        : dbUser.picture;
+      const pictureBuffer = Buffer.from(picture, "base64");
+      await Bun.write(fileName, pictureBuffer);
+    }
+  }
+}

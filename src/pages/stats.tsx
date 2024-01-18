@@ -1,7 +1,6 @@
 import { type ChartConfiguration } from "chart.js";
 import { Elysia } from "elysia";
 import { type Session } from "lucia";
-import { array } from "zod";
 import { HeaderHtml } from "../components/header";
 import { LayoutHtml } from "../components/Layout";
 import { NavbarHtml } from "../components/Navbar";
@@ -17,13 +16,13 @@ export const stats = new Elysia({
   prefix: "/stats",
 })
   .use(ctx)
-  .get("/", async ({ html, session, headers }) => {
-    return html(() => statsPage(session, headers));
+  .get("/", async ({ session, headers }) => {
+    return statsPage(session, headers);
   });
 
 async function statsPage(
   session: Session | null,
-  headers: Record<string, string | null>,
+  headers: ElysiaHeader,
 ) {
   return (
     <>

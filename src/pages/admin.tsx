@@ -1,6 +1,7 @@
 import { Elysia } from "elysia";
 import { type Session } from "lucia";
 import { HeaderHtml } from "../components/header";
+import { HxButton } from "../components/HxButton";
 import { LayoutHtml } from "../components/Layout";
 import { NavbarHtml } from "../components/Navbar";
 import { StatsCardHtml } from "../components/StatsCard";
@@ -15,6 +16,10 @@ export const admin = new Elysia({
   .use(ctx)
   .get("/", async ({ html, session, headers }) => {
     return html(() => adminPage(session, headers));
+  })
+  .delete("/match/:id", ({ params: { id } }) => {
+    console.log(id);
+    return "";
   });
 
 async function adminPage(
@@ -76,7 +81,7 @@ const PrettyMatch = ({ match }: PrettyMatchProps) => {
   };
   let winners: string[];
   let losers: string[];
-  const matchId: number = match.id;
+
   switch (match.result) {
     case "Draw": {
       return (
@@ -86,7 +91,7 @@ const PrettyMatch = ({ match }: PrettyMatchProps) => {
           <button
             type="Remove match"
             class="w-full rounded-lg bg-blue-600 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-800 sm:w-auto"
-            onclick="doSomething('matchId')"
+            onclick="doSomething(matchId)"
           >
             Remove kebab
           </button>
@@ -106,23 +111,18 @@ const PrettyMatch = ({ match }: PrettyMatchProps) => {
   }
   return (
     <>
-      <script>
-        {function handleClick(matchId: number) {
-          console.log(matchId.toString());
-          return;
-        }}
-      </script>
-      <span class="text-balance" style={`font-size: 16px`}>
+      <span id={match.id} class="text-balance" style={`font-size: 16px`}>
         <span class="font-bold">{winners.join(" & ")}</span> {" won by "}{" "}
         {match.scoreDiff}
         {" against "}
         {losers.join(" & ")}{" "}
         <span> gaining {Math.abs(match.blackEloChange)} elo </span>
         <button
-          id="yikers"
           type="Remove match"
           class="w-full rounded-lg bg-blue-600 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-800 sm:w-auto"
-          onclick="handleClick('${matchId}')"
+          hx-swap="delete"
+          hx-delete={`admin/match/${match.id}`}
+          _="on click halt the event then remove the closest <span/>"
         >
           Remove kebab
         </button>

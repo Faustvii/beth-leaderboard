@@ -1,12 +1,11 @@
 import { Elysia } from "elysia";
 import { type Session } from "lucia";
 import { HeaderHtml } from "../components/header";
-import { HxButton } from "../components/HxButton";
 import { LayoutHtml } from "../components/Layout";
 import { NavbarHtml } from "../components/Navbar";
 import { StatsCardHtml } from "../components/StatsCard";
 import { ctx } from "../context";
-import { getMatchesWithPlayers } from "../db/queries/matchQueries";
+import { deleteMatch, getMatchesWithPlayers } from "../db/queries/matchQueries";
 import { getActiveSeason } from "../db/queries/seasonQueries";
 import { isHxRequest, notEmpty } from "../lib";
 
@@ -19,7 +18,7 @@ export const admin = new Elysia({
   })
   .delete("/match/:id", ({ params: { id } }) => {
     console.log(id);
-    return "";
+    return deleteMatch(parseInt(id));
   });
 
 async function adminPage(
@@ -42,13 +41,13 @@ async function page(session: Session | null) {
   const matchesWithPlayers = await getMatchesWithPlayers(activeSeason?.id);
   const globalMatchHistory = matchesWithPlayers
     .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
-    .slice(0, 20)
+    .slice(0, 1)
     .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   return (
     <>
       <NavbarHtml session={session} activePage="admin" />
       <HeaderHtml title="ADIMINISTWATOR" />
-      <StatsCardHtml title="Latest games" doubleSize>
+      <StatsCardHtml title="Latest game" doubleSize>
         <>
           <div class="flex flex-col justify-center gap-2">
             {globalMatchHistory ? (
@@ -91,7 +90,8 @@ const PrettyMatch = ({ match }: PrettyMatchProps) => {
           <button
             type="Remove match"
             class="w-full rounded-lg bg-blue-600 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-800 sm:w-auto"
-            onclick="doSomething(matchId)"
+            hx-delete={`admin/match/${match.id}`}
+            _="on click halt the event then remove the closest <span/>"
           >
             Remove kebab
           </button>
@@ -120,7 +120,6 @@ const PrettyMatch = ({ match }: PrettyMatchProps) => {
         <button
           type="Remove match"
           class="w-full rounded-lg bg-blue-600 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-800 sm:w-auto"
-          hx-swap="delete"
           hx-delete={`admin/match/${match.id}`}
           _="on click halt the event then remove the closest <span/>"
         >

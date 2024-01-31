@@ -50,3 +50,11 @@ export const getMatches = async (seasonId: number): Promise<Match[]> => {
     };
   });
 };
+
+export const deleteMatch = async (matchId: number) => {
+  const deletedMatch = await readDb
+    .delete(matches)
+    .where(eq(matches.id, matchId))
+    .returning();
+  return deletedMatch;
+};

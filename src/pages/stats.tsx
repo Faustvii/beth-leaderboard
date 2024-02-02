@@ -304,6 +304,7 @@ const PrettyMatch = ({ match }: PrettyMatchProps) => {
   };
   let winners: string[];
   let losers: string[];
+  let winnerElochange: number;
   switch (match.result) {
     case "Draw": {
       return (
@@ -320,11 +321,13 @@ const PrettyMatch = ({ match }: PrettyMatchProps) => {
     case "White": {
       winners = teamPlayers.white;
       losers = teamPlayers.black;
+      winnerElochange = match.whiteEloChange;
       break;
     }
     case "Black": {
       winners = teamPlayers.black;
       losers = teamPlayers.white;
+      winnerElochange = match.blackEloChange;
       break;
     }
   }
@@ -344,7 +347,7 @@ const PrettyMatch = ({ match }: PrettyMatchProps) => {
       </span>{" "}
       {fancyInBetweenText(match.scoreDiff, losers.join(" & "))}{" "}
       <span> gaining </span>
-      <span class="font-bold"> {Math.abs(match.blackEloChange)} elo</span>
+      <span class="font-bold"> {winnerEloChange} elo</span>
       {checkForFarming(
         teamPlayers.white,
         teamPlayers.black,

@@ -7,36 +7,49 @@ import { StatsCardHtml } from "../components/StatsCard";
 import { ctx } from "../context";
 import { deleteMatch, getMatchesWithPlayers } from "../db/queries/matchQueries";
 import { getActiveSeason } from "../db/queries/seasonQueries";
-import { isHxRequest, notEmpty } from "../lib";
+import { isHxRequest, notEmpty, redirect } from "../lib";
 
 export const admin = new Elysia({
   prefix: "/admin",
 })
   .use(ctx)
-  .get("/", async ({ html, session, headers }) => {
-    return html(() => adminPage(session, headers));
+  .onBeforeHandle(({ session, headers, set, roles }) => {
+    if (!session || !session.user) {
+      redirect({ set, headers }, "/api/auth/signin/azure");
+      return true;
+    }
+    if (!roles.includes("admin")) {
+      redirect({ set, headers }, "/");
+      return true;
+    }
   })
-  .delete("/match/:id", ({ params: { id } }) => {
+  //TODO det her hejs skal med til alle sider
+  .get("/", async ({ html, session, headers, roles }) => {
+    return html(() => adminPage(session, headers, roles));
+  })
+  .delete("/match/:id", async ({ params: { id } }) => {
     console.log(id);
-    return deleteMatch(parseInt(id));
+    await deleteMatch(parseInt(id));
+    return;
   });
 
 async function adminPage(
   session: Session | null,
   headers: Record<string, string | null>,
+  userRoles: string[],
 ) {
   return (
     <>
       {isHxRequest(headers) ? (
-        page(session)
+        page(session, userRoles)
       ) : (
-        <LayoutHtml>{page(session)}</LayoutHtml>
+        <LayoutHtml>{page(session, userRoles)}</LayoutHtml>
       )}
     </>
   );
 }
 
-async function page(session: Session | null) {
+async function page(session: Session | null, userRoles: string[]) {
   const activeSeason = await getActiveSeason();
   const matchesWithPlayers = await getMatchesWithPlayers(activeSeason?.id);
   const globalMatchHistory = matchesWithPlayers
@@ -45,7 +58,7 @@ async function page(session: Session | null) {
     .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   return (
     <>
-      <NavbarHtml session={session} activePage="admin" />
+      <NavbarHtml session={session} userRoles={userRoles} activePage="admin" />
       <HeaderHtml title="ADIMINISTWATOR" />
       <StatsCardHtml title="Latest game" doubleSize>
         <>

@@ -17,12 +17,14 @@ export type Page =
 interface Props extends PropsWithChildren {
   session: Session | null;
   activePage: Page;
+  userRoles: string[];
 }
 
 interface NavbarRoute {
   name: string;
   page: Page;
   route: string;
+  roles?: string[];
 }
 
 const pageRoutes: NavbarRoute[] = [
@@ -30,14 +32,14 @@ const pageRoutes: NavbarRoute[] = [
   { name: "Play", page: "play", route: "/play" },
   { name: "Log match", page: "match", route: "/match" },
   { name: "Stats", page: "stats", route: "/stats" },
-  { name: "Admin", page: "admin", route: "/admin" },
+  { name: "Admin", page: "admin", route: "/admin", roles: ["admin"] },
 ];
 
 const profileRoutes: NavbarRoute[] = [
   { name: "Profile", page: "profile", route: "/profile" },
 ];
 
-export const NavbarHtml = async ({ session, activePage }: Props) => {
+export const NavbarHtml = async ({ session, activePage, userRoles }: Props) => {
   return (
     <>
       <script>
@@ -118,9 +120,16 @@ export const NavbarHtml = async ({ session, activePage }: Props) => {
               </div>
               <div class="hidden lg:ml-6 lg:block">
                 <div class="flex w-full items-center justify-center space-x-4">
-                  {pageRoutes.map(({ name, page, route }) =>
-                    navBarButton(name, page, activePage, route),
-                  )}
+                  {pageRoutes
+                    .filter(
+                      (x) =>
+                        !x.roles ||
+                        (x.roles &&
+                          x.roles.every((x) => userRoles.includes(x))),
+                    )
+                    .map(({ name, page, route }) =>
+                      navBarButton(name, page, activePage, route),
+                    )}
                 </div>
               </div>
             </div>
@@ -210,15 +219,21 @@ export const NavbarHtml = async ({ session, activePage }: Props) => {
 
         <div class="hidden lg:hidden" id="mobile-menu">
           <div class="space-y-1 px-2 pb-3 pt-2">
-            {pageRoutes.map(({ name, page, route }) =>
-              navBarButton(
-                name,
-                page,
-                activePage,
-                route,
-                "block rounded-md px-3 py-2 text-base font-medium text-white",
-              ),
-            )}
+            {pageRoutes
+              .filter(
+                (x) =>
+                  !x.roles ||
+                  (x.roles && x.roles.every((x) => userRoles.includes(x))),
+              )
+              .map(({ name, page, route }) =>
+                navBarButton(
+                  name,
+                  page,
+                  activePage,
+                  route,
+                  "block rounded-md px-3 py-2 text-base font-medium text-white",
+                ),
+              )}
           </div>
         </div>
       </nav>

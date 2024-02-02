@@ -347,7 +347,7 @@ const PrettyMatch = ({ match }: PrettyMatchProps) => {
       </span>{" "}
       {fancyInBetweenText(match.scoreDiff, losers.join(" & "))}{" "}
       <span> gaining </span>
-      <span class="font-bold"> {winnerEloChange} elo</span>
+      <span class="font-bold"> {winnerElochange} elo</span>
       {checkForFarming(
         teamPlayers.white,
         teamPlayers.black,

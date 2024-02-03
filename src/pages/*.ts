@@ -1,5 +1,6 @@
 import Elysia from "elysia";
 import { home } from "./(home)";
+import { admin } from "./admin";
 import { leaderboard } from "./leaderboard";
 import { match } from "./log-match/logMatch";
 import { login } from "./login";
@@ -12,7 +13,8 @@ const publicPages = new Elysia()
   .use(login)
   .use(leaderboard)
   .use(stats)
-  .use(profile);
+  .use(profile)
+  .use(admin);
 
 const authPages = new Elysia().use(play).use(match);
 

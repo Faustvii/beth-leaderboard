@@ -215,3 +215,11 @@ export const playerEloPaginationQuery = async (
     elo: (elo.eloChange ?? 0) + 1500,
   }));
 };
+
+export const deleteMatch = async (matchId: number) => {
+  const deletedMatch = await readDb
+    .delete(matches)
+    .where(eq(matches.id, matchId))
+    .returning();
+  return deletedMatch;
+};

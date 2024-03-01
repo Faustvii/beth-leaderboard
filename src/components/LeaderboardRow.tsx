@@ -45,7 +45,7 @@ export const LeaderboardRowHtml = async ({
           <td class="px-1 py-4 pl-2 md:px-3 lg:px-6">{rank}.</td>
           <th
             scope="row"
-            class="grid grid-cols-12 items-center gap-3 whitespace-nowrap px-1 py-4 font-medium text-white md:flex md:px-3 lg:px-6"
+            class="grid grid-cols-12 items-center gap-3 whitespace-nowrap px-1 py-4 font-medium text-white md:flex md:px-3 lg:px-6 "
           >
             <div class="col-span-2">
               <WinLoseStreak
@@ -55,8 +55,8 @@ export const LeaderboardRowHtml = async ({
               />
             </div>
             <img
-              class="col-span-2 mr-1 inline-block h-8 w-8 rounded-full ring-2 ring-gray-700 lg:mr-3 lg:h-8 lg:w-8"
-              src={`/static/user/${userId}/small`}
+              class="col-span-2 mr-1 inline-block h-8 w-8 rounded-full ring-2 ring-gray-700 lg:mr-3 lg:h-40 lg:w-40"
+              src={`/static/user/${userId}/`}
               loading="lazy"
               alt=""
             />
@@ -87,8 +87,8 @@ export const LeaderboardRowHtml = async ({
               />
             </div>
             <img
-              class="col-span-2 mr-1 inline-block h-8 w-8 rounded-full ring-2 ring-gray-700 lg:mr-3 lg:h-8 lg:w-8"
-              src={`/static/user/${userId}/small`}
+              class="col-span-2 mr-1 inline-block h-8 w-8 rounded-full ring-2 ring-gray-700 lg:mr-3 lg:h-40 lg:w-40"
+              src={`/static/user/${userId}/`}
               loading="lazy"
               alt=""
             />
@@ -119,14 +119,14 @@ export const WinLoseStreak = ({
   isWinStreak: boolean;
 }) => {
   if (lastPlayed && isDateOlderThanNDays(lastPlayed, 7)) {
-    return <span class="pr2 text-2xl">💤</span>;
+    return <span class="pr2 text-[160px] leading-[160px]">💤</span>;
   }
   if (streak && streak === 5) {
-    return <span class="pr-2 text-2xl">{isWinStreak ? "🤑" : "🗑️"}</span>;
+    return <span class="pr-2 text-[160px] leading-[160px]">{isWinStreak ? "🤑" : "🗑️"}</span>;
   }
 
   if (streak && streak >= 3) {
-    return <span class="pr-2 text-2xl">{isWinStreak ? "🔥" : "❄️"}</span>;
+    return <span class="pr-2 text-[160px] leading-[160px]">{isWinStreak ? "🔥" : "❄️"}</span>;
   }
 
   return <></>;

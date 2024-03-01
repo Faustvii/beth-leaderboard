@@ -11,6 +11,9 @@ export default {
       colors: {
         primary: "#ff8906",
       },
+      screens: {
+        'tall': { 'raw': '(min-height: 1920px)' },
+      },
     },
   },
   plugins: [],

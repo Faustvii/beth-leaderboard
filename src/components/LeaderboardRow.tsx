@@ -55,8 +55,8 @@ export const LeaderboardRowHtml = async ({
               />
             </div>
             <img
-              class="col-span-2 mr-1 inline-block h-8 w-8 rounded-full ring-2 ring-gray-700 lg:mr-3 lg:h-8 lg:w-8"
-              src={`/static/user/${userId}/small`}
+              class="col-span-2 mr-1 inline-block h-8 w-8 rounded-full ring-2 ring-gray-700 lg:mr-3 hover:h-40 hover:w-40 tall:h-40 tall:w-40 lg"
+              src={`/static/user/${userId}/`}
               loading="lazy"
               alt=""
             />
@@ -87,8 +87,8 @@ export const LeaderboardRowHtml = async ({
               />
             </div>
             <img
-              class="col-span-2 mr-1 inline-block h-8 w-8 rounded-full ring-2 ring-gray-700 lg:mr-3 lg:h-8 lg:w-8"
-              src={`/static/user/${userId}/small`}
+              class="col-span-2 mr-1 inline-block h-8 w-8 rounded-full ring-2 ring-gray-700 lg:mr-3 hover:h-40 hover:w-40 tall:h-40 tall:w-40"
+              src={`/static/user/${userId}/`}
               loading="lazy"
               alt=""
             />
@@ -119,14 +119,14 @@ export const WinLoseStreak = ({
   isWinStreak: boolean;
 }) => {
   if (lastPlayed && isDateOlderThanNDays(lastPlayed, 7)) {
-    return <span class="pr2 text-2xl">💤</span>;
+    return <span class="pr2 text-2xl tall:text-[160px] tall:leading-[160px]">💤</span>;
   }
   if (streak && streak === 5) {
-    return <span class="pr-2 text-2xl">{isWinStreak ? "🤑" : "🗑️"}</span>;
+    return <span class="pr2 text-2xl tall:text-[160px] tall:leading-[160px]">{isWinStreak ? "🤑" : "🗑️"}</span>;
   }
 
   if (streak && streak >= 3) {
-    return <span class="pr-2 text-2xl">{isWinStreak ? "🔥" : "❄️"}</span>;
+    return <span class="pr2 text-2xl tall:text-[160px] tall:leading-[160px]">{isWinStreak ? "🔥" : "❄️"}</span>;
   }
 
   return <></>;

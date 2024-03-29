@@ -2,7 +2,55 @@ import { and, desc, eq, inArray, isNotNull, or, sql, sum } from "drizzle-orm";
 import { unionAll } from "drizzle-orm/sqlite-core";
 import { readDb } from "..";
 import { notEmpty, unique } from "../../lib";
+import { Match } from "../../lib/scoring";
 import { matches, userTbl } from "../schema";
+
+export const getMatches = async (seasonId: number): Promise<Match[]> => {
+  const result = await readDb.query.matches.findMany({
+    where: eq(matches.seasonId, seasonId),
+  });
+
+  const userIds = result
+    .flatMap((match) => [
+      match.blackPlayerOne,
+      match.blackPlayerTwo,
+      match.whitePlayerOne,
+      match.whitePlayerTwo,
+    ])
+    .filter(notEmpty)
+    .filter(unique);
+
+  const players =
+    userIds.length === 0
+      ? []
+      : await readDb.query.userTbl.findMany({
+          where: inArray(userTbl.id, userIds),
+          columns: {
+            email: false,
+            picture: false,
+          },
+        });
+
+  return result.map((match) => {
+    const blackPlayerOne = players.find(
+      (player) => player.id === match.blackPlayerOne,
+    )!;
+    const blackPlayerTwo =
+      players.find((player) => player.id === match.blackPlayerTwo) || null;
+    const whitePlayerOne = players.find(
+      (player) => player.id === match.whitePlayerOne,
+    )!;
+    const whitePlayerTwo =
+      players.find((player) => player.id === match.whitePlayerTwo) || null;
+    return {
+      ...match,
+      blackPlayerOne,
+      blackPlayerTwo,
+      whitePlayerOne,
+      whitePlayerTwo,
+    };
+  });
+};
 
 export const getMatchesWithPlayers = async (
   seasonId?: number,

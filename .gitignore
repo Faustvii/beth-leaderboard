@@ -173,6 +173,8 @@ tsconfig.tsbuildinfo
 local.sqlite
 local.sqlite-shm
 local.sqlite-wal
+local.sqlite:Zone.Identifier
+local_backup.sqlite
 
 beth-cache.sqlite
 

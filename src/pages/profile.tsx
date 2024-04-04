@@ -81,7 +81,7 @@ const profileStats = (
   const { win: biggestWin, loss: biggestLoss } =
     MatchStatistics.biggestWinAndLoss(matchesWithPlayers, userId);
 
-  const eloChanges = MatchStatistics.test(matchesWithPlayers, userId);
+  const ratingHistory = MatchStatistics.test(matchesWithPlayers, userId);
   const matchHistory = MatchStatistics.getMatchHistory(
     matchesWithPlayers,
     userId,
@@ -120,8 +120,25 @@ const profileStats = (
     },
   };
 
-  const eloChangeData = {
-    labels: eloChanges.map((x) =>
+  const colorFromPrevious = (cur: number, i: number, arr: number[]) => {
+    if (i === 0) {
+      return "#00FF00";
+    }
+
+    const prev = arr[i - 1];
+
+    if (cur >= prev) {
+      return "#00FF00";
+    }
+
+    return "#FF0000";
+  };
+
+  const ratings = ratingHistory.map((x) => x.rating);
+  const ratingColor = ratings.map(colorFromPrevious);
+
+  const ratingData = {
+    labels: ratingHistory.map((x) =>
       x.date.toLocaleString("en-US", {
         day: "numeric",
         month: "long",
@@ -130,30 +147,20 @@ const profileStats = (
 
     datasets: [
       {
-        label: "Elo",
+        label: "Rating",
         borderColor: "#ff8906",
-        data: eloChanges.map((x) => x.eloChange),
+        data: ratings,
         hoverOffset: 4,
-        pointBackgroundColor: [] as string[],
-        pointBorderColor: [] as string[],
+        pointBackgroundColor: ratingColor,
+        pointBorderColor: ratingColor,
         tension: 0.1,
       },
     ],
   };
 
-  eloChangeData.datasets[0].data.forEach(function (value) {
-    if (value >= 0) {
-      eloChangeData.datasets[0].pointBackgroundColor.push("#00FF00");
-      eloChangeData.datasets[0].pointBorderColor.push("#00FF00");
-    } else if (value < 0) {
-      eloChangeData.datasets[0].pointBackgroundColor.push("#FF0000");
-      eloChangeData.datasets[0].pointBorderColor.push("#FF0000");
-    }
-  });
-
-  const eloChangeConfig: ChartConfiguration = {
+  const ratingTrendConfig: ChartConfiguration = {
     type: "line",
-    data: eloChangeData,
+    data: ratingData,
     options: {
       scales: {
         y: {
@@ -271,14 +278,14 @@ const profileStats = (
           )}
         </div>
       </StatsCardHtml>
-      <StatsCardHtml title="Elo changes">
+      <StatsCardHtml title="Rating history">
         <>
           <div class="flex h-48 w-full items-center justify-center pt-5">
-            <canvas id="eloChart"></canvas>
+            <canvas id="ratingChart"></canvas>
           </div>
           <script>
-            {`new Chart(document.getElementById("eloChart"), ${JSON.stringify(
-              eloChangeConfig,
+            {`new Chart(document.getElementById("ratingChart"), ${JSON.stringify(
+              ratingTrendConfig,
             )})`}
           </script>
         </>

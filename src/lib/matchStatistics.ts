@@ -1,6 +1,7 @@
 import { notEmpty, unique } from ".";
 import { type Match } from "../db/schema/matches";
 import { getDatePartFromDate } from "./dateUtils";
+import { elo, getPlayerRatingHistory } from "./rating";
 
 export enum RESULT {
   WIN = "WIN",
@@ -152,26 +153,15 @@ class MatchStatistics {
   }
 
   static test(matches: MatchWithPlayers[], userId: string) {
-    const eloChangeByDay: Record<string, number> = {};
+    const eloRatingSystem = elo();
+    const history = getPlayerRatingHistory(matches, userId, eloRatingSystem);
 
-    matches.forEach((mt) => {
-      const currentTeam = this.getPlayersTeam(mt, userId);
-      const eloChange =
-        currentTeam === "White" ? mt.whiteEloChange : mt.blackEloChange;
+    const ratingTrend = Object.entries(history).map(([date, rating]) => ({
+      date: new Date(date),
+      rating,
+    }));
 
-      const dateKey = getDatePartFromDate(mt.createdAt);
-
-      eloChangeByDay[dateKey] = (eloChangeByDay[dateKey] || 0) + eloChange;
-    });
-
-    const eloTrend = Object.entries(eloChangeByDay).map(
-      ([date, eloChange]) => ({
-        date: new Date(date),
-        eloChange,
-      }),
-    );
-
-    return eloTrend;
+    return ratingTrend;
   }
 
   static getPlayersEasiestAndHardestOpponents(

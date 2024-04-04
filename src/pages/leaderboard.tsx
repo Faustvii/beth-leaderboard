@@ -39,7 +39,7 @@ const playerPaginationQuery = async (page: number) => {
     userId: player.player.id,
     rank: index + (page - 1) * pageSize + 1,
     name: player.player.name,
-    elo: eloRatingSystem.toNumber(player.rating),
+    rating: eloRatingSystem.toNumber(player.rating),
     lastPlayed:
       lastPlayed.find((match) => match.player.id === player.player.id)
         ?.lastPlayed || new Date(0),
@@ -82,7 +82,7 @@ function LeaderboardTable(
     userId: string;
     rank: number;
     name: string;
-    elo: number;
+    rating: number;
     lastPlayed: Date;
     latestPlayerResults: {
       winStreak: number;

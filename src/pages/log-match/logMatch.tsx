@@ -11,8 +11,6 @@ import { getActiveSeason } from "../../db/queries/seasonQueries";
 import { matches, userTbl } from "../../db/schema";
 import { isHxRequest, notEmpty, redirect } from "../../lib";
 import { syncIfLocal } from "../../lib/dbHelpers";
-import { applyMatchResult, matchEloChange } from "../../lib/elo";
-import { type GameResult } from "../../types/elo";
 import { UserLookUp } from "./components/userLookup";
 
 export const match = new Elysia({
@@ -76,25 +74,13 @@ export const match = new Elysia({
         (player) => player.id === black1Id || player.id === black2Id,
       );
 
-      const match: GameResult = {
-        outcome: mapMatchOutcome(match_winner),
-        teams: [
-          { color: "White", players: whiteTeam },
-          { color: "Black", players: blackTeam },
-        ],
-      };
-
-      const eloChange = matchEloChange(match);
-      console.log("eloChange", eloChange);
-      applyMatchResult({ eloFloor: 0 }, match);
-
       type newMatch = typeof matches.$inferInsert;
 
       const matchInsert: newMatch = {
         result: match_winner,
         scoreDiff: Number(point_difference),
-        whiteEloChange: eloChange.white,
-        blackEloChange: eloChange.black,
+        whiteEloChange: 0,
+        blackEloChange: 0,
         whitePlayerOne: white1Id,
         whitePlayerTwo: white2Id ? white2Id : null,
         blackPlayerOne: black1Id,

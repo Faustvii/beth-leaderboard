@@ -2,7 +2,7 @@ import { and, desc, eq, inArray, isNotNull, or, sql, sum } from "drizzle-orm";
 import { unionAll } from "drizzle-orm/sqlite-core";
 import { readDb } from "..";
 import { notEmpty, unique } from "../../lib";
-import { Match } from "../../lib/scoring";
+import { elo, getScores, Match } from "../../lib/scoring";
 import { matches, userTbl } from "../schema";
 
 export const getMatches = async (seasonId: number): Promise<Match[]> => {
@@ -190,44 +190,38 @@ export const playerEloQuery = async (userId: string, seasonId: number) => {
 };
 
 export const playersEloQuery = async (userIds: string[], seasonId: number) => {
-  const result = eloChangeSubquery(seasonId);
-  const playerElo = await readDb
-    .with(result)
-    .select()
-    .from(result)
-    .where(inArray(result.player_id, userIds));
+  const matches = await getMatches(seasonId);
+  const eloScoring = elo();
+  const eloScores = getScores(matches, eloScoring)
+    .filter((x) => userIds.includes(x.player.id))
+    .map((x) => ({
+      id: x.player.id,
+      elo: x.score,
+    }));
+
   // None of the players have played any matches
-  if (playerElo.length === 0) {
+  if (eloScores.length === 0) {
     return userIds.map((id) => ({
       id,
       elo: 1500,
     }));
   }
   // Some of the players haven't played any matches
-  if (playerElo.length !== userIds.length) {
+  if (eloScores.length !== userIds.length) {
     const missingIds = userIds.filter(
-      (id) => !playerElo.find((elo) => elo.player_id === id),
+      (id) => !eloScores.find((elo) => elo.id === id),
     );
-    playerElo.push(
+    eloScores.push(
       ...missingIds.map((id) => ({
-        player_id: id,
-        total_elo_change: 0,
+        id: id,
+        elo: eloScoring.defaultScore,
       })),
     );
   }
 
-  return playerElo.map((elo) => ({
-    id: elo.player_id,
-    elo: (elo.total_elo_change ?? 0) + 1500,
-  }));
-};
-
-export const getAllPlayersWithElo = async (seasonId: number) => {
-  const result = eloChangeSubquery(seasonId);
-  const playerElo = await readDb.with(result).select().from(result);
-  return playerElo.map((elo) => ({
-    id: elo.player_id,
-    elo: (elo.total_elo_change ?? 0) + 1500,
+  return eloScores.map((elo) => ({
+    id: elo.id,
+    elo: elo.elo ?? eloScoring.defaultScore,
   }));
 };
 
@@ -236,30 +230,17 @@ export const playerEloPaginationQuery = async (
   seasonId: number,
 ) => {
   const pageSize = 15;
-  const result = eloChangeSubquery(seasonId);
-  const pageResult = readDb.$with("pageResult").as(
-    readDb
-      .with(result)
-      .select()
-      .from(result)
-      .orderBy(desc(result.total_elo_change))
-      .limit(pageSize)
-      .offset((page - 1) * pageSize),
-  );
 
-  const playerEloChanges = await readDb
-    .with(pageResult)
-    .select({
-      id: pageResult.player_id,
-      name: userTbl.name,
-      eloChange: pageResult.total_elo_change,
-    })
-    .from(pageResult)
-    .innerJoin(userTbl, eq(pageResult.player_id, userTbl.id));
+  const matches = await getMatches(seasonId);
+  const eloScoring = elo();
+  const eloScores = getScores(matches, eloScoring);
 
-  return playerEloChanges.map((elo) => ({
-    id: elo.id,
-    name: elo.name,
-    elo: (elo.eloChange ?? 0) + 1500,
+  const startIndex = (page - 1) * pageSize;
+  const endIndex = startIndex + pageSize - 1;
+
+  return eloScores.slice(startIndex, endIndex).map((x) => ({
+    id: x.player.id,
+    name: x.player.name,
+    elo: x.score,
   }));
 };

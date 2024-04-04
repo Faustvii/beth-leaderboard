@@ -1,6 +1,7 @@
 import { ordinal, rate, rating } from "openskill";
 import { type Rating } from "openskill/dist/types";
 import { type EloConfig } from "../types/elo";
+import { getDatePartFromDate, subtractDays } from "./dateUtils";
 import { isDefined } from "./utils";
 
 export interface RatingSystem<TRating> {
@@ -78,6 +79,67 @@ export function getRatings<TRating>(
   return Object.values(ratings).toSorted(
     (a, b) => system.toNumber(b.rating) - system.toNumber(a.rating),
   );
+}
+
+export function getPlayerRatingHistory<TRating>(
+  matches: Match[],
+  playerId: string,
+  system: RatingSystem<TRating>,
+): Record<string, TRating> {
+  const ratings: Record<string, PlayerWithRating<TRating>> = {};
+
+  const playersFirstMatch =
+    matches.find(
+      (match) =>
+        match.whitePlayerOne.id === playerId ||
+        match.whitePlayerTwo?.id === playerId ||
+        match.blackPlayerOne.id === playerId ||
+        match.blackPlayerTwo?.id === playerId,
+    )?.createdAt ?? new Date();
+
+  const dayBeforePlayersFirstMatch = subtractDays(playersFirstMatch, 1);
+
+  const playerRatingHistory: Record<string, TRating> = {
+    [getDatePartFromDate(dayBeforePlayersFirstMatch)]: system.defaultRating,
+  };
+
+  for (const match of matches) {
+    const matchWithRatings: MatchWithRatings<TRating> = {
+      ...match,
+      whitePlayerOne: ratings[match.whitePlayerOne.id] ?? {
+        player: match.whitePlayerOne,
+        rating: system.defaultRating,
+      },
+      whitePlayerTwo: match.whitePlayerTwo
+        ? ratings[match.whitePlayerTwo.id] ?? {
+            player: match.whitePlayerTwo,
+            rating: system.defaultRating,
+          }
+        : null,
+      blackPlayerOne: ratings[match.blackPlayerOne.id] ?? {
+        player: match.blackPlayerOne,
+        rating: system.defaultRating,
+      },
+      blackPlayerTwo: match.blackPlayerTwo
+        ? ratings[match.blackPlayerTwo.id] ?? {
+            player: match.blackPlayerTwo,
+            rating: system.defaultRating,
+          }
+        : null,
+    };
+
+    const newRatings = system.rateMatch(matchWithRatings);
+    for (const newRating of newRatings) {
+      ratings[newRating.player.id] = newRating;
+
+      if (newRating.player.id === playerId) {
+        playerRatingHistory[getDatePartFromDate(match.createdAt)] =
+          newRating.rating;
+      }
+    }
+  }
+
+  return playerRatingHistory;
 }
 
 export function openskill(): RatingSystem<Rating> {

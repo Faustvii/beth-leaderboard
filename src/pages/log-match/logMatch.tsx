@@ -6,10 +6,9 @@ import { HeaderHtml } from "../../components/header";
 import { LayoutHtml } from "../../components/Layout";
 import { NavbarHtml } from "../../components/Navbar";
 import { ctx } from "../../context";
-import { playersEloQuery } from "../../db/queries/matchQueries";
 import { getActiveSeason } from "../../db/queries/seasonQueries";
 import { matches, userTbl } from "../../db/schema";
-import { isHxRequest, notEmpty, redirect } from "../../lib";
+import { isHxRequest, redirect } from "../../lib";
 import { syncIfLocal } from "../../lib/dbHelpers";
 import { UserLookUp } from "./components/userLookup";
 
@@ -60,19 +59,6 @@ export const match = new Elysia({
           },
         );
       }
-
-      const playerArray = [white1Id, white2Id, black1Id, black2Id].filter(
-        notEmpty,
-      );
-
-      const players = await playersEloQuery(playerArray, activeSeason.id);
-
-      const whiteTeam = players.filter(
-        (player) => player.id === white1Id || player.id === white2Id,
-      );
-      const blackTeam = players.filter(
-        (player) => player.id === black1Id || player.id === black2Id,
-      );
 
       type newMatch = typeof matches.$inferInsert;
 
@@ -145,17 +131,6 @@ export const match = new Elysia({
       }),
     },
   );
-
-function mapMatchOutcome(match_winner: "White" | "Black" | "Draw") {
-  switch (match_winner) {
-    case "White":
-      return "win";
-    case "Black":
-      return "loss";
-    case "Draw":
-      return "draw";
-  }
-}
 
 function matchSearchResults(results: { name: string; id: string }[]) {
   return (

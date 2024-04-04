@@ -1,17 +1,17 @@
 import { ordinal, rate, rating } from "openskill";
 import { type Rating } from "openskill/dist/types";
-import { EloConfig } from "../types/elo";
+import { type EloConfig } from "../types/elo";
 import { isDefined } from "./utils";
 
-export interface ScoringSystem<TScore> {
-  defaultScore: TScore;
-  scoreMatch: (match: MatchWithScores<TScore>) => PlayerWithScore<TScore>[];
-  toNumber: (score: TScore) => number;
+export interface RatingSystem<TRating> {
+  defaultRating: TRating;
+  rateMatch: (match: MatchWithRatings<TRating>) => PlayerWithRating<TRating>[];
+  toNumber: (rating: TRating) => number;
 }
 
-export interface PlayerWithScore<TScore> {
+export interface PlayerWithRating<TRating> {
   player: Player;
-  score: TScore;
+  rating: TRating;
 }
 
 type Winner = "Black" | "White" | "Draw";
@@ -27,72 +27,72 @@ export interface Match {
   createdAt: Date;
 }
 
-interface MatchWithScores<TScore> {
+interface MatchWithRatings<TRating> {
   id: number;
-  whitePlayerOne: PlayerWithScore<TScore>;
-  whitePlayerTwo: PlayerWithScore<TScore> | null;
-  blackPlayerOne: PlayerWithScore<TScore>;
-  blackPlayerTwo: PlayerWithScore<TScore> | null;
+  whitePlayerOne: PlayerWithRating<TRating>;
+  whitePlayerTwo: PlayerWithRating<TRating> | null;
+  blackPlayerOne: PlayerWithRating<TRating>;
+  blackPlayerTwo: PlayerWithRating<TRating> | null;
   result: Winner;
   scoreDiff: number;
   createdAt: Date;
 }
 
-export function getScores<TScore>(
+export function getRatings<TRating>(
   matches: Match[],
-  system: ScoringSystem<TScore>,
-): PlayerWithScore<TScore>[] {
-  const scores: Record<string, PlayerWithScore<TScore>> = {};
+  system: RatingSystem<TRating>,
+): PlayerWithRating<TRating>[] {
+  const ratings: Record<string, PlayerWithRating<TRating>> = {};
 
   for (const match of matches) {
-    const matchWithScores: MatchWithScores<TScore> = {
+    const matchWithRatings: MatchWithRatings<TRating> = {
       ...match,
-      whitePlayerOne: scores[match.whitePlayerOne.id] ?? {
+      whitePlayerOne: ratings[match.whitePlayerOne.id] ?? {
         player: match.whitePlayerOne,
-        score: system.defaultScore,
+        rating: system.defaultRating,
       },
       whitePlayerTwo: match.whitePlayerTwo
-        ? scores[match.whitePlayerTwo.id] ?? {
+        ? ratings[match.whitePlayerTwo.id] ?? {
             player: match.whitePlayerTwo,
-            score: system.defaultScore,
+            rating: system.defaultRating,
           }
         : null,
-      blackPlayerOne: scores[match.blackPlayerOne.id] ?? {
+      blackPlayerOne: ratings[match.blackPlayerOne.id] ?? {
         player: match.blackPlayerOne,
-        score: system.defaultScore,
+        rating: system.defaultRating,
       },
       blackPlayerTwo: match.blackPlayerTwo
-        ? scores[match.blackPlayerTwo.id] ?? {
+        ? ratings[match.blackPlayerTwo.id] ?? {
             player: match.blackPlayerTwo,
-            score: system.defaultScore,
+            rating: system.defaultRating,
           }
         : null,
     };
 
-    const newScores = system.scoreMatch(matchWithScores);
-    for (const newScore of newScores) {
-      scores[newScore.player.id] = newScore;
+    const newRatings = system.rateMatch(matchWithRatings);
+    for (const newRating of newRatings) {
+      ratings[newRating.player.id] = newRating;
     }
   }
 
-  return Object.values(scores).toSorted(
-    (a, b) => system.toNumber(b.score) - system.toNumber(a.score),
+  return Object.values(ratings).toSorted(
+    (a, b) => system.toNumber(b.rating) - system.toNumber(a.rating),
   );
 }
 
-export function openskill(): ScoringSystem<Rating> {
+export function openskill(): RatingSystem<Rating> {
   return {
-    defaultScore: rating(),
+    defaultRating: rating(),
 
-    scoreMatch(match: MatchWithScores<Rating>): PlayerWithScore<Rating>[] {
+    rateMatch(match: MatchWithRatings<Rating>): PlayerWithRating<Rating>[] {
       const whiteTeam = [
-        match.whitePlayerOne.score,
-        match.whitePlayerTwo?.score,
+        match.whitePlayerOne.rating,
+        match.whitePlayerTwo?.rating,
       ].filter(isDefined);
 
       const blackTeam = [
-        match.blackPlayerOne.score,
-        match.blackPlayerTwo?.score,
+        match.blackPlayerOne.rating,
+        match.blackPlayerTwo?.rating,
       ].filter(isDefined);
 
       const outcomeRanking = {
@@ -102,50 +102,50 @@ export function openskill(): ScoringSystem<Rating> {
       }[match.result];
 
       const [
-        [whitePlayerOneNewScore, whitePlayerTwoNewScore],
-        [blackPlayerOneNewScore, blackPlayerTwoNewScore],
+        [whitePlayerOneNewRating, whitePlayerTwoNewRating],
+        [blackPlayerOneNewRating, blackPlayerTwoNewRating],
       ] = rate([whiteTeam, blackTeam], {
         rank: outcomeRanking,
       });
 
-      const result = [
+      const result: PlayerWithRating<Rating>[] = [
         {
           player: match.whitePlayerOne.player,
-          score: whitePlayerOneNewScore,
+          rating: whitePlayerOneNewRating,
         },
         {
           player: match.blackPlayerOne.player,
-          score: blackPlayerOneNewScore,
+          rating: blackPlayerOneNewRating,
         },
       ].filter((x) => isDefined(x.player));
 
       if (match.whitePlayerTwo) {
         result.push({
           player: match.whitePlayerTwo.player,
-          score: whitePlayerTwoNewScore,
+          rating: whitePlayerTwoNewRating,
         });
       }
 
       if (match.blackPlayerTwo) {
         result.push({
           player: match.blackPlayerTwo?.player,
-          score: blackPlayerTwoNewScore,
+          rating: blackPlayerTwoNewRating,
         });
       }
 
       return result;
     },
 
-    toNumber(score: Rating) {
-      return Math.floor(ordinal(score) * 1000);
+    toNumber(rating: Rating) {
+      return Math.floor(ordinal(rating) * 1000);
     },
   };
 }
 
-export function elo(config?: EloConfig): ScoringSystem<number> {
-  function avg(scores: number[]) {
-    const totalElo = scores.reduce((sum, player) => sum + player, 0);
-    return Math.floor(totalElo / scores.length);
+export function elo(config?: EloConfig): RatingSystem<number> {
+  function avg(ratings: number[]) {
+    const totalElo = ratings.reduce((sum, player) => sum + player, 0);
+    return Math.floor(totalElo / ratings.length);
   }
 
   function getExpectedScore(playerElo: number, opponentElo: number) {
@@ -176,17 +176,17 @@ export function elo(config?: EloConfig): ScoringSystem<number> {
   }
 
   return {
-    defaultScore: 1500,
+    defaultRating: 1500,
 
-    scoreMatch(match: MatchWithScores<number>): PlayerWithScore<number>[] {
+    rateMatch(match: MatchWithRatings<number>): PlayerWithRating<number>[] {
       const whiteTeamElo = avg(
-        [match.whitePlayerOne.score, match.whitePlayerTwo?.score].filter(
+        [match.whitePlayerOne.rating, match.whitePlayerTwo?.rating].filter(
           isDefined,
         ),
       );
 
       const blackTeamElo = avg(
-        [match.blackPlayerOne.score, match.blackPlayerTwo?.score].filter(
+        [match.blackPlayerOne.rating, match.blackPlayerTwo?.rating].filter(
           isDefined,
         ),
       );
@@ -228,28 +228,28 @@ export function elo(config?: EloConfig): ScoringSystem<number> {
       const whiteTeamEloChange = whiteTeamEloAfter - whiteTeamElo;
       const blackTeamEloChange = blackTeamEloAfter - blackTeamElo;
 
-      const result = [
+      const result: PlayerWithRating<number>[] = [
         {
           player: match.whitePlayerOne.player,
-          score: match.whitePlayerOne.score + whiteTeamEloChange,
+          rating: match.whitePlayerOne.rating + whiteTeamEloChange,
         },
         {
           player: match.blackPlayerOne.player,
-          score: match.blackPlayerOne.score + blackTeamEloChange,
+          rating: match.blackPlayerOne.rating + blackTeamEloChange,
         },
       ].filter((x) => isDefined(x.player));
 
       if (match.whitePlayerTwo) {
         result.push({
           player: match.whitePlayerTwo.player,
-          score: match.whitePlayerTwo.score + whiteTeamEloChange,
+          rating: match.whitePlayerTwo.rating + whiteTeamEloChange,
         });
       }
 
       if (match.blackPlayerTwo) {
         result.push({
           player: match.blackPlayerTwo?.player,
-          score: match.blackPlayerTwo.score + blackTeamEloChange,
+          rating: match.blackPlayerTwo.rating + blackTeamEloChange,
         });
       }
 

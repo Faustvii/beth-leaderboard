@@ -1,7 +1,6 @@
 import { generateRandomString } from "lucia/utils";
 import { type readDb } from ".";
 import { config } from "../config";
-import { playerEloQuery } from "./queries/matchQueries";
 import { getActiveSeason } from "./queries/seasonQueries";
 import { matches, seasonsTbl, userTbl } from "./schema";
 import { type InsertSeason } from "./schema/season";
@@ -70,14 +69,11 @@ async function SeedMatches(
       players[Math.floor(Math.random() * players.length)].id,
     ];
 
-    const eloPlayers = userIds.map(async (id) => ({
-      id: id,
-      elo: await playerEloQuery(id, activeSeason?.id ?? 1),
-    }));
-    const whitePlayerOne = await eloPlayers[0];
-    const whitePlayerTwo = await eloPlayers[1];
-    const blackPlayerOne = await eloPlayers[2];
-    const blackPlayerTwo = await eloPlayers[3];
+    const whitePlayerOne = userIds[0];
+    const whitePlayerTwo = userIds[1];
+    const blackPlayerOne = userIds[2];
+    const blackPlayerTwo = userIds[3];
+
     // Generate a random date within between start of year and now
     const matchDate = new Date(
       startOfYear + Math.random() * (now - startOfYear),
@@ -90,14 +86,14 @@ async function SeedMatches(
       result === "Draw" ? 0 : Math.min(Math.floor(Math.random() * 40) * 5, 960);
 
     const matchInsert: typeof matches.$inferInsert = {
-      whitePlayerOne: whitePlayerOne.id,
-      blackPlayerOne: blackPlayerOne.id,
+      whitePlayerOne: whitePlayerOne,
+      blackPlayerOne: blackPlayerOne,
       result: result,
       scoreDiff: scoreDiff,
       whiteEloChange: 0,
       blackEloChange: 0,
-      whitePlayerTwo: whitePlayerTwo.id,
-      blackPlayerTwo: blackPlayerTwo.id,
+      whitePlayerTwo: whitePlayerTwo,
+      blackPlayerTwo: blackPlayerTwo,
       createdAt: matchDate,
       seasonId: activeSeason?.id ?? 1,
     };

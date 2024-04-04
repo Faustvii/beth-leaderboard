@@ -6,7 +6,7 @@ export const LeaderboardRowHtml = async ({
   userId,
   rank,
   name,
-  elo,
+  rating,
   first,
   page,
   lastPlayed,
@@ -15,7 +15,7 @@ export const LeaderboardRowHtml = async ({
   userId: string;
   rank: number;
   name: string;
-  elo: number;
+  rating: number;
   first: boolean;
   page: number;
   lastPlayed: Date;
@@ -70,7 +70,7 @@ export const LeaderboardRowHtml = async ({
               <LatestResults latestPlayerResults={results} />
             </div>
           </th>
-          <td class="px-1 py-4 md:px-3 lg:px-6">{elo}</td>
+          <td class="px-1 py-4 md:px-3 lg:px-6">{rating}</td>
         </tr>
       ) : (
         <tr class="border-b border-gray-700 bg-gray-800">
@@ -102,7 +102,7 @@ export const LeaderboardRowHtml = async ({
               <LatestResults latestPlayerResults={results} />
             </div>
           </th>
-          <td class="px-1 py-4 md:px-3 lg:px-6">{elo}</td>
+          <td class="px-1 py-4 md:px-3 lg:px-6">{rating}</td>
         </tr>
       )}
     </>

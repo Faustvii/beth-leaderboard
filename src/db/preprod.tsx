@@ -1,8 +1,6 @@
 import { generateRandomString } from "lucia/utils";
 import { type readDb } from ".";
 import { config } from "../config";
-import { applyMatchResult, matchEloChange } from "../lib/elo";
-import { type GameResult } from "../types/elo";
 import { playerEloQuery } from "./queries/matchQueries";
 import { getActiveSeason } from "./queries/seasonQueries";
 import { matches, seasonsTbl, userTbl } from "./schema";
@@ -90,48 +88,14 @@ async function SeedMatches(
     //960 is 4 rounds of only 20 shots and all misses for opposite team
     const scoreDiff =
       result === "Draw" ? 0 : Math.min(Math.floor(Math.random() * 40) * 5, 960);
-    const match: GameResult = {
-      outcome:
-        result === "Black" ? "loss" : result === "White" ? "win" : "draw",
-      teams: [
-        {
-          color: "White",
-          players: [
-            {
-              id: whitePlayerOne.id,
-              elo: whitePlayerOne.elo,
-            },
-            {
-              id: whitePlayerTwo.id,
-              elo: whitePlayerTwo.elo,
-            },
-          ],
-        },
-        {
-          color: "Black",
-          players: [
-            {
-              id: blackPlayerOne.id,
-              elo: blackPlayerOne.elo,
-            },
-            {
-              id: blackPlayerTwo.id,
-              elo: blackPlayerTwo.elo,
-            },
-          ],
-        },
-      ],
-    };
-    const eloChange = matchEloChange(match);
-    applyMatchResult({ eloFloor: 0 }, match);
 
     const matchInsert: typeof matches.$inferInsert = {
       whitePlayerOne: whitePlayerOne.id,
       blackPlayerOne: blackPlayerOne.id,
       result: result,
       scoreDiff: scoreDiff,
-      whiteEloChange: eloChange.white,
-      blackEloChange: eloChange.black,
+      whiteEloChange: 0,
+      blackEloChange: 0,
       whitePlayerTwo: whitePlayerTwo.id,
       blackPlayerTwo: blackPlayerTwo.id,
       createdAt: matchDate,

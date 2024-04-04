@@ -6,7 +6,7 @@ import { isDefined } from "./utils";
 export interface ScoringSystem<TScore> {
   defaultScore: TScore;
   scoreMatch: (match: MatchWithScores<TScore>) => PlayerWithScore<TScore>[];
-  display: (score: TScore) => string;
+  toNumber: (score: TScore) => number;
 }
 
 export interface PlayerWithScore<TScore> {
@@ -75,7 +75,9 @@ export function getScores<TScore>(
     }
   }
 
-  return Object.values(scores);
+  return Object.values(scores).toSorted(
+    (a, b) => system.toNumber(b.score) - system.toNumber(a.score),
+  );
 }
 
 export function openskill(): ScoringSystem<Rating> {
@@ -134,8 +136,8 @@ export function openskill(): ScoringSystem<Rating> {
       return result;
     },
 
-    display(score: Rating) {
-      return (ordinal(score) * 1000).toFixed(0);
+    toNumber(score: Rating) {
+      return Math.floor(ordinal(score) * 1000);
     },
   };
 }
@@ -143,7 +145,7 @@ export function openskill(): ScoringSystem<Rating> {
 export function elo(config?: EloConfig): ScoringSystem<number> {
   function avg(scores: number[]) {
     const totalElo = scores.reduce((sum, player) => sum + player, 0);
-    return totalElo / scores.length;
+    return Math.floor(totalElo / scores.length);
   }
 
   function getExpectedScore(playerElo: number, opponentElo: number) {
@@ -254,8 +256,8 @@ export function elo(config?: EloConfig): ScoringSystem<number> {
       return result;
     },
 
-    display(score: number) {
-      return score.toFixed(0);
+    toNumber(score: number) {
+      return Math.floor(score);
     },
   };
 }

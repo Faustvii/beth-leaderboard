@@ -10,7 +10,7 @@ export const LeaderboardTableHtml = ({
     userId: string;
     rank: number;
     name: string;
-    elo: number;
+    rating: number;
     lastPlayed: Date;
     latestPlayerResults: {
       winStreak: number;
@@ -32,7 +32,7 @@ export const LeaderboardTableHtml = ({
                 Name
               </th>
               <th scope="col" class="px-1 py-3 md:px-3 lg:px-6">
-                Elo
+                Rating
               </th>
             </tr>
           </thead>

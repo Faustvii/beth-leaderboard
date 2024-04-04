@@ -1,17 +1,17 @@
 import { type ChartConfiguration } from "chart.js";
 import { Elysia } from "elysia";
 import { type Session } from "lucia";
-import { array } from "zod";
 import { HeaderHtml } from "../components/header";
 import { LayoutHtml } from "../components/Layout";
 import { NavbarHtml } from "../components/Navbar";
 import { StatsCardHtml } from "../components/StatsCard";
 import { ctx } from "../context";
-import { getMatchesWithPlayers } from "../db/queries/matchQueries";
+import { getMatches } from "../db/queries/matchQueries";
 import { getActiveSeason } from "../db/queries/seasonQueries";
 import { isHxRequest, measure, notEmpty } from "../lib";
 import { getDatePartFromDate } from "../lib/dateUtils";
-import MatchStatistics, { mapToMatches } from "../lib/matchStatistics";
+import MatchStatistics from "../lib/matchStatistics";
+import { Match } from "../lib/rating";
 
 export const stats = new Elysia({
   prefix: "/stats",
@@ -38,37 +38,35 @@ async function statsPage(
 
 async function page(session: Session | null) {
   const activeSeason = await getActiveSeason();
-  const { elaspedTimeMs, result: matchesWithPlayers } = await measure(
-    async () => {
-      return await getMatchesWithPlayers(activeSeason?.id);
-    },
-  );
+  const activeSeasonId = activeSeason?.id ?? 1;
+
+  const { elaspedTimeMs, result: matches } = await measure(async () => {
+    return await getMatches(activeSeasonId);
+  });
   console.log("stats page database calls", elaspedTimeMs, "ms");
 
-  const globalMatchHistory = matchesWithPlayers
+  const globalMatchHistory = matches
     .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
     .slice(0, 20)
     .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   const now = performance.now();
-  const matches = mapToMatches(matchesWithPlayers);
   const matchesToday = MatchStatistics.gamesToday(matches);
   const matchesYesterday = MatchStatistics.gamesYesterday(matches);
   const { date: dayWithMostGames, games: mostGamesOnOneDay } =
     MatchStatistics.mostGamesInOneDay(matches);
 
   const { highestWinStreak, highestLoseStreak } =
-    MatchStatistics.highestStreak(matchesWithPlayers);
+    MatchStatistics.highestStreak(matches);
 
-  const playerWithMostGames =
-    MatchStatistics.playerWithMostGames(matchesWithPlayers);
+  const playerWithMostGames = MatchStatistics.playerWithMostGames(matches);
 
   const playerWithHighestWinRate = MatchStatistics.playerWithWinrate(
-    matchesWithPlayers,
+    matches,
     false,
   );
 
   const playerWithLowestWinRate = MatchStatistics.playerWithWinrate(
-    matchesWithPlayers,
+    matches,
     true,
   );
 
@@ -134,9 +132,7 @@ async function page(session: Session | null) {
             </div>
           </>
         </StatsCardHtml>
-        <StatsCardHtml title="Biggest win">
-          {biggestWin(matchesWithPlayers)}
-        </StatsCardHtml>
+        <StatsCardHtml title="Biggest win">{biggestWin(matches)}</StatsCardHtml>
         <StatsCardHtml title="Winrates">
           <>
             <div class="flex h-48 w-full items-center justify-center pt-5">
@@ -257,7 +253,7 @@ async function page(session: Session | null) {
   );
 }
 
-async function biggestWin(matches: MatchWithPlayers[]) {
+async function biggestWin(matches: Match[]) {
   const biggestWin = Math.max(...matches.map((mt) => mt.scoreDiff));
   const biggestWinMatch = matches.find((mt) => mt.scoreDiff === biggestWin);
   if (!biggestWinMatch) return <></>;
@@ -291,7 +287,7 @@ async function biggestWin(matches: MatchWithPlayers[]) {
 }
 
 interface PrettyMatchProps {
-  match: MatchWithPlayers;
+  match: Match;
 }
 const PrettyMatch = ({ match }: PrettyMatchProps) => {
   const teamPlayers = {
@@ -304,7 +300,6 @@ const PrettyMatch = ({ match }: PrettyMatchProps) => {
   };
   let winners: string[];
   let losers: string[];
-  let winnerElochange: number;
   switch (match.result) {
     case "Draw": {
       return (
@@ -321,13 +316,11 @@ const PrettyMatch = ({ match }: PrettyMatchProps) => {
     case "White": {
       winners = teamPlayers.white;
       losers = teamPlayers.black;
-      winnerElochange = match.whiteEloChange;
       break;
     }
     case "Black": {
       winners = teamPlayers.black;
       losers = teamPlayers.white;
-      winnerElochange = match.blackEloChange;
       break;
     }
   }
@@ -345,14 +338,7 @@ const PrettyMatch = ({ match }: PrettyMatchProps) => {
       >
         {winners.join(" & ")}
       </span>{" "}
-      {fancyInBetweenText(match.scoreDiff, losers.join(" & "))}{" "}
-      <span> gaining </span>
-      <span class="font-bold"> {winnerElochange} elo</span>
-      {checkForFarming(
-        teamPlayers.white,
-        teamPlayers.black,
-        match.whiteEloChange,
-      )}
+      {fancyInBetweenText(match.scoreDiff, losers.join(" & "))}
     </span>
   );
 };
@@ -471,19 +457,4 @@ function fancyInBetweenText(scoreDiff: number, losers: string) {
     default:
       return "won ? against ";
   }
-}
-
-function checkForFarming(
-  winners: string[],
-  losers: string[],
-  matchEloChange: number,
-) {
-  if (Math.abs(matchEloChange) < 20) {
-    return "🧑‍🌾";
-  }
-  if (Math.abs(matchEloChange) > 39) {
-    return "🤦‍♂️🧑‍🌾";
-  }
-  const emojiArray: string[] = ["🥳", "😂", "🤷‍♂️", "😎", "🫅"];
-  return emojiArray[Math.floor(Math.random() * emojiArray.length)];
 }

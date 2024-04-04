@@ -6,11 +6,15 @@ import { LayoutHtml } from "../components/Layout";
 import { NavbarHtml } from "../components/Navbar";
 import { StatsCardHtml } from "../components/StatsCard";
 import { ctx } from "../context";
-import { getMatchesWithPlayers } from "../db/queries/matchQueries";
+import { getMatches } from "../db/queries/matchQueries";
 import { getActiveSeason } from "../db/queries/seasonQueries";
 import { getUser } from "../db/queries/userQueries";
 import { isHxRequest, measure, notEmpty } from "../lib";
-import MatchStatistics, { mapToMatches, RESULT } from "../lib/matchStatistics";
+import MatchStatistics, {
+  isPlayerInMatchFilter,
+  RESULT,
+} from "../lib/matchStatistics";
+import { Match } from "../lib/rating";
 
 export const profile = new Elysia({
   prefix: "/profile",
@@ -29,8 +33,10 @@ async function page(
   userId: string,
 ) {
   const activeSeason = await getActiveSeason();
-  const { elaspedTimeMs, result: matchesWithPlayers } = await measure(() =>
-    getMatchesWithPlayers(activeSeason?.id, userId),
+  const activeSeasonId = activeSeason?.id ?? 1;
+
+  const { elaspedTimeMs, result: matches } = await measure(() =>
+    getMatches(activeSeasonId),
   );
   console.log(`player stats took ${elaspedTimeMs}ms to get from db`);
   let profileName = "Your stats";
@@ -44,23 +50,20 @@ async function page(
     <>
       <NavbarHtml session={session} activePage="profile" />
       <HeaderHtml title={header} />
-      {profileStats(matchesWithPlayers, userId)}
+      {profileStats(matches, userId)}
     </>
   ) : (
     <LayoutHtml>
       <NavbarHtml session={session} activePage="profile" />
       <HeaderHtml title={header} />
-      {profileStats(matchesWithPlayers, userId)}
+      {profileStats(matches, userId)}
     </LayoutHtml>
   );
 }
 
-const profileStats = (
-  matchesWithPlayers: MatchWithPlayers[],
-  userId: string,
-) => {
+const profileStats = (matches: Match[], userId: string) => {
   const now = performance.now();
-  const playerMatches = mapToMatches(matchesWithPlayers);
+  const playerMatches = matches.filter(isPlayerInMatchFilter(userId));
   const matchesToday = MatchStatistics.gamesToday(playerMatches);
   const matchesYesterday = MatchStatistics.gamesYesterday(playerMatches);
 
@@ -70,22 +73,19 @@ const profileStats = (
   );
   const winRate = MatchStatistics.playerWinRate(playerMatches, userId);
   const { highestLoseStreak, highestWinStreak } =
-    MatchStatistics.getPlayersStreak(matchesWithPlayers, userId);
+    MatchStatistics.getPlayersStreak(matches, userId);
 
   const { easiestOpponents, hardestOpponents } =
-    MatchStatistics.getPlayersEasiestAndHardestOpponents(
-      matchesWithPlayers,
-      userId,
-    );
+    MatchStatistics.getPlayersEasiestAndHardestOpponents(matches, userId);
 
   const { win: biggestWin, loss: biggestLoss } =
-    MatchStatistics.biggestWinAndLoss(matchesWithPlayers, userId);
+    MatchStatistics.biggestWinAndLoss(matches, userId);
 
-  const ratingHistory = MatchStatistics.test(matchesWithPlayers, userId);
-  const matchHistory = MatchStatistics.getMatchHistory(
-    matchesWithPlayers,
-    userId,
-  ).slice(0, 20);
+  const ratingHistory = MatchStatistics.test(matches, userId);
+  const matchHistory = MatchStatistics.getMatchHistory(matches, userId).slice(
+    0,
+    20,
+  );
 
   const colorWinrateData = {
     labels: ["Won", "Lost", "Draw"],
@@ -331,7 +331,7 @@ function winLossDrawIcon(result: RESULT): string {
 }
 
 function matchFaceoff(biggestWin: {
-  match: MatchWithPlayers;
+  match: Match;
   biggestPlayers: { black: string[]; white: string[] };
 }): JSX.Element {
   return (
@@ -361,7 +361,7 @@ function matchOutput(
     match,
     result,
   }: {
-    match: MatchWithPlayers;
+    match: Match;
     result: RESULT;
   },
   userId: string,

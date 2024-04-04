@@ -1,7 +1,6 @@
 import { notEmpty, unique } from ".";
-import { type Match } from "../db/schema/matches";
 import { getDatePartFromDate } from "./dateUtils";
-import { elo, getPlayerRatingHistory } from "./rating";
+import { elo, getPlayerRatingHistory, type Match } from "./rating";
 
 export enum RESULT {
   WIN = "WIN",
@@ -10,7 +9,7 @@ export enum RESULT {
 }
 
 class MatchStatistics {
-  static getMatchHistory(matches: MatchWithPlayers[], userId: string) {
+  static getMatchHistory(matches: Match[], userId: string) {
     const matchHistories = this.getMatchHistories(matches);
     const playerMatchHistory = matchHistories[userId];
     return playerMatchHistory.sort(
@@ -18,13 +17,13 @@ class MatchStatistics {
     );
   }
 
-  static getMatchHistories(matches: MatchWithPlayers[]) {
+  static getMatchHistories(matches: Match[]) {
     // sort matches so we get the latest first
     matches.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
 
     const playerMatchHistory: Record<
       string,
-      { match: MatchWithPlayers; result: RESULT }[]
+      { match: Match; result: RESULT }[]
     > = {};
 
     const players = matches
@@ -38,13 +37,7 @@ class MatchStatistics {
       .filter(unique);
 
     players.forEach((player) => {
-      const playerMatches = matches.filter(
-        (mt) =>
-          mt.whitePlayerOne === player ||
-          mt.whitePlayerTwo === player ||
-          mt.blackPlayerOne === player ||
-          mt.blackPlayerTwo === player,
-      );
+      const playerMatches = matches.filter(isPlayerInMatchFilter(player.id));
 
       for (const match of playerMatches) {
         const team = this.getPlayersTeam(match, player.id);
@@ -81,11 +74,7 @@ class MatchStatistics {
 
     const playersWithLastPlayed = players.map((player) => {
       const playerMatches = latestMatches.filter(
-        (mt) =>
-          mt.whitePlayerOne === player ||
-          mt.whitePlayerTwo === player ||
-          mt.blackPlayerOne === player ||
-          mt.blackPlayerTwo === player,
+        isPlayerInMatchFilter(player.id),
       );
       if (playerMatches.length === 0)
         return { player, lastPlayed: new Date(0) };
@@ -95,7 +84,7 @@ class MatchStatistics {
     return playersWithLastPlayed;
   }
 
-  static highestStreak(matches: MatchWithPlayers[]) {
+  static highestStreak(matches: Match[]) {
     let highestWinningPlayer: Player | null = null;
     let highestWinningStreak = 0;
     let highestLosingPlayer: Player | null = null;
@@ -127,7 +116,7 @@ class MatchStatistics {
     };
   }
 
-  static getPlayersStreak(matches: MatchWithPlayers[], userId: string) {
+  static getPlayersStreak(matches: Match[], userId: string) {
     const streaks = this.streaksByPlayer(matches);
     const playerStreak = streaks.find((streak) => streak.player.id === userId);
 
@@ -139,20 +128,7 @@ class MatchStatistics {
       : { highestStreak: 0, loseStreak: 0 };
   }
 
-  static getPlayersEloTrend(matches: MatchWithPlayers[], userId: string) {
-    return matches.map((mt) => {
-      const currentTeam = this.getPlayersTeam(mt, userId);
-      const eloChange =
-        currentTeam === "White" ? mt.whiteEloChange : mt.blackEloChange;
-
-      return {
-        createdAt: mt.createdAt,
-        eloChange,
-      };
-    });
-  }
-
-  static test(matches: MatchWithPlayers[], userId: string) {
+  static test(matches: Match[], userId: string) {
     const eloRatingSystem = elo();
     const history = getPlayerRatingHistory(matches, userId, eloRatingSystem);
 
@@ -165,7 +141,7 @@ class MatchStatistics {
   }
 
   static getPlayersEasiestAndHardestOpponents(
-    matches: MatchWithPlayers[],
+    matches: Match[],
     userId: string,
   ) {
     const hardestOpponents: Record<string, { player: Player; games: number }> =
@@ -251,14 +227,10 @@ class MatchStatistics {
       .filter(unique);
 
     players.forEach((player) => {
+      const playerId = player.id;
+
       const playerMatches = matches
-        .filter(
-          (mt) =>
-            mt.whitePlayerOne === player ||
-            mt.whitePlayerTwo === player ||
-            mt.blackPlayerOne === player ||
-            mt.blackPlayerTwo === player,
-        )
+        .filter(isPlayerInMatchFilter(playerId))
         .slice(0, 5);
 
       playerMatches.sort(
@@ -266,29 +238,34 @@ class MatchStatistics {
       );
 
       for (const match of playerMatches) {
-        const team = this.getPlayersTeamByMatch(match, player);
-        if (!playerStreaks[player]) {
-          playerStreaks[player] = { winStreak: 0, loseStreak: 0, results: [] };
+        const team = this.getPlayersTeamByMatch(match, playerId);
+        if (!playerStreaks[playerId]) {
+          playerStreaks[playerId] = {
+            winStreak: 0,
+            loseStreak: 0,
+            results: [],
+          };
         }
         if (match.result == team) {
-          playerStreaks[player].winStreak++;
-          playerStreaks[player].loseStreak = 0;
-          playerStreaks[player].results.push(RESULT.WIN);
+          playerStreaks[playerId].winStreak++;
+          playerStreaks[playerId].loseStreak = 0;
+          playerStreaks[playerId].results.push(RESULT.WIN);
         } else if (match.result === "Draw") {
-          playerStreaks[player].results.push(RESULT.DRAW);
+          playerStreaks[playerId].results.push(RESULT.DRAW);
         } else {
-          playerStreaks[player].loseStreak++;
-          playerStreaks[player].winStreak = 0;
-          playerStreaks[player].results.push(RESULT.LOSS);
+          playerStreaks[playerId].loseStreak++;
+          playerStreaks[playerId].winStreak = 0;
+          playerStreaks[playerId].results.push(RESULT.LOSS);
         }
       }
-      playerStreaks[player].results = playerStreaks[player].results.reverse();
+      playerStreaks[playerId].results =
+        playerStreaks[playerId].results.reverse();
     });
 
     return playerStreaks;
   }
 
-  static biggestWinAndLoss(matches: MatchWithPlayers[], userId: string) {
+  static biggestWinAndLoss(matches: Match[], userId: string) {
     const { wins, losses } = this.splitMatchesIntoWinsLossesAndDraws(
       matches,
       userId,
@@ -346,12 +323,12 @@ class MatchStatistics {
   }
 
   private static splitMatchesIntoWinsLossesAndDraws(
-    matches: MatchWithPlayers[],
+    matches: Match[],
     userId: string,
   ) {
-    const wins: MatchWithPlayers[] = [];
-    const losses: MatchWithPlayers[] = [];
-    const draws: MatchWithPlayers[] = [];
+    const wins: Match[] = [];
+    const losses: Match[] = [];
+    const draws: Match[] = [];
     for (const match of matches) {
       const currentTeam = this.getPlayersTeam(match, userId);
       if (match.result === currentTeam) {
@@ -366,7 +343,7 @@ class MatchStatistics {
     return { wins, losses, draws };
   }
 
-  static streaksByPlayer(matches: MatchWithPlayers[]) {
+  static streaksByPlayer(matches: Match[]) {
     matches.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
 
     const playerStreaks: Record<
@@ -447,11 +424,11 @@ class MatchStatistics {
     return Object.values(result); // Convert the result to an array of records
   }
 
-  static totalGamesPlayed(matches: Match[] | MatchWithPlayers[]) {
+  static totalGamesPlayed(matches: Match[] | Match[]) {
     return matches.length;
   }
 
-  static gamesToday(matches: Match[] | MatchWithPlayers[]) {
+  static gamesToday(matches: Match[]) {
     const matchesToday = matches.filter(
       (mt) =>
         getDatePartFromDate(mt.createdAt) === getDatePartFromDate(new Date()),
@@ -469,12 +446,12 @@ class MatchStatistics {
     return matchesYesterday.length;
   }
 
-  static draws(matches: Match[] | MatchWithPlayers[]) {
+  static draws(matches: Match[] | Match[]) {
     const drawMatches = matches.filter((mt) => mt.result === "Draw").length;
     return drawMatches;
   }
 
-  static mostGamesInOneDay(matches: Match[] | MatchWithPlayers[]) {
+  static mostGamesInOneDay(matches: Match[] | Match[]) {
     const matchesPerDate = matches.reduce(
       (acc, curr) => {
         const date = getDatePartFromDate(curr.createdAt);
@@ -504,13 +481,13 @@ class MatchStatistics {
     const blackWins = matches.filter(
       (mt) =>
         mt.result === "Black" &&
-        (mt.blackPlayerOne === userId || mt.blackPlayerTwo === userId),
+        (mt.blackPlayerOne.id === userId || mt.blackPlayerTwo?.id === userId),
     ).length;
 
     const whiteWins = matches.filter(
       (mt) =>
         mt.result === "White" &&
-        (mt.whitePlayerOne === userId || mt.whitePlayerTwo === userId),
+        (mt.whitePlayerOne.id === userId || mt.whitePlayerTwo?.id === userId),
     ).length;
 
     const draws = matches.filter((mt) => mt.result === "Draw").length;
@@ -524,7 +501,7 @@ class MatchStatistics {
   }
 
   static playerWithWinrate(
-    matches: MatchWithPlayers[],
+    matches: Match[],
     lowest: boolean,
   ): {
     player: Player;
@@ -620,7 +597,7 @@ class MatchStatistics {
     };
   }
 
-  static playerWithMostGames(matches: MatchWithPlayers[]): {
+  static playerWithMostGames(matches: Match[]): {
     player: Player;
     games: number;
   } {
@@ -680,12 +657,12 @@ class MatchStatistics {
     const whiteWins = matches.filter(
       (mt) =>
         mt.result === "White" &&
-        (mt.whitePlayerOne === userId || mt.whitePlayerTwo === userId),
+        (mt.whitePlayerOne.id === userId || mt.whitePlayerTwo?.id === userId),
     ).length;
     const blackWins = matches.filter(
       (mt) =>
         mt.result === "Black" &&
-        (mt.blackPlayerOne === userId || mt.blackPlayerTwo === userId),
+        (mt.blackPlayerOne.id === userId || mt.blackPlayerTwo?.id === userId),
     ).length;
     const numOfDraws = matches.filter((mt) => mt.result === "Draw").length;
     const totalGames = blackWins + whiteWins + numOfDraws;
@@ -706,7 +683,7 @@ class MatchStatistics {
     };
   }
 
-  private static getMatchTeams(match: MatchWithPlayers) {
+  private static getMatchTeams(match: Match) {
     const whitePlayers = [match.whitePlayerOne, match.whitePlayerTwo].filter(
       notEmpty,
     );
@@ -727,7 +704,7 @@ class MatchStatistics {
   }
 
   public static getPlayersTeam(
-    match: MatchWithPlayers,
+    match: Match,
     userId: string,
   ): "White" | "Black" {
     const { whitePlayers } = this.getMatchTeams(match);
@@ -744,25 +721,21 @@ class MatchStatistics {
     userId: string,
   ): "White" | "Black" {
     const { whitePlayers } = this.getMatchTeamsByMatch(match);
-    const currentTeam = whitePlayers.find((x) => x === userId)
+    const currentTeam = whitePlayers.find((x) => x.id === userId)
       ? "White"
       : "Black";
     return currentTeam;
   }
 }
 
-export function mapToMatches(matches: MatchWithPlayers[]): Match[] {
-  return matches.map(mapToMatch);
-}
-
-export function mapToMatch(match: MatchWithPlayers): Match {
-  return {
-    ...match,
-    whitePlayerOne: match.whitePlayerOne.id,
-    whitePlayerTwo: match.whitePlayerTwo ? match.whitePlayerTwo.id : null,
-    blackPlayerOne: match.blackPlayerOne.id,
-    blackPlayerTwo: match.blackPlayerTwo ? match.blackPlayerTwo.id : null,
-  };
+export function isPlayerInMatchFilter(
+  playerId: string,
+): (match: Match) => boolean {
+  return (match: Match) =>
+    match.whitePlayerOne.id === playerId ||
+    match.whitePlayerTwo?.id === playerId ||
+    match.blackPlayerOne.id === playerId ||
+    match.blackPlayerTwo?.id === playerId;
 }
 
 export default MatchStatistics;

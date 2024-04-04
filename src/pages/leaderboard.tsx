@@ -1,4 +1,3 @@
-import { and, desc, eq, inArray, or } from "drizzle-orm";
 import { Elysia } from "elysia";
 import { type Session } from "lucia";
 import { HeaderHtml } from "../components/header";
@@ -7,38 +6,26 @@ import { LeaderboardRowHtml } from "../components/LeaderboardRow";
 import { LeaderboardTableHtml } from "../components/LeaderboardTable";
 import { NavbarHtml } from "../components/Navbar";
 import { ctx } from "../context";
-import { readDb } from "../db";
-import { playerEloPaginationQuery } from "../db/queries/matchQueries";
+import { getMatches } from "../db/queries/matchQueries";
 import { getActiveSeason } from "../db/queries/seasonQueries";
-import { matches } from "../db/schema";
-import { type Match } from "../db/schema/matches";
 import { isHxRequest } from "../lib";
 import MatchStatistics, { type RESULT } from "../lib/matchStatistics";
+import { elo, getRatings } from "../lib/rating";
 
 const playerPaginationQuery = async (page: number) => {
   const pageSize = 15;
   const activeSeason = await getActiveSeason();
   const activeSeasonId = activeSeason?.id ?? 1;
 
-  const players = await playerEloPaginationQuery(page, activeSeasonId);
-  const userIds = players.map((player) => player.id);
+  const matches = await getMatches(activeSeasonId);
+  const eloRatingSystem = elo();
+  const players = getRatings(matches, eloRatingSystem);
 
-  const matchesByPlayer: Match[] =
-    userIds.length === 0
-      ? []
-      : await readDb.query.matches.findMany({
-          orderBy: [desc(matches.createdAt)],
-          where: and(
-            eq(matches.seasonId, activeSeasonId),
-            or(
-              inArray(matches.blackPlayerOne, userIds),
-              inArray(matches.whitePlayerOne, userIds),
-              inArray(matches.blackPlayerTwo, userIds),
-              inArray(matches.whitePlayerTwo, userIds),
-            ),
-          ),
-        });
-  const lastPlayed = MatchStatistics.latestMatch(matchesByPlayer);
+  const startIndex = (page - 1) * pageSize;
+  const endIndex = startIndex + pageSize - 1;
+  const playersInPage = players.slice(startIndex, endIndex);
+
+  const lastPlayed = MatchStatistics.latestMatch(matches);
   const latestResults: Record<
     string,
     {
@@ -46,18 +33,18 @@ const playerPaginationQuery = async (page: number) => {
       loseStreak: number;
       results: RESULT[];
     }
-  > = MatchStatistics.currentStreaksByPlayer(matchesByPlayer);
+  > = MatchStatistics.currentStreaksByPlayer(matches);
 
-  return players.map((player, index) => ({
-    userId: player.id,
+  return playersInPage.map((player, index) => ({
+    userId: player.player.id,
     rank: index + (page - 1) * pageSize + 1,
-    name: player.name,
-    elo: player.elo,
+    name: player.player.name,
+    elo: eloRatingSystem.toNumber(player.rating),
     lastPlayed:
-      lastPlayed.find((match) => match.player === player.id)?.lastPlayed ||
-      new Date(0),
-    latestPlayerResults: latestResults[player.id]
-      ? latestResults[player.id]
+      lastPlayed.find((match) => match.player.id === player.player.id)
+        ?.lastPlayed || new Date(0),
+    latestPlayerResults: latestResults[player.player.id]
+      ? latestResults[player.player.id]
       : null,
   }));
 };

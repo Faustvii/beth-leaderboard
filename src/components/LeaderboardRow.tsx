@@ -129,7 +129,7 @@ export const WinLoseStreak = ({
     return <span class="pr-2 text-2xl">{isWinStreak ? "🔥" : "❄️"}</span>;
   }
 
-  return <></>;
+  return <span class="invisible pr-2 text-2xl">〰️</span>;
 };
 
 export const LatestResults = ({

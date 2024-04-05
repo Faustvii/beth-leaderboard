@@ -16,10 +16,6 @@ export const matches = sqliteTable(
     blackPlayerTwo: text("black_player_two").references(() => userTbl.id),
     result: text("result", { enum: ["Black", "White", "Draw"] }).notNull(),
     scoreDiff: integer("score_diff", { mode: "number" }).notNull(),
-    whiteEloChange: integer("white_elo_change", { mode: "number" }).notNull(),
-    blackEloChange: integer("black_elo_change", { mode: "number" })
-      .notNull()
-      .default(0),
     createdAt: integer("createdAt", { mode: "timestamp" })
       .notNull()
       .$defaultFn(() => new Date()),

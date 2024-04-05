@@ -90,8 +90,6 @@ async function SeedMatches(
       blackPlayerOne: blackPlayerOne,
       result: result,
       scoreDiff: scoreDiff,
-      whiteEloChange: 0,
-      blackEloChange: 0,
       whitePlayerTwo: whitePlayerTwo,
       blackPlayerTwo: blackPlayerTwo,
       createdAt: matchDate,

@@ -6,8 +6,6 @@ interface MatchWithPlayers {
   blackPlayerTwo: Player | null;
   result: "Black" | "White" | "Draw";
   scoreDiff: number;
-  whiteEloChange: number;
-  blackEloChange: number;
   seasonId: number;
   createdAt: Date;
 }

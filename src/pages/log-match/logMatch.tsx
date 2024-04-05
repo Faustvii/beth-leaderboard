@@ -65,8 +65,6 @@ export const match = new Elysia({
       const matchInsert: newMatch = {
         result: match_winner,
         scoreDiff: Number(point_difference),
-        whiteEloChange: 0,
-        blackEloChange: 0,
         whitePlayerOne: white1Id,
         whitePlayerTwo: white2Id ? white2Id : null,
         blackPlayerOne: black1Id,

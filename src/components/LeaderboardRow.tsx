@@ -119,7 +119,7 @@ export const WinLoseStreak = ({
   isWinStreak: boolean;
 }) => {
   if (lastPlayed && isDateOlderThanNDays(lastPlayed, 7)) {
-    return <span class="pr2 text-2xl">💤</span>;
+    return <span class="pr-2 text-2xl">💤</span>;
   }
   if (streak && streak === 5) {
     return <span class="pr-2 text-2xl">{isWinStreak ? "🤑" : "🗑️"}</span>;

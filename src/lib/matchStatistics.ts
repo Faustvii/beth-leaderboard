@@ -149,7 +149,7 @@ class MatchStatistics {
     const easiestOpponents: Record<string, { player: Player; games: number }> =
       {};
 
-    for (const match of matches.filter((x) => x.result !== "Draw")) {
+    for (const match of matches.filter(isPlayerInMatchFilter(userId)).filter((x) => x.result !== "Draw")) {
       const { whitePlayers, blackPlayers } = this.getMatchTeams(match);
       const currentTeam = this.getPlayersTeam(match, userId);
       const opposingPlayers =
@@ -329,7 +329,7 @@ class MatchStatistics {
     const wins: Match[] = [];
     const losses: Match[] = [];
     const draws: Match[] = [];
-    for (const match of matches) {
+    for (const match of matches.filter(isPlayerInMatchFilter(userId))) {
       const currentTeam = this.getPlayersTeam(match, userId);
       if (match.result === currentTeam) {
         wins.push(match);

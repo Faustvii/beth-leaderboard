@@ -45,7 +45,7 @@ export function getRatings<TRating>(
 ): PlayerWithRating<TRating>[] {
   const ratings: Record<string, PlayerWithRating<TRating>> = {};
 
-  for (const match of matches) {
+  for (const match of matches.sort((a,b) => a.createdAt.getTime() - b.createdAt.getTime())) {
     const matchWithRatings: MatchWithRatings<TRating> = {
       ...match,
       whitePlayerOne: ratings[match.whitePlayerOne.id] ?? {
@@ -157,9 +157,11 @@ export function openskill(): RatingSystem<Rating> {
         match.blackPlayerTwo?.rating,
       ].filter(isDefined);
 
+      // Lower is better
+      // It makes a difference if the ranking is zero or non-zero, not sure why 🤷
       const outcomeRanking = {
-        White: [1, 0],
-        Black: [0, 1],
+        White: [1, 2],
+        Black: [2, 1],
         Draw: [1, 1],
       }[match.result];
 

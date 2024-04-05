@@ -1,5 +1,5 @@
 import { ordinal, rate, rating } from "openskill";
-import { type Rating } from "openskill/dist/types";
+import { type Options, type Rating } from "openskill/dist/types";
 import { type EloConfig } from "../types/elo";
 import { getDatePartFromDate, subtractDays } from "./dateUtils";
 import { isDefined } from "./utils";
@@ -142,9 +142,16 @@ export function getPlayerRatingHistory<TRating>(
   return playerRatingHistory;
 }
 
-export function openskill(): RatingSystem<Rating> {
+export function openskill(options?: Options): RatingSystem<Rating> {
+  const selectedOptions: Options = options ?? {
+    mu: 1000, // skill level, higher is better
+    sigma: 500, // certainty, lower is more certain
+    tau: 0.3, // tau prevents model from getting too certain about a players skill level
+    z: 2, // used in calculation of ordinal `my - z * sigma`
+  };
+
   return {
-    defaultRating: rating(),
+    defaultRating: rating(selectedOptions),
 
     rateMatch(match: MatchWithRatings<Rating>): PlayerWithRating<Rating>[] {
       const whiteTeam = [
@@ -169,6 +176,7 @@ export function openskill(): RatingSystem<Rating> {
         [whitePlayerOneNewRating, whitePlayerTwoNewRating],
         [blackPlayerOneNewRating, blackPlayerTwoNewRating],
       ] = rate([whiteTeam, blackTeam], {
+        ...selectedOptions,
         rank: outcomeRanking,
       });
 
@@ -201,7 +209,7 @@ export function openskill(): RatingSystem<Rating> {
     },
 
     toNumber(rating: Rating) {
-      return Math.floor(ordinal(rating) * 1000);
+      return Math.floor(ordinal(rating, selectedOptions));
     },
   };
 }

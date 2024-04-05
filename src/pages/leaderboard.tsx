@@ -22,7 +22,7 @@ const playerPaginationQuery = async (page: number) => {
   const players = getRatings(matches, eloRatingSystem);
 
   const startIndex = (page - 1) * pageSize;
-  const endIndex = startIndex + pageSize - 1;
+  const endIndex = startIndex + pageSize;
   const playersInPage = players.slice(startIndex, endIndex);
 
   const lastPlayed = MatchStatistics.latestMatch(matches);

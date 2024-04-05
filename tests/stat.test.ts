@@ -1,10 +1,11 @@
 import { describe, expect, test } from "bun:test";
 import MatchStatistics from "../src/lib/matchStatistics";
+import { Match } from "../src/lib/rating";
 
 describe("stats", () => {
   test("should be able to calculate highest win&lose streaks", () => {
     const now = new Date().getTime();
-    const matches: MatchWithPlayers[] = [
+    const matches: Match[] = [
       {
         id: 1,
         blackPlayerOne: {
@@ -29,10 +30,7 @@ describe("stats", () => {
         },
         result: "Black",
         scoreDiff: 1,
-        whiteEloChange: 1,
-        blackEloChange: 1,
         createdAt: new Date(now - 1000),
-        seasonId: 2,
       },
       {
         id: 2,
@@ -58,10 +56,7 @@ describe("stats", () => {
         },
         result: "Black",
         scoreDiff: 1,
-        whiteEloChange: 1,
-        blackEloChange: 1,
         createdAt: new Date(now - 999),
-        seasonId: 2,
       },
       {
         id: 3,
@@ -87,10 +82,7 @@ describe("stats", () => {
         },
         result: "Black",
         scoreDiff: 1,
-        whiteEloChange: 1,
-        blackEloChange: 1,
         createdAt: new Date(now - 998),
-        seasonId: 2,
       },
       {
         id: 4,
@@ -116,10 +108,7 @@ describe("stats", () => {
         },
         result: "White",
         scoreDiff: 1,
-        whiteEloChange: 1,
-        blackEloChange: 1,
         createdAt: new Date(now - 997),
-        seasonId: 2,
       },
     ];
     const { highestLoseStreak, highestWinStreak } =
@@ -134,7 +123,7 @@ describe("stats", () => {
 
   test("should reset streak when there are breaks in the streak", () => {
     const now = new Date().getTime();
-    const matches: MatchWithPlayers[] = [];
+    const matches: Match[] = [];
     for (let i = 0; i < 3; i++) {
       const match = generateMatch(new Date(now + i * 5000));
       match.id = i;
@@ -163,7 +152,7 @@ describe("stats", () => {
   });
 });
 
-function generateMatch(createdAt: Date): MatchWithPlayers {
+function generateMatch(createdAt: Date): Match {
   return {
     id: 1,
     whitePlayerOne: {
@@ -180,9 +169,6 @@ function generateMatch(createdAt: Date): MatchWithPlayers {
     whitePlayerTwo: null,
     result: "White",
     scoreDiff: 1,
-    whiteEloChange: 1,
-    blackEloChange: 1,
     createdAt: createdAt,
-    seasonId: 2,
   };
 }

@@ -22,6 +22,13 @@
       "when": 1702647839991,
       "tag": "0002_regular_aqueduct",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1712319182962,
+      "tag": "0003_fearless_warbird",
+      "breakpoints": true
     }
   ]
 }

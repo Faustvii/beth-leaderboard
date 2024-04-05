@@ -217,7 +217,7 @@ export function openskill(options?: Options): RatingSystem<Rating> {
 export function elo(config?: EloConfig): RatingSystem<number> {
   function avg(ratings: number[]) {
     const totalElo = ratings.reduce((sum, player) => sum + player, 0);
-    return Math.floor(totalElo / ratings.length);
+    return Math.round(totalElo / ratings.length);
   }
 
   function getExpectedScore(playerElo: number, opponentElo: number) {

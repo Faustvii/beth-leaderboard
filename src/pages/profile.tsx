@@ -84,7 +84,7 @@ const profileStats = (
   );
   const winRate = MatchStatistics.playerWinRate(playerMatches, userId);
   const { highestLoseStreak, highestWinStreak } =
-    MatchStatistics.getPlayersStreak(matches, userId);
+    MatchStatistics.getPlayersStreak(playerMatches, userId);
 
   const { easiestOpponents, hardestOpponents } =
     MatchStatistics.getPlayersEasiestAndHardestOpponents(matches, userId);
@@ -92,7 +92,11 @@ const profileStats = (
   const { win: biggestWin, loss: biggestLoss } =
     MatchStatistics.biggestWinAndLoss(matches, userId);
 
-  const ratingHistory = MatchStatistics.test(matches, userId, ratingSystem);
+  const ratingHistory = MatchStatistics.getRatingHistory(
+    matches,
+    userId,
+    ratingSystem,
+  );
   const matchHistory = MatchStatistics.getMatchHistory(matches, userId).slice(
     0,
     20,

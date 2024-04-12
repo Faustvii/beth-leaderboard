@@ -133,7 +133,7 @@ class MatchStatistics {
       : { highestStreak: 0, loseStreak: 0 };
   }
 
-  static test(
+  static getRatingHistory(
     matches: Match[],
     userId: string,
     ratingSystem: RatingSystem<Rating>,

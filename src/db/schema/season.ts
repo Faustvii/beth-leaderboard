@@ -31,4 +31,5 @@ export const seasonsTbl = sqliteTable(
 );
 
 export type Season = typeof seasonsTbl.$inferSelect;
+export type RatingSystemType = typeof seasonsTbl.$inferSelect.ratingSystem;
 export type InsertSeason = typeof seasonsTbl.$inferInsert;

@@ -1,6 +1,11 @@
 import { notEmpty, unique } from ".";
 import { getDatePartFromDate } from "./dateUtils";
-import { elo, getPlayerRatingHistory, type Match } from "./rating";
+import {
+  getPlayerRatingHistory,
+  type Match,
+  type Rating,
+  type RatingSystem,
+} from "./rating";
 
 export enum RESULT {
   WIN = "WIN",
@@ -128,9 +133,12 @@ class MatchStatistics {
       : { highestStreak: 0, loseStreak: 0 };
   }
 
-  static test(matches: Match[], userId: string) {
-    const eloRatingSystem = elo();
-    const history = getPlayerRatingHistory(matches, userId, eloRatingSystem);
+  static test(
+    matches: Match[],
+    userId: string,
+    ratingSystem: RatingSystem<Rating>,
+  ) {
+    const history = getPlayerRatingHistory(matches, userId, ratingSystem);
 
     const ratingTrend = Object.entries(history).map(([date, rating]) => ({
       date: new Date(date),

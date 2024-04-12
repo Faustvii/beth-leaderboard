@@ -14,7 +14,12 @@ import MatchStatistics, {
   isPlayerInMatchFilter,
   RESULT,
 } from "../lib/matchStatistics";
-import { Match } from "../lib/rating";
+import {
+  getRatingSystem,
+  type Match,
+  type Rating,
+  type RatingSystem,
+} from "../lib/rating";
 
 export const profile = new Elysia({
   prefix: "/profile",
@@ -34,6 +39,8 @@ async function page(
 ) {
   const activeSeason = await getActiveSeason();
   const activeSeasonId = activeSeason?.id ?? 1;
+  const activeSeasonRatingSystemType = activeSeason?.ratingSystem ?? "elo";
+  const ratingSystem = getRatingSystem(activeSeasonRatingSystemType);
 
   const { elaspedTimeMs, result: matches } = await measure(() =>
     getMatches(activeSeasonId),
@@ -50,18 +57,22 @@ async function page(
     <>
       <NavbarHtml session={session} activePage="profile" />
       <HeaderHtml title={header} />
-      {profileStats(matches, userId)}
+      {profileStats(matches, userId, ratingSystem)}
     </>
   ) : (
     <LayoutHtml>
       <NavbarHtml session={session} activePage="profile" />
       <HeaderHtml title={header} />
-      {profileStats(matches, userId)}
+      {profileStats(matches, userId, ratingSystem)}
     </LayoutHtml>
   );
 }
 
-const profileStats = (matches: Match[], userId: string) => {
+const profileStats = (
+  matches: Match[],
+  userId: string,
+  ratingSystem: RatingSystem<Rating>,
+) => {
   const now = performance.now();
   const playerMatches = matches.filter(isPlayerInMatchFilter(userId));
   const matchesToday = MatchStatistics.gamesToday(playerMatches);
@@ -81,7 +92,7 @@ const profileStats = (matches: Match[], userId: string) => {
   const { win: biggestWin, loss: biggestLoss } =
     MatchStatistics.biggestWinAndLoss(matches, userId);
 
-  const ratingHistory = MatchStatistics.test(matches, userId);
+  const ratingHistory = MatchStatistics.test(matches, userId, ratingSystem);
   const matchHistory = MatchStatistics.getMatchHistory(matches, userId).slice(
     0,
     20,
@@ -134,7 +145,7 @@ const profileStats = (matches: Match[], userId: string) => {
     return "#FF0000";
   };
 
-  const ratings = ratingHistory.map((x) => x.rating);
+  const ratings = ratingHistory.map((x) => ratingSystem.toNumber(x.rating));
   const ratingColor = ratings.map(colorFromPrevious);
 
   const ratingData = {

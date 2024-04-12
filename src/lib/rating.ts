@@ -1,8 +1,15 @@
 import { ordinal, rate, rating } from "openskill";
-import { type Options, type Rating } from "openskill/dist/types";
+import {
+  type Rating as OpenskillRating,
+  type Options,
+} from "openskill/dist/types";
+import { RatingSystemType } from "../db/schema/season";
 import { type EloConfig } from "../types/elo";
 import { getDatePartFromDate, subtractDays } from "./dateUtils";
 import { isDefined } from "./utils";
+
+type EloRating = number;
+export type Rating = EloRating | OpenskillRating;
 
 export interface RatingSystem<TRating> {
   defaultRating: TRating;
@@ -45,7 +52,9 @@ export function getRatings<TRating>(
 ): PlayerWithRating<TRating>[] {
   const ratings: Record<string, PlayerWithRating<TRating>> = {};
 
-  for (const match of matches.sort((a,b) => a.createdAt.getTime() - b.createdAt.getTime())) {
+  for (const match of matches.sort(
+    (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),
+  )) {
     const matchWithRatings: MatchWithRatings<TRating> = {
       ...match,
       whitePlayerOne: ratings[match.whitePlayerOne.id] ?? {
@@ -142,7 +151,7 @@ export function getPlayerRatingHistory<TRating>(
   return playerRatingHistory;
 }
 
-export function openskill(options?: Options): RatingSystem<Rating> {
+export function openskill(options?: Options): RatingSystem<OpenskillRating> {
   const selectedOptions: Options = options ?? {
     mu: 1000, // skill level, higher is better
     sigma: 500, // certainty, lower is more certain
@@ -153,7 +162,9 @@ export function openskill(options?: Options): RatingSystem<Rating> {
   return {
     defaultRating: rating(selectedOptions),
 
-    rateMatch(match: MatchWithRatings<Rating>): PlayerWithRating<Rating>[] {
+    rateMatch(
+      match: MatchWithRatings<OpenskillRating>,
+    ): PlayerWithRating<OpenskillRating>[] {
       const whiteTeam = [
         match.whitePlayerOne.rating,
         match.whitePlayerTwo?.rating,
@@ -180,7 +191,7 @@ export function openskill(options?: Options): RatingSystem<Rating> {
         rank: outcomeRanking,
       });
 
-      const result: PlayerWithRating<Rating>[] = [
+      const result: PlayerWithRating<OpenskillRating>[] = [
         {
           player: match.whitePlayerOne.player,
           rating: whitePlayerOneNewRating,
@@ -208,13 +219,13 @@ export function openskill(options?: Options): RatingSystem<Rating> {
       return result;
     },
 
-    toNumber(rating: Rating) {
+    toNumber(rating: OpenskillRating) {
       return Math.floor(ordinal(rating, selectedOptions));
     },
   };
 }
 
-export function elo(config?: EloConfig): RatingSystem<number> {
+export function elo(config?: EloConfig): RatingSystem<EloRating> {
   function avg(ratings: number[]) {
     const totalElo = ratings.reduce((sum, player) => sum + player, 0);
     return Math.round(totalElo / ratings.length);
@@ -250,7 +261,9 @@ export function elo(config?: EloConfig): RatingSystem<number> {
   return {
     defaultRating: 1500,
 
-    rateMatch(match: MatchWithRatings<number>): PlayerWithRating<number>[] {
+    rateMatch(
+      match: MatchWithRatings<EloRating>,
+    ): PlayerWithRating<EloRating>[] {
       const whiteTeamElo = avg(
         [match.whitePlayerOne.rating, match.whitePlayerTwo?.rating].filter(
           isDefined,
@@ -300,7 +313,7 @@ export function elo(config?: EloConfig): RatingSystem<number> {
       const whiteTeamEloChange = whiteTeamEloAfter - whiteTeamElo;
       const blackTeamEloChange = blackTeamEloAfter - blackTeamElo;
 
-      const result: PlayerWithRating<number>[] = [
+      const result: PlayerWithRating<EloRating>[] = [
         {
           player: match.whitePlayerOne.player,
           rating: match.whitePlayerOne.rating + whiteTeamEloChange,
@@ -328,8 +341,18 @@ export function elo(config?: EloConfig): RatingSystem<number> {
       return result;
     },
 
-    toNumber(score: number) {
+    toNumber(score: EloRating) {
       return Math.floor(score);
     },
   };
+}
+
+export function getRatingSystem(type: RatingSystemType): RatingSystem<Rating> {
+  switch (type) {
+    case "openskill":
+      return openskill() as RatingSystem<Rating>;
+    case "elo":
+    default:
+      return elo() as RatingSystem<Rating>;
+  }
 }

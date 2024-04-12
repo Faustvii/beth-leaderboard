@@ -10,16 +10,17 @@ import { getMatches } from "../db/queries/matchQueries";
 import { getActiveSeason } from "../db/queries/seasonQueries";
 import { isHxRequest } from "../lib";
 import MatchStatistics, { type RESULT } from "../lib/matchStatistics";
-import { elo, getRatings } from "../lib/rating";
+import { getRatings, getRatingSystem } from "../lib/rating";
 
 const playerPaginationQuery = async (page: number) => {
   const pageSize = 15;
   const activeSeason = await getActiveSeason();
   const activeSeasonId = activeSeason?.id ?? 1;
+  const activeSeasonRatingSystemType = activeSeason?.ratingSystem ?? "elo";
 
   const matches = await getMatches(activeSeasonId);
-  const eloRatingSystem = elo();
-  const players = getRatings(matches, eloRatingSystem);
+  const ratingSystem = getRatingSystem(activeSeasonRatingSystemType);
+  const players = getRatings(matches, ratingSystem);
 
   const startIndex = (page - 1) * pageSize;
   const endIndex = startIndex + pageSize;
@@ -39,7 +40,7 @@ const playerPaginationQuery = async (page: number) => {
     userId: player.player.id,
     rank: index + (page - 1) * pageSize + 1,
     name: player.player.name,
-    rating: eloRatingSystem.toNumber(player.rating),
+    rating: ratingSystem.toNumber(player.rating),
     lastPlayed:
       lastPlayed.find((match) => match.player.id === player.player.id)
         ?.lastPlayed || new Date(0),

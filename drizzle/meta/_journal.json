@@ -29,6 +29,13 @@
       "when": 1712319182962,
       "tag": "0003_fearless_warbird",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1712928806068,
+      "tag": "0004_fast_stick",
+      "breakpoints": true
     }
   ]
 }

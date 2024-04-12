@@ -39,7 +39,6 @@ async function SeedPlayers(db: typeof readDb) {
     const player: typeof userTbl.$inferInsert = {
       id: generateRandomString(15),
       name: `Player ${index}`,
-      elo: 1500,
       email: "fake@fake.crokinole",
     };
 
@@ -59,8 +58,7 @@ async function SeedMatches(
         id: true,
       },
     });
-    if (index % 50 == 0)
-      console.log("creating elo match " + index + " of 1000");
+    if (index % 50 == 0) console.log("creating match " + index + " of 1000");
 
     const userIds = [
       players[Math.floor(Math.random() * players.length)].id,

@@ -137,7 +137,6 @@ export const authController = new Elysia({
           const newUser = await createUser({
             attributes: {
               name: name,
-              elo: 1500,
               email: normalizedAzureUser.email ?? null,
               picture: normalizedAzureUser.picture ?? null,
             },
@@ -213,7 +212,6 @@ export const authController = new Elysia({
 //         const user = await createUser({
 //           attributes: {
 //             name: googleUser.name,
-//             elo: 1500,
 //             email: googleUser.email ?? null,
 //             picture: googleUser.picture ?? null,
 //           },

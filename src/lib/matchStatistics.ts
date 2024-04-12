@@ -149,7 +149,9 @@ class MatchStatistics {
     const easiestOpponents: Record<string, { player: Player; games: number }> =
       {};
 
-    for (const match of matches.filter(isPlayerInMatchFilter(userId)).filter((x) => x.result !== "Draw")) {
+    for (const match of matches
+      .filter(isPlayerInMatchFilter(userId))
+      .filter((x) => x.result !== "Draw")) {
       const { whitePlayers, blackPlayers } = this.getMatchTeams(match);
       const currentTeam = this.getPlayersTeam(match, userId);
       const opposingPlayers =
@@ -559,7 +561,7 @@ class MatchStatistics {
     const filteredPlayers = players.filter((pl) => playerWins[pl.id].total > 4);
     if (filteredPlayers.length === 0)
       return {
-        player: { name: "N/A", elo: 0, id: "" },
+        player: { name: "N/A", id: "" },
         winrate: 0,
         totalGames: 0,
       };

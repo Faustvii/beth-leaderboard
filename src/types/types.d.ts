@@ -13,5 +13,4 @@ interface MatchWithPlayers {
 interface Player {
   id: string;
   name: string;
-  elo: number;
 }

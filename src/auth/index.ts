@@ -36,7 +36,6 @@ export const readAuth = lucia({
       id: data.id,
       name: data.name,
       email: data.email,
-      elo: data.elo,
     };
   },
 });
@@ -54,7 +53,6 @@ export const writeAuth = lucia({
       id: data.id,
       name: data.name,
       email: data.email,
-      elo: data.elo,
     };
   },
 });

@@ -42,6 +42,7 @@ export interface Match {
   result: Winner;
   scoreDiff: number;
   createdAt: Date;
+  seasonId: number;
 }
 
 interface MatchWithRatings<TRating> {

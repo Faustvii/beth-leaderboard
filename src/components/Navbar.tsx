@@ -5,7 +5,13 @@ import "@kitajs/html/register";
 import { cn } from "../lib/utils";
 import { HxButton } from "./HxButton";
 
-export type Page = "leaderboard" | "play" | "stats" | "match" | "profile";
+export type Page =
+  | "leaderboard"
+  | "play"
+  | "stats"
+  | "match"
+  | "profile"
+  | "result";
 
 interface Props extends PropsWithChildren {
   session: Session | null;

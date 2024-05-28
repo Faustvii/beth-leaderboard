@@ -3,7 +3,7 @@ import {
   type Rating as OpenskillRating,
   type Options,
 } from "openskill/dist/types";
-import { RatingSystemType } from "../db/schema/season";
+import { type RatingSystemType } from "../db/schema/season";
 import { type EloConfig } from "../types/elo";
 import { getDatePartFromDate, subtractDays } from "./dateUtils";
 import { isDefined } from "./utils";
@@ -50,44 +50,57 @@ export function getRatings<TRating>(
   matches: Match[],
   system: RatingSystem<TRating>,
 ): PlayerWithRating<TRating>[] {
-  const ratings: Record<string, PlayerWithRating<TRating>> = {};
-
-  for (const match of matches.sort(
+  const orderedMatches = matches.sort(
     (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),
-  )) {
-    const matchWithRatings: MatchWithRatings<TRating> = {
-      ...match,
-      whitePlayerOne: ratings[match.whitePlayerOne.id] ?? {
-        player: match.whitePlayerOne,
-        rating: system.defaultRating,
-      },
-      whitePlayerTwo: match.whitePlayerTwo
-        ? ratings[match.whitePlayerTwo.id] ?? {
-            player: match.whitePlayerTwo,
-            rating: system.defaultRating,
-          }
-        : null,
-      blackPlayerOne: ratings[match.blackPlayerOne.id] ?? {
-        player: match.blackPlayerOne,
-        rating: system.defaultRating,
-      },
-      blackPlayerTwo: match.blackPlayerTwo
-        ? ratings[match.blackPlayerTwo.id] ?? {
-            player: match.blackPlayerTwo,
-            rating: system.defaultRating,
-          }
-        : null,
-    };
+  );
 
-    const newRatings = system.rateMatch(matchWithRatings);
-    for (const newRating of newRatings) {
-      ratings[newRating.player.id] = newRating;
-    }
-  }
+  const ratings = orderedMatches.reduce(
+    (ratings, match) => getRatingAfterMatch(ratings, match, system),
+    {} as Record<string, PlayerWithRating<TRating>>,
+  );
 
   return Object.values(ratings).toSorted(
     (a, b) => system.toNumber(b.rating) - system.toNumber(a.rating),
   );
+}
+
+function getRatingAfterMatch<TRating>(
+  ratings: Record<string, PlayerWithRating<TRating>>,
+  match: Match,
+  system: RatingSystem<TRating>,
+) {
+  const matchWithRatings: MatchWithRatings<TRating> = {
+    ...match,
+    whitePlayerOne: ratings[match.whitePlayerOne.id] ?? {
+      player: match.whitePlayerOne,
+      rating: system.defaultRating,
+    },
+    whitePlayerTwo: match.whitePlayerTwo
+      ? ratings[match.whitePlayerTwo.id] ?? {
+          player: match.whitePlayerTwo,
+          rating: system.defaultRating,
+        }
+      : null,
+    blackPlayerOne: ratings[match.blackPlayerOne.id] ?? {
+      player: match.blackPlayerOne,
+      rating: system.defaultRating,
+    },
+    blackPlayerTwo: match.blackPlayerTwo
+      ? ratings[match.blackPlayerTwo.id] ?? {
+          player: match.blackPlayerTwo,
+          rating: system.defaultRating,
+        }
+      : null,
+  };
+
+  const newRatings = system.rateMatch(matchWithRatings);
+  const newRatingsMap = Object.fromEntries(
+    newRatings.map((x) => [x.player.id, x]),
+  );
+  return {
+    ...ratings,
+    ...newRatingsMap,
+  };
 }
 
 export function getPlayerRatingHistory<TRating>(

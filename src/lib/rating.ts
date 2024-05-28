@@ -15,11 +15,20 @@ export interface RatingSystem<TRating> {
   defaultRating: TRating;
   rateMatch: (match: MatchWithRatings<TRating>) => PlayerWithRating<TRating>[];
   toNumber: (rating: TRating) => number;
+  equals: (a: TRating | undefined, b: TRating | undefined) => boolean;
 }
 
 export interface PlayerWithRating<TRating> {
   player: Player;
   rating: TRating;
+}
+
+export interface PlayerWithRatingDiff<TRating> {
+  player: Player;
+  ratingBefore: TRating;
+  ratingAfter: TRating;
+  rankBefore: number;
+  rankAfter: number;
 }
 
 type Winner = "Black" | "White" | "Draw";
@@ -62,6 +71,27 @@ export function getRatings<TRating>(
   return Object.values(ratings).toSorted(
     (a, b) => system.toNumber(b.rating) - system.toNumber(a.rating),
   );
+}
+
+export function getMatchRatingDiff<TRating>(
+  matches: Match[],
+  system: RatingSystem<TRating>,
+): PlayerWithRatingDiff<TRating>[] {
+  const orderedMatches = matches.sort(
+    (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),
+  );
+  const matchToDiff = orderedMatches.splice(-1, 1)[0];
+
+  type PlayerRatingRecord = Record<string, PlayerWithRating<TRating>>;
+
+  const ratingsBefore = orderedMatches.reduce(
+    (ratings, match) => getRatingsAfterMatch(ratings, match, system),
+    {} as PlayerRatingRecord,
+  );
+
+  const ratingsAfter = getRatingsAfterMatch(ratingsBefore, matchToDiff, system);
+
+  return diffRatings(ratingsBefore, ratingsAfter, system);
 }
 
 function getRatingsAfterMatch<TRating>(
@@ -140,6 +170,42 @@ function hasPlayer(match: Match, playerId: string): boolean {
   );
 }
 
+function diffRatings<TRating>(
+  before: Record<string, PlayerWithRating<TRating>>,
+  after: Record<string, PlayerWithRating<TRating>>,
+  system: RatingSystem<TRating>,
+): PlayerWithRatingDiff<TRating>[] {
+  const distinctPlayers = [
+    ...new Set([...Object.keys(before), ...Object.keys(after)]),
+  ];
+
+  const diffs: PlayerWithRatingDiff<TRating>[] = [];
+
+  for (const playerId of distinctPlayers) {
+    const ratingBefore = before[playerId]?.rating;
+    const ratingAfter = after[playerId]?.rating;
+
+    const rankBefore = Object.values(before)
+      .toSorted((a, b) => system.toNumber(b.rating) - system.toNumber(a.rating))
+      .findIndex((x) => x.player.id === playerId);
+    const rankAfter = Object.values(after)
+      .toSorted((a, b) => system.toNumber(b.rating) - system.toNumber(a.rating))
+      .findIndex((x) => x.player.id === playerId);
+
+    if (!system.equals(ratingBefore, ratingAfter)) {
+      diffs.push({
+        player: after[playerId].player,
+        ratingBefore: ratingBefore ?? system.defaultRating,
+        ratingAfter,
+        rankBefore: rankBefore > -1 ? rankBefore + 1 : rankBefore,
+        rankAfter: rankAfter > -1 ? rankAfter + 1 : rankAfter,
+      });
+    }
+  }
+
+  return diffs;
+}
+
 export function openskill(options?: Options): RatingSystem<OpenskillRating> {
   const selectedOptions: Options = options ?? {
     mu: 1000, // skill level, higher is better
@@ -210,6 +276,12 @@ export function openskill(options?: Options): RatingSystem<OpenskillRating> {
 
     toNumber(rating: OpenskillRating) {
       return Math.floor(ordinal(rating, selectedOptions));
+    },
+
+    equals(a: OpenskillRating | undefined, b: OpenskillRating | undefined) {
+      if (a === undefined && b === undefined) return true;
+      if (a === undefined || b === undefined) return false;
+      return a.sigma === b.sigma && a.mu === b.mu;
     },
   };
 }
@@ -332,6 +404,10 @@ export function elo(config?: EloConfig): RatingSystem<EloRating> {
 
     toNumber(score: EloRating) {
       return Math.floor(score);
+    },
+
+    equals(a: EloRating | undefined, b: EloRating | undefined) {
+      return a === b;
     },
   };
 }

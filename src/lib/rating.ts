@@ -55,7 +55,7 @@ export function getRatings<TRating>(
   );
 
   const ratings = orderedMatches.reduce(
-    (ratings, match) => getRatingAfterMatch(ratings, match, system),
+    (ratings, match) => getRatingsAfterMatch(ratings, match, system),
     {} as Record<string, PlayerWithRating<TRating>>,
   );
 
@@ -64,7 +64,7 @@ export function getRatings<TRating>(
   );
 }
 
-function getRatingAfterMatch<TRating>(
+function getRatingsAfterMatch<TRating>(
   ratings: Record<string, PlayerWithRating<TRating>>,
   match: Match,
   system: RatingSystem<TRating>,
@@ -108,16 +108,11 @@ export function getPlayerRatingHistory<TRating>(
   playerId: string,
   system: RatingSystem<TRating>,
 ): Record<string, TRating> {
-  const ratings: Record<string, PlayerWithRating<TRating>> = {};
+  let ratings: Record<string, PlayerWithRating<TRating>> = {};
 
   const playersFirstMatch =
-    matches.find(
-      (match) =>
-        match.whitePlayerOne.id === playerId ||
-        match.whitePlayerTwo?.id === playerId ||
-        match.blackPlayerOne.id === playerId ||
-        match.blackPlayerTwo?.id === playerId,
-    )?.createdAt ?? new Date();
+    matches.find((match) => hasPlayer(match, playerId))?.createdAt ??
+    new Date();
 
   const dayBeforePlayersFirstMatch = subtractDays(playersFirstMatch, 1);
 
@@ -126,42 +121,23 @@ export function getPlayerRatingHistory<TRating>(
   };
 
   for (const match of matches) {
-    const matchWithRatings: MatchWithRatings<TRating> = {
-      ...match,
-      whitePlayerOne: ratings[match.whitePlayerOne.id] ?? {
-        player: match.whitePlayerOne,
-        rating: system.defaultRating,
-      },
-      whitePlayerTwo: match.whitePlayerTwo
-        ? ratings[match.whitePlayerTwo.id] ?? {
-            player: match.whitePlayerTwo,
-            rating: system.defaultRating,
-          }
-        : null,
-      blackPlayerOne: ratings[match.blackPlayerOne.id] ?? {
-        player: match.blackPlayerOne,
-        rating: system.defaultRating,
-      },
-      blackPlayerTwo: match.blackPlayerTwo
-        ? ratings[match.blackPlayerTwo.id] ?? {
-            player: match.blackPlayerTwo,
-            rating: system.defaultRating,
-          }
-        : null,
-    };
-
-    const newRatings = system.rateMatch(matchWithRatings);
-    for (const newRating of newRatings) {
-      ratings[newRating.player.id] = newRating;
-
-      if (newRating.player.id === playerId) {
-        playerRatingHistory[getDatePartFromDate(match.createdAt)] =
-          newRating.rating;
-      }
+    ratings = getRatingsAfterMatch(ratings, match, system);
+    if (hasPlayer(match, playerId)) {
+      const dateOfMatch = getDatePartFromDate(match.createdAt);
+      playerRatingHistory[dateOfMatch] = ratings[playerId].rating;
     }
   }
 
   return playerRatingHistory;
+}
+
+function hasPlayer(match: Match, playerId: string): boolean {
+  return (
+    match.whitePlayerOne.id === playerId ||
+    match.whitePlayerTwo?.id === playerId ||
+    match.blackPlayerOne.id === playerId ||
+    match.blackPlayerTwo?.id === playerId
+  );
 }
 
 export function openskill(options?: Options): RatingSystem<OpenskillRating> {

@@ -47,7 +47,7 @@ export const match = new Elysia({
   )
   .post(
     "/",
-    async ({ html, body, writeDb }) => {
+    async ({ headers, set, body, writeDb }) => {
       const { white1Id, white2Id, black1Id, black2Id } = body;
       const { match_winner, point_difference } = body;
       const activeSeason = await getActiveSeason();
@@ -72,9 +72,11 @@ export const match = new Elysia({
         seasonId: activeSeason.id,
       };
 
-      await writeDb.insert(matches).values(matchInsert);
+      const insertResult = await writeDb.insert(matches).values(matchInsert);
       await syncIfLocal();
-      return html(maForm());
+
+      const matchId = insertResult.lastInsertRowid;
+      redirect({ headers, set }, `/result/${activeSeason.id}/${matchId}`);
     },
     {
       error({ code, error }) {

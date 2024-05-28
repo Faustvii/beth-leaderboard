@@ -3,6 +3,7 @@ import { Elysia } from "elysia";
 import { type Session } from "lucia";
 import { HeaderHtml } from "../components/header";
 import { LayoutHtml } from "../components/Layout";
+import { MatchResultLink } from "../components/MatchResultLink";
 import { NavbarHtml } from "../components/Navbar";
 import { StatsCardHtml } from "../components/StatsCard";
 import { ctx } from "../context";
@@ -11,7 +12,7 @@ import { getActiveSeason } from "../db/queries/seasonQueries";
 import { isHxRequest, measure, notEmpty } from "../lib";
 import { getDatePartFromDate } from "../lib/dateUtils";
 import MatchStatistics from "../lib/matchStatistics";
-import { Match } from "../lib/rating";
+import { type Match } from "../lib/rating";
 
 export const stats = new Elysia({
   prefix: "/stats",
@@ -272,10 +273,15 @@ async function biggestWin(matches: Match[]) {
   return (
     <span class="text-sm">
       On{" "}
-      {biggestWinMatch.createdAt.toLocaleString("en-US", {
-        day: "numeric",
-        month: "long",
-      })}
+      <MatchResultLink
+        seasonId={biggestWinMatch.seasonId}
+        matchId={biggestWinMatch.id}
+      >
+        {biggestWinMatch.createdAt.toLocaleString("en-US", {
+          day: "numeric",
+          month: "long",
+        })}
+      </MatchResultLink>
       , the White team of{" "}
       <span class="font-bold">{biggestPlayers.white.join(" & ")}</span> faced
       off against the Black team of{" "}
@@ -305,7 +311,9 @@ const PrettyMatch = ({ match }: PrettyMatchProps) => {
       return (
         <span class="text-balance">
           <span class="font-bold">
-            {matchhistoryDateToString(match.createdAt)}
+            <MatchResultLink seasonId={match.seasonId} matchId={match.id}>
+              {matchhistoryDateToString(match.createdAt)}
+            </MatchResultLink>
           </span>{" "}
           <span class="font-bold"> {teamPlayers.white.join(" & ")}</span>{" "}
           {"&#128511;"} drew {"&#128511;"} with{" "}
@@ -329,7 +337,11 @@ const PrettyMatch = ({ match }: PrettyMatchProps) => {
       class="text-balance"
       style={`font-size: ${match.scoreDiff / 40 + 14}px`}
     >
-      <span class="font-bold">{matchhistoryDateToString(match.createdAt)}</span>{" "}
+      <span class="font-bold">
+        <MatchResultLink seasonId={match.seasonId} matchId={match.id}>
+          {matchhistoryDateToString(match.createdAt)}
+        </MatchResultLink>
+      </span>{" "}
       <span
         class="font-bold"
         style={`color: #${(winners.join(" ").length % 14).toString(16)}${(

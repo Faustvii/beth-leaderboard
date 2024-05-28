@@ -1,14 +1,14 @@
 import { type PropsWithChildren } from "@kitajs/html";
 import Elysia from "elysia";
 import { type Session } from "lucia";
-import { HeaderHtml } from "../components/header";
 import { HxButton } from "../components/HxButton";
 import { LayoutHtml } from "../components/Layout";
 import { NavbarHtml } from "../components/Navbar";
 import { ctx } from "../context";
 import { getMatches } from "../db/queries/matchQueries";
 import { getSeason } from "../db/queries/seasonQueries";
-import { getMatchRatingDiff, getRatingSystem } from "../lib/rating";
+import { notEmpty } from "../lib";
+import { getMatchRatingDiff, getRatingSystem, type Match } from "../lib/rating";
 
 export const matchResult = new Elysia({
   prefix: "/result",
@@ -38,6 +38,8 @@ async function page(
     allMatchesInSeason.findIndex((x) => x.id === matchId) + 1,
   );
 
+  const match = matches.at(-1);
+
   const matchDiff = getMatchRatingDiff(matches, ratingSystem)
     .map((x) => ({
       playerId: x.player.id,
@@ -52,7 +54,18 @@ async function page(
   return (
     <LayoutHtml>
       <NavbarHtml session={session} activePage="result" />
-      <HeaderHtml title="Match result" />
+      <div class="p-5 text-white">
+        <span class="text-4xl font-bold">Match result</span>
+        <span class="pl-4 text-2xl font-semibold">
+          (
+          {match?.createdAt?.toLocaleString("en-US", {
+            day: "numeric",
+            month: "long",
+          })}
+          )
+        </span>
+      </div>
+      <div class="px-5 pb-6 text-white">{matchDescription(match)}</div>
       <RatingDiffTable>
         {matchDiff.map((playerDiff) => (
           <RatingDiffTableRow {...playerDiff} />
@@ -62,13 +75,44 @@ async function page(
   );
 }
 
+function matchDescription(match: Match | undefined) {
+  if (match === undefined) {
+    return <></>;
+  }
+
+  const players = {
+    black: [match.blackPlayerOne.name, match.blackPlayerTwo?.name].filter(
+      notEmpty,
+    ),
+    white: [match.whitePlayerOne.name, match.whitePlayerTwo?.name].filter(
+      notEmpty,
+    ),
+  };
+
+  return (
+    <>
+      On{" "}
+      {match.createdAt.toLocaleString("en-US", {
+        day: "numeric",
+        month: "long",
+      })}
+      , the White team of{" "}
+      <span class="font-bold">{players.white.join(" & ")}</span> faced off
+      against the Black team of{" "}
+      <span class="font-bold">{players.black.join(" & ")}</span>. The{" "}
+      {match.result.toLowerCase()} team triumphed with a {match.scoreDiff}
+      -point difference.
+    </>
+  );
+}
+
 function RatingDiffTable({ children }: PropsWithChildren): JSX.Element {
   return (
     <>
       <div class="flex flex-col items-center justify-center">
         <div class="w-full overflow-x-auto rounded-lg shadow-md">
           <table class="w-full text-left text-sm text-gray-400">
-            <thead class=" bg-gray-700 text-xs uppercase text-gray-400">
+            <thead class="bg-gray-700 text-xs uppercase text-gray-400">
               <tr>
                 <th scope="col" class="px-1 py-3 pl-2 md:px-3 lg:px-6">
                   Rank

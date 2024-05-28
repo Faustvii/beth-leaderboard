@@ -3,6 +3,7 @@ import Elysia from "elysia";
 import { type Session } from "lucia";
 import { HeaderHtml } from "../components/header";
 import { LayoutHtml } from "../components/Layout";
+import { MatchResultLink } from "../components/MatchResultLink";
 import { NavbarHtml } from "../components/Navbar";
 import { StatsCardHtml } from "../components/StatsCard";
 import { ctx } from "../context";
@@ -352,10 +353,15 @@ function matchFaceoff(biggestWin: {
   return (
     <span class="text-sm">
       On{" "}
-      {biggestWin.match.createdAt.toLocaleString("en-US", {
-        day: "numeric",
-        month: "long",
-      })}
+      <MatchResultLink
+        seasonId={biggestWin.match.seasonId}
+        matchId={biggestWin.match.id}
+      >
+        {biggestWin.match.createdAt.toLocaleString("en-US", {
+          day: "numeric",
+          month: "long",
+        })}
+      </MatchResultLink>
       , the White team of{" "}
       <span class="font-bold">
         {biggestWin.biggestPlayers.white.join(" & ")}
@@ -396,10 +402,12 @@ function matchOutput(
   return (
     <span class="text-sm">
       On{" "}
-      {match.createdAt.toLocaleString("en-US", {
-        day: "numeric",
-        month: "long",
-      })}
+      <MatchResultLink seasonId={match.seasonId} matchId={match.id}>
+        {match.createdAt.toLocaleString("en-US", {
+          day: "numeric",
+          month: "long",
+        })}
+      </MatchResultLink>
       , <span class="font-bold">{firstTeam.join(" & ")}</span> faced off against{" "}
       <span class="font-bold">{lastTeam.join(" & ")}</span> and{" "}
       {result === RESULT.DRAW ? "tied" : result === RESULT.WIN ? "won" : "lost"}{" "}

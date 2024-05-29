@@ -60,7 +60,7 @@ export function getRatings<TRating>(
   matches: Match[],
   system: RatingSystem<TRating>,
 ): PlayerWithRating<TRating>[] {
-  const orderedMatches = matches.sort(
+  const orderedMatches = matches.toSorted(
     (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),
   );
 
@@ -78,7 +78,7 @@ export function getMatchRatingDiff<TRating>(
   matches: Match[],
   system: RatingSystem<TRating>,
 ): PlayerWithRatingDiff<TRating>[] {
-  const orderedMatches = matches.sort(
+  const orderedMatches = matches.toSorted(
     (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),
   );
   const matchToDiff = orderedMatches.splice(-1, 1)[0];

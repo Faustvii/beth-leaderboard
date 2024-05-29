@@ -33,10 +33,9 @@ async function page(
   const ratingSystem = getRatingSystem(season?.ratingSystem ?? "elo");
 
   const allMatchesInSeason = await getMatches(seasonId);
-  const matches = allMatchesInSeason.slice(
-    0,
-    allMatchesInSeason.findIndex((x) => x.id === matchId) + 1,
-  );
+  const matches = allMatchesInSeason
+    .toSorted((a, b) => a.createdAt.getTime() - b.createdAt.getTime())
+    .slice(0, allMatchesInSeason.findIndex((x) => x.id === matchId) + 1);
 
   const match = matches.at(-1);
 

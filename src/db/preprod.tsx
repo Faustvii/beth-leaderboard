@@ -2,6 +2,7 @@ import { generateRandomString } from "lucia/utils";
 import { type readDb } from ".";
 import { config } from "../config";
 import { dayInMs, daysBetween, hourInMs } from "../lib/dateUtils";
+import { pick } from "../lib/utils";
 import { getActiveSeason } from "./queries/seasonQueries";
 import { matches, seasonsTbl, userTbl } from "./schema";
 import { type InsertSeason } from "./schema/season";
@@ -69,17 +70,12 @@ async function SeedMatches(
     if (index % 50 == 0)
       console.log("creating match " + index + " of " + countToGenerate);
 
-    const userIds = [
-      players[Math.floor(Math.random() * players.length)].id,
-      players[Math.floor(Math.random() * players.length)].id,
-      players[Math.floor(Math.random() * players.length)].id,
-      players[Math.floor(Math.random() * players.length)].id,
-    ];
+    const userIds = pick(players, 4);
 
-    const whitePlayerOne = userIds[0];
-    const whitePlayerTwo = userIds[1];
-    const blackPlayerOne = userIds[2];
-    const blackPlayerTwo = userIds[3];
+    const whitePlayerOne = userIds[0].id;
+    const whitePlayerTwo = userIds[1].id;
+    const blackPlayerOne = userIds[2].id;
+    const blackPlayerTwo = userIds[3].id;
 
     // Generate a date that is evenly distributed between start of season and today and a time between 9:00 and 15:00
     const matchDate =

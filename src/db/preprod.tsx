@@ -1,6 +1,7 @@
 import { generateRandomString } from "lucia/utils";
 import { type readDb } from ".";
 import { config } from "../config";
+import { dayInMs, daysBetween, hourInMs } from "../lib/dateUtils";
 import { getActiveSeason } from "./queries/seasonQueries";
 import { matches, seasonsTbl, userTbl } from "./schema";
 import { type InsertSeason } from "./schema/season";
@@ -50,15 +51,23 @@ async function SeedMatches(
   db: typeof readDb,
   activeSeason: typeof seasonsTbl.$inferSelect,
 ) {
-  const startOfYear = new Date(new Date().getFullYear(), 0, 1).getTime();
-  const now = new Date().getTime();
-  for (let index = 0; index < 1000; index++) {
+  const now = new Date();
+  const daysSinceSeasonStart = daysBetween(activeSeason.startAt, now);
+
+  const aproximateCountToGenerate = 1000;
+  const extraMatchCount = aproximateCountToGenerate % daysSinceSeasonStart;
+  const countToGenerate = aproximateCountToGenerate - extraMatchCount;
+
+  const countPerDay = countToGenerate / daysSinceSeasonStart;
+
+  for (let index = 0; index < countToGenerate; index++) {
     const players = await db.query.userTbl.findMany({
       columns: {
         id: true,
       },
     });
-    if (index % 50 == 0) console.log("creating match " + index + " of 1000");
+    if (index % 50 == 0)
+      console.log("creating match " + index + " of " + countToGenerate);
 
     const userIds = [
       players[Math.floor(Math.random() * players.length)].id,
@@ -72,10 +81,13 @@ async function SeedMatches(
     const blackPlayerOne = userIds[2];
     const blackPlayerTwo = userIds[3];
 
-    // Generate a random date within between start of year and now
-    const matchDate = new Date(
-      startOfYear + Math.random() * (now - startOfYear),
-    );
+    // Generate a date that is evenly distributed between start of season and today and a time between 9:00 and 15:00
+    const matchDate =
+      activeSeason.startAt.getTime() +
+      Math.floor(index / countPerDay) * dayInMs;
+    const matchTime =
+      (9 + ((index % countPerDay) / countPerDay) * 6) * hourInMs;
+    const matchTimestamp = new Date(matchDate + matchTime);
 
     const result =
       Math.random() > 0.9 ? "Draw" : Math.random() > 0.5 ? "Black" : "White";
@@ -90,7 +102,7 @@ async function SeedMatches(
       scoreDiff: scoreDiff,
       whitePlayerTwo: whitePlayerTwo,
       blackPlayerTwo: blackPlayerTwo,
-      createdAt: matchDate,
+      createdAt: matchTimestamp,
       seasonId: activeSeason?.id ?? 1,
     };
 

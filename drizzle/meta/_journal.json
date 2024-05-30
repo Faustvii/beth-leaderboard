@@ -36,6 +36,13 @@
       "when": 1712928806068,
       "tag": "0004_fast_stick",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1717059468582,
+      "tag": "0005_lonely_mastermind",
+      "breakpoints": true
     }
   ]
 }

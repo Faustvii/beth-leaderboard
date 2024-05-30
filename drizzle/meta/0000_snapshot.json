@@ -1,8 +1,6 @@
 {
-  "version": "5",
+  "version": "6",
   "dialect": "sqlite",
-  "id": "ba848b0e-2b35-4436-8aa4-9990ad5dd04a",
-  "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "job_queue": {
       "name": "job_queue",
@@ -100,15 +98,15 @@
         "user_key_user_id_user_id_fk": {
           "name": "user_key_user_id_user_id_fk",
           "tableFrom": "user_key",
-          "tableTo": "user",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "user",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -212,54 +210,54 @@
         "match_white_player_one_user_id_fk": {
           "name": "match_white_player_one_user_id_fk",
           "tableFrom": "match",
-          "tableTo": "user",
           "columnsFrom": [
             "white_player_one"
           ],
+          "tableTo": "user",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         },
         "match_white_player_two_user_id_fk": {
           "name": "match_white_player_two_user_id_fk",
           "tableFrom": "match",
-          "tableTo": "user",
           "columnsFrom": [
             "white_player_two"
           ],
+          "tableTo": "user",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         },
         "match_black_player_one_user_id_fk": {
           "name": "match_black_player_one_user_id_fk",
           "tableFrom": "match",
-          "tableTo": "user",
           "columnsFrom": [
             "black_player_one"
           ],
+          "tableTo": "user",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         },
         "match_black_player_two_user_id_fk": {
           "name": "match_black_player_two_user_id_fk",
           "tableFrom": "match",
-          "tableTo": "user",
           "columnsFrom": [
             "black_player_two"
           ],
+          "tableTo": "user",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -302,15 +300,15 @@
         "user_session_user_id_user_id_fk": {
           "name": "user_session_user_id_user_id_fk",
           "tableFrom": "user_session",
-          "tableTo": "user",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "user",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -372,8 +370,9 @@
   },
   "enums": {},
   "_meta": {
-    "schemas": {},
     "tables": {},
     "columns": {}
-  }
+  },
+  "id": "ba848b0e-2b35-4436-8aa4-9990ad5dd04a",
+  "prevId": "00000000-0000-0000-0000-000000000000"
 }

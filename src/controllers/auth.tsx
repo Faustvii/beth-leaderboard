@@ -148,9 +148,7 @@ export const authController = new Elysia({
         const user = await getUser();
         const session = await writeAuth.createSession({
           userId: user.userId,
-          attributes: {
-            t: "",
-          },
+          attributes: {},
         });
         const sessionCookie = writeAuth.createSessionCookie(session);
         await syncIfLocal();

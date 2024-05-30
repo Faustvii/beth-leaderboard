@@ -16,7 +16,7 @@ export const StatsCardHtml = ({ title, children, doubleSize }: Props) => (
     <h2 class="border-b-[1px] border-primary/60 p-2 text-2xl font-semibold">
       {title}
     </h2>
-    <div class="flex h-full w-full flex-col items-center justify-evenly gap-3 p-4 md:flex-row">
+    <div class="flex h-full w-full flex-col items-center justify-evenly gap-3 py-4 md:flex-row">
       {children}
     </div>
   </div>

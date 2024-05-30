@@ -7,6 +7,7 @@ export const userTbl = sqliteTable("user", {
   picture: text("picture")
     .notNull()
     .$defaultFn(() => "/static/crokinole.svg"),
+  roles: text("roles"),
 });
 
 export const session = sqliteTable("user_session", {

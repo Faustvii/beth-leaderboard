@@ -40,7 +40,6 @@ export const ctx = new Elysia({
   .derive(async (ctx) => {
     const authRequest = ctx.readAuth.handleRequest(ctx);
     const session = await authRequest.validate();
-    //Hente de faktiske roller
-    const roles = ["admin"];
-    return { session, roles };
+    const userRoles = session?.user.roles?.split(",") ?? [];
+    return { session, userRoles };
   });

@@ -5,7 +5,7 @@ import { LayoutHtml } from "../components/Layout";
 import { NavbarHtml } from "../components/Navbar";
 import { StatsCardHtml } from "../components/StatsCard";
 import { ctx } from "../context";
-import { deleteMatch, getMatchesWithPlayers } from "../db/queries/matchQueries";
+import { deleteMatch, getMatches } from "../db/queries/matchQueries";
 import { getActiveSeason } from "../db/queries/seasonQueries";
 import { isHxRequest, notEmpty, redirect } from "../lib";
 
@@ -13,19 +13,18 @@ export const admin = new Elysia({
   prefix: "/admin",
 })
   .use(ctx)
-  .onBeforeHandle(({ session, headers, set, roles }) => {
+  .onBeforeHandle(({ session, headers, set, userRoles }) => {
     if (!session || !session.user) {
       redirect({ set, headers }, "/api/auth/signin/azure");
       return true;
     }
-    if (!roles.includes("admin")) {
+    if (!userRoles.includes("admin")) {
       redirect({ set, headers }, "/");
       return true;
     }
   })
-  //TODO det her hejs skal med til alle sider
-  .get("/", async ({ html, session, headers, roles }) => {
-    return html(() => adminPage(session, headers, roles));
+  .get("/", async ({ html, session, headers }) => {
+    return html(() => adminPage(session, headers));
   })
   .delete("/match/:id", async ({ params: { id } }) => {
     console.log(id);
@@ -36,29 +35,28 @@ export const admin = new Elysia({
 async function adminPage(
   session: Session | null,
   headers: Record<string, string | null>,
-  userRoles: string[],
 ) {
   return (
     <>
       {isHxRequest(headers) ? (
-        page(session, userRoles)
+        page(session)
       ) : (
-        <LayoutHtml>{page(session, userRoles)}</LayoutHtml>
+        <LayoutHtml>{page(session)}</LayoutHtml>
       )}
     </>
   );
 }
 
-async function page(session: Session | null, userRoles: string[]) {
+async function page(session: Session | null) {
   const activeSeason = await getActiveSeason();
-  const matchesWithPlayers = await getMatchesWithPlayers(activeSeason?.id);
+  const matchesWithPlayers = await getMatches(activeSeason?.id);
   const globalMatchHistory = matchesWithPlayers
     .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
     .slice(0, 1)
     .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   return (
     <>
-      <NavbarHtml session={session} userRoles={userRoles} activePage="admin" />
+      <NavbarHtml session={session} activePage="admin" />
       <HeaderHtml title="ADIMINISTWATOR" />
       <StatsCardHtml title="Latest game" doubleSize>
         <>
@@ -138,6 +136,7 @@ const PrettyMatch = ({ match }: PrettyMatchProps) => {
         >
           Remove kebab
         </button>
+        <button>edit</button>
       </span>
     </>
   );

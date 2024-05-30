@@ -36,6 +36,7 @@ export const readAuth = lucia({
       id: data.id,
       name: data.name,
       email: data.email,
+      roles: data.roles,
     };
   },
 });
@@ -53,6 +54,7 @@ export const writeAuth = lucia({
       id: data.id,
       name: data.name,
       email: data.email,
+      roles: data.roles,
     };
   },
 });

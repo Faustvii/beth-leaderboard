@@ -1,6 +1,6 @@
 import Elysia from "elysia";
 import { home } from "./(home)";
-import { Admin } from "./admin/admin";
+import { Admin } from "./admin/Admin";
 import { Help } from "./Help";
 import { leaderboard } from "./leaderboard";
 import { match } from "./log-match/logMatch";

@@ -73,7 +73,7 @@ async function page(session: Session | null) {
 
   const gameResults = MatchStatistics.winsByResult(matches);
   console.log("metrics took ", performance.now() - now + "ms  to run");
-  console.log(playerWithMostGames);
+
   const data = {
     labels: ["White win", "Black win", "Draw"],
     datasets: [

@@ -50,26 +50,24 @@ async function adminPage(
 
 async function page(session: Session | null) {
   const activeSeason = await getActiveSeason();
-  const matchesWithPlayers = await getMatches(activeSeason?.id);
+  // Fallback to first season if activeSeason is undefined :shrug:
+  const matchesWithPlayers = await getMatches(activeSeason?.id ?? 0);
   const globalMatchHistory = matchesWithPlayers
     .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
-    .slice(0, 5)
+    .slice(0, 10)
     .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   return (
     <>
       <NavbarHtml session={session} activePage="admin" />
       <HeaderHtml title="With great power comes great responsibility" />
       <StatsCardHtml title="Latest games" doubleSize>
-        <>
-          {/* TODO: Make gap work? */}
-          <div class="flex w-full flex-col flex-wrap gap-3 lg:flex-row">
-            {globalMatchHistory.length !== 0 ? (
-              globalMatchHistory.map((match) => <MatchCard match={match} />)
-            ) : (
-              <span class="text-sm">No matches yet</span>
-            )}
-          </div>
-        </>
+        <div class="flex w-full flex-col flex-wrap justify-between lg:flex-row">
+          {globalMatchHistory.length !== 0 ? (
+            globalMatchHistory.map((match) => <MatchCard match={match} />)
+          ) : (
+            <span class="text-sm">No matches yet</span>
+          )}
+        </div>
       </StatsCardHtml>
     </>
   );
@@ -92,7 +90,7 @@ const MatchCard = ({ match }: MatchCardProps) => {
   return (
     <div
       id={match.id}
-      class="border-1 w-full rounded-md border p-4 shadow-md lg:w-1/2"
+      class="border-1 mb-3 w-full rounded-md border p-4 shadow-md lg:mb-[1%] lg:w-[49.5%]"
     >
       <p>Team White: {teamPlayers.white.join(" & ")}</p>
       <p>Team Black: {teamPlayers.black.join(" & ")}</p>

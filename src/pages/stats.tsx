@@ -73,7 +73,7 @@ async function page(session: Session | null) {
 
   const gameResults = MatchStatistics.winsByResult(matches);
   console.log("metrics took ", performance.now() - now + "ms  to run");
-
+  console.log(playerWithMostGames);
   const data = {
     labels: ["White win", "Black win", "Draw"],
     datasets: [
@@ -174,8 +174,8 @@ async function page(session: Session | null) {
         <StatsCardHtml title="Most Games Played">
           {playerWithMostGames && (
             <span class="text-sm">
-              <b>{playerWithMostGames.player.name}</b> has played the most games
-              with <b>{playerWithMostGames.games} games played</b>
+              <b>{playerWithMostGames.player?.name}</b> has played the most
+              games with <b>{playerWithMostGames.games} games played</b>
             </span>
           )}
         </StatsCardHtml>

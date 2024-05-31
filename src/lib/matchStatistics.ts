@@ -434,7 +434,7 @@ class MatchStatistics {
     return Object.values(result); // Convert the result to an array of records
   }
 
-  static totalGamesPlayed(matches: Match[] | Match[]) {
+  static totalGamesPlayed(matches: Match[]) {
     return matches.length;
   }
 
@@ -456,12 +456,12 @@ class MatchStatistics {
     return matchesYesterday.length;
   }
 
-  static draws(matches: Match[] | Match[]) {
+  static draws(matches: Match[]) {
     const drawMatches = matches.filter((mt) => mt.result === "Draw").length;
     return drawMatches;
   }
 
-  static mostGamesInOneDay(matches: Match[] | Match[]) {
+  static mostGamesInOneDay(matches: Match[]) {
     const matchesPerDate = matches.reduce(
       (acc, curr) => {
         const date = getDatePartFromDate(curr.createdAt);
@@ -608,7 +608,7 @@ class MatchStatistics {
   }
 
   static playerWithMostGames(matches: Match[]): {
-    player: Player;
+    player?: Player;
     games: number;
   } {
     const players = matches

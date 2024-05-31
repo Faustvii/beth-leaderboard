@@ -8,7 +8,7 @@ import { ctx } from "../../context";
 import { deleteMatch, getMatches } from "../../db/queries/matchQueries";
 import { getActiveSeason } from "../../db/queries/seasonQueries";
 import { isHxRequest, redirect } from "../../lib";
-import { MatchCard } from "./matchCard";
+import { MatchCard } from "./MatchCard";
 
 export const Admin = new Elysia({
   prefix: "/admin",

@@ -27,10 +27,10 @@ export const Admin = new Elysia({
   .get("/", async ({ html, session, headers }) => {
     return html(() => adminPage(session, headers));
   })
-  .delete("/match/:id", async ({ params: { id } }) => {
+  .delete("/match/:id", async ({ params: { id }, session }) => {
     console.log(id);
     await deleteMatch(parseInt(id));
-    return;
+    return page(session);
   });
 
 async function adminPage(
@@ -54,7 +54,7 @@ async function page(session: Session | null) {
   const matchesWithPlayers = await getMatches(activeSeason?.id ?? 0);
   const globalMatchHistory = matchesWithPlayers
     .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
-    .slice(0, 10)
+    .slice(0, 8)
     .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   return (
     <>

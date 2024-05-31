@@ -1,6 +1,8 @@
 import { notEmpty } from "../../lib";
 import { EditIcon, TrashIcon } from "../../lib/icons";
 import { cn } from "../../lib/utils";
+import { MatchDetails } from "./MatchDetails";
+import { TeamDetails } from "./TeamDetails";
 
 interface MatchCardProps {
   match: MatchWithPlayers;
@@ -19,28 +21,27 @@ export const MatchCard = ({ match }: MatchCardProps) => {
   return (
     <div
       id={match.id}
-      class="border-1 mb-3 w-full rounded-md border p-4 shadow-md lg:mb-[1%] lg:w-[49.5%]"
+      class={cn(
+        "border-1 mb-3 flex w-full flex-col gap-3 rounded-md border p-4 shadow-md",
+        "lg:mb-[1%] lg:w-[49.5%]",
+      )}
     >
-      <p>Team White: {teamPlayers.white.join(" & ")}</p>
-      <p>Team Black: {teamPlayers.black.join(" & ")}</p>
-      <p>Match winner: Team {match.result}</p>
-      <p>Point difference: {match.scoreDiff}</p>
-      <p>
-        Game logged:{" "}
-        {match.createdAt.toLocaleString("en-US", {
-          hourCycle: "h24",
-          month: "long",
-          day: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-        })}
-      </p>
-      <div class={cn("flex pt-3")}>
+      <div class="flex flex-col justify-between gap-3 lg:flex-row">
+        <TeamDetails title={"Team White"} team={teamPlayers.white} />
+        <TeamDetails title={"Team Black"} team={teamPlayers.black} />
+      </div>
+      <MatchDetails
+        result={match.result}
+        scoreDiff={match.scoreDiff}
+        dateLogged={match.createdAt}
+      />
+      <div class={cn("mt-auto flex")}>
         <button
           class={cn(
-            "flex w-1/2 justify-center gap-3 rounded-l-lg bg-teal-600 p-2 hover:bg-teal-600/85",
+            "mt-2 flex w-1/2 justify-center gap-3 rounded-l-lg",
+            "bg-teal-700 p-2 hover:bg-teal-700/85",
           )}
-          _="on click call alert('Not implemented yet!')"
+          _="on click call alert('Not implemented yet!\nDelete your match and log it again.')"
         >
           <EditIcon />
           <p class="hidden sm:block">Edit</p>
@@ -48,10 +49,15 @@ export const MatchCard = ({ match }: MatchCardProps) => {
         <button
           type="Remove match"
           class={cn(
-            "flex w-1/2 justify-center gap-3 rounded-r-lg bg-red-600 p-2 hover:bg-red-600/85 ",
+            "mt-2 flex w-1/2 justify-center gap-3 rounded-r-lg",
+            "bg-red-700 p-2 hover:bg-red-700/85 disabled:bg-gray-600",
           )}
+          hx-indicator=".progress-bar"
           hx-delete={`admin/match/${match.id}`}
-          _={`on click halt the event then remove #{"${match.id}"}`}
+          hx-target="#mainContainer"
+          hx-disabled-elt="this"
+          hx-confirm="Are you sure you wish to delete this match?"
+          _="on htmx:beforeRequest set innerText of <p/> in me to 'Deleting...'"
         >
           <TrashIcon />
           <p class="hidden sm:block">Delete</p>

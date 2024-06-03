@@ -15,8 +15,13 @@ export enum RESULT {
 
 class MatchStatistics {
   static getMatchHistory(matches: Match[], userId: string) {
+    if (!matches) return;
+
     const matchHistories = this.getMatchHistories(matches);
     const playerMatchHistory = matchHistories[userId];
+
+    if (!playerMatchHistory) return;
+
     return playerMatchHistory.sort(
       (a, b) => b.match.createdAt.getTime() - a.match.createdAt.getTime(),
     );

@@ -98,7 +98,7 @@ const profileStats = (
     userId,
     ratingSystem,
   );
-  const matchHistory = MatchStatistics.getMatchHistory(matches, userId).slice(
+  const matchHistory = MatchStatistics.getMatchHistory(matches, userId)?.slice(
     0,
     20,
   );

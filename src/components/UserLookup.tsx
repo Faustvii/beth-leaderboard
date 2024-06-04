@@ -1,7 +1,8 @@
 import clsx from "clsx";
-import { SearchIcon } from "../../../lib/icons";
+import { SearchIcon } from "../lib/icons";
 
 interface Props extends JSX.HtmlInputTag {
+  formId: string;
   input: string;
   label: string;
   needed?: boolean;
@@ -18,7 +19,7 @@ export const UserLookUp = ({ ...props }: Props) => (
     <SearchIcon />
     <input
       id={`${props.input}-input`}
-      form="matchForm"
+      form={props.formId}
       hx-trigger="keyup[checkUserKeydown.call(this, event)] changed delay:300ms"
       hx-sync="this:replace"
       hx-swap="innerHtml"
@@ -59,7 +60,7 @@ export const UserLookUp = ({ ...props }: Props) => (
     />
     <input
       type="hidden"
-      form="matchForm"
+      form={props.formId}
       id={`${props.input}Id`}
       name={`${props.input}Id`}
     />

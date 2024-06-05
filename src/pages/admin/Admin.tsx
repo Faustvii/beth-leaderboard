@@ -32,6 +32,11 @@ export const Admin = new Elysia({
   .delete("/match/:id", async ({ params: { id }, session }) => {
     await deleteMatch(parseInt(id));
     return page(session);
+  })
+  .get("/match/:id", ({ params: { id } }) => {
+    console.log("selected match id", id);
+
+    return <EditMatchModal matchId={id} />;
   });
 
 async function adminPage(
@@ -70,29 +75,30 @@ async function page(session: Session | null) {
           )}
         </div>
       </StatsCardHtml>
-      <EditMatchModal />
     </>
   );
 }
 
-const EditMatchModal = () => {
-  const matchId = 0;
+interface EditMatchModalProps {
+  matchId: string;
+}
+
+const EditMatchModal = ({ matchId }: EditMatchModalProps) => {
   return (
     <div
       id="edit-match-modal"
       class={cn(
         "fixed bottom-0 left-0 right-0 top-0 z-50 backdrop-brightness-50",
-        "hidden flex-col items-center justify-center",
+        "flex flex-col items-center justify-center",
         // Todo: Add animation
       )}
-      _="on closeEditModal add .hidden to me"
+      _="on closeEditModal remove me"
     >
-      <input hidden id="edit-modal-match-id" />
       <div
         class="absolute bottom-0 left-0 right-0 top-0 -z-50"
         _="on click trigger closeEditModal"
       />
-      <div class="-z-20 w-[80%] rounded-md bg-slate-800 p-4 text-white shadow-md lg:p-8">
+      <div class="-z-20 w-[80%] max-w-[600px] rounded-md bg-slate-800 p-4 text-white shadow-md lg:p-8">
         <h1 class="mb-4 text-2xl font-semibold">Edit match</h1>
         <MatchForm
           formId={`edit-match-${matchId}-form`}

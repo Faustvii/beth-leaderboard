@@ -37,11 +37,15 @@ export const MatchCard = ({ match }: MatchCardProps) => {
       />
       <div class={cn("mt-auto flex")}>
         <button
+          hx-get={`admin/match/${match.id}`}
+          hx-target="body"
+          hx-swap="afterend"
+          hx-push-url="true"
           class={cn(
             "mt-2 flex w-1/2 justify-center gap-3 rounded-l-lg",
             "bg-teal-700 p-2 hover:bg-teal-700/85",
           )}
-          _={`on click remove .hidden from #edit-match-modal then add .flex to #edit-match-modal then set the value of #edit-modal-match-id to ${match.id}`}
+          // _={`on click remove .hidden from #edit-match-modal then add .flex to #edit-match-modal then set the value of #edit-modal-match-id to ${match.id}`}
         >
           <EditIcon />
           <p class="hidden sm:block">Edit</p>

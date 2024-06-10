@@ -1,15 +1,18 @@
+import { type Match } from "../lib/rating";
 import { UserLookUp } from "./UserLookup";
 
 interface MatchFormProps {
   formId: string;
   formMethod: string;
   actionButtons: JSX.Element;
+  match?: Match;
 }
 
 export const MatchForm = async ({
   formId,
   formMethod,
   actionButtons,
+  match,
 }: MatchFormProps) => {
   return (
     <>
@@ -36,6 +39,7 @@ export const MatchForm = async ({
             formId={formId}
             label="White player 1"
             input="white1"
+            user={match?.whitePlayerOne}
             required={true}
           />
         </div>
@@ -44,6 +48,7 @@ export const MatchForm = async ({
             formId={formId}
             label="White player 2 (optional)"
             input="white2"
+            user={match?.whitePlayerTwo}
           />
         </div>
 
@@ -56,6 +61,7 @@ export const MatchForm = async ({
             formId={formId}
             label="Black player 1"
             input="black1"
+            user={match?.blackPlayerOne}
             required={true}
           />
         </div>
@@ -64,6 +70,7 @@ export const MatchForm = async ({
             formId={formId}
             label="Black player 2 (optional)"
             input="black2"
+            user={match?.blackPlayerTwo}
           />
         </div>
 
@@ -80,12 +87,18 @@ export const MatchForm = async ({
             class="peer block w-full appearance-none border-0 border-b-2 border-gray-300 bg-transparent px-0 py-2.5 text-sm   text-white focus:border-blue-500 focus:outline-none focus:ring-0"
             required={true}
           >
-            <option disabled value="" selected={true}>
+            <option disabled value="" selected={match ? false : true}>
               Select a winner
             </option>
-            <option>White</option>
-            <option>Black</option>
-            <option>Draw</option>
+            <option selected={match?.result === "White" ? true : false}>
+              White
+            </option>
+            <option selected={match?.result === "Black" ? true : false}>
+              Black
+            </option>
+            <option selected={match?.result === "Draw" ? true : false}>
+              Draw
+            </option>
           </select>
           <label
             for="match_winner"
@@ -97,6 +110,7 @@ export const MatchForm = async ({
         <div class="group relative mb-6 w-full">
           <input
             type="number"
+            value={match?.scoreDiff.toString()}
             form={formId}
             name="point_difference"
             id="point_difference"

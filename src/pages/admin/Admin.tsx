@@ -6,9 +6,14 @@ import { MatchForm } from "../../components/MatchForm";
 import { NavbarHtml } from "../../components/Navbar";
 import { StatsCardHtml } from "../../components/StatsCard";
 import { ctx } from "../../context";
-import { deleteMatch, getMatches } from "../../db/queries/matchQueries";
+import {
+  deleteMatch,
+  getMatch,
+  getMatches,
+} from "../../db/queries/matchQueries";
 import { getActiveSeason } from "../../db/queries/seasonQueries";
 import { isHxRequest, redirect } from "../../lib";
+import { type Match } from "../../lib/rating";
 import { cn } from "../../lib/utils";
 import { MatchCard } from "./MatchCard";
 
@@ -33,10 +38,13 @@ export const Admin = new Elysia({
     await deleteMatch(parseInt(id));
     return page(session);
   })
-  .get("/match/:id", ({ params: { id } }) => {
-    console.log("selected match id", id);
+  // TODO: Check for hx-request (stats.tsx:31)
+  .get("/match/:id", async ({ params: { id } }) => {
+    const matchToEdit = await getMatch(Number(id));
 
-    return <EditMatchModal matchId={id} />;
+    if (!matchToEdit) return;
+
+    return <EditMatchModal match={matchToEdit} />;
   });
 
 async function adminPage(
@@ -80,10 +88,10 @@ async function page(session: Session | null) {
 }
 
 interface EditMatchModalProps {
-  matchId: string;
+  match: Match;
 }
 
-const EditMatchModal = ({ matchId }: EditMatchModalProps) => {
+const EditMatchModal = ({ match }: EditMatchModalProps) => {
   return (
     <div
       id="edit-match-modal"
@@ -101,8 +109,9 @@ const EditMatchModal = ({ matchId }: EditMatchModalProps) => {
       <div class="-z-20 w-[80%] max-w-[600px] rounded-md bg-slate-800 p-4 text-white shadow-md lg:p-8">
         <h1 class="mb-4 text-2xl font-semibold">Edit match</h1>
         <MatchForm
-          formId={`edit-match-${matchId}-form`}
+          formId={`edit-match-${match.id}-form`}
           formMethod="put"
+          match={match}
           actionButtons={
             <div class="mt-3 flex justify-end gap-3">
               <button
@@ -116,7 +125,7 @@ const EditMatchModal = ({ matchId }: EditMatchModalProps) => {
                 type="Edit match"
                 class="rounded-lg bg-teal-700 p-2"
                 hx-indicator=".progress-bar"
-                hx-put={`admin/match/${matchId}`}
+                hx-put={`admin/match/${match.id}`}
                 hx-target="#mainContainer"
                 _="on htmx:beforeRequest set my.innerText to 'Submitting...'"
               >

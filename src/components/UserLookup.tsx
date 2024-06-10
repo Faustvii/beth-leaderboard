@@ -5,10 +5,10 @@ interface Props extends JSX.HtmlInputTag {
   formId: string;
   input: string;
   label: string;
-  needed?: boolean;
+  user?: Player | null;
 }
 
-export const UserLookUp = ({ ...props }: Props) => (
+export const UserLookUp = ({ formId, input, label, user, ...props }: Props) => (
   <>
     <script>
       {function checkUserKeydown(event: Event) {
@@ -18,17 +18,18 @@ export const UserLookUp = ({ ...props }: Props) => (
     </script>
     <SearchIcon />
     <input
-      id={`${props.input}-input`}
-      form={props.formId}
+      id={`${input}-input`}
+      form={formId}
       hx-trigger="keyup[checkUserKeydown.call(this, event)] changed delay:300ms"
       hx-sync="this:replace"
       hx-swap="innerHtml"
       hx-get="/match/search"
       hx-indicator=".progress-bar"
-      hx-target={`#${props.input}-results`}
+      hx-target={`#${input}-results`}
       hx-params="name"
       name="name"
       placeholder=" "
+      value={user?.name}
       autocomplete="off"
       class={clsx([
         "peer block w-full appearance-none px-0 py-2.5 pl-10 text-sm text-white",
@@ -36,10 +37,10 @@ export const UserLookUp = ({ ...props }: Props) => (
         "focus:border-blue-500 focus:outline-none focus:ring-0",
       ])}
       {...props}
-      _={`on focus remove @hidden from next <div/> then set the value of ${props.input}Id to null`}
+      _={`on focus remove @hidden from next <div/> then set the value of ${input}Id to null`}
     />
     <label
-      for={`${props.input}-input`}
+      for={`${input}-input`}
       class={clsx([
         "absolute top-3 -z-10 origin-[0] pl-10 text-sm text-gray-400",
         "-translate-y-6 scale-75 transform duration-300",
@@ -47,11 +48,11 @@ export const UserLookUp = ({ ...props }: Props) => (
         "peer-focus:left-0 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:pl-0 peer-focus:font-medium peer-focus:text-blue-500",
       ])}
     >
-      {props.label}
+      {label}
     </label>
     {/* Results from search */}
     <div
-      id={`${props.input}-results`}
+      id={`${input}-results`}
       class={clsx([
         "bg-slate-600 text-white",
         "rounded-b-lg shadow-md shadow-slate-900/5",
@@ -60,9 +61,10 @@ export const UserLookUp = ({ ...props }: Props) => (
     />
     <input
       type="hidden"
-      form={props.formId}
-      id={`${props.input}Id`}
-      name={`${props.input}Id`}
+      value={user?.id}
+      form={formId}
+      id={`${input}Id`}
+      name={`${input}Id`}
     />
   </>
 );

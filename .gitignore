@@ -183,6 +183,5 @@ public/user/*
 .env.production
 client_wal_index
 
-
 # Mac stuff
-.DS_store
+.DS_Store

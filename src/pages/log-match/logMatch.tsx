@@ -132,7 +132,8 @@ export const match = new Elysia({
     },
   );
 
-function matchSearchResults(results: { name: string; id: string }[]) {
+// TODO: Move to own file
+export function matchSearchResults(results: { name: string; id: string }[]) {
   return (
     <>
       {results.map((result) => (

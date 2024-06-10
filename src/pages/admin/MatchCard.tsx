@@ -40,7 +40,7 @@ export const MatchCard = ({ match }: MatchCardProps) => {
           hx-get={`admin/match/${match.id}`}
           hx-target="body"
           hx-swap="afterend"
-          hx-push-url="true"
+          // hx-replace-url="true"
           class={cn(
             "mt-2 flex w-1/2 justify-center gap-3 rounded-l-lg",
             "bg-teal-700 p-2 hover:bg-teal-700/85",

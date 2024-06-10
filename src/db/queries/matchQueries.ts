@@ -51,6 +51,52 @@ export const getMatches = async (seasonId: number): Promise<Match[]> => {
   });
 };
 
+export const getMatch = async (matchId: number): Promise<Match | undefined> => {
+  const match = await readDb.query.matches.findFirst({
+    where: eq(matches.id, matchId),
+  });
+
+  if (!match) return;
+
+  const userIds = [
+    match.blackPlayerOne,
+    match.blackPlayerTwo,
+    match.whitePlayerOne,
+    match.whitePlayerTwo,
+  ]
+    .filter(notEmpty)
+    .filter(unique);
+
+  const players =
+    userIds.length === 0
+      ? []
+      : await readDb.query.userTbl.findMany({
+          where: inArray(userTbl.id, userIds),
+          columns: {
+            email: false,
+            picture: false,
+          },
+        });
+
+  const blackPlayerOne = players.find(
+    (player) => player.id === match.blackPlayerOne,
+  )!;
+  const blackPlayerTwo =
+    players.find((player) => player.id === match.blackPlayerTwo) || null;
+  const whitePlayerOne = players.find(
+    (player) => player.id === match.whitePlayerOne,
+  )!;
+  const whitePlayerTwo =
+    players.find((player) => player.id === match.whitePlayerTwo) || null;
+  return {
+    ...match,
+    blackPlayerOne,
+    blackPlayerTwo,
+    whitePlayerOne,
+    whitePlayerTwo,
+  };
+};
+
 export const deleteMatch = async (matchId: number) => {
   const deletedMatch = await readDb
     .delete(matches)

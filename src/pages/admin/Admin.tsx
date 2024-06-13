@@ -40,7 +40,6 @@ export const Admin = new Elysia({
     await deleteMatch(parseInt(id));
     return page(session);
   })
-  // TODO: Check for hx-request (stats.tsx:31)
   .get("/match/:id", async ({ params: { id } }) => {
     const matchToEdit = await getMatch(Number(id));
 
@@ -168,8 +167,6 @@ const EditMatchModal = ({ match }: EditMatchModalProps) => {
                 type="submit"
                 class="rounded-lg bg-teal-700 p-2"
                 hx-indicator=".progress-bar"
-                // hx-put={`/admin/match/${match.id}`}
-                // hx-target="#mainContainer"
                 _="on htmx:beforeRequest set my.innerText to 'Saving...'"
               >
                 Save

@@ -66,6 +66,13 @@ export const Admin = new Elysia({
       return html(() => adminPage(session, headers));
     },
     {
+      transform({ body }) {
+        const id = +body.match_id;
+        const diff = +body.point_difference;
+
+        if (!Number.isNaN(id)) body.match_id = id;
+        if (!Number.isNaN(diff)) body.point_difference = diff;
+      },
       body: t.Object({
         name: t.Array(t.String()),
         white1Id: t.String({ minLength: 1 }),
@@ -77,9 +84,8 @@ export const Admin = new Elysia({
           Black: "Black",
           Draw: "Draw",
         }),
-        // point_difference: t.Number({ minimum: 0, maximum: 960, multipleOf: 5 }),
-        point_difference: t.String({ minLength: 1 }),
-        match_id: t.String(),
+        point_difference: t.Number({ minimum: 0, maximum: 960, multipleOf: 5 }),
+        match_id: t.Number(),
       }),
     },
   );

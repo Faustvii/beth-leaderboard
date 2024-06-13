@@ -1,4 +1,5 @@
-import { Elysia } from "elysia";
+import { eq } from "drizzle-orm";
+import { Elysia, t } from "elysia";
 import { type Session } from "lucia";
 import { HeaderHtml } from "../../components/header";
 import { LayoutHtml } from "../../components/Layout";
@@ -12,6 +13,7 @@ import {
   getMatches,
 } from "../../db/queries/matchQueries";
 import { getActiveSeason } from "../../db/queries/seasonQueries";
+import { matches } from "../../db/schema";
 import { isHxRequest, redirect } from "../../lib";
 import { type Match } from "../../lib/rating";
 import { cn } from "../../lib/utils";
@@ -45,7 +47,42 @@ export const Admin = new Elysia({
     if (!matchToEdit) return;
 
     return <EditMatchModal match={matchToEdit} />;
-  });
+  })
+  .post(
+    "/",
+    async ({ html, session, headers, body, writeDb }) => {
+      await writeDb
+        .update(matches)
+        .set({
+          whitePlayerOne: body.white1Id,
+          whitePlayerTwo: body.white2Id,
+          blackPlayerOne: body.black1Id,
+          blackPlayerTwo: body.black2Id,
+          result: body.match_winner,
+          scoreDiff: Number(body.point_difference),
+        })
+        .where(eq(matches.id, Number(body.match_id)));
+
+      return html(() => adminPage(session, headers));
+    },
+    {
+      body: t.Object({
+        name: t.Array(t.String()),
+        white1Id: t.String({ minLength: 1 }),
+        white2Id: t.Optional(t.String()),
+        black1Id: t.String({ minLength: 1 }),
+        black2Id: t.Optional(t.String()),
+        match_winner: t.Enum({
+          White: "White",
+          Black: "Black",
+          Draw: "Draw",
+        }),
+        // point_difference: t.Number({ minimum: 0, maximum: 960, multipleOf: 5 }),
+        point_difference: t.String({ minLength: 1 }),
+        match_id: t.String(),
+      }),
+    },
+  );
 
 async function adminPage(
   session: Session | null,
@@ -110,7 +147,7 @@ const EditMatchModal = ({ match }: EditMatchModalProps) => {
         <h1 class="mb-4 text-2xl font-semibold">Edit match</h1>
         <MatchForm
           formId={`edit-match-${match.id}-form`}
-          formMethod="put"
+          formMethod="post"
           match={match}
           actionButtons={
             <div class="mt-3 flex justify-end gap-3">
@@ -122,12 +159,12 @@ const EditMatchModal = ({ match }: EditMatchModalProps) => {
                 Cancel
               </button>
               <button
-                type="Edit match"
+                type="submit"
                 class="rounded-lg bg-teal-700 p-2"
                 hx-indicator=".progress-bar"
-                hx-put={`admin/match/${match.id}`}
-                hx-target="#mainContainer"
-                _="on htmx:beforeRequest set my.innerText to 'Submitting...'"
+                // hx-put={`/admin/match/${match.id}`}
+                // hx-target="#mainContainer"
+                _="on htmx:beforeRequest set my.innerText to 'Saving...'"
               >
                 Save
               </button>

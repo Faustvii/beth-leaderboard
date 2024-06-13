@@ -130,6 +130,9 @@ export const MatchForm = async ({
         </div>
         {actionButtons}
         <div id="errors" class="text-red-500"></div>
+        {match && (
+          <input type="hidden" name="match_id" value={match.id.toString()} />
+        )}
       </form>
     </>
   );

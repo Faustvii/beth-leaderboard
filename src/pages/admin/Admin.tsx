@@ -4,6 +4,7 @@ import { type Session } from "lucia";
 import { HeaderHtml } from "../../components/header";
 import { LayoutHtml } from "../../components/Layout";
 import { MatchForm } from "../../components/MatchForm";
+import { MatchSearchResults } from "../../components/MatchSearchResults";
 import { NavbarHtml } from "../../components/Navbar";
 import { StatsCardHtml } from "../../components/StatsCard";
 import { ctx } from "../../context";
@@ -17,7 +18,6 @@ import { matches, userTbl } from "../../db/schema";
 import { isHxRequest, redirect } from "../../lib";
 import { type Match } from "../../lib/rating";
 import { cn } from "../../lib/utils";
-import { matchSearchResults } from "../log-match/logMatch";
 import { MatchCard } from "./MatchCard";
 
 export const Admin = new Elysia({
@@ -47,7 +47,7 @@ export const Admin = new Elysia({
         .limit(5)
         .where(like(userTbl.name, `%${name}%`));
 
-      return html(() => matchSearchResults(players));
+      return html(() => MatchSearchResults(players));
     },
     {
       query: t.Partial(

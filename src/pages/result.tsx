@@ -9,6 +9,7 @@ import { getMatches } from "../db/queries/matchQueries";
 import { getSeason } from "../db/queries/seasonQueries";
 import { notEmpty } from "../lib";
 import { getMatchRatingDiff, getRatingSystem, type Match } from "../lib/rating";
+import { isDefined } from "../lib/utils";
 
 export const matchResult = new Elysia({
   prefix: "/result",
@@ -43,7 +44,9 @@ async function page(
     .map((x) => ({
       playerId: x.player.id,
       playerName: x.player.name,
-      ratingBefore: x.ratingBefore ? ratingSystem.toNumber(x.ratingBefore) : -1,
+      ratingBefore: isDefined(x.ratingBefore)
+        ? ratingSystem.toNumber(x.ratingBefore)
+        : undefined,
       ratingAfter: ratingSystem.toNumber(x.ratingAfter),
       rankBefore: x.rankBefore,
       rankAfter: x.rankAfter,
@@ -142,9 +145,9 @@ function RatingDiffTableRow({
 }: {
   playerId: string;
   playerName: string;
-  ratingBefore: number;
+  ratingBefore: number | undefined;
   ratingAfter: number;
-  rankBefore: number;
+  rankBefore: number | undefined;
   rankAfter: number;
 }): JSX.Element {
   return (
@@ -195,11 +198,11 @@ function DiffIcon({
   after,
   isHigherBetter,
 }: {
-  before: number;
+  before: number | undefined;
   after: number;
   isHigherBetter: boolean;
 }): JSX.Element {
-  const areDefined = !!before && before > 0 && !!after && after > 0;
+  const areDefined = isDefined(before) && after;
   const areEqual = before === after;
   const shouldDisplay = areDefined && !areEqual;
 

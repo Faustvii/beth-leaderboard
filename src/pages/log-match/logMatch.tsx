@@ -1,10 +1,10 @@
-import clsx from "clsx";
 import { like } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { type Session } from "lucia";
 import { HeaderHtml } from "../../components/header";
 import { LayoutHtml } from "../../components/Layout";
 import { MatchForm } from "../../components/MatchForm";
+import { MatchSearchResults } from "../../components/MatchSearchResults";
 import { NavbarHtml } from "../../components/Navbar";
 import { ctx } from "../../context";
 import { getActiveSeason } from "../../db/queries/seasonQueries";
@@ -35,7 +35,7 @@ export const match = new Elysia({
         .limit(5)
         .where(like(userTbl.name, `%${name}%`));
 
-      return html(() => matchSearchResults(players));
+      return html(() => MatchSearchResults(players));
     },
     {
       query: t.Partial(
@@ -131,27 +131,6 @@ export const match = new Elysia({
       }),
     },
   );
-
-// TODO: Move to own file
-export function matchSearchResults(results: { name: string; id: string }[]) {
-  return (
-    <>
-      {results.map((result) => (
-        <button
-          id={result.id}
-          class={clsx([
-            "w-full p-3 pl-10 text-left hover:bg-primary/50 last:hover:rounded-b-lg",
-            "focus-visible:outline-none focus-visible:ring focus-visible:ring-primary/50 last:focus-visible:rounded-b-lg",
-          ])}
-          value={result.name}
-          _="on click halt the event then add @hidden to the closest <div/> then put my value into the value of the previous <input/> from me then put my id into the value of the next <input/>"
-        >
-          {result.name}
-        </button>
-      ))}
-    </>
-  );
-}
 
 function MatchPage(
   session: Session | null,

@@ -175,9 +175,9 @@ function LogMatchPage(session: Session | null) {
       <HeaderHtml title="Log match" />
       <MatchForm
         formId="log-match-form"
-        formMethod="post"
         actionButtons={
           <button
+            hx-post="/match"
             type="submit"
             class="rounded-lg bg-blue-600 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-800 sm:w-auto"
           >

@@ -210,7 +210,6 @@ const EditMatchModal = ({ match }: EditMatchModalProps) => {
         <h1 class="mb-4 text-2xl font-semibold">Edit match</h1>
         <MatchForm
           formId={`edit-match-${match.id}-form`}
-          formMethod="post"
           match={match}
           actionButtons={
             <div class="mt-3 flex justify-end gap-3">
@@ -222,9 +221,11 @@ const EditMatchModal = ({ match }: EditMatchModalProps) => {
                 Cancel
               </button>
               <button
+                hx-post="/admin"
                 type="submit"
                 class="rounded-lg bg-teal-700 p-2"
                 hx-indicator=".progress-bar"
+                _="on click set my.innerText to 'Saving...' then wait for htmx:afterRequest then set my.innerText to 'Save'"
               >
                 Save
               </button>

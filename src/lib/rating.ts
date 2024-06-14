@@ -25,9 +25,9 @@ export interface PlayerWithRating<TRating> {
 
 export interface PlayerWithRatingDiff<TRating> {
   player: Player;
-  ratingBefore: TRating;
+  ratingBefore: TRating | undefined;
   ratingAfter: TRating;
-  rankBefore: number;
+  rankBefore: number | undefined;
   rankAfter: number;
 }
 
@@ -198,8 +198,8 @@ function diffRatings<TRating>(
         player: after[playerId].player,
         ratingBefore: ratingBefore ?? system.defaultRating,
         ratingAfter,
-        rankBefore: rankBefore > -1 ? rankBefore + 1 : rankBefore,
-        rankAfter: rankAfter > -1 ? rankAfter + 1 : rankAfter,
+        rankBefore: rankBefore === -1 ? undefined : rankBefore + 1,
+        rankAfter: rankAfter + 1,
       });
     }
   }

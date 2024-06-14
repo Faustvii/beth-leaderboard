@@ -44,7 +44,7 @@ export const MatchCard = ({ match }: MatchCardProps) => {
             "mt-2 flex w-1/2 justify-center gap-3 rounded-l-lg",
             "bg-teal-700 p-2 hover:bg-teal-700/85",
           )}
-          _={`on htmx:afterRequest wait 1s then js htmx.process(document.body) end`}
+          _={`on htmx:afterSettle js htmx.process(document.body) end`}
         >
           <EditIcon />
           <p class="hidden sm:block">Edit</p>

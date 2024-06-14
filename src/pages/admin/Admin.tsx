@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { eq, like } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { type Session } from "lucia";
 import { HeaderHtml } from "../../components/header";
@@ -13,10 +13,11 @@ import {
   getMatches,
 } from "../../db/queries/matchQueries";
 import { getActiveSeason } from "../../db/queries/seasonQueries";
-import { matches } from "../../db/schema";
+import { matches, userTbl } from "../../db/schema";
 import { isHxRequest, redirect } from "../../lib";
 import { type Match } from "../../lib/rating";
 import { cn } from "../../lib/utils";
+import { matchSearchResults } from "../log-match/logMatch";
 import { MatchCard } from "./MatchCard";
 
 export const Admin = new Elysia({
@@ -36,6 +37,26 @@ export const Admin = new Elysia({
   .get("/", async ({ html, session, headers }) => {
     return html(() => adminPage(session, headers));
   })
+  .get(
+    "/search",
+    async ({ readDb, html, query: { name } }) => {
+      if (name === "") return;
+      const players = await readDb
+        .select({ name: userTbl.name, id: userTbl.id })
+        .from(userTbl)
+        .limit(5)
+        .where(like(userTbl.name, `%${name}%`));
+
+      return html(() => matchSearchResults(players));
+    },
+    {
+      query: t.Partial(
+        t.Object({
+          name: t.String(),
+        }),
+      ),
+    },
+  )
   .delete("/match/:id", async ({ params: { id }, session }) => {
     await deleteMatch(parseInt(id));
     return page(session);
@@ -49,7 +70,7 @@ export const Admin = new Elysia({
   })
   .post(
     "/",
-    async ({ html, session, headers, body, writeDb }) => {
+    async ({ set, headers, body, writeDb }) => {
       await writeDb
         .update(matches)
         .set({
@@ -62,7 +83,7 @@ export const Admin = new Elysia({
         })
         .where(eq(matches.id, Number(body.match_id)));
 
-      return html(() => adminPage(session, headers));
+      redirect({ headers, set }, `/admin`);
     },
     {
       transform({ body }) {
@@ -73,7 +94,6 @@ export const Admin = new Elysia({
         if (!Number.isNaN(diff)) body.point_difference = diff;
       },
       body: t.Object({
-        name: t.Array(t.String()),
         white1Id: t.String({ minLength: 1 }),
         white2Id: t.Optional(t.String()),
         black1Id: t.String({ minLength: 1 }),
@@ -138,9 +158,9 @@ const EditMatchModal = ({ match }: EditMatchModalProps) => {
     <div
       id="edit-match-modal"
       class={cn(
-        "fixed bottom-0 left-0 right-0 top-0 z-50 backdrop-brightness-50",
+        "fixed bottom-0 left-0 right-0 top-0 z-40 backdrop-brightness-50",
         "flex flex-col items-center justify-center",
-        // Todo: Add animation
+        // TODO: Add animation
       )}
       _="on closeEditModal remove me"
     >
@@ -167,7 +187,7 @@ const EditMatchModal = ({ match }: EditMatchModalProps) => {
                 type="submit"
                 class="rounded-lg bg-teal-700 p-2"
                 hx-indicator=".progress-bar"
-                _="on htmx:beforeRequest set my.innerText to 'Saving...'"
+                _="on click set my.innerText to 'Saving...'"
               >
                 Save
               </button>

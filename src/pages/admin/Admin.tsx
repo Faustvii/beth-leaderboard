@@ -86,6 +86,44 @@ export const Admin = new Elysia({
       redirect({ headers, set }, `/admin`);
     },
     {
+      error({ code, error }) {
+        switch (code) {
+          case "VALIDATION":
+            return new Response(
+              `<div id="errors" class="text-red-500">${error.message}</div>`,
+              {
+                status: 400,
+              },
+            );
+        }
+      },
+      beforeHandle: ({ body }) => {
+        const userIds = [
+          body.white1Id,
+          body.white2Id,
+          body.black1Id,
+          body.black2Id,
+        ].filter((id) => id !== "");
+
+        const uniqueIds = new Set(userIds);
+        if (uniqueIds.size !== userIds.length) {
+          return new Response(
+            `<div id="errors" class="text-red-500">The same player can't participate multiple times</div>`,
+            {
+              status: 400,
+            },
+          );
+        }
+        if (uniqueIds.size % 2 !== 0) {
+          return new Response(
+            `<div id="errors" class="text-red-500">The teams must have the same amount of players</div>`,
+            {
+              status: 400,
+            },
+          );
+        }
+        return;
+      },
       transform({ body }) {
         const id = +body.match_id;
         const diff = +body.point_difference;
@@ -187,7 +225,6 @@ const EditMatchModal = ({ match }: EditMatchModalProps) => {
                 type="submit"
                 class="rounded-lg bg-teal-700 p-2"
                 hx-indicator=".progress-bar"
-                _="on click set my.innerText to 'Saving...'"
               >
                 Save
               </button>

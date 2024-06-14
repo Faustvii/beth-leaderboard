@@ -511,7 +511,7 @@ class MatchStatistics {
       winPercentage: ((blackWins + whiteWins) / totalGames) * 100,
       wonGames: blackWins + whiteWins,
       draws,
-      lostGames: totalGames - (blackWins + whiteWins),
+      lostGames: totalGames - (blackWins + whiteWins + draws),
     };
   }
 

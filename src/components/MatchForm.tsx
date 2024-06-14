@@ -3,14 +3,12 @@ import { UserLookUp } from "./UserLookup";
 
 interface MatchFormProps {
   formId: string;
-  formMethod: string;
   actionButtons: JSX.Element;
   match?: Match;
 }
 
 export const MatchForm = async ({
   formId,
-  formMethod,
   actionButtons,
   match,
 }: MatchFormProps) => {
@@ -18,7 +16,7 @@ export const MatchForm = async ({
     <>
       <form
         class="flex w-full flex-col"
-        method={formMethod}
+        method="post"
         id={formId}
         hx-ext="response-targets"
         enctype="multipart/form-data"

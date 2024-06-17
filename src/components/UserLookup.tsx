@@ -23,7 +23,7 @@ export const UserLookUp = ({ formId, input, label, user, ...props }: Props) => (
       hx-trigger="keyup[checkUserKeydown.call(this, event)] changed delay:300ms"
       hx-sync="this:replace"
       hx-swap="innerHtml"
-      hx-get={user ? "/admin/search" : "/match/search"}
+      hx-get="/match/search"
       hx-indicator=".progress-bar"
       hx-target={`#${input}-results`}
       hx-params="name"
@@ -37,7 +37,7 @@ export const UserLookUp = ({ formId, input, label, user, ...props }: Props) => (
         "focus:border-blue-500 focus:outline-none focus:ring-0",
       ])}
       {...props}
-      _={`on focus remove @hidden from #${input}-results then set the value of ${input}Id to null`}
+      _={`on focus remove @hidden from #${input}-results`}
     />
     <label
       for={`${input}-input`}

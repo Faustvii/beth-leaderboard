@@ -1,10 +1,9 @@
-import { eq, like } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { type Session } from "lucia";
 import { HeaderHtml } from "../../components/header";
 import { LayoutHtml } from "../../components/Layout";
 import { MatchForm } from "../../components/MatchForm";
-import { MatchSearchResults } from "../../components/MatchSearchResults";
 import { NavbarHtml } from "../../components/Navbar";
 import { StatsCardHtml } from "../../components/StatsCard";
 import { ctx } from "../../context";
@@ -14,7 +13,7 @@ import {
   getMatches,
 } from "../../db/queries/matchQueries";
 import { getActiveSeason } from "../../db/queries/seasonQueries";
-import { matches, userTbl } from "../../db/schema";
+import { matches } from "../../db/schema";
 import { isHxRequest, redirect } from "../../lib";
 import { type Match } from "../../lib/rating";
 import { cn } from "../../lib/utils";
@@ -37,26 +36,6 @@ export const Admin = new Elysia({
   .get("/", async ({ html, session, headers }) => {
     return html(() => adminPage(session, headers));
   })
-  .get(
-    "/search",
-    async ({ readDb, html, query: { name } }) => {
-      if (name === "") return;
-      const players = await readDb
-        .select({ name: userTbl.name, id: userTbl.id })
-        .from(userTbl)
-        .limit(5)
-        .where(like(userTbl.name, `%${name}%`));
-
-      return html(() => MatchSearchResults(players));
-    },
-    {
-      query: t.Partial(
-        t.Object({
-          name: t.String(),
-        }),
-      ),
-    },
-  )
   .delete("/match/:id", async ({ params: { id }, session }) => {
     await deleteMatch(parseInt(id));
     return page(session);

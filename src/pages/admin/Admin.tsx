@@ -12,8 +12,8 @@ import {
   getMatch,
   getMatches,
 } from "../../db/queries/matchQueries";
-import { getActiveSeason } from "../../db/queries/seasonQueries";
-import { matches } from "../../db/schema";
+import { getActiveSeason, getSeasons } from "../../db/queries/seasonQueries";
+import { matches, seasonsTbl } from "../../db/schema";
 import { isHxRequest, redirect } from "../../lib";
 import { type Match } from "../../lib/rating";
 import { cn } from "../../lib/utils";
@@ -124,6 +124,60 @@ export const Admin = new Elysia({
         match_id: t.Number(),
       }),
     },
+  )
+  .post(
+    "/new-season",
+    async ({ set, headers, body, writeDb }) => {
+      const newSeasonName = `Season ${body.currentSeasonId + 1}`;
+
+      type newSeason = typeof seasonsTbl.$inferInsert;
+      const seasonToInsert: newSeason = {
+        name: newSeasonName,
+        startAt: new Date(body.newSeasonStart),
+        endAt: new Date(body.newSeasonEnd),
+        ratingSystem: body.ratingSystem,
+      };
+
+      await writeDb.insert(seasonsTbl).values(seasonToInsert);
+
+      redirect({ headers, set }, `/admin`);
+    },
+    {
+      beforeHandle: ({ body }) => {
+        const startDate = new Date(body.newSeasonStart);
+        const endDate = new Date(body.newSeasonEnd);
+        const now = new Date(Date.now());
+
+        if (startDate > endDate) {
+          return new Response(
+            `<div id="errors" class="text-red-500">Start date must be before end date</div>`,
+            {
+              status: 400,
+            },
+          );
+        }
+        if (startDate < now || endDate < now) {
+          return new Response(
+            `<div id="errors" class="text-red-500">The new season must in the future</div>`,
+            {
+              status: 400,
+            },
+          );
+        }
+        return;
+      },
+      transform({ body }) {
+        const currentSeasonId = +body.currentSeasonId;
+        if (!Number.isNaN(currentSeasonId))
+          body.currentSeasonId = currentSeasonId;
+      },
+      body: t.Object({
+        newSeasonStart: t.String({ minLength: 1 }),
+        newSeasonEnd: t.String({ minLength: 1 }),
+        ratingSystem: t.Enum({ elo: "elo", openskill: "openskill" }),
+        currentSeasonId: t.Number(),
+      }),
+    },
   );
 
 async function adminPage(
@@ -142,7 +196,9 @@ async function adminPage(
 }
 
 async function page(session: Session | null) {
+  const seasons = await getSeasons();
   const activeSeason = await getActiveSeason();
+
   // Fallback to first season if activeSeason is undefined :shrug:
   const matchesWithPlayers = await getMatches(activeSeason?.id ?? 0);
   const globalMatchHistory = matchesWithPlayers
@@ -153,6 +209,70 @@ async function page(session: Session | null) {
     <>
       <NavbarHtml session={session} activePage="admin" />
       <HeaderHtml title="With great power comes great responsibility" />
+      <StatsCardHtml title="Seasons" doubleSize>
+        <div class="flex flex-col">
+          <form
+            id="newSeasonForm"
+            method="post"
+            enctype="multipart/form-data"
+            hx-ext="response-targets"
+            hx-target-400="#errors"
+          >
+            <label for="newSeasonStart">Start</label>
+            <input
+              id="newSeasonStart"
+              name="newSeasonStart"
+              form="newSeasonForm"
+              class="text-black"
+              type="datetime-local"
+            />
+            <label for="newSeasonEnd">End</label>
+            <input
+              id="newSeasonEnd"
+              name="newSeasonEnd"
+              form="newSeasonForm"
+              class="text-black"
+              type="datetime-local"
+            />
+            <label for="ratingSystemSelect">Rating system:</label>
+            <select
+              id="ratingSystemSelect"
+              name="ratingSystem"
+              form="newSeasonForm"
+              class="text-black"
+            >
+              <option value="openskill">Openskill</option>
+              <option value="elo">ELO</option>
+            </select>
+            <input
+              hidden
+              form="newSeasonForm"
+              id="currenSeasonId"
+              name="currentSeasonId"
+              value={activeSeason?.id.toString()}
+            />
+            <button
+              hx-post="/admin/new-season"
+              hx-indicator=".progress-bar"
+              class="rounded-lg bg-teal-700 p-2"
+              type="button"
+            >
+              Create new Season
+            </button>
+            <div id="errors" class="text-red-500"></div>
+          </form>
+          <div>
+            {seasons.map((season) => (
+              <div>
+                <p>{season.name}</p>
+                <p>{season.startAt}</p>
+                <p>{season.endAt}</p>
+                <p>{season.ratingSystem}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </StatsCardHtml>
       <StatsCardHtml title="Latest games" doubleSize>
         <div class="flex w-full flex-col flex-wrap justify-between lg:flex-row">
           {globalMatchHistory.length !== 0 ? (

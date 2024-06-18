@@ -15,3 +15,7 @@ export const getSeason = async (id: number) => {
     where: eq(seasonsTbl.id, id),
   });
 };
+
+export const getSeasons = async () => {
+  return await readDb.select().from(seasonsTbl);
+};

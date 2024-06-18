@@ -38,7 +38,7 @@ async function page(session: Session | null) {
     <>
       <NavbarHtml session={session} activePage="help" />
       <HeaderHtml title="Help" />
-      <p class="pl-5 text-white">
+      <p class="pl-5">
         If you need help deleting or editing a match, you can write one of the
         admins below
       </p>

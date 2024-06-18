@@ -30,7 +30,7 @@ export const MatchForm = async ({
         {/* TODO: Use flex with gap instead */}
         {/* White team */}
         <div class="group relative mb-6 w-full border-b">
-          <span class="text-white">White team</span>
+          <span>White team</span>
         </div>
         <div class="group relative mb-6 w-full">
           <UserLookUp
@@ -52,7 +52,7 @@ export const MatchForm = async ({
 
         {/* Black team */}
         <div class="group relative mb-6 w-full border-b">
-          <span class="text-white">Black team</span>
+          <span>Black team</span>
         </div>
         <div class="group relative mb-6 w-full">
           <UserLookUp
@@ -74,7 +74,7 @@ export const MatchForm = async ({
 
         {/* Winner and points */}
         <div class="group relative mb-6 w-full border-b">
-          <span class="text-white">Match result</span>
+          <span>Match result</span>
         </div>
 
         <div class="group relative mb-6 w-full">
@@ -82,7 +82,7 @@ export const MatchForm = async ({
             name="match_winner"
             form={formId}
             id="match_winner"
-            class="peer block w-full appearance-none border-0 border-b-2 border-gray-300 bg-transparent px-0 py-2.5 text-sm   text-white focus:border-blue-500 focus:outline-none focus:ring-0"
+            class="peer block w-full appearance-none border-0 border-b-2 border-gray-300 bg-transparent px-0 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-0"
             required={true}
           >
             <option disabled value="" selected={match ? false : true}>
@@ -112,7 +112,7 @@ export const MatchForm = async ({
             form={formId}
             name="point_difference"
             id="point_difference"
-            class="peer block w-full appearance-none border-0 border-b-2  border-gray-600 bg-transparent px-0 py-2.5   text-sm text-white focus:border-blue-500 focus:outline-none focus:ring-0"
+            class="peer block w-full appearance-none border-0 border-b-2 border-gray-600 bg-transparent px-0 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-0"
             placeholder=" "
             required={true}
             min="0"
@@ -121,7 +121,7 @@ export const MatchForm = async ({
           />
           <label
             for="point_difference"
-            class="absolute top-3 -z-10 origin-[0] -translate-y-6 scale-75 transform text-sm  text-gray-400 duration-300 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:left-0 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:font-medium peer-focus:text-blue-500"
+            class="absolute top-3 -z-10 origin-[0] -translate-y-6 scale-75 transform text-sm text-gray-400 duration-300 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:left-0 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:font-medium peer-focus:text-blue-500"
           >
             Point difference
           </label>

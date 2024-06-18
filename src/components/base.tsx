@@ -34,6 +34,7 @@ export const BaseHtml = ({ children }: PropsWithChildren) => (
         bg-slate-800
         bg-gradient-to-b
         from-slate-700 via-slate-800 to-gray-900 font-roboto-mono
+        text-white
     "
       >
         <LoadingBarHtml />

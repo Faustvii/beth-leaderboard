@@ -201,7 +201,7 @@ const profileStats = (
   console.log("metrics took ", performance.now() - now + "ms to run");
 
   return (
-    <div class="grid grid-cols-6 gap-3 text-white md:grid-cols-12">
+    <div class="grid grid-cols-6 gap-3 md:grid-cols-12">
       <StatsCardHtml title="Games">
         <>
           <div class="flex flex-col items-center justify-center gap-2">

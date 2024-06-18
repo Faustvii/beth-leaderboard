@@ -29,7 +29,7 @@ function handleQueue(players: number, queue: QueuedPlayer[]) {
         <>
           <div
             id="queue-status"
-            class="flex flex-col items-center justify-center text-white"
+            class="flex flex-col items-center justify-center"
           >
             <span class="p-4">
               {`Match between ${queue
@@ -44,7 +44,7 @@ function handleQueue(players: number, queue: QueuedPlayer[]) {
     }
     x.Connection.send(
       <>
-        <div id="queue-status" class="flex flex-col text-white">
+        <div id="queue-status" class="flex flex-col">
           <span class="p-4">
             You're in queue for {players == 2 ? "1v1" : "2v2"}
           </span>

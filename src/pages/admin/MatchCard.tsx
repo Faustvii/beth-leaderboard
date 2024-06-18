@@ -1,23 +1,12 @@
-import { notEmpty } from "../../lib";
+import { MatchDescription } from "../../components/MatchDescription";
 import { EditIcon, TrashIcon } from "../../lib/icons";
 import { cn } from "../../lib/utils";
-import { MatchDetails } from "./MatchDetails";
-import { TeamDetails } from "./TeamDetails";
 
 interface MatchCardProps {
   match: MatchWithPlayers;
 }
 
 export const MatchCard = ({ match }: MatchCardProps) => {
-  const teamPlayers = {
-    black: [match.blackPlayerOne.name, match.blackPlayerTwo?.name].filter(
-      notEmpty,
-    ),
-    white: [match.whitePlayerOne.name, match.whitePlayerTwo?.name].filter(
-      notEmpty,
-    ),
-  };
-
   return (
     <div
       id={match.id}
@@ -26,15 +15,7 @@ export const MatchCard = ({ match }: MatchCardProps) => {
         "lg:mb-[1%] lg:w-[49.5%]",
       )}
     >
-      <div class="flex flex-col justify-between gap-3 lg:flex-row">
-        <TeamDetails title={"Team White"} team={teamPlayers.white} />
-        <TeamDetails title={"Team Black"} team={teamPlayers.black} />
-      </div>
-      <MatchDetails
-        result={match.result}
-        scoreDiff={match.scoreDiff}
-        dateLogged={match.createdAt}
-      />
+      <MatchDescription match={match} />
       <div class={cn("mt-auto flex")}>
         <button
           hx-get={`admin/match/${match.id}`}

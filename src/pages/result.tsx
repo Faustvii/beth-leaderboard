@@ -3,15 +3,13 @@ import Elysia from "elysia";
 import { type Session } from "lucia";
 import { HxButton } from "../components/HxButton";
 import { LayoutHtml } from "../components/Layout";
+import { MatchDescription } from "../components/MatchDescription";
 import { NavbarHtml } from "../components/Navbar";
 import { ctx } from "../context";
 import { getMatches } from "../db/queries/matchQueries";
 import { getSeason } from "../db/queries/seasonQueries";
-import { notEmpty } from "../lib";
-import { getMatchRatingDiff, getRatingSystem, type Match } from "../lib/rating";
+import { getMatchRatingDiff, getRatingSystem } from "../lib/rating";
 import { isDefined } from "../lib/utils";
-import { MatchDetails } from "./admin/MatchDetails";
-import { TeamDetails } from "./admin/TeamDetails";
 
 export const matchResult = new Elysia({
   prefix: "/result",
@@ -59,7 +57,9 @@ async function page(
     <LayoutHtml>
       <NavbarHtml session={session} activePage="result" />
       <span class="py-5 text-4xl font-bold">Match result</span>
-      <MatchDescription match={match} />
+      <div class="mb-6 flex flex-col gap-3">
+        <MatchDescription match={match} />
+      </div>
       <RatingDiffTable>
         {matchDiff.map((playerDiff) => (
           <RatingDiffTableRow {...playerDiff} />
@@ -68,35 +68,6 @@ async function page(
     </LayoutHtml>
   );
 }
-
-const MatchDescription = ({ match }: { match: Match | undefined }) => {
-  if (match === undefined) {
-    return <></>;
-  }
-
-  const teamPlayers = {
-    black: [match.blackPlayerOne.name, match.blackPlayerTwo?.name].filter(
-      notEmpty,
-    ),
-    white: [match.whitePlayerOne.name, match.whitePlayerTwo?.name].filter(
-      notEmpty,
-    ),
-  };
-
-  return (
-    <div class="mb-6 flex flex-col gap-3">
-      <div class="flex flex-col justify-between gap-3 lg:flex-row">
-        <TeamDetails title="Team White" team={teamPlayers.white} />
-        <TeamDetails title="Team Black" team={teamPlayers.black} />
-      </div>
-      <MatchDetails
-        result={match.result}
-        scoreDiff={match.scoreDiff}
-        dateLogged={match.createdAt}
-      />
-    </div>
-  );
-};
 
 function RatingDiffTable({ children }: PropsWithChildren): JSX.Element {
   return (

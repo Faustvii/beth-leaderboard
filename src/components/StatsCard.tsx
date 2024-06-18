@@ -10,7 +10,7 @@ export const StatsCardHtml = ({ title, children, doubleSize }: Props) => (
   <div
     class={cn(
       doubleSize ? "col-span-6 md:col-span-12" : "col-span-6",
-      "flex h-full flex-col rounded-lg p-5 text-white",
+      "flex h-full flex-col rounded-lg p-5",
     )}
   >
     <h2 class="border-b-[1px] border-primary/60 p-2 text-2xl font-semibold">

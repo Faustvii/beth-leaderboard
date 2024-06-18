@@ -32,7 +32,7 @@ export const UserLookUp = ({ formId, input, label, user, ...props }: Props) => (
       value={user?.name}
       autocomplete="off"
       class={clsx([
-        "peer block w-full appearance-none px-0 py-2.5 pl-10 text-sm text-white",
+        "peer block w-full appearance-none px-0 py-2.5 pl-10 text-sm",
         "border-0 border-b-2 border-gray-300 bg-transparent",
         "focus:border-blue-500 focus:outline-none focus:ring-0",
       ])}
@@ -54,7 +54,7 @@ export const UserLookUp = ({ formId, input, label, user, ...props }: Props) => (
     <div
       id={`${input}-results`}
       class={clsx([
-        "bg-slate-600 text-white",
+        "bg-slate-600",
         "rounded-b-lg shadow-md shadow-slate-900/5",
         "absolute z-50 w-full",
       ])}

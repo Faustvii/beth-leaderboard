@@ -116,7 +116,7 @@ async function page(session: Session | null) {
     <>
       <NavbarHtml session={session} activePage="stats" />
       <HeaderHtml title="Statistics" />
-      <div class="grid grid-cols-6 gap-3 text-white md:grid-cols-12">
+      <div class="grid grid-cols-6 gap-3 md:grid-cols-12">
         <StatsCardHtml title="Games">
           <>
             <div class="flex flex-col items-center justify-center gap-2">

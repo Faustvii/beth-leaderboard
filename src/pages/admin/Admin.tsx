@@ -185,7 +185,7 @@ const EditMatchModal = ({ match }: EditMatchModalProps) => {
         class="absolute bottom-0 left-0 right-0 top-0 -z-50"
         _="on click trigger closeEditModal"
       />
-      <div class="-z-20 w-[80%] max-w-[600px] rounded-md bg-slate-800 p-4 text-white shadow-md lg:p-8">
+      <div class="-z-20 w-[80%] max-w-[600px] rounded-md bg-slate-800 p-4 shadow-md lg:p-8">
         <h1 class="mb-4 text-2xl font-semibold">Edit match</h1>
         <MatchForm
           formId={`edit-match-${match.id}-form`}

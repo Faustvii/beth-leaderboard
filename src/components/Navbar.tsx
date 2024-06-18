@@ -164,7 +164,7 @@ export const NavbarHtml = async ({ session, activePage }: Props) => {
                           <li>
                             <HxButton
                               hx-get={route}
-                              class="rounded-md px-3 py-2 text-sm font-medium text-white"
+                              class="rounded-md px-3 py-2 text-sm font-medium"
                               role="menuitem"
                               tabindex="-1"
                             >
@@ -175,7 +175,7 @@ export const NavbarHtml = async ({ session, activePage }: Props) => {
                         <li>
                           <a
                             href="/api/auth/signout"
-                            class="rounded-md px-3 py-2 text-sm font-medium text-white"
+                            class="rounded-md px-3 py-2 text-sm font-medium"
                             role="menuitem"
                             tabindex="-1"
                           >
@@ -223,7 +223,7 @@ export const NavbarHtml = async ({ session, activePage }: Props) => {
                 page,
                 activePage,
                 route,
-                "block rounded-md px-3 py-2 text-base font-medium text-white",
+                "block rounded-md px-3 py-2 text-base font-medium",
               ),
             )}
           </div>
@@ -247,7 +247,7 @@ const navBarButton = (
   isActivePage(page, activePage) ? (
     <span
       class={cn(
-        "rounded px-3 py-2 text-sm font-bold text-white hover:bg-primary/50",
+        "rounded px-3 py-2 text-sm font-bold hover:bg-primary/50",
         { "bg-primary hover:bg-primary": isActivePage(page, activePage) },
         { classes: classes !== undefined },
       )}
@@ -261,10 +261,9 @@ const navBarButton = (
       hx-target="#mainContainer"
       hx-swap="innerHTML"
       hx-push-url="true"
-      class={cn(
-        "rounded px-3 py-2 text-sm font-bold text-white hover:bg-primary/50",
-        { "bg-primary hover:bg-primary": isActivePage(page, activePage) },
-      )}
+      class={cn("rounded px-3 py-2 text-sm font-bold hover:bg-primary/50", {
+        "bg-primary hover:bg-primary": isActivePage(page, activePage),
+      })}
     >
       {text}
     </button>

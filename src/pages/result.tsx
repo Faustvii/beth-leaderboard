@@ -10,6 +10,8 @@ import { getSeason } from "../db/queries/seasonQueries";
 import { notEmpty } from "../lib";
 import { getMatchRatingDiff, getRatingSystem, type Match } from "../lib/rating";
 import { isDefined } from "../lib/utils";
+import { MatchDetails } from "./admin/MatchDetails";
+import { TeamDetails } from "./admin/TeamDetails";
 
 export const matchResult = new Elysia({
   prefix: "/result",
@@ -56,18 +58,8 @@ async function page(
   return (
     <LayoutHtml>
       <NavbarHtml session={session} activePage="result" />
-      <div class="p-5 text-white">
-        <span class="text-4xl font-bold">Match result</span>
-        <span class="pl-4 text-2xl font-semibold">
-          (
-          {match?.createdAt?.toLocaleString("en-US", {
-            day: "numeric",
-            month: "long",
-          })}
-          )
-        </span>
-      </div>
-      <div class="px-5 pb-6 text-white">{matchDescription(match)}</div>
+      <span class="py-5 text-4xl font-bold">Match result</span>
+      <MatchDescription match={match} />
       <RatingDiffTable>
         {matchDiff.map((playerDiff) => (
           <RatingDiffTableRow {...playerDiff} />
@@ -77,12 +69,12 @@ async function page(
   );
 }
 
-function matchDescription(match: Match | undefined) {
+const MatchDescription = ({ match }: { match: Match | undefined }) => {
   if (match === undefined) {
     return <></>;
   }
 
-  const players = {
+  const teamPlayers = {
     black: [match.blackPlayerOne.name, match.blackPlayerTwo?.name].filter(
       notEmpty,
     ),
@@ -92,21 +84,19 @@ function matchDescription(match: Match | undefined) {
   };
 
   return (
-    <>
-      On{" "}
-      {match.createdAt.toLocaleString("en-US", {
-        day: "numeric",
-        month: "long",
-      })}
-      , the White team of{" "}
-      <span class="font-bold">{players.white.join(" & ")}</span> faced off
-      against the Black team of{" "}
-      <span class="font-bold">{players.black.join(" & ")}</span>. The{" "}
-      {match.result.toLowerCase()} team triumphed with a {match.scoreDiff}
-      -point difference.
-    </>
+    <div class="mb-6 flex flex-col gap-3">
+      <div class="flex flex-col justify-between gap-3 lg:flex-row">
+        <TeamDetails title="Team White" team={teamPlayers.white} />
+        <TeamDetails title="Team Black" team={teamPlayers.black} />
+      </div>
+      <MatchDetails
+        result={match.result}
+        scoreDiff={match.scoreDiff}
+        dateLogged={match.createdAt}
+      />
+    </div>
   );
-}
+};
 
 function RatingDiffTable({ children }: PropsWithChildren): JSX.Element {
   return (

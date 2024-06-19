@@ -12,9 +12,15 @@ import {
   getMatch,
   getMatches,
 } from "../../db/queries/matchQueries";
-import { getActiveSeason, getSeasons } from "../../db/queries/seasonQueries";
+import {
+  deleteSeason,
+  getActiveSeason,
+  getSeasons,
+} from "../../db/queries/seasonQueries";
 import { matches, seasonsTbl } from "../../db/schema";
 import { isHxRequest, redirect } from "../../lib";
+import { syncIfLocal } from "../../lib/dbHelpers";
+import { EditIcon, TrashIcon } from "../../lib/icons";
 import { type Match } from "../../lib/rating";
 import { cn } from "../../lib/utils";
 import { MatchCard } from "./MatchCard";
@@ -38,6 +44,10 @@ export const Admin = new Elysia({
   })
   .delete("/match/:id", async ({ params: { id }, session }) => {
     await deleteMatch(parseInt(id));
+    return page(session);
+  })
+  .delete("/season/:id", async ({ params: { id }, session }) => {
+    await deleteSeason(parseInt(id));
     return page(session);
   })
   .get("/match/:id", async ({ params: { id } }) => {
@@ -128,7 +138,7 @@ export const Admin = new Elysia({
   .post(
     "/new-season",
     async ({ set, headers, body, writeDb }) => {
-      const newSeasonName = `Season ${body.currentSeasonId + 1}`;
+      const newSeasonName = `Season ${body.amountOfSeasons + 1}`;
 
       type newSeason = typeof seasonsTbl.$inferInsert;
       const seasonToInsert: newSeason = {
@@ -139,6 +149,7 @@ export const Admin = new Elysia({
       };
 
       await writeDb.insert(seasonsTbl).values(seasonToInsert);
+      await syncIfLocal();
 
       redirect({ headers, set }, `/admin`);
     },
@@ -167,15 +178,15 @@ export const Admin = new Elysia({
         return;
       },
       transform({ body }) {
-        const currentSeasonId = +body.currentSeasonId;
-        if (!Number.isNaN(currentSeasonId))
-          body.currentSeasonId = currentSeasonId;
+        const amountOfSeasons = +body.amountOfSeasons;
+        if (!Number.isNaN(amountOfSeasons))
+          body.amountOfSeasons = amountOfSeasons;
       },
       body: t.Object({
         newSeasonStart: t.String({ minLength: 1 }),
         newSeasonEnd: t.String({ minLength: 1 }),
         ratingSystem: t.Enum({ elo: "elo", openskill: "openskill" }),
-        currentSeasonId: t.Number(),
+        amountOfSeasons: t.Number(),
       }),
     },
   );
@@ -247,9 +258,9 @@ async function page(session: Session | null) {
             <input
               hidden
               form="newSeasonForm"
-              id="currenSeasonId"
-              name="currentSeasonId"
-              value={activeSeason?.id.toString()}
+              id="amountOfSeasons"
+              name="amountOfSeasons"
+              value={seasons.length.toString()}
             />
             <button
               hx-post="/admin/new-season"
@@ -265,9 +276,48 @@ async function page(session: Session | null) {
             {seasons.map((season) => (
               <div>
                 <p>{season.name}</p>
-                <p>{season.startAt}</p>
-                <p>{season.endAt}</p>
-                <p>{season.ratingSystem}</p>
+                <p class="truncate">
+                  {season.startAt.toLocaleString("en-US", {
+                    hourCycle: "h24",
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </p>
+                <p class="truncate">
+                  {season.endAt.toLocaleString("en-US", {
+                    hourCycle: "h24",
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </p>
+                <p>{season.ratingSystem.toUpperCase()}</p>
+                <button
+                  class={cn(
+                    "mt-2 flex w-1/2 justify-center gap-3 rounded-lg bg-teal-700 p-2 hover:bg-teal-700/85",
+                  )}
+                >
+                  <EditIcon />
+                  <p class="hidden sm:block">Edit</p>
+                </button>
+                <button
+                  type="button"
+                  class="mt-2 flex w-1/2 justify-center gap-3 rounded-lg bg-red-700 p-2 hover:bg-red-700/85"
+                  hx-indicator=".progress-bar"
+                  hx-target="#mainContainer"
+                  hx-delete={`admin/season/${season.id}`}
+                  hx-disabled-elt="this"
+                  hx-confirm="Are you sure you wish to delete this season? This will result in all matches in this season being deleted as well."
+                  _="on htmx:beforeRequest set innerText of <p/> in me to 'Deleting...'"
+                >
+                  <TrashIcon />
+                  <p class="hidden sm:block">Delete</p>
+                </button>
               </div>
             ))}
           </div>

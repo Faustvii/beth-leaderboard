@@ -43,14 +43,6 @@ export const Admin = new Elysia({
   .get("/", async ({ html, session, headers }) => {
     return html(() => adminPage(session, headers));
   })
-  .delete("/match/:id", async ({ params: { id }, session }) => {
-    await deleteMatch(parseInt(id));
-    return page(session);
-  })
-  .delete("/season/:id", async ({ params: { id }, session }) => {
-    await deleteSeason(parseInt(id));
-    return page(session);
-  })
   .get("/match/:id", async ({ params: { id } }) => {
     const matchToEdit = await getMatch(Number(id));
 
@@ -215,7 +207,15 @@ export const Admin = new Elysia({
         ratingSystem: t.Enum({ elo: "elo", openskill: "openskill" }),
       }),
     },
-  );
+  )
+  .delete("/match/:id", async ({ params: { id }, session }) => {
+    await deleteMatch(parseInt(id));
+    return page(session);
+  })
+  .delete("/season/:id", async ({ params: { id }, session }) => {
+    await deleteSeason(parseInt(id));
+    return page(session);
+  });
 
 async function adminPage(
   session: Session | null,

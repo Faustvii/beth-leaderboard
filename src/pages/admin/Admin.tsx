@@ -248,13 +248,14 @@ async function page(session: Session | null) {
       <HeaderHtml title="With great power comes great responsibility" />
       <StatsCardHtml title="Seasons" doubleSize>
         <div class="flex w-full flex-col gap-3">
+          <ExistingSeasons seasons={seasons} />
           <SeasonForm
             formId="newSeason"
             actionButtons={
               <button
                 hx-post="/admin/new-season"
                 hx-indicator=".progress-bar"
-                class="rounded-lg bg-teal-700 p-2"
+                class="ml-auto mt-4 h-10 w-full min-w-[180px] rounded-lg bg-teal-700 p-2 px-4 lg:mt-auto"
                 type="button"
               >
                 Create new Season
@@ -262,7 +263,6 @@ async function page(session: Session | null) {
             }
             amountOfSeasons={seasons.length}
           />
-          <ExistingSeasons seasons={seasons} />
         </div>
       </StatsCardHtml>
       <StatsCardHtml title="Latest games" doubleSize>

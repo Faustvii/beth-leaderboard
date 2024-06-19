@@ -1,4 +1,5 @@
 import { type Season } from "../../../db/schema/season";
+import { cn } from "../../../lib/utils";
 
 interface SeasonFormProps {
   formId: string;
@@ -28,54 +29,74 @@ export const SeasonForm = ({
       hx-ext="response-targets"
       hx-target-400="#errors"
     >
-      <label for="seasonStart">Start</label>
-      <input
-        id="seasonStart"
-        name="seasonStart"
-        form={formId}
-        class="text-black"
-        type="datetime-local"
-        value={startAt}
-      />
-      <label for="seasonEnd">End</label>
-      <input
-        id="seasonEnd"
-        name="seasonEnd"
-        form={formId}
-        class="text-black"
-        type="datetime-local"
-        value={endAt}
-      />
-      <label for="ratingSystemSelect">Rating system:</label>
-      <select
-        id="ratingSystemSelect"
-        name="ratingSystem"
-        form={formId}
-        class="text-black"
+      <div
+        class={cn("mt-3 flex flex-col gap-3 py-2", !season && "lg:flex-row")}
       >
-        <option
-          value="openskill"
-          selected={season?.ratingSystem === "openskill"}
-        >
-          Openskill
-        </option>
-        <option value="elo" selected={season?.ratingSystem === "elo"}>
-          ELO
-        </option>
-      </select>
-      <label for="seasonName">Season name:</label>
-      <input
-        id="seasonName"
-        name="seasonName"
-        form={formId}
-        class="text-black"
-        type="text"
-        value={
-          season?.name ??
-          `Season ${amountOfSeasons ? amountOfSeasons + 1 : "name"}`
-        }
-      />
-      {actionButtons}
+        <div class="flex w-full flex-col">
+          <label for="seasonName" class="font-semibold">
+            Season name
+          </label>
+          <input
+            id="seasonName"
+            name="seasonName"
+            form={formId}
+            class="rounded-sm px-2 py-1 text-black"
+            type="text"
+            value={
+              season?.name ??
+              `Season ${amountOfSeasons ? amountOfSeasons + 1 : "name"}`
+            }
+          />
+        </div>
+        <div class="flex w-full flex-col">
+          <label for="seasonStart" class="font-semibold">
+            Start
+          </label>
+          <input
+            id="seasonStart"
+            name="seasonStart"
+            form={formId}
+            class="rounded-sm px-2 py-1 text-black"
+            type="datetime-local"
+            value={startAt}
+          />
+        </div>
+        <div class="flex w-full flex-col">
+          <label for="seasonEnd" class="font-semibold">
+            End
+          </label>
+          <input
+            id="seasonEnd"
+            name="seasonEnd"
+            form={formId}
+            class="rounded-sm px-2 py-1 text-black"
+            type="datetime-local"
+            value={endAt}
+          />
+        </div>
+        <div class="flex w-full flex-col">
+          <label for="ratingSystemSelect" class="truncate font-semibold">
+            Rating system
+          </label>
+          <select
+            id="ratingSystemSelect"
+            name="ratingSystem"
+            form={formId}
+            class="h-[34px] rounded-sm px-2 py-1 text-black"
+          >
+            <option
+              value="openskill"
+              selected={season?.ratingSystem === "openskill"}
+            >
+              Openskill
+            </option>
+            <option value="elo" selected={season?.ratingSystem === "elo"}>
+              ELO
+            </option>
+          </select>
+        </div>
+        {actionButtons}
+      </div>
       <div id="errors" class="text-red-500"></div>
       {season && <input hidden name="seasonId" value={season.id.toString()} />}
     </form>

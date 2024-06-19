@@ -8,7 +8,7 @@ interface ExistingSeasonsProps {
 
 export const ExistingSeasons = ({ seasons }: ExistingSeasonsProps) => {
   return (
-    <div class="mt-3 flex flex-col gap-3">
+    <div class="flex flex-col gap-3">
       <div class="hidden gap-3 px-4 font-semibold md:flex">
         <p class="w-[10%]">Name</p>
         <p class="w-1/4">Start</p>

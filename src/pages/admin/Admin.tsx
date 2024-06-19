@@ -138,11 +138,9 @@ export const Admin = new Elysia({
   .post(
     "/new-season",
     async ({ set, headers, body, writeDb }) => {
-      const newSeasonName = `Season ${body.amountOfSeasons + 1}`;
-
       type newSeason = typeof seasonsTbl.$inferInsert;
       const seasonToInsert: newSeason = {
-        name: newSeasonName,
+        name: body.newSeasonName,
         startAt: new Date(body.newSeasonStart),
         endAt: new Date(body.newSeasonEnd),
         ratingSystem: body.ratingSystem,
@@ -177,16 +175,11 @@ export const Admin = new Elysia({
         }
         return;
       },
-      transform({ body }) {
-        const amountOfSeasons = +body.amountOfSeasons;
-        if (!Number.isNaN(amountOfSeasons))
-          body.amountOfSeasons = amountOfSeasons;
-      },
       body: t.Object({
         newSeasonStart: t.String({ minLength: 1 }),
         newSeasonEnd: t.String({ minLength: 1 }),
         ratingSystem: t.Enum({ elo: "elo", openskill: "openskill" }),
-        amountOfSeasons: t.Number(),
+        newSeasonName: t.String({ minLength: 1 }),
       }),
     },
   );
@@ -255,12 +248,14 @@ async function page(session: Session | null) {
               <option value="openskill">Openskill</option>
               <option value="elo">ELO</option>
             </select>
+            <label for="newSeasonName">Season name:</label>
             <input
-              hidden
+              id="newSeasonName"
+              name="newSeasonName"
               form="newSeasonForm"
-              id="amountOfSeasons"
-              name="amountOfSeasons"
-              value={seasons.length.toString()}
+              class="text-black"
+              type="text"
+              value={`Season ${(seasons.length + 1).toString()}`}
             />
             <button
               hx-post="/admin/new-season"

@@ -8,11 +8,17 @@ interface ExistingSeasonsProps {
 
 export const ExistingSeasons = ({ seasons }: ExistingSeasonsProps) => {
   return (
-    <>
+    <div class="mt-3 flex flex-col gap-3">
+      <div class="flex gap-3 px-4 font-semibold ">
+        <p class="w-[10%]">Name</p>
+        <p class="w-1/4">Start</p>
+        <p class="w-1/4">End</p>
+        <p class="w-1/4">Rating System</p>
+      </div>
       {seasons.map((season) => (
-        <div>
-          <p>{season.name}</p>
-          <p class="truncate">
+        <div class="flex items-center gap-3 rounded-lg border px-4 py-2">
+          <p class="w-[10%]">{season.name}</p>
+          <p class="w-1/4 truncate">
             {season.startAt.toLocaleString("en-US", {
               hourCycle: "h24",
               year: "numeric",
@@ -22,7 +28,7 @@ export const ExistingSeasons = ({ seasons }: ExistingSeasonsProps) => {
               minute: "2-digit",
             })}
           </p>
-          <p class="truncate">
+          <p class="w-1/4 truncate">
             {season.endAt.toLocaleString("en-US", {
               hourCycle: "h24",
               year: "numeric",
@@ -33,25 +39,25 @@ export const ExistingSeasons = ({ seasons }: ExistingSeasonsProps) => {
             })}
           </p>
           <p>{season.ratingSystem.toUpperCase()}</p>
-          <div class={cn("mt-auto flex")}>
+
+          <div class={cn(" ml-auto flex")}>
             <button
               hx-get={`admin/season/${season.id}`}
               hx-target="#mainContainer"
               hx-swap="afterend"
               class={cn(
-                "mt-2 flex w-1/2 justify-center gap-3 rounded-l-lg",
-                "bg-teal-700 p-2 hover:bg-teal-700/85",
+                "flex w-1/2 justify-center gap-3 rounded-l-lg",
+                "p-2 hover:text-teal-600",
               )}
               _={`on htmx:afterSettle js htmx.process(document.body) end`}
             >
               <EditIcon />
-              <p class="hidden sm:block">Edit</p>
             </button>
             <button
               type="button"
               class={cn(
-                "mt-2 flex w-1/2 justify-center gap-3 rounded-r-lg",
-                "bg-red-700 p-2 hover:bg-red-700/85 disabled:bg-gray-600",
+                "flex w-1/2 justify-center gap-3 rounded-r-lg",
+                "p-2 hover:text-red-600 disabled:bg-gray-600",
               )}
               hx-indicator=".progress-bar"
               hx-target="#mainContainer"
@@ -61,11 +67,10 @@ export const ExistingSeasons = ({ seasons }: ExistingSeasonsProps) => {
               _="on htmx:beforeRequest set innerText of <p/> in me to 'Deleting...'"
             >
               <TrashIcon />
-              <p class="hidden sm:block">Delete</p>
             </button>
           </div>
         </div>
       ))}
-    </>
+    </div>
   );
 };

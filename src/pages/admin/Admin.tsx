@@ -247,7 +247,7 @@ async function page(session: Session | null) {
       <NavbarHtml session={session} activePage="admin" />
       <HeaderHtml title="With great power comes great responsibility" />
       <StatsCardHtml title="Seasons" doubleSize>
-        <div class="flex flex-col">
+        <div class="flex w-full flex-col gap-3">
           <SeasonForm
             formId="newSeason"
             actionButtons={

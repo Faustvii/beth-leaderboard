@@ -25,7 +25,7 @@ import { syncIfLocal } from "../../lib/dbHelpers";
 import { EditIcon, TrashIcon } from "../../lib/icons";
 import { type Match } from "../../lib/rating";
 import { cn } from "../../lib/utils";
-import { MatchCard } from "./MatchCard";
+import { MatchCard } from "./components/MatchCard";
 
 export const Admin = new Elysia({
   prefix: "/admin",

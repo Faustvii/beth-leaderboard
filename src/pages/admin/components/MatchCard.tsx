@@ -1,6 +1,6 @@
-import { MatchDescription } from "../../components/MatchDescription";
-import { EditIcon, TrashIcon } from "../../lib/icons";
-import { cn } from "../../lib/utils";
+import { MatchDescription } from "../../../components/MatchDescription";
+import { EditIcon, TrashIcon } from "../../../lib/icons";
+import { cn } from "../../../lib/utils";
 
 interface MatchCardProps {
   match: MatchWithPlayers;

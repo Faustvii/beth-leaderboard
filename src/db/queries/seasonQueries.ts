@@ -19,3 +19,12 @@ export const getSeason = async (id: number) => {
 export const getSeasons = async () => {
   return await readDb.select().from(seasonsTbl);
 };
+
+export const deleteSeason = async (seasonId: number) => {
+  const deletedSeason = await readDb
+    .delete(seasonsTbl)
+    .where(eq(seasonsTbl.id, seasonId))
+    .returning();
+
+  return deletedSeason;
+};

@@ -1,7 +1,7 @@
 import { notEmpty } from "../lib";
-import { type Match } from "../lib/rating";
-import { MatchDetails } from "../pages/admin/MatchDetails";
-import { TeamDetails } from "../pages/admin/TeamDetails";
+import { Match } from "../lib/rating";
+import { MatchDetails } from "../pages/admin/components/MatchDetails";
+import { TeamDetails } from "../pages/admin/components/TeamDetails";
 
 export const MatchDescription = ({ match }: { match: Match | undefined }) => {
   if (match === undefined) {

@@ -36,7 +36,7 @@ export const EditMatchModal = ({ match }: EditMatchModalProps) => {
                 Cancel
               </button>
               <button
-                hx-post="/admin/match"
+                hx-put="/admin/match"
                 type="submit"
                 class="rounded-lg bg-teal-700 p-2"
                 hx-indicator=".progress-bar"

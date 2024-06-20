@@ -17,13 +17,9 @@ export const SeasonForm = ({
   let startAt = "";
   let endAt = "";
 
-  console.log(season?.startAt);
-
   // substring 0 - 16 to remove milliseconds and timezone
   if (season?.startAt) startAt = season.startAt.toISOString().substring(0, 10);
   if (season?.endAt) endAt = season.endAt.toISOString().substring(0, 10);
-
-  console.log(startAt);
 
   return (
     <form

@@ -17,7 +17,7 @@ export const getSeason = async (id: number) => {
 };
 
 export const getSeasons = async () => {
-  return await readDb.select().from(seasonsTbl);
+  return await readDb.query.seasonsTbl.findMany();
 };
 
 export const deleteSeason = async (seasonId: number) => {

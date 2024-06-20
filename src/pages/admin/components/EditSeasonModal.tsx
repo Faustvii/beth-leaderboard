@@ -36,7 +36,7 @@ export const EditSeasonModal = ({ season }: EditSeasonModalProps) => {
                 Cancel
               </button>
               <button
-                hx-post="/admin/season"
+                hx-put="/admin/season"
                 type="submit"
                 class="rounded-lg bg-teal-700 p-2"
                 hx-indicator=".progress-bar"

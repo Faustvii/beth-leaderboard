@@ -57,7 +57,7 @@ export const Admin = new Elysia({
 
     return <EditSeasonModal season={seasonToEdit} />;
   })
-  .post(
+  .put(
     "/match",
     async ({ set, headers, body, writeDb }) => {
       await writeDb
@@ -135,7 +135,7 @@ export const Admin = new Elysia({
       }),
     },
   )
-  .post(
+  .put(
     "/season",
     async ({ set, headers, body, writeDb }) => {
       await writeDb
@@ -161,7 +161,7 @@ export const Admin = new Elysia({
     },
   )
   .post(
-    "/new-season",
+    "/season",
     async ({ set, headers, body, writeDb }) => {
       type newSeason = typeof seasonsTbl.$inferInsert;
       const seasonToInsert: newSeason = {
@@ -253,7 +253,7 @@ async function page(session: Session | null) {
             formId="newSeason"
             actionButtons={
               <button
-                hx-post="/admin/new-season"
+                hx-post="/admin/season"
                 hx-indicator=".progress-bar"
                 class="ml-auto mt-4 h-10 w-full min-w-[180px] rounded-lg bg-teal-700 p-2 px-4 lg:mt-auto"
                 type="button"

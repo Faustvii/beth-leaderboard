@@ -17,9 +17,13 @@ export const SeasonForm = ({
   let startAt = "";
   let endAt = "";
 
+  console.log(season?.startAt);
+
   // substring 0 - 16 to remove milliseconds and timezone
-  if (season?.startAt) startAt = season.startAt.toISOString().substring(0, 16);
-  if (season?.endAt) endAt = season.endAt.toISOString().substring(0, 16);
+  if (season?.startAt) startAt = season.startAt.toISOString().substring(0, 10);
+  if (season?.endAt) endAt = season.endAt.toISOString().substring(0, 10);
+
+  console.log(startAt);
 
   return (
     <form
@@ -57,7 +61,7 @@ export const SeasonForm = ({
             name="seasonStart"
             form={formId}
             class="rounded-sm px-2 py-1 text-black"
-            type="datetime-local"
+            type="date"
             value={startAt}
           />
         </div>
@@ -70,7 +74,7 @@ export const SeasonForm = ({
             name="seasonEnd"
             form={formId}
             class="rounded-sm px-2 py-1 text-black"
-            type="datetime-local"
+            type="date"
             value={endAt}
           />
         </div>

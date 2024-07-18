@@ -69,6 +69,7 @@ export const Admin = new Elysia({
           blackPlayerTwo: body.black2Id,
           result: body.match_winner,
           scoreDiff: Number(body.point_difference),
+          createdAt: new Date(`${body.date_played}T${body.time_played}`),
         })
         .where(eq(matches.id, Number(body.match_id)));
 
@@ -132,6 +133,8 @@ export const Admin = new Elysia({
         }),
         point_difference: t.Number({ minimum: 0, maximum: 960, multipleOf: 5 }),
         match_id: t.Number(),
+        date_played: t.String(),
+        time_played: t.String(),
       }),
     },
   )

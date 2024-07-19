@@ -16,10 +16,17 @@ export const MatchForm = async ({
   let createdTime = "";
 
   if (match?.createdAt) {
-    createdDate = new Date(match.createdAt.toLocaleString())
-      .toISOString()
-      .split("T")[0];
-    createdTime = match.createdAt.toLocaleTimeString().slice(0, 5);
+    const [day, , month, , year, , hour, , minute] = new Intl.DateTimeFormat(
+      "en-GB",
+      {
+        dateStyle: "short",
+        timeStyle: "long",
+        timeZone: "Europe/Copenhagen",
+      },
+    ).formatToParts(match.createdAt);
+
+    createdDate = `${year.value}-${month.value}-${day.value}`;
+    createdTime = `${hour.value}:${minute.value}`;
   }
 
   return (

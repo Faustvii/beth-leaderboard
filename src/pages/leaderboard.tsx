@@ -9,6 +9,7 @@ import { ctx } from "../context";
 import { getMatches } from "../db/queries/matchQueries";
 import { getActiveSeason } from "../db/queries/seasonQueries";
 import { isHxRequest } from "../lib";
+import { subtractDays } from "../lib/dateUtils";
 import MatchStatistics, { type RESULT } from "../lib/matchStatistics";
 import { getRatings, getRatingSystem } from "../lib/rating";
 
@@ -21,12 +22,23 @@ const playerPaginationQuery = async (page: number) => {
   const matches = await getMatches(activeSeasonId);
   const ratingSystem = getRatingSystem(activeSeasonRatingSystemType);
   const players = getRatings(matches, ratingSystem);
+  const lastPlayed = MatchStatistics.latestMatch(matches);
+
+  const cutoffDate = subtractDays(new Date(), 21);
+  const playersThatHaveRecentlyPlayed = players.filter((player) => {
+    const playerLastPlayed = lastPlayed.find(
+      (match) => match.player.id === player.player.id,
+    );
+    return playerLastPlayed && playerLastPlayed.lastPlayed > cutoffDate;
+  });
 
   const startIndex = (page - 1) * pageSize;
   const endIndex = startIndex + pageSize;
-  const playersInPage = players.slice(startIndex, endIndex);
+  const playersInPage = playersThatHaveRecentlyPlayed.slice(
+    startIndex,
+    endIndex,
+  );
 
-  const lastPlayed = MatchStatistics.latestMatch(matches);
   const latestResults: Record<
     string,
     {

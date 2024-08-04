@@ -118,7 +118,7 @@ export const WinLoseStreak = ({
   streak: number | undefined;
   isWinStreak: boolean;
 }) => {
-  if (lastPlayed && isDateOlderThanNDays(lastPlayed, 7)) {
+  if (lastPlayed && isDateOlderThanNDays(lastPlayed, 14)) {
     return <span class="pr-2 text-2xl">💤</span>;
   }
   if (streak && streak === 5) {

@@ -5,7 +5,8 @@ import {
 } from "openskill/dist/types";
 import { type RatingSystemType } from "../db/schema/season";
 import { type EloConfig } from "../types/elo";
-import { getDatePartFromDate, subtractDays } from "./dateUtils";
+import { daysBetween, getDatePartFromDate, subtractDays } from "./dateUtils";
+import { lerp, normalize } from "./mathUtils";
 import { isDefined } from "./utils";
 
 type EloRating = number;
@@ -13,6 +14,7 @@ export type Rating = EloRating | OpenskillRating;
 
 export interface RatingSystem<TRating> {
   defaultRating: TRating;
+  decayRating: (rating: TRating, now: Date, latestMatchAt: Date) => TRating;
   rateMatch: (match: MatchWithRatings<TRating>) => PlayerWithRating<TRating>[];
   toNumber: (rating: TRating) => number;
   equals: (a: TRating | undefined, b: TRating | undefined) => boolean;
@@ -21,6 +23,7 @@ export interface RatingSystem<TRating> {
 export interface PlayerWithRating<TRating> {
   player: Player;
   rating: TRating;
+  latestMatchAt: Date;
 }
 
 export interface PlayerWithRatingDiff<TRating> {
@@ -69,9 +72,16 @@ export function getRatings<TRating>(
     {} as Record<string, PlayerWithRating<TRating>>,
   );
 
-  return Object.values(ratings).toSorted(
-    (a, b) => system.toNumber(b.rating) - system.toNumber(a.rating),
-  );
+  return Object.values(ratings)
+    .map((player) => ({
+      ...player,
+      rating: system.decayRating(
+        player.rating,
+        new Date(),
+        player.latestMatchAt,
+      ),
+    }))
+    .toSorted((a, b) => system.toNumber(b.rating) - system.toNumber(a.rating));
 }
 
 export function getMatchRatingDiff<TRating>(
@@ -95,31 +105,77 @@ export function getMatchRatingDiff<TRating>(
   return diffRatings(ratingsBefore, ratingsAfter, system);
 }
 
+function decayPlayersInMatch<TRating>(
+  ratings: Record<string, PlayerWithRating<TRating>>,
+  now: Date,
+  playerIds: string[],
+  system: RatingSystem<TRating>,
+): Record<string, PlayerWithRating<TRating>> {
+  const decayedPlayerRatings = Object.fromEntries(
+    playerIds
+      .filter((playerId) => !!ratings[playerId])
+      .map((playerId) => [
+        playerId,
+        {
+          ...ratings[playerId],
+          rating: system.decayRating(
+            ratings[playerId].rating,
+            now,
+            ratings[playerId].latestMatchAt,
+          ),
+        },
+      ]),
+  );
+
+  return {
+    ...ratings,
+    ...decayedPlayerRatings,
+  };
+}
+
 function getRatingsAfterMatch<TRating>(
   ratings: Record<string, PlayerWithRating<TRating>>,
   match: Match,
   system: RatingSystem<TRating>,
-) {
+): Record<string, PlayerWithRating<TRating>> {
+  const playersInMatch = [
+    match.whitePlayerOne.id,
+    match.whitePlayerTwo?.id,
+    match.blackPlayerOne.id,
+    match.blackPlayerTwo?.id,
+  ].filter(isDefined);
+
+  const decayedRatings = decayPlayersInMatch(
+    ratings,
+    match.createdAt,
+    playersInMatch,
+    system,
+  );
+
   const matchWithRatings: MatchWithRatings<TRating> = {
     ...match,
-    whitePlayerOne: ratings[match.whitePlayerOne.id] ?? {
+    whitePlayerOne: decayedRatings[match.whitePlayerOne.id] ?? {
       player: match.whitePlayerOne,
       rating: system.defaultRating,
+      latestMatchAt: match.createdAt,
     },
     whitePlayerTwo: match.whitePlayerTwo
-      ? ratings[match.whitePlayerTwo.id] ?? {
+      ? decayedRatings[match.whitePlayerTwo.id] ?? {
           player: match.whitePlayerTwo,
           rating: system.defaultRating,
+          latestMatchAt: match.createdAt,
         }
       : null,
-    blackPlayerOne: ratings[match.blackPlayerOne.id] ?? {
+    blackPlayerOne: decayedRatings[match.blackPlayerOne.id] ?? {
       player: match.blackPlayerOne,
       rating: system.defaultRating,
+      latestMatchAt: match.createdAt,
     },
     blackPlayerTwo: match.blackPlayerTwo
-      ? ratings[match.blackPlayerTwo.id] ?? {
+      ? decayedRatings[match.blackPlayerTwo.id] ?? {
           player: match.blackPlayerTwo,
           rating: system.defaultRating,
+          latestMatchAt: match.createdAt,
         }
       : null,
   };
@@ -129,7 +185,7 @@ function getRatingsAfterMatch<TRating>(
     newRatings.map((x) => [x.player.id, x]),
   );
   return {
-    ...ratings,
+    ...decayedRatings,
     ...newRatingsMap,
   };
 }
@@ -158,6 +214,11 @@ export function getPlayerRatingHistory<TRating>(
       playerRatingHistory[dateOfMatch] = ratings[playerId].rating;
     }
   }
+
+  // decay player from last match to request time
+  ratings = decayPlayersInMatch(ratings, new Date(), [playerId], system);
+  playerRatingHistory[getDatePartFromDate(new Date())] =
+    ratings[playerId].rating;
 
   return playerRatingHistory;
 }
@@ -215,8 +276,50 @@ export function openskill(options?: Options): RatingSystem<OpenskillRating> {
     z: 2, // used in calculation of ordinal `my - z * sigma`
   };
 
+  const defaultRating = rating(selectedOptions);
+
+  const toNumber = (rating: OpenskillRating) => {
+    return Math.floor(ordinal(rating, selectedOptions));
+  };
+
   return {
-    defaultRating: rating(selectedOptions),
+    defaultRating,
+
+    decayRating(
+      rating: OpenskillRating,
+      now: Date,
+      latestMatchAt: Date,
+    ): OpenskillRating {
+      const daysSinceLastMatch = daysBetween(latestMatchAt, now);
+      const daysToReachMaxDecay = 63; // 9 weeks (after initial 3 weeks)
+      const decayDays = Math.min(daysSinceLastMatch - 21, daysToReachMaxDecay);
+
+      if (decayDays <= 0) {
+        return rating;
+      }
+
+      const maxMuScale = 0.5;
+      const maxSigmaScale = 0.25;
+
+      const amountOfDecay = normalize(decayDays, 0, daysToReachMaxDecay);
+
+      const decayedMu = lerp(
+        amountOfDecay * maxMuScale,
+        defaultRating.mu,
+        rating.mu,
+      );
+
+      const decayedSigma = lerp(
+        amountOfDecay * maxSigmaScale,
+        rating.sigma,
+        defaultRating.sigma,
+      );
+
+      return {
+        mu: Math.min(decayedMu, rating.mu),
+        sigma: Math.max(decayedSigma, rating.sigma),
+      };
+    },
 
     rateMatch(
       match: MatchWithRatings<OpenskillRating>,
@@ -251,10 +354,12 @@ export function openskill(options?: Options): RatingSystem<OpenskillRating> {
         {
           player: match.whitePlayerOne.player,
           rating: whitePlayerOneNewRating,
+          latestMatchAt: match.createdAt,
         },
         {
           player: match.blackPlayerOne.player,
           rating: blackPlayerOneNewRating,
+          latestMatchAt: match.createdAt,
         },
       ].filter((x) => isDefined(x.player));
 
@@ -262,6 +367,7 @@ export function openskill(options?: Options): RatingSystem<OpenskillRating> {
         result.push({
           player: match.whitePlayerTwo.player,
           rating: whitePlayerTwoNewRating,
+          latestMatchAt: match.createdAt,
         });
       }
 
@@ -269,15 +375,14 @@ export function openskill(options?: Options): RatingSystem<OpenskillRating> {
         result.push({
           player: match.blackPlayerTwo?.player,
           rating: blackPlayerTwoNewRating,
+          latestMatchAt: match.createdAt,
         });
       }
 
       return result;
     },
 
-    toNumber(rating: OpenskillRating) {
-      return Math.floor(ordinal(rating, selectedOptions));
-    },
+    toNumber,
 
     equals(a: OpenskillRating | undefined, b: OpenskillRating | undefined) {
       if (a === undefined && b === undefined) return true;
@@ -322,6 +427,11 @@ export function elo(config?: EloConfig): RatingSystem<EloRating> {
 
   return {
     defaultRating: 1500,
+
+    decayRating(rating: number, _now: Date, _latestMatchAt: Date): number {
+      // no decay
+      return rating;
+    },
 
     rateMatch(
       match: MatchWithRatings<EloRating>,
@@ -379,10 +489,12 @@ export function elo(config?: EloConfig): RatingSystem<EloRating> {
         {
           player: match.whitePlayerOne.player,
           rating: match.whitePlayerOne.rating + whiteTeamEloChange,
+          latestMatchAt: match.createdAt,
         },
         {
           player: match.blackPlayerOne.player,
           rating: match.blackPlayerOne.rating + blackTeamEloChange,
+          latestMatchAt: match.createdAt,
         },
       ].filter((x) => isDefined(x.player));
 
@@ -390,6 +502,7 @@ export function elo(config?: EloConfig): RatingSystem<EloRating> {
         result.push({
           player: match.whitePlayerTwo.player,
           rating: match.whitePlayerTwo.rating + whiteTeamEloChange,
+          latestMatchAt: match.createdAt,
         });
       }
 
@@ -397,6 +510,7 @@ export function elo(config?: EloConfig): RatingSystem<EloRating> {
         result.push({
           player: match.blackPlayerTwo?.player,
           rating: match.blackPlayerTwo.rating + blackTeamEloChange,
+          latestMatchAt: match.createdAt,
         });
       }
 

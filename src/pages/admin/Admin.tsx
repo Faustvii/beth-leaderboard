@@ -25,6 +25,7 @@ import { EditSeasonModal } from "./components/EditSeasonModal";
 import { ExistingSeasons } from "./components/ExisitngSeasons";
 import { MatchCard } from "./components/MatchCard";
 import { SeasonForm } from "./components/SeasonForm";
+import { fromTimezoneToUTC } from "../../lib/dateUtils";
 
 export const Admin = new Elysia({
   prefix: "/admin",
@@ -60,6 +61,9 @@ export const Admin = new Elysia({
   .put(
     "/match",
     async ({ set, headers, body, writeDb }) => {
+      const createdAtFromUser = new Date(`${body.date_played}T${body.time_played}`);
+      const createdAt = fromTimezoneToUTC(createdAtFromUser, "Europe/Copenhagen");
+
       await writeDb
         .update(matches)
         .set({
@@ -69,7 +73,7 @@ export const Admin = new Elysia({
           blackPlayerTwo: body.black2Id,
           result: body.match_winner,
           scoreDiff: Number(body.point_difference),
-          createdAt: new Date(`${body.date_played}T${body.time_played}`),
+          createdAt,
         })
         .where(eq(matches.id, Number(body.match_id)));
 

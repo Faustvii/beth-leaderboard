@@ -35,9 +35,9 @@ function getOffsetMinutes(date: Date, timezone: string) {
   const localTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   if (localTimezone !== "UTC") throw new Error("Only UTC is supported for local timezone");
 
-  const lastSundayInMatch = lastSundayOfMonth(date.getFullYear(), 2);
-  const lastSundayInOktober = lastSundayOfMonth(date.getFullYear(), 9);
-  const isSummertime = date >= lastSundayInMatch && date < lastSundayInOktober;
+  const lastSundayInMarch = lastSundayOfMonth(date.getFullYear(), 2);
+  const lastSundayInOctober = lastSundayOfMonth(date.getFullYear(), 9);
+  const isSummertime = date >= lastSundayInMarch && date < lastSundayInOctober;
 
   return isSummertime ? 120 : 60;
 }

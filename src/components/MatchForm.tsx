@@ -1,4 +1,5 @@
 import { type Match } from "../lib/rating";
+import { DateAndTimePicker } from "./DateAndTimePicker";
 import { UserLookUp } from "./UserLookup";
 
 interface MatchFormProps {
@@ -12,6 +13,23 @@ export const MatchForm = async ({
   actionButtons,
   match,
 }: MatchFormProps) => {
+  let createdDate = "";
+  let createdTime = "";
+
+  if (match?.createdAt) {
+    const [day, , month, , year, , hour, , minute] = new Intl.DateTimeFormat(
+      "en-GB",
+      {
+        dateStyle: "short",
+        timeStyle: "long",
+        timeZone: "Europe/Copenhagen",
+      },
+    ).formatToParts(match.createdAt);
+
+    createdDate = `${year.value}-${month.value}-${day.value}`;
+    createdTime = `${hour.value}:${minute.value}`;
+  }
+
   return (
     <>
       <form
@@ -126,6 +144,14 @@ export const MatchForm = async ({
             Point difference
           </label>
         </div>
+        {/* Only show date and time picker if editing existing match */}
+        {match && (
+          <DateAndTimePicker
+            formId={formId}
+            initialDate={createdDate}
+            initialTime={createdTime}
+          />
+        )}
         {actionButtons}
         <div id="errors" class="text-red-500"></div>
         {match && (

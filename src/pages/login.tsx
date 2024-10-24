@@ -18,6 +18,9 @@ export const login = new Elysia({ prefix: "/login" })
         <a hx-boost="false" href="/api/auth/signin/azure">
           Login with azure
         </a>
+        <a hx-boost="false" href="/api/auth/signin/local">
+          Login for testing
+        </a>
       </LayoutHtml>
     ));
   });

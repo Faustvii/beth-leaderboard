@@ -41,7 +41,8 @@ async function SeedPlayers(db: typeof readDb) {
     const player: typeof userTbl.$inferInsert = {
       id: generateRandomString(15),
       name: `Player ${index}`,
-      email: "fake@fake.crokinole",
+      email: `fake${index}@fake.crokinole`,
+      roles: index === 0 ? "admin" : "",
     };
 
     await db.insert(userTbl).values(player);

@@ -6,10 +6,15 @@ import { HeaderHtml } from "../components/header";
 import { LayoutHtml } from "../components/Layout";
 import { MatchResultLink } from "../components/MatchResultLink";
 import { NavbarHtml } from "../components/Navbar";
+import { SelectGet } from "../components/SelectGet";
 import { StatsCardHtml } from "../components/StatsCard";
 import { ctx } from "../context";
 import { getMatches } from "../db/queries/matchQueries";
-import { getActiveSeason } from "../db/queries/seasonQueries";
+import {
+  getActiveSeason,
+  getSeason,
+  getSeasons,
+} from "../db/queries/seasonQueries";
 import { getUser } from "../db/queries/userQueries";
 import { isHxRequest, measure, notEmpty } from "../lib";
 import MatchStatistics, {
@@ -27,25 +32,57 @@ export const profile = new Elysia({
   prefix: "/profile",
 })
   .use(ctx)
-  .get("/", ({ html, session, headers }) => {
-    return html(page(session, headers, session?.user?.id ?? ""));
+  .get("/", async ({ html, session, headers }) => {
+    const activeSeason = await getActiveSeason();
+    const activeSeasonId = activeSeason?.id ?? 1;
+    return html(() =>
+      profilePage(session, headers, session?.user?.id ?? "", activeSeasonId),
+    );
   })
-  .get("/:userId", ({ html, params, headers, session }) => {
-    return html(page(session, headers, params.userId));
-  });
+  .get("/season/:seasonId", async ({ html, session, headers, params }) => {
+    const seasonId = parseInt(params.seasonId, 10);
+    return html(() =>
+      profilePage(session, headers, session?.user?.id ?? "", seasonId),
+    );
+  })
+  .get("/:userId", async ({ html, params, headers, session }) => {
+    const activeSeason = await getActiveSeason();
+    const activeSeasonId = activeSeason?.id ?? 1;
+    return html(() =>
+      profilePage(session, headers, params.userId, activeSeasonId),
+    );
+  })
+  .get(
+    "/:userId/season/:seasonId",
+    async ({ html, params, headers, session }) => {
+      const seasonId = parseInt(params.seasonId, 10);
+      return html(() => profilePage(session, headers, params.userId, seasonId));
+    },
+  );
 
-async function page(
+async function profilePage(
   session: Session | null,
   headers: Record<string, string | null>,
   userId: string,
+  seasonId: number,
 ) {
-  const activeSeason = await getActiveSeason();
-  const activeSeasonId = activeSeason?.id ?? 1;
-  const activeSeasonRatingSystemType = activeSeason?.ratingSystem ?? "elo";
-  const ratingSystem = getRatingSystem(activeSeasonRatingSystemType);
+  return (
+    <>
+      {isHxRequest(headers) ? (
+        page(session, userId, seasonId)
+      ) : (
+        <LayoutHtml>{page(session, userId, seasonId)}</LayoutHtml>
+      )}
+    </>
+  );
+}
+
+async function page(session: Session | null, userId: string, seasonId: number) {
+  const season = await getSeason(seasonId);
+  const ratingSystem = getRatingSystem(season?.ratingSystem ?? "elo");
 
   const { elaspedTimeMs, result: matches } = await measure(() =>
-    getMatches(activeSeasonId),
+    getMatches(seasonId),
   );
   console.log(`player stats took ${elaspedTimeMs}ms to get from db`);
   let profileName = "Your stats";
@@ -54,19 +91,27 @@ async function page(
     if (user) profileName = `${user.name}'s stats`;
   }
   const header = profileName;
+  const seasons = await getSeasons();
 
-  return isHxRequest(headers) ? (
+  return (
     <>
       <NavbarHtml session={session} activePage="profile" />
-      <HeaderHtml title={header} />
+      <div class="flex flex-row justify-between">
+        <HeaderHtml title={header} />
+        <div class="p-5">
+          <SelectGet
+            options={seasons.map((season) => ({
+              path: `/profile/${userId}/season/${season.id}`,
+              text: season.name,
+            }))}
+            selectedIndex={seasons.findIndex(
+              (season) => season.id === seasonId,
+            )}
+          ></SelectGet>
+        </div>
+      </div>
       {profileStats(matches, userId, ratingSystem)}
     </>
-  ) : (
-    <LayoutHtml>
-      <NavbarHtml session={session} activePage="profile" />
-      <HeaderHtml title={header} />
-      {profileStats(matches, userId, ratingSystem)}
-    </LayoutHtml>
   );
 }
 

@@ -8,41 +8,62 @@ import { NavbarHtml } from "../components/Navbar";
 import { StatsCardHtml } from "../components/StatsCard";
 import { ctx } from "../context";
 import { getMatches } from "../db/queries/matchQueries";
-import { getActiveSeason } from "../db/queries/seasonQueries";
+import { getActiveSeason, getSeasons } from "../db/queries/seasonQueries";
 import { isHxRequest, measure, notEmpty } from "../lib";
 import { getDatePartFromDate } from "../lib/dateUtils";
 import MatchStatistics from "../lib/matchStatistics";
 import { type Match } from "../lib/rating";
+import { isDefined } from "../lib/utils";
 
 export const stats = new Elysia({
   prefix: "/stats",
 })
   .use(ctx)
-  .get("/", async ({ html, session, headers }) => {
-    return html(() => statsPage(session, headers));
+  .get("/", async (ctx) => {
+    const { html, redirect, session, headers, query } = ctx;
+
+    if (isDefined(query.seasonId)) {
+      const season = parseInt(query.seasonId, 10);
+      redirect(ctx, `/stats/${season}`);
+      return;
+    }
+
+    const activeSeason = await getActiveSeason();
+    const activeSeasonId = activeSeason?.id ?? 1;
+    return html(() => statsPage(session, headers, activeSeasonId));
+  })
+  .get("/:seasonId", async (ctx) => {
+    const { html, redirect, session, headers, query, params } = ctx;
+
+    if (isDefined(query.seasonId)) {
+      const season = parseInt(query.seasonId, 10);
+      redirect(ctx, `/stats/${season}`);
+      return;
+    }
+
+    const seasonId = parseInt(params.seasonId, 10);
+    return html(() => statsPage(session, headers, seasonId));
   });
 
 async function statsPage(
   session: Session | null,
   headers: Record<string, string | null>,
+  seasonId: number,
 ) {
   return (
     <>
       {isHxRequest(headers) ? (
-        page(session)
+        page(session, seasonId)
       ) : (
-        <LayoutHtml>{page(session)}</LayoutHtml>
+        <LayoutHtml>{page(session, seasonId)}</LayoutHtml>
       )}
     </>
   );
 }
 
-async function page(session: Session | null) {
-  const activeSeason = await getActiveSeason();
-  const activeSeasonId = activeSeason?.id ?? 1;
-
+async function page(session: Session | null, seasonId: number) {
   const { elaspedTimeMs, result: matches } = await measure(async () => {
-    return await getMatches(activeSeasonId);
+    return await getMatches(seasonId);
   });
   console.log("stats page database calls", elaspedTimeMs, "ms");
 
@@ -112,10 +133,28 @@ async function page(session: Session | null) {
     },
   };
 
+  const seasons = await getSeasons();
+
   return (
     <>
       <NavbarHtml session={session} activePage="stats" />
-      <HeaderHtml title="Statistics" />
+      <div class="flex flex-row justify-between">
+        <HeaderHtml title="Statistics" />
+        <div class="p-5">
+          <select
+            class="h-[40px] rounded-sm px-2 py-1 text-black"
+            hx-get="/stats"
+            hx-trigger="change"
+            name="seasonId"
+          >
+            {seasons.map((season) => (
+              <option value={`${season.id}`} selected={season.id === seasonId}>
+                {season.name}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
       <div class="grid grid-cols-6 gap-3 md:grid-cols-12">
         <StatsCardHtml title="Games">
           <>

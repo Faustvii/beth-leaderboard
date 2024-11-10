@@ -1,6 +1,7 @@
 import { type ChartConfiguration } from "chart.js";
 import Elysia from "elysia";
 import { type Session } from "lucia";
+import { Chart } from "../components/Chart";
 import { HeaderHtml } from "../components/header";
 import { LayoutHtml } from "../components/Layout";
 import { MatchResultLink } from "../components/MatchResultLink";
@@ -235,16 +236,11 @@ const profileStats = (
       <StatsCardHtml title="Winrate">
         <>
           <div class="flex h-48 w-full items-center justify-center pt-5">
-            <canvas id="chartDoughnut"></canvas>
+            <Chart id="chartDoughnut" config={winrateConfig}></Chart>
             <span class="pl-3 text-sm">
               {winRate.winPercentage.toFixed(2)}%
             </span>
           </div>
-          <script>
-            {`new Chart(document.getElementById("chartDoughnut"), ${JSON.stringify(
-              winrateConfig,
-            )})`}
-          </script>
         </>
       </StatsCardHtml>
       <StatsCardHtml title="Winrate By Color">
@@ -297,13 +293,8 @@ const profileStats = (
       <StatsCardHtml title="Rating history">
         <>
           <div class="flex h-48 w-full items-center justify-center pt-5">
-            <canvas id="ratingChart"></canvas>
+            <Chart id="ratingChart" config={ratingTrendConfig}></Chart>
           </div>
-          <script>
-            {`new Chart(document.getElementById("ratingChart"), ${JSON.stringify(
-              ratingTrendConfig,
-            )})`}
-          </script>
         </>
       </StatsCardHtml>
       <StatsCardHtml title="Hardest opponents">

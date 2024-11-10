@@ -1,6 +1,7 @@
 import { type ChartConfiguration } from "chart.js";
 import { Elysia } from "elysia";
 import { type Session } from "lucia";
+import { Chart } from "../components/Chart";
 import { HeaderHtml } from "../components/header";
 import { LayoutHtml } from "../components/Layout";
 import { MatchResultLink } from "../components/MatchResultLink";
@@ -155,16 +156,9 @@ async function page(session: Session | null, seasonId: number) {
         </StatsCardHtml>
         <StatsCardHtml title="Biggest win">{biggestWin(matches)}</StatsCardHtml>
         <StatsCardHtml title="Winrates">
-          <>
-            <div class="flex h-48 w-full items-center justify-center pt-5">
-              <canvas class="" id="chartDoughnut"></canvas>
-            </div>
-            <script>
-              {`new Chart(document.getElementById("chartDoughnut"), ${JSON.stringify(
-                config,
-              )})`}
-            </script>
-          </>
+          <div class="flex h-48 w-full items-center justify-center pt-5">
+            <Chart id="chartDoughnut" config={config}></Chart>
+          </div>
         </StatsCardHtml>
         <StatsCardHtml title="Winrate By Color">
           <>

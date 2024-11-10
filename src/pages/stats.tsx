@@ -5,6 +5,7 @@ import { HeaderHtml } from "../components/header";
 import { LayoutHtml } from "../components/Layout";
 import { MatchResultLink } from "../components/MatchResultLink";
 import { NavbarHtml } from "../components/Navbar";
+import { SelectGet } from "../components/SelectGet";
 import { StatsCardHtml } from "../components/StatsCard";
 import { ctx } from "../context";
 import { getMatches } from "../db/queries/matchQueries";
@@ -13,34 +14,17 @@ import { isHxRequest, measure, notEmpty } from "../lib";
 import { getDatePartFromDate } from "../lib/dateUtils";
 import MatchStatistics from "../lib/matchStatistics";
 import { type Match } from "../lib/rating";
-import { isDefined } from "../lib/utils";
 
 export const stats = new Elysia({
   prefix: "/stats",
 })
   .use(ctx)
-  .get("/", async (ctx) => {
-    const { html, redirect, session, headers, query } = ctx;
-
-    if (isDefined(query.seasonId)) {
-      const season = parseInt(query.seasonId, 10);
-      redirect(ctx, `/stats/${season}`);
-      return;
-    }
-
+  .get("/", async ({ html, session, headers }) => {
     const activeSeason = await getActiveSeason();
     const activeSeasonId = activeSeason?.id ?? 1;
     return html(() => statsPage(session, headers, activeSeasonId));
   })
-  .get("/:seasonId", async (ctx) => {
-    const { html, redirect, session, headers, query, params } = ctx;
-
-    if (isDefined(query.seasonId)) {
-      const season = parseInt(query.seasonId, 10);
-      redirect(ctx, `/stats/${season}`);
-      return;
-    }
-
+  .get("/:seasonId", async ({ html, session, headers, params }) => {
     const seasonId = parseInt(params.seasonId, 10);
     return html(() => statsPage(session, headers, seasonId));
   });
@@ -141,18 +125,15 @@ async function page(session: Session | null, seasonId: number) {
       <div class="flex flex-row justify-between">
         <HeaderHtml title="Statistics" />
         <div class="p-5">
-          <select
-            class="h-[40px] rounded-sm px-2 py-1 text-black"
-            hx-get="/stats"
-            hx-trigger="change"
-            name="seasonId"
-          >
-            {seasons.map((season) => (
-              <option value={`${season.id}`} selected={season.id === seasonId}>
-                {season.name}
-              </option>
-            ))}
-          </select>
+          <SelectGet
+            options={seasons.map((season) => ({
+              path: `/stats/${season.id}`,
+              text: season.name,
+            }))}
+            selectedIndex={seasons.findIndex(
+              (season) => season.id === seasonId,
+            )}
+          ></SelectGet>
         </div>
       </div>
       <div class="grid grid-cols-6 gap-3 md:grid-cols-12">

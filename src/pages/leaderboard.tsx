@@ -12,8 +12,7 @@ import { isHxRequest } from "../lib";
 import MatchStatistics, { type RESULT } from "../lib/matchStatistics";
 import { getRatings, getRatingSystem } from "../lib/rating";
 
-const playerPaginationQuery = async (page: number) => {
-  const pageSize = 15;
+const playerQuery = async () => {
   const activeSeason = await getActiveSeason();
   const activeSeasonId = activeSeason?.id ?? 1;
   const activeSeasonRatingSystemType = activeSeason?.ratingSystem ?? "elo";
@@ -22,9 +21,6 @@ const playerPaginationQuery = async (page: number) => {
   const ratingSystem = getRatingSystem(activeSeasonRatingSystemType);
   const players = getRatings(matches, ratingSystem);
 
-  const startIndex = (page - 1) * pageSize;
-  const endIndex = startIndex + pageSize;
-  const playersInPage = players.slice(startIndex, endIndex);
 
   const lastPlayed = MatchStatistics.latestMatch(matches);
   const latestResults: Record<
@@ -36,9 +32,9 @@ const playerPaginationQuery = async (page: number) => {
     }
   > = MatchStatistics.currentStreaksByPlayer(matches);
 
-  return playersInPage.map((player, index) => ({
+  return players.map((player, index) => ({
     userId: player.player.id,
-    rank: index + (page - 1) * pageSize + 1,
+    rank: index + 1,
     name: player.player.name,
     rating: ratingSystem.toNumber(player.rating),
     lastPlayed:
@@ -57,15 +53,12 @@ export const leaderboard = new Elysia({
   .get("/", async ({ html, session, headers }) => {
     return html(() => LeaderboardPage(session, headers));
   })
-  .get("/page/:page", ({ html, params: { page } }) =>
-    html(PagedLeaderboard(page)),
-  );
 
 export async function LeaderboardPage(
   session: Session | null,
   headers: Record<string, string | null>,
 ) {
-  const rows = await playerPaginationQuery(1);
+  const rows = await playerQuery();
   return (
     <>
       {isHxRequest(headers) ? (
@@ -96,19 +89,18 @@ function LeaderboardTable(
     <>
       <NavbarHtml session={session} activePage="leaderboard" />
       <HeaderHtml title="Leaderboard" />
-      <LeaderboardTableHtml page={1} rows={rows}></LeaderboardTableHtml>
+      <LeaderboardTableHtml rows={rows}></LeaderboardTableHtml>
     </>
   );
 }
 
-export async function PagedLeaderboard(page: string) {
-  const pageNumber = parseInt(page);
-  const rows = await playerPaginationQuery(pageNumber);
+export async function PagedLeaderboard(seasonId: number) {
+  const rows = await playerQuery(seasonId);
 
   return (
     <>
-      {rows.map((row, index) => (
-        <LeaderboardRowHtml {...row} first={index === 0} page={pageNumber} />
+      {rows.map((row) => (
+        <LeaderboardRowHtml {...row} />
       ))}
     </>
   );

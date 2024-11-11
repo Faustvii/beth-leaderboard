@@ -3,9 +3,7 @@ import { LeaderboardRowHtml } from "./LeaderboardRow";
 
 export const LeaderboardTableHtml = ({
   rows,
-  page,
 }: {
-  page: number;
   rows: {
     userId: string;
     rank: number;
@@ -37,8 +35,8 @@ export const LeaderboardTableHtml = ({
             </tr>
           </thead>
           <tbody id="nextPageData">
-            {rows.map((row, index) => (
-              <LeaderboardRowHtml {...row} first={index === 0} page={page} />
+            {rows.map((row) => (
+              <LeaderboardRowHtml {...row} />
             ))}
           </tbody>
         </table>

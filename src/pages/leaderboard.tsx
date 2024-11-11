@@ -5,22 +5,24 @@ import { LayoutHtml } from "../components/Layout";
 import { LeaderboardRowHtml } from "../components/LeaderboardRow";
 import { LeaderboardTableHtml } from "../components/LeaderboardTable";
 import { NavbarHtml } from "../components/Navbar";
+import { SelectGet } from "../components/SelectGet";
 import { ctx } from "../context";
 import { getMatches } from "../db/queries/matchQueries";
-import { getActiveSeason } from "../db/queries/seasonQueries";
+import {
+  getActiveSeason,
+  getSeason,
+  getSeasons,
+} from "../db/queries/seasonQueries";
 import { isHxRequest } from "../lib";
 import MatchStatistics, { type RESULT } from "../lib/matchStatistics";
 import { getRatings, getRatingSystem } from "../lib/rating";
 
-const playerQuery = async () => {
-  const activeSeason = await getActiveSeason();
-  const activeSeasonId = activeSeason?.id ?? 1;
-  const activeSeasonRatingSystemType = activeSeason?.ratingSystem ?? "elo";
+const playerQuery = async (seasonId: number) => {
+  const season = await getSeason(seasonId);
+  const ratingSystem = getRatingSystem(season?.ratingSystem ?? "elo");
 
-  const matches = await getMatches(activeSeasonId);
-  const ratingSystem = getRatingSystem(activeSeasonRatingSystemType);
+  const matches = await getMatches(seasonId);
   const players = getRatings(matches, ratingSystem);
-
 
   const lastPlayed = MatchStatistics.latestMatch(matches);
   const latestResults: Record<
@@ -51,44 +53,55 @@ export const leaderboard = new Elysia({
 })
   .use(ctx)
   .get("/", async ({ html, session, headers }) => {
-    return html(() => LeaderboardPage(session, headers));
+    const activeSeason = await getActiveSeason();
+    const activeSeasonId = activeSeason?.id ?? 1;
+    return html(() => LeaderboardPage(session, headers, activeSeasonId));
   })
+  .get("/:seasonId", async ({ html, session, headers, params }) => {
+    const seasonId = parseInt(params.seasonId, 10);
+    return html(() => LeaderboardPage(session, headers, seasonId));
+  });
 
 export async function LeaderboardPage(
   session: Session | null,
   headers: Record<string, string | null>,
+  seasonId: number,
 ) {
-  const rows = await playerQuery();
   return (
     <>
       {isHxRequest(headers) ? (
-        LeaderboardTable(session, rows)
+        LeaderboardTable(session, seasonId)
       ) : (
-        <LayoutHtml>{LeaderboardTable(session, rows)}</LayoutHtml>
+        <LayoutHtml>{LeaderboardTable(session, seasonId)}</LayoutHtml>
       )}
     </>
   );
 }
 
-function LeaderboardTable(
+async function LeaderboardTable(
   session: Session | null,
-  rows: {
-    userId: string;
-    rank: number;
-    name: string;
-    rating: number;
-    lastPlayed: Date;
-    latestPlayerResults: {
-      winStreak: number;
-      loseStreak: number;
-      results: RESULT[];
-    } | null;
-  }[],
-): JSX.Element {
+  seasonId: number,
+): Promise<JSX.Element> {
+  const rows = await playerQuery(seasonId);
+  const seasons = await getSeasons();
+
   return (
     <>
       <NavbarHtml session={session} activePage="leaderboard" />
-      <HeaderHtml title="Leaderboard" />
+      <div class="flex flex-row justify-between">
+        <HeaderHtml title="Leaderboard" />
+        <div class="p-5">
+          <SelectGet
+            options={seasons.map((season) => ({
+              path: `/leaderboard/${season.id}`,
+              text: season.name,
+            }))}
+            selectedIndex={seasons.findIndex(
+              (season) => season.id === seasonId,
+            )}
+          ></SelectGet>
+        </div>
+      </div>
       <LeaderboardTableHtml rows={rows}></LeaderboardTableHtml>
     </>
   );

@@ -14,6 +14,10 @@ export const staticController = new Elysia({
     const file = Bun.file("public/styles.css");
     return etagFileServe(file, ctx.set, ctx.headers);
   })
+  .get("/favicon.ico", (ctx) => {
+    const file = Bun.file("public/favicon.ico");
+    return etagFileServe(file, ctx.set, ctx.headers);
+  })
   .get("/bar.svg", (ctx) => {
     const file = Bun.file("public/bar.min.svg");
     return etagFileServe(file, ctx.set, ctx.headers);

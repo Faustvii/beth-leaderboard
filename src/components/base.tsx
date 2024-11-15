@@ -16,6 +16,7 @@ export const BaseHtml = ({ children }: PropsWithChildren) => (
         <script src="https://unpkg.com/hyperscript.org@0.9.11"></script>
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <link href="/static/styles.css" rel="stylesheet" />
+        <link rel="icon" type="image/x-icon" href="/static/favicon.ico" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" />
         <link
@@ -23,7 +24,6 @@ export const BaseHtml = ({ children }: PropsWithChildren) => (
           rel="stylesheet"
         />
 
-        <link rel="icon" href="data:;base64,="></link>
       </head>
       <body
         hx-boost="true"

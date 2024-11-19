@@ -9,6 +9,7 @@ export const LeaderboardRowHtml = async ({
   rating,
   lastPlayed,
   latestPlayerResults,
+  isCurrentSeason,
 }: {
   userId: string;
   rank: number;
@@ -20,6 +21,7 @@ export const LeaderboardRowHtml = async ({
     loseStreak: number;
     results: RESULT[];
   } | null;
+  isCurrentSeason: boolean;
 }) => {
   const { loseStreak, results, winStreak } = latestPlayerResults || {};
 
@@ -38,6 +40,7 @@ export const LeaderboardRowHtml = async ({
             lastPlayed={lastPlayed}
             streak={streak}
             isWinStreak={isWinStreak}
+            isCurrentSeason={isCurrentSeason}
           />
         </div>
         <img
@@ -65,12 +68,14 @@ export const WinLoseStreak = ({
   streak,
   isWinStreak,
   lastPlayed,
+  isCurrentSeason,
 }: {
   lastPlayed: Date | undefined;
   streak: number | undefined;
   isWinStreak: boolean;
+  isCurrentSeason: boolean;
 }) => {
-  if (lastPlayed && isDateOlderThanNDays(lastPlayed, 7)) {
+  if (isCurrentSeason && lastPlayed && isDateOlderThanNDays(lastPlayed, 7)) {
     return <span class="pr-2 text-2xl">💤</span>;
   }
   if (streak && streak === 5) {

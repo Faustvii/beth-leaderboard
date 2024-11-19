@@ -13,6 +13,7 @@ import {
   getSeason,
   getSeasons,
 } from "../db/queries/seasonQueries";
+import { type Season } from "../db/schema/season";
 import { isHxRequest } from "../lib";
 import MatchStatistics, { type RESULT } from "../lib/matchStatistics";
 import { getRatings, getRatingSystem } from "../lib/rating";
@@ -102,7 +103,18 @@ async function LeaderboardTable(
           ></SelectGet>
         </div>
       </div>
-      <LeaderboardTableHtml rows={rows}></LeaderboardTableHtml>
+      <LeaderboardTableHtml
+        rows={rows}
+        isCurrentSeason={isCurrentSeason(seasonId, seasons)}
+      ></LeaderboardTableHtml>
     </>
   );
+}
+
+function isCurrentSeason(seasonId: number, seasons: Season[]): boolean {
+  const now = Date.now();
+  const { id: currentSeasonId } = seasons.find(
+    ({ startAt, endAt }) => now > startAt.getTime() && now < endAt.getTime(),
+  ) ?? { id: -1 };
+  return currentSeasonId == seasonId;
 }

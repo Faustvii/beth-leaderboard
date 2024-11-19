@@ -3,6 +3,7 @@ import { LeaderboardRowHtml } from "./LeaderboardRow";
 
 export const LeaderboardTableHtml = ({
   rows,
+  isCurrentSeason,
 }: {
   rows: {
     userId: string;
@@ -16,6 +17,7 @@ export const LeaderboardTableHtml = ({
       results: RESULT[];
     } | null;
   }[];
+  isCurrentSeason: boolean;
 }) => (
   <>
     <div class="flex flex-col items-center justify-center">
@@ -36,7 +38,7 @@ export const LeaderboardTableHtml = ({
           </thead>
           <tbody id="nextPageData">
             {rows.map((row) => (
-              <LeaderboardRowHtml {...row} />
+              <LeaderboardRowHtml {...row} isCurrentSeason={isCurrentSeason} />
             ))}
           </tbody>
         </table>

@@ -106,15 +106,3 @@ async function LeaderboardTable(
     </>
   );
 }
-
-export async function PagedLeaderboard(seasonId: number) {
-  const rows = await playerQuery(seasonId);
-
-  return (
-    <>
-      {rows.map((row) => (
-        <LeaderboardRowHtml {...row} />
-      ))}
-    </>
-  );
-}

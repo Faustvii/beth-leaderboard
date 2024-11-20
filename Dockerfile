@@ -6,7 +6,7 @@ FROM oven/bun:${BUN_VERSION}-slim as base
 
 LABEL fly_launch_runtime="Bun"
 
-# Bun app lives here
+# Bun app lives here - hey, it's a bun!
 WORKDIR /app
 
 # Set production environment

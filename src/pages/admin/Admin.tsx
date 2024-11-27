@@ -19,13 +19,13 @@ import {
 } from "../../db/queries/seasonQueries";
 import { matches, seasonsTbl } from "../../db/schema";
 import { isHxRequest, redirect } from "../../lib";
+import { fromTimezoneToUTC } from "../../lib/dateUtils";
 import { syncIfLocal } from "../../lib/dbHelpers";
 import { EditMatchModal } from "./components/EditMatchModal";
 import { EditSeasonModal } from "./components/EditSeasonModal";
 import { ExistingSeasons } from "./components/ExisitngSeasons";
 import { MatchCard } from "./components/MatchCard";
 import { SeasonForm } from "./components/SeasonForm";
-import { fromTimezoneToUTC } from "../../lib/dateUtils";
 
 export const Admin = new Elysia({
   prefix: "/admin",
@@ -61,8 +61,13 @@ export const Admin = new Elysia({
   .put(
     "/match",
     async ({ set, headers, body, writeDb }) => {
-      const createdAtFromUser = new Date(`${body.date_played}T${body.time_played}`);
-      const createdAt = fromTimezoneToUTC(createdAtFromUser, "Europe/Copenhagen");
+      const createdAtFromUser = new Date(
+        `${body.date_played}T${body.time_played}`,
+      );
+      const createdAt = fromTimezoneToUTC(
+        createdAtFromUser,
+        "Europe/Copenhagen",
+      );
 
       await writeDb
         .update(matches)
@@ -163,7 +168,7 @@ export const Admin = new Elysia({
         seasonName: t.String({ minLength: 1 }),
         seasonStart: t.String({ minLength: 1 }),
         seasonEnd: t.String({ minLength: 1 }),
-        ratingSystem: t.Enum({ elo: "elo", openskill: "openskill" }),
+        ratingSystem: t.Enum({ elo: "elo", openskill: "openskill", xp: "xp" }),
       }),
     },
   )
@@ -211,7 +216,7 @@ export const Admin = new Elysia({
         seasonName: t.String({ minLength: 1 }),
         seasonStart: t.String({ minLength: 1 }),
         seasonEnd: t.String({ minLength: 1 }),
-        ratingSystem: t.Enum({ elo: "elo", openskill: "openskill" }),
+        ratingSystem: t.Enum({ elo: "elo", openskill: "openskill", xp: "xp" }),
       }),
     },
   )

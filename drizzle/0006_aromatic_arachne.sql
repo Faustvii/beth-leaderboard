@@ -1,0 +1,1 @@
+ALTER TABLE `season` ADD `ratingEventSystem` text DEFAULT 'none' NOT NULL;

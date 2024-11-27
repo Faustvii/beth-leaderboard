@@ -19,6 +19,11 @@ export const seasonsTbl = sqliteTable(
     })
       .notNull()
       .default("elo"),
+    ratingEventSystem: text("ratingEventSystem", {
+      enum: ["none", "quest"],
+    })
+      .notNull()
+      .default("none"),
   },
   (table) => {
     return {

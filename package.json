@@ -29,7 +29,7 @@
     "bun-types": "latest",
     "chart.js": "^4.4.0",
     "concurrently": "^8.2.1",
-    "drizzle-kit": "latest",
+    "drizzle-kit": "0.21.4",
     "eslint": "^8.49.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-import": "^2.28.1",

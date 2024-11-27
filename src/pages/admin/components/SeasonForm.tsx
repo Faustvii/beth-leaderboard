@@ -92,6 +92,9 @@ export const SeasonForm = ({
             <option value="elo" selected={season?.ratingSystem === "elo"}>
               ELO
             </option>
+            <option value="xp" selected={season?.ratingSystem === "xp"}>
+              XP
+            </option>
           </select>
         </div>
         {actionButtons}

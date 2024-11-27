@@ -157,6 +157,7 @@ export const Admin = new Elysia({
           startAt: new Date(body.seasonStart),
           endAt: new Date(body.seasonEnd),
           ratingSystem: body.ratingSystem,
+          ratingEventSystem: body.ratingEventSystem,
         })
         .where(eq(seasonsTbl.id, Number(body.seasonId)));
 
@@ -169,6 +170,7 @@ export const Admin = new Elysia({
         seasonStart: t.String({ minLength: 1 }),
         seasonEnd: t.String({ minLength: 1 }),
         ratingSystem: t.Enum({ elo: "elo", openskill: "openskill", xp: "xp" }),
+        ratingEventSystem: t.Enum({ none: "none", quest: "quest" }),
       }),
     },
   )
@@ -181,6 +183,7 @@ export const Admin = new Elysia({
         startAt: new Date(body.seasonStart),
         endAt: new Date(body.seasonEnd),
         ratingSystem: body.ratingSystem,
+        ratingEventSystem: body.ratingEventSystem,
       };
 
       await writeDb.insert(seasonsTbl).values(seasonToInsert);
@@ -217,6 +220,7 @@ export const Admin = new Elysia({
         seasonStart: t.String({ minLength: 1 }),
         seasonEnd: t.String({ minLength: 1 }),
         ratingSystem: t.Enum({ elo: "elo", openskill: "openskill", xp: "xp" }),
+        ratingEventSystem: t.Enum({ none: "none", quest: "quest" }),
       }),
     },
   )

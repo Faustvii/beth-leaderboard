@@ -97,6 +97,30 @@ export const SeasonForm = ({
             </option>
           </select>
         </div>
+        <div class="flex w-full flex-col">
+          <label for="ratingEventSystemSelect" class="truncate font-semibold">
+            Rating event system
+          </label>
+          <select
+            id="ratingEventSystemSelect"
+            name="ratingEventSystem"
+            form={formId}
+            class="h-[34px] rounded-sm px-2 py-1 text-black"
+          >
+            <option
+              value="none"
+              selected={season?.ratingEventSystem === "none"}
+            >
+              None
+            </option>
+            <option
+              value="quest"
+              selected={season?.ratingEventSystem === "quest"}
+            >
+              Quest
+            </option>
+          </select>
+        </div>
         {actionButtons}
       </div>
       <div id="errors" class="text-red-500"></div>

@@ -15,7 +15,7 @@ export const seasonsTbl = sqliteTable(
       .$defaultFn(() => new Date()),
     endAt: integer("endAt", { mode: "timestamp" }).notNull(),
     ratingSystem: text("ratingSystem", {
-      enum: ["elo", "openskill"],
+      enum: ["elo", "openskill", "xp"],
     })
       .notNull()
       .default("elo"),

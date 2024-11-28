@@ -11,9 +11,9 @@ export const ExistingSeasons = ({ seasons }: ExistingSeasonsProps) => {
     <div class="flex flex-col gap-3">
       <div class="hidden gap-3 px-4 font-semibold md:flex">
         <p class="w-[10%]">Name</p>
-        <p class="w-1/5">Start</p>
-        <p class="w-1/5">End</p>
-        <p class="w-[15%]">Rating System</p>
+        <p class="w-1/6">Start</p>
+        <p class="w-1/6">End</p>
+        <p class="w-1/6">Rating System</p>
         <p class="w-1/5">Rating Event System</p>
       </div>
       {seasons.map((season) => (
@@ -21,29 +21,23 @@ export const ExistingSeasons = ({ seasons }: ExistingSeasonsProps) => {
           <p class="w-full pt-3 font-semibold md:hidden">Name</p>
           <p class="w-full truncate md:w-[10%]">{season.name}</p>
           <p class="w-full pt-3 font-semibold md:hidden">Start</p>
-          <p class="w-full truncate md:w-1/5">
+          <p class="w-full truncate md:w-1/6">
             {season.startAt.toLocaleString("en-US", {
-              hourCycle: "h24",
               year: "numeric",
-              month: "long",
-              day: "numeric",
-              hour: "2-digit",
-              minute: "2-digit",
+              month: "short",
+              day: "2-digit",
             })}
           </p>
           <p class="w-full pt-3 font-semibold md:hidden">End</p>
-          <p class="w-full truncate md:w-1/5">
+          <p class="w-full truncate md:w-1/6">
             {season.endAt.toLocaleString("en-US", {
-              hourCycle: "h24",
               year: "numeric",
-              month: "long",
-              day: "numeric",
-              hour: "2-digit",
-              minute: "2-digit",
+              month: "short",
+              day: "2-digit",
             })}
           </p>
           <p class="w-full pt-3 font-semibold md:hidden">Rating System</p>
-          <p class="w-full truncate md:w-[15%]">
+          <p class="w-full truncate md:w-1/6">
             {season.ratingSystem.toUpperCase()}
           </p>
           <p class="w-full pt-3 font-semibold md:hidden">Rating Event System</p>

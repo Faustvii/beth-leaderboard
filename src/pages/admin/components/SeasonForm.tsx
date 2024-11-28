@@ -29,7 +29,7 @@ export const SeasonForm = ({
       hx-target-400="#errors"
     >
       <div
-        class={cn("mt-3 flex flex-col gap-3 py-2", !season && "lg:flex-row")}
+        class={cn("mt-3 flex flex-col gap-3 py-2", !season && "xl:flex-row")}
       >
         <div class="flex w-full flex-col">
           <label for="seasonName" class="font-semibold">

@@ -25,20 +25,21 @@ export class QuestManager<TCondition, TState> {
   private activeQuests: Quest<TCondition, TState>[] = [];
   private completedQuests: Quest<TCondition, TState>[] = [];
   private failedQuests: Quest<TCondition, TState>[] = [];
-  private playerQuests: Record<string, Quest<TCondition, TState>[]> = {};
   private maxQuestsPerPlayer = 3;
 
   addQuest(quest: Quest<TCondition, TState>): void {
-    if (!this.playerQuests[quest.playerId]) {
-      this.playerQuests[quest.playerId] = [];
-    }
-    if (this.playerQuests[quest.playerId].length >= this.maxQuestsPerPlayer) {
-      const failedQuest = this.playerQuests[quest.playerId].shift();
-      if (failedQuest) this.failedQuests.push(failedQuest);
+    const playerQuests = this.activeQuests.filter(
+      (q) => q.playerId === quest.playerId,
+    );
+
+    if (playerQuests.length + 1 > this.maxQuestsPerPlayer) {
+      const failedQuest = playerQuests.shift();
+      if (!failedQuest) return;
+
+      this.failedQuests.push(failedQuest);
     }
 
     this.activeQuests.push(quest);
-    this.playerQuests[quest.playerId].push(quest);
   }
 
   handleMatch(match: MatchWithPlayers): void {
@@ -47,8 +48,8 @@ export class QuestManager<TCondition, TState> {
     );
     this.completedQuests.push(...completedQuests);
 
-    this.activeQuests = this.activeQuests.filter((q) =>
-      this.completedQuests.includes(q),
+    this.activeQuests = this.activeQuests.filter(
+      (q) => !this.completedQuests.includes(q),
     );
   }
 

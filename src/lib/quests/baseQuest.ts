@@ -28,7 +28,7 @@ export abstract class BaseQuest<TConditionData, TState>
   }
 
   protected isMatchAfterQuestCreation(match: MatchWithPlayers): boolean {
-    return match.createdAt < this.createdAt;
+    return match.createdAt > this.createdAt;
   }
 
   protected getPlayersTeam(

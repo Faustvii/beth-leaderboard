@@ -1,8 +1,8 @@
 import { type QuestStatus, type QuestType } from "../quest";
 import { BaseQuest } from "./baseQuest";
 
-export class WinCountQuest extends BaseQuest<number, number> {
-  type: QuestType = "WinCount";
+export class WinStreakQuest extends BaseQuest<number, number> {
+  type: QuestType = "WinStreak";
   state = 0;
 
   constructor(
@@ -23,6 +23,8 @@ export class WinCountQuest extends BaseQuest<number, number> {
     const playersTeam = this.getPlayersTeam(match);
     if (match.result == playersTeam) {
       this.state++;
+    } else {
+      this.state = 0;
     }
 
     if (this.state < this.conditionData) return "InProgress";

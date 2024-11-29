@@ -2,7 +2,7 @@ import { eq } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 import { ctx } from "../context";
 import { readDb } from "../db";
-import { webhookTbl } from "../db/schema/webhooks";
+import { webhookTbl, type WebookEventType } from "../db/schema/webhooks";
 
 export const webhookController = new Elysia({ prefix: "/webhook" })
   .use(ctx)
@@ -15,13 +15,17 @@ export const webhookController = new Elysia({ prefix: "/webhook" })
       body: t.Object({
         url: t.String(),
         secret: t.String(),
-        eventType: t.String(),
+        eventType: t.Enum({
+          match: "match",
+          season_end: "season_end",
+          season_start: "season_start",
+        }),
       }),
     },
   );
 
 export const execute_webhooks = async (
-  eventType: string,
+  eventType: WebookEventType,
   dataToSend: unknown,
 ) => {
   const webhooks = await readDb

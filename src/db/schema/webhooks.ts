@@ -26,3 +26,4 @@ export const webhookTbl = sqliteTable(
 
 export type Webhook = typeof webhookTbl.$inferSelect;
 export type InsertWebhook = typeof webhookTbl.$inferInsert;
+export type WebookEventType = typeof webhookTbl.$inferInsert.eventType;

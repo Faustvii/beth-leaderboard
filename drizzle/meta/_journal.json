@@ -50,6 +50,13 @@
       "when": 1732726393776,
       "tag": "0006_aromatic_arachne",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1732896552120,
+      "tag": "0007_flashy_fenris",
+      "breakpoints": true
     }
   ]
 }

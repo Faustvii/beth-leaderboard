@@ -7,6 +7,7 @@ import { MatchForm } from "../../components/MatchForm";
 import { MatchSearchResults } from "../../components/MatchSearchResults";
 import { NavbarHtml } from "../../components/Navbar";
 import { ctx } from "../../context";
+import { execute_webhooks } from "../../controllers/webhook";
 import { getActiveSeason } from "../../db/queries/seasonQueries";
 import { matches, userTbl } from "../../db/schema";
 import { isHxRequest, redirect } from "../../lib";
@@ -74,6 +75,8 @@ export const match = new Elysia({
 
       const insertResult = await writeDb.insert(matches).values(matchInsert);
       await syncIfLocal();
+
+      execute_webhooks("match", matchInsert).catch(console.log);
 
       const matchId = insertResult.lastInsertRowid;
       redirect({ headers, set }, `/result/${activeSeason.id}/${matchId}`);

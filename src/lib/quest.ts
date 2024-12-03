@@ -6,6 +6,18 @@ export interface Quest<TConditionData, TState> {
   state: TState;
   description: string;
   evaluate: (match: MatchWithPlayers) => QuestStatus;
+  reward(): CompletedEvent<TConditionData>;
+  penality(): FailedEvent<TConditionData>;
+}
+
+export interface CompletedEvent<TConditionData> {
+  type: QuestType;
+  data: TConditionData;
+}
+
+export interface FailedEvent<TConditionData> {
+  type: QuestType;
+  data: TConditionData;
 }
 
 export type QuestType =

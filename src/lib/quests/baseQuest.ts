@@ -1,5 +1,10 @@
 import MatchStatistics, { isPlayerInMatchFilter } from "../matchStatistics";
-import { type Quest, type QuestStatus, type QuestType } from "../quest";
+import {
+  type Quest,
+  type QuestEvent,
+  type QuestStatus,
+  type QuestType,
+} from "../quest";
 
 export abstract class BaseQuest<TConditionData, TState>
   implements Quest<TConditionData, TState>
@@ -13,6 +18,14 @@ export abstract class BaseQuest<TConditionData, TState>
     public createdAt: Date,
     public description: string,
   ) {}
+
+  public reward(): QuestEvent<TConditionData> {
+    return { type: `${this.type}Completed`, data: this.conditionData };
+  }
+
+  public penalty(): QuestEvent<TConditionData> {
+    return { type: `${this.type}Failed`, data: this.conditionData };
+  }
 
   abstract evaluate(match: MatchWithPlayers): QuestStatus;
 

@@ -6,17 +6,12 @@ export interface Quest<TConditionData, TState> {
   state: TState;
   description: string;
   evaluate: (match: MatchWithPlayers) => QuestStatus;
-  reward(): CompletedEvent<TConditionData>;
-  penality(): FailedEvent<TConditionData>;
+  reward(): QuestEvent<TConditionData>;
+  penalty(): QuestEvent<TConditionData>;
 }
 
-export interface CompletedEvent<TConditionData> {
-  type: QuestType;
-  data: TConditionData;
-}
-
-export interface FailedEvent<TConditionData> {
-  type: QuestType;
+export interface QuestEvent<TConditionData> {
+  type: QuestEventType;
   data: TConditionData;
 }
 
@@ -31,6 +26,7 @@ export type QuestType =
   | "PlayMatchWith" // Play a match with a specific player
   | "Play1v1"; // Play a 1v1 match
 
+export type QuestEventType = `${QuestType}${"Failed" | "Completed"}`;
 export type QuestStatus = "InProgress" | "Completed" | "Failed";
 
 export class QuestManager<TCondition, TState> {

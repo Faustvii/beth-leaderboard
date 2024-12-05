@@ -12,7 +12,7 @@ export const ratingEventTbl = sqliteTable(
     seasonId: integer("seasonId")
       .notNull()
       .references(() => seasonsTbl.id),
-    playerId: integer("playerId")
+    playerId: text("playerId")
       .notNull()
       .references(() => userTbl.id),
     data: text("data", { mode: "json" }).notNull(),
@@ -20,8 +20,8 @@ export const ratingEventTbl = sqliteTable(
   },
   (table) => {
     return {
-      seasonIdIdx: index("season_id_idx").on(table.seasonId),
-      playerIdIdx: index("player_id_idx").on(table.playerId),
+      seasonIdIdx: index("event_season_id_idx").on(table.seasonId),
+      playerIdIdx: index("event_player_id_idx").on(table.playerId),
     };
   },
 );

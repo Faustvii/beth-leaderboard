@@ -5,7 +5,7 @@ export class WinStreakQuest extends BaseQuest<number, number> {
   type: QuestType = "WinStreak";
   state = 0;
 
-  constructor(
+  private constructor(
     public conditionData: number,
     public playerId: string,
     public createdAt: Date,

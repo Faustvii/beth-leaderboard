@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "3c430dae-0281-4998-b416-2994aba55cf9",
+  "id": "e50146cb-48f2-4436-bab1-4a66e345b60e",
   "prevId": "303ca1b3-2098-4ad4-9c99-30579a07302b",
   "tables": {
     "job_queue": {
@@ -277,6 +277,72 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
+    "quest": {
+      "name": "quest",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "playerId": {
+          "name": "playerId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "conditionData": {
+          "name": "conditionData",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "type": {
+          "name": "type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "quest_player_id_idx": {
+          "name": "quest_player_id_idx",
+          "columns": [
+            "playerId"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "quest_playerId_user_id_fk": {
+          "name": "quest_playerId_user_id_fk",
+          "tableFrom": "quest",
+          "tableTo": "user",
+          "columnsFrom": [
+            "playerId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
     "rating_event": {
       "name": "rating_event",
       "columns": {
@@ -303,7 +369,7 @@
         },
         "playerId": {
           "name": "playerId",
-          "type": "integer",
+          "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
@@ -324,15 +390,15 @@
         }
       },
       "indexes": {
-        "season_id_idx": {
-          "name": "season_id_idx",
+        "event_season_id_idx": {
+          "name": "event_season_id_idx",
           "columns": [
             "seasonId"
           ],
           "isUnique": false
         },
-        "player_id_idx": {
-          "name": "player_id_idx",
+        "event_player_id_idx": {
+          "name": "event_player_id_idx",
           "columns": [
             "playerId"
           ],
@@ -571,7 +637,7 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
-          "default": 1733239068690
+          "default": 1733324856005
         },
         "updated_at": {
           "name": "updated_at",
@@ -579,7 +645,7 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
-          "default": 1733239068690
+          "default": 1733324856005
         }
       },
       "indexes": {

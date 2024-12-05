@@ -1,17 +1,21 @@
+import { type Match } from "./rating";
+
 export interface Quest<TConditionData, TState> {
+  id: number;
   type: QuestType;
   createdAt: Date;
   playerId: string;
   conditionData: TConditionData;
   state: TState;
   description: string;
-  evaluate: (match: MatchWithPlayers) => QuestStatus;
+  evaluate: (match: Match) => QuestStatus;
   reward(): QuestEvent<TConditionData>;
   penalty(): QuestEvent<TConditionData>;
 }
 
 export interface QuestEvent<TConditionData> {
   type: QuestEventType;
+  playerId: string;
   data: TConditionData;
 }
 
@@ -36,13 +40,14 @@ export class QuestManager<TCondition, TState> {
   private maxQuestsPerPlayer = 3;
 
   addQuest(quest: Quest<TCondition, TState>): void {
-    const playerQuests = this.activeQuests.filter(
-      (q) => q.playerId === quest.playerId,
-    );
+    const playerQuests = this.activeQuests
+      .filter((q) => q.playerId === quest.playerId)
+      .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
 
     if (playerQuests.length + 1 > this.maxQuestsPerPlayer) {
-      const failedQuest = playerQuests.shift();
+      const failedQuest = playerQuests[0];
       if (!failedQuest) return;
+      this.activeQuests = this.activeQuests.filter((q) => q !== failedQuest);
 
       this.failedQuests.push(failedQuest);
     }
@@ -50,7 +55,7 @@ export class QuestManager<TCondition, TState> {
     this.activeQuests.push(quest);
   }
 
-  handleMatch(match: MatchWithPlayers): void {
+  handleMatch(match: Match): void {
     const completedQuests = this.activeQuests.filter(
       (quest) => quest.evaluate(match) === "Completed",
     );

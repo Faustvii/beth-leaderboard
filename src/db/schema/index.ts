@@ -9,6 +9,7 @@ export { job_queue } from "./jobQueue";
 export { seasonsTbl } from "./season";
 export { webhookTbl } from "./webhooks";
 export { ratingEventTbl } from "./ratingEvent";
+export { questTbl } from "./quest";
 
 export const matchPlayerRelations = relations(matches, ({ one }) => ({
   blackPlayerOne: one(userTbl, {

@@ -1,8 +1,8 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "e50146cb-48f2-4436-bab1-4a66e345b60e",
-  "prevId": "303ca1b3-2098-4ad4-9c99-30579a07302b",
+  "id": "8034dcb3-95d5-433d-9315-f6643d8f75fe",
+  "prevId": "e50146cb-48f2-4436-bab1-4a66e345b60e",
   "tables": {
     "job_queue": {
       "name": "job_queue",
@@ -314,6 +314,13 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
+        },
+        "resolvedAt": {
+          "name": "resolvedAt",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
         }
       },
       "indexes": {
@@ -387,6 +394,13 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
+        },
+        "matchId": {
+          "name": "matchId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
         }
       },
       "indexes": {
@@ -425,6 +439,19 @@
           "tableTo": "user",
           "columnsFrom": [
             "playerId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "rating_event_matchId_match_id_fk": {
+          "name": "rating_event_matchId_match_id_fk",
+          "tableFrom": "rating_event",
+          "tableTo": "match",
+          "columnsFrom": [
+            "matchId"
           ],
           "columnsTo": [
             "id"
@@ -637,7 +664,7 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
-          "default": 1733324856005
+          "default": 1733477996442
         },
         "updated_at": {
           "name": "updated_at",
@@ -645,7 +672,7 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
-          "default": 1733324856005
+          "default": 1733477996442
         }
       },
       "indexes": {

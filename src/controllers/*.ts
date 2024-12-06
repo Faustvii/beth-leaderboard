@@ -1,6 +1,7 @@
 import Elysia from "elysia";
 import { authController } from "./auth";
 import { imageGen } from "./imageGeneration";
+import { questJobs } from "./questJobs";
 import { webhookController } from "./webhook";
 
 export const api = new Elysia({
@@ -8,4 +9,5 @@ export const api = new Elysia({
 })
   .use(authController)
   .use(webhookController)
+  .use(questJobs)
   .use(imageGen);

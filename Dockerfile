@@ -6,7 +6,7 @@ FROM oven/bun:${BUN_VERSION}-slim as base
 
 LABEL fly_launch_runtime="Bun"
 
-# Bun app lives here
+# Bun app lives here - hey, it's a bun!
 WORKDIR /app
 
 # Set production environment
@@ -31,6 +31,10 @@ FROM base
 
 # Copy built application
 COPY --from=build /app /app
+
+# Forcing a low RAM size will cause more frequent GC
+# https://github.com/oven-sh/bun/issues/6548#issuecomment-2254940542
+ENV BUN_JSC_forceRAMSize=134217728
 
 # Start the server by default, this can be overwritten at runtime
 EXPOSE 3000

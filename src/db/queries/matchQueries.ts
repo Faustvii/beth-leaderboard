@@ -1,67 +1,43 @@
-import { and, eq, gte, inArray } from "drizzle-orm";
+import { and, eq, gte, inArray, lte } from "drizzle-orm";
 import { readDb } from "..";
 import { notEmpty, unique } from "../../lib";
 import { type Match } from "../../lib/rating";
 import { matches, userTbl } from "../schema";
+import { type Match as DbMatch } from "../schema/matches";
 
 export const getMatches = async (seasonId: number): Promise<Match[]> => {
   const result = await readDb.query.matches.findMany({
     where: eq(matches.seasonId, seasonId),
   });
 
-  const userIds = result
-    .flatMap((match) => [
-      match.blackPlayerOne,
-      match.blackPlayerTwo,
-      match.whitePlayerOne,
-      match.whitePlayerTwo,
-    ])
-    .filter(notEmpty)
-    .filter(unique);
-
-  const players =
-    userIds.length === 0
-      ? []
-      : await readDb.query.userTbl.findMany({
-          where: inArray(userTbl.id, userIds),
-          columns: {
-            email: false,
-            picture: false,
-          },
-        });
-
-  return result.map((match) => {
-    const blackPlayerOne = players.find(
-      (player) => player.id === match.blackPlayerOne,
-    )!;
-    const blackPlayerTwo =
-      players.find((player) => player.id === match.blackPlayerTwo) || null;
-    const whitePlayerOne = players.find(
-      (player) => player.id === match.whitePlayerOne,
-    )!;
-    const whitePlayerTwo =
-      players.find((player) => player.id === match.whitePlayerTwo) || null;
-    return {
-      ...match,
-      blackPlayerOne,
-      blackPlayerTwo,
-      whitePlayerOne,
-      whitePlayerTwo,
-    };
-  });
+  return getMatchesWithPlayers(result);
 };
 
-export const getMatchesGreaterThanEqual = async (
+export const getMatchesAfterDate = async (
   seasonId: number,
-  oldestDate: Date,
+  date: Date,
 ): Promise<Match[]> => {
   const result = await readDb.query.matches.findMany({
-    where: and(
-      eq(matches.seasonId, seasonId),
-      gte(matches.createdAt, oldestDate),
-    ),
+    where: and(eq(matches.seasonId, seasonId), gte(matches.createdAt, date)),
   });
 
+  return getMatchesWithPlayers(result);
+};
+
+export const getMatchesBeforeDate = async (
+  seasonId: number,
+  date: Date,
+): Promise<Match[]> => {
+  const result = await readDb.query.matches.findMany({
+    where: and(eq(matches.seasonId, seasonId), lte(matches.createdAt, date)),
+  });
+
+  return getMatchesWithPlayers(result);
+};
+
+export const getMatchesWithPlayers = async (
+  result: DbMatch[],
+): Promise<Match[]> => {
   const userIds = result
     .flatMap((match) => [
       match.blackPlayerOne,
@@ -111,43 +87,8 @@ export const getMatch = async (matchId: number): Promise<Match | undefined> => {
 
   if (!match) return;
 
-  const userIds = [
-    match.blackPlayerOne,
-    match.blackPlayerTwo,
-    match.whitePlayerOne,
-    match.whitePlayerTwo,
-  ]
-    .filter(notEmpty)
-    .filter(unique);
-
-  const players =
-    userIds.length === 0
-      ? []
-      : await readDb.query.userTbl.findMany({
-          where: inArray(userTbl.id, userIds),
-          columns: {
-            email: false,
-            picture: false,
-          },
-        });
-
-  const blackPlayerOne = players.find(
-    (player) => player.id === match.blackPlayerOne,
-  )!;
-  const blackPlayerTwo =
-    players.find((player) => player.id === match.blackPlayerTwo) || null;
-  const whitePlayerOne = players.find(
-    (player) => player.id === match.whitePlayerOne,
-  )!;
-  const whitePlayerTwo =
-    players.find((player) => player.id === match.whitePlayerTwo) || null;
-  return {
-    ...match,
-    blackPlayerOne,
-    blackPlayerTwo,
-    whitePlayerOne,
-    whitePlayerTwo,
-  };
+  const matchWithPlayers = await getMatchesWithPlayers([match]);
+  return matchWithPlayers[0];
 };
 
 export const deleteMatch = async (matchId: number) => {

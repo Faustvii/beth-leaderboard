@@ -1,4 +1,4 @@
-import { like } from "drizzle-orm";
+import { eq, like } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { type Session } from "lucia";
 import { HeaderHtml } from "../../components/header";
@@ -8,10 +8,14 @@ import { MatchSearchResults } from "../../components/MatchSearchResults";
 import { NavbarHtml } from "../../components/Navbar";
 import { ctx } from "../../context";
 import { execute_webhooks } from "../../controllers/webhook";
+import { getMatchesBeforeDate } from "../../db/queries/matchQueries";
 import { getActiveSeason } from "../../db/queries/seasonQueries";
-import { matches, userTbl } from "../../db/schema";
+import { matches, questTbl, ratingEventTbl, userTbl } from "../../db/schema";
 import { isHxRequest, redirect } from "../../lib";
 import { syncIfLocal } from "../../lib/dbHelpers";
+import { handleQuestsAfterLoggedMatch } from "../../lib/quest";
+import { type Match } from "../../lib/rating";
+import { toInsertRatingEvent } from "../../lib/ratingEvent";
 
 export const match = new Elysia({
   prefix: "/match",
@@ -71,14 +75,70 @@ export const match = new Elysia({
         blackPlayerOne: black1Id,
         blackPlayerTwo: black2Id ? black2Id : null,
         seasonId: activeSeason.id,
+        createdAt: new Date(),
       };
 
-      const insertResult = await writeDb.insert(matches).values(matchInsert);
+      const matchesForQuests = await getMatchesBeforeDate(
+        activeSeason.id,
+        matchInsert.createdAt,
+      );
+
+      const newMatchWithPlayer: Match = {
+        id: 0,
+        blackPlayerOne: {
+          id: black1Id,
+          name: "",
+        },
+        blackPlayerTwo: black2Id
+          ? {
+              id: black2Id,
+              name: "",
+            }
+          : null,
+        whitePlayerOne: {
+          id: white1Id,
+          name: "",
+        },
+        whitePlayerTwo: white2Id
+          ? {
+              id: white2Id,
+              name: "",
+            }
+          : null,
+        createdAt: matchInsert.createdAt,
+        result: match_winner,
+        scoreDiff: Number(point_difference),
+        seasonId: activeSeason.id,
+      };
+
+      const matchId = await writeDb.transaction(async (trans) => {
+        const insertResult = await trans.insert(matches).values(matchInsert);
+        if (!insertResult.lastInsertRowid) return;
+
+        newMatchWithPlayer.id = Number(insertResult.lastInsertRowid);
+        matchesForQuests.push(newMatchWithPlayer);
+        const completedQuests =
+          await handleQuestsAfterLoggedMatch(matchesForQuests);
+
+        console.log("Completed quests: ", completedQuests.length);
+        for (const quest of completedQuests) {
+          const questEvent = quest.reward();
+          await trans
+            .update(questTbl)
+            .set({ resolvedAt: matchInsert.createdAt })
+            .where(eq(questTbl.id, quest.id));
+          await trans
+            .insert(ratingEventTbl)
+            .values(toInsertRatingEvent(questEvent, activeSeason.id));
+        }
+
+        return insertResult.lastInsertRowid;
+      });
+
       await syncIfLocal();
 
       execute_webhooks("match", matchInsert).catch(console.log);
 
-      const matchId = insertResult.lastInsertRowid;
       redirect({ headers, set }, `/result/${activeSeason.id}/${matchId}`);
     },
     {

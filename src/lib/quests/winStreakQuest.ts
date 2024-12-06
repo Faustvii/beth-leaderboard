@@ -1,11 +1,11 @@
 import { type QuestStatus, type QuestType } from "../quest";
 import { BaseQuest } from "./baseQuest";
 
-export class WinStreakQuest extends BaseQuest<number, number> {
+export class WinStreakQuest extends BaseQuest<number> {
   type: QuestType = "WinStreak";
-  state = 0;
+  winStreakCount = 0;
 
-  private constructor(
+  constructor(
     public conditionData: number,
     public playerId: string,
     public createdAt: Date,
@@ -15,19 +15,20 @@ export class WinStreakQuest extends BaseQuest<number, number> {
   }
 
   evaluate(match: MatchWithPlayers): QuestStatus {
-    if (this.state >= this.conditionData) {
+    if (this.winStreakCount >= this.conditionData) {
       return "Completed";
     }
     if (!this.matchIsValidForQuest(match)) return "InProgress";
 
     const playersTeam = this.getPlayersTeam(match);
     if (match.result == playersTeam) {
-      this.state++;
+      this.winStreakCount++;
     } else {
-      this.state = 0;
+      this.winStreakCount = 0;
     }
 
-    if (this.state < this.conditionData) return "InProgress";
+    if (this.winStreakCount < this.conditionData) return "InProgress";
+    this.setQuestCompletionData(match);
 
     return "Completed";
   }

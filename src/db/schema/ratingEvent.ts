@@ -1,5 +1,6 @@
 import { index, integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import { userTbl } from "./auth";
+import { matches } from "./matches";
 import { seasonsTbl } from "./season";
 
 export const ratingEventTbl = sqliteTable(
@@ -17,6 +18,7 @@ export const ratingEventTbl = sqliteTable(
       .references(() => userTbl.id),
     data: text("data", { mode: "json" }).notNull(),
     type: text("type").notNull(),
+    matchId: integer("matchId").references(() => matches.id),
   },
   (table) => {
     return {

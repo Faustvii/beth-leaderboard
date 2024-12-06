@@ -1,20 +1,17 @@
 import cron from "@elysiajs/cron";
-import { eq } from "drizzle-orm";
+import { inArray, isNull } from "drizzle-orm";
 import Elysia from "elysia";
 import { config } from "../config";
 import { readDb, writeDb } from "../db";
-import { getMatchesGreaterThanEqual } from "../db/queries/matchQueries";
+import { getMatchesAfterDate } from "../db/queries/matchQueries";
 import { getActiveSeason } from "../db/queries/seasonQueries";
 import { questTbl } from "../db/schema";
-import {
-  ratingEventTbl,
-  type InsertRatingEvent,
-} from "../db/schema/ratingEvent";
+import { ratingEventTbl } from "../db/schema/ratingEvent";
 import { notEmpty, unique } from "../lib";
 import {
   QuestManager,
+  toInsertQuest,
   type Quest,
-  type QuestEvent,
   type QuestType,
 } from "../lib/quest";
 import { Play1v1Quest } from "../lib/quests/play1v1Quest";
@@ -23,17 +20,20 @@ import { MapQuests } from "../lib/quests/questMapper";
 import { WinByPointsQuest } from "../lib/quests/winByPointsQuest";
 import { WinCountQuest } from "../lib/quests/winCountQuest";
 import { WinStreakQuest } from "../lib/quests/winStreakQuest";
+import { toInsertRatingEvent } from "../lib/ratingEvent";
 
 export const questJobs = new Elysia().use(
   cron({
     name: "quest-schedule",
-    pattern: config.env.NODE_ENV !== "production" ? "* * * * *" : "0 0 * * SUN",
+    pattern:
+      config.env.NODE_ENV !== "production" ? "0 0 31 2 *" : "0 0 * * SUN",
     async run() {
       console.log("Checking progress of quests");
       const questManager = new QuestManager();
-      const dbQuests = await readDb.query.questTbl.findMany();
+      const dbQuests = await readDb.query.questTbl.findMany({
+        where: isNull(questTbl.resolvedAt),
+      });
       const mappedQuests = MapQuests(dbQuests);
-
       // Add existing quests to the quest manager
       for (const quest of mappedQuests) {
         questManager.addQuest(quest);
@@ -41,9 +41,9 @@ export const questJobs = new Elysia().use(
       const today = new Date();
       today.setDate(today.getDate() - 21);
       const oldestMatchDate =
-        dbQuests
-          .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())
-          .shift()?.createdAt ?? today;
+        dbQuests.sort(
+          (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),
+        )[0]?.createdAt ?? today;
 
       console.log("Oldest match date: ", oldestMatchDate, dbQuests.length);
 
@@ -53,7 +53,7 @@ export const questJobs = new Elysia().use(
         console.log("No active season found");
         return;
       }
-      const matchesForQuests = await getMatchesGreaterThanEqual(
+      const matchesForQuests = await getMatchesAfterDate(
         activeSeason.id,
         oldestMatchDate,
       );
@@ -74,52 +74,35 @@ export const questJobs = new Elysia().use(
         .filter(notEmpty)
         .filter(unique);
 
+      console.log("Eligible Players: ", players.length);
       const newQuests = generateQuests(players);
       // Add new quests to the quest manager
       for (const quest of newQuests) {
         questManager.addQuest(quest);
       }
 
+      const insertQuests = newQuests.map((quest) => toInsertQuest(quest));
       const failedQuests = questManager.getFailedQuests();
-      const completedQuests = questManager.getCompletedQuests();
+      console.log("Failed quests: ", failedQuests.length);
+      const penalties = failedQuests.map((quest) =>
+        toInsertRatingEvent(quest.penalty(), activeSeason.id),
+      );
+      const failedQuestIds = failedQuests.map((quest) => quest.id);
 
-      for (const quest of failedQuests) {
-        const questEvent = quest.penalty();
-        await writeDb.transaction(async (trx) => {
-          await trx.delete(questTbl).where(eq(questTbl.id, quest.id));
-          await trx
-            .insert(ratingEventTbl)
-            .values(toInsertRatingEvent(questEvent, activeSeason.id));
-        });
-      }
-
-      for (const quest of completedQuests) {
-        const questEvent = quest.reward();
-        await writeDb.transaction(async (trx) => {
-          await trx.delete(questTbl).where(eq(questTbl.id, quest.id));
-          await trx
-            .insert(ratingEventTbl)
-            .values(toInsertRatingEvent(questEvent, activeSeason.id));
-        });
-      }
+      await writeDb.transaction(async (trx) => {
+        await trx
+          .update(questTbl)
+          .set({ resolvedAt: new Date() })
+          .where(inArray(questTbl.id, failedQuestIds));
+        await trx.insert(ratingEventTbl).values(penalties);
+        if (insertQuests.length > 0)
+          await trx.insert(questTbl).values(insertQuests);
+      });
     },
   }),
 );
 
-function toInsertRatingEvent(
-  event: QuestEvent<unknown>,
-  activeSeasonId: number,
-): InsertRatingEvent {
-  return {
-    createdAt: new Date(),
-    seasonId: activeSeasonId,
-    playerId: event.playerId,
-    data: JSON.stringify(event.data),
-    type: event.type,
-  };
-}
-
-function generateQuests(players: Player[]): Quest<unknown, unknown>[] {
+function generateQuests(players: Player[]): Quest<unknown>[] {
   const quests = [];
   const questTypes: QuestType[] = [
     "PlayMatchCount",
@@ -136,10 +119,7 @@ function generateQuests(players: Player[]): Quest<unknown, unknown>[] {
   return quests;
 }
 
-function generateQuest(
-  playerId: string,
-  type: QuestType,
-): Quest<unknown, unknown> {
+function generateQuest(playerId: string, type: QuestType): Quest<unknown> {
   switch (type) {
     case "PlayMatchCount":
       return new PlayMatchCountQuest(1, playerId, new Date(), "Play 1 match");

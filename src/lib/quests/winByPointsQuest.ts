@@ -1,9 +1,9 @@
 import { type QuestStatus, type QuestType } from "../quest";
 import { BaseQuest } from "./baseQuest";
 
-export class WinByPointsQuest extends BaseQuest<number, number> {
+export class WinByPointsQuest extends BaseQuest<number> {
   type: QuestType = "WinByPoints";
-  state = 0;
+  pointsWon = 0;
 
   constructor(
     public conditionData: number,
@@ -15,17 +15,18 @@ export class WinByPointsQuest extends BaseQuest<number, number> {
   }
 
   evaluate(match: MatchWithPlayers): QuestStatus {
-    if (this.state >= this.conditionData) {
+    if (this.pointsWon >= this.conditionData) {
       return "Completed";
     }
     if (!this.matchIsValidForQuest(match)) return "InProgress";
 
     const playersTeam = this.getPlayersTeam(match);
     if (match.result == playersTeam) {
-      this.state = match.scoreDiff;
+      this.pointsWon = match.scoreDiff;
     }
 
-    if (this.state < this.conditionData) return "InProgress";
+    if (this.pointsWon < this.conditionData) return "InProgress";
+    this.setQuestCompletionData(match);
 
     return "Completed";
   }

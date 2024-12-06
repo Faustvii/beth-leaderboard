@@ -14,6 +14,7 @@ export const questTbl = sqliteTable(
     conditionData: text("conditionData", { mode: "json" }).notNull(),
     type: text("type").notNull(),
     description: text("type").notNull(),
+    resolvedAt: integer("resolvedAt", { mode: "timestamp" }),
   },
   (table) => {
     return {

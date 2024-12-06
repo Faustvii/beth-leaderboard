@@ -13,17 +13,18 @@ import { WinCountQuest } from "./winCountQuest";
 import { WinStreakQuest } from "./winStreakQuest";
 import { WinWithQuest } from "./winWithQuest";
 
-export function MapQuests(quests: DbQuest[]): Quest<unknown, unknown>[] {
+export function MapQuests(quests: DbQuest[]): Quest<unknown>[] {
   return quests.map((quest) => {
     const questType = quest.type as QuestType;
-    return MapQuestType(questType, quest);
+
+    const mappedQuest = MapQuestType(questType, quest);
+    mappedQuest.id = quest.id;
+
+    return mappedQuest;
   });
 }
 
-function MapQuestType(
-  questType: QuestType,
-  quest: DbQuest,
-): Quest<unknown, unknown> {
+function MapQuestType(questType: QuestType, quest: DbQuest): Quest<unknown> {
   switch (questType) {
     case "PlayMatchCount":
       return new PlayMatchCountQuest(

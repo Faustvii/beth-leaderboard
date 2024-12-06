@@ -7,11 +7,11 @@ import {
 } from "../quest";
 import { type Match } from "../rating";
 
-export abstract class BaseQuest<TConditionData, TState>
-  implements Quest<TConditionData, TState>
+export abstract class BaseQuest<TConditionData>
+  implements Quest<TConditionData>
 {
   public id = 0;
-  abstract state: TState;
+  public matchId = 0;
   abstract type: QuestType;
 
   constructor(
@@ -23,21 +23,29 @@ export abstract class BaseQuest<TConditionData, TState>
 
   public reward(): QuestEvent<TConditionData> {
     return {
-      type: `${this.type}Completed`,
+      type: `Quest_${this.type}Completed`,
       data: this.conditionData,
       playerId: this.playerId,
+      questId: this.id,
+      matchId: this.matchId,
     };
   }
 
   public penalty(): QuestEvent<TConditionData> {
     return {
-      type: `${this.type}Failed`,
+      type: `Quest_${this.type}Failed`,
       data: this.conditionData,
       playerId: this.playerId,
+      questId: this.id,
+      matchId: this.matchId,
     };
   }
 
   abstract evaluate(match: Match): QuestStatus;
+
+  protected setQuestCompletionData(match: Match) {
+    this.matchId = match.id;
+  }
 
   protected matchIsValidForQuest(match: Match): boolean {
     return this.isPlayerInMatch(match) && this.isMatchAfterQuestCreation(match);

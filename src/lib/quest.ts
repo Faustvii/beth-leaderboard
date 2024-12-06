@@ -1,12 +1,15 @@
+import { isNull } from "drizzle-orm";
+import { readDb } from "../db";
+import { questTbl, type InsertQuest } from "../db/schema/quest";
+import { MapQuests } from "./quests/questMapper";
 import { type Match } from "./rating";
 
-export interface Quest<TConditionData, TState> {
+export interface Quest<TConditionData> {
   id: number;
   type: QuestType;
   createdAt: Date;
   playerId: string;
   conditionData: TConditionData;
-  state: TState;
   description: string;
   evaluate: (match: Match) => QuestStatus;
   reward(): QuestEvent<TConditionData>;
@@ -17,6 +20,8 @@ export interface QuestEvent<TConditionData> {
   type: QuestEventType;
   playerId: string;
   data: TConditionData;
+  matchId: number;
+  questId: number;
 }
 
 export type QuestType =
@@ -33,13 +38,13 @@ export type QuestType =
 export type QuestEventType = `${QuestType}${"Failed" | "Completed"}`;
 export type QuestStatus = "InProgress" | "Completed" | "Failed";
 
-export class QuestManager<TCondition, TState> {
-  private activeQuests: Quest<TCondition, TState>[] = [];
-  private completedQuests: Quest<TCondition, TState>[] = [];
-  private failedQuests: Quest<TCondition, TState>[] = [];
+export class QuestManager<TCondition> {
+  private activeQuests: Quest<TCondition>[] = [];
+  private completedQuests: Quest<TCondition>[] = [];
+  private failedQuests: Quest<TCondition>[] = [];
   private maxQuestsPerPlayer = 3;
 
-  addQuest(quest: Quest<TCondition, TState>): void {
+  addQuest(quest: Quest<TCondition>): void {
     const playerQuests = this.activeQuests
       .filter((q) => q.playerId === quest.playerId)
       .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
@@ -66,15 +71,46 @@ export class QuestManager<TCondition, TState> {
     );
   }
 
-  getActiveQuests(): Quest<TCondition, TState>[] {
+  getActiveQuests(): Quest<TCondition>[] {
     return this.activeQuests;
   }
 
-  getCompletedQuests(): Quest<TCondition, TState>[] {
+  getCompletedQuests(): Quest<TCondition>[] {
     return this.completedQuests;
   }
 
-  getFailedQuests(): Quest<TCondition, TState>[] {
+  getFailedQuests(): Quest<TCondition>[] {
     return this.failedQuests;
   }
+}
+
+export async function handleQuestsAfterLoggedMatch(
+  matchesForQuests: MatchWithPlayers[],
+) {
+  const questManager = new QuestManager();
+  const dbQuests = await readDb.query.questTbl.findMany({
+    where: isNull(questTbl.resolvedAt),
+  });
+  const mappedQuests = MapQuests(dbQuests);
+  for (const quest of mappedQuests) {
+    questManager.addQuest(quest);
+  }
+  matchesForQuests.sort(
+    (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),
+  );
+
+  for (const match of matchesForQuests) {
+    questManager.handleMatch(match);
+  }
+  return questManager.getCompletedQuests();
+}
+
+export function toInsertQuest(quest: Quest<unknown>): InsertQuest {
+  return {
+    type: quest.type,
+    createdAt: quest.createdAt,
+    playerId: quest.playerId,
+    conditionData: JSON.stringify(quest.conditionData),
+    description: quest.description,
+  };
 }

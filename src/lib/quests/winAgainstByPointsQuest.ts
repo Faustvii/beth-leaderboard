@@ -6,12 +6,9 @@ export interface WinAgainstByPointsConditionData {
   playerId: string;
 }
 
-export class WinAgainstByPointsQuest extends BaseQuest<
-  WinAgainstByPointsConditionData,
-  boolean
-> {
+export class WinAgainstByPointsQuest extends BaseQuest<WinAgainstByPointsConditionData> {
   type: QuestType = "WinAgainstByPoints";
-  state = false;
+  winAgainstPoints = false;
 
   constructor(
     public conditionData: WinAgainstByPointsConditionData,
@@ -23,7 +20,7 @@ export class WinAgainstByPointsQuest extends BaseQuest<
   }
 
   evaluate(match: MatchWithPlayers): QuestStatus {
-    if (this.state) {
+    if (this.winAgainstPoints) {
       return "Completed";
     }
     if (!this.matchIsValidForQuest(match)) return "InProgress";
@@ -39,12 +36,13 @@ export class WinAgainstByPointsQuest extends BaseQuest<
           againstPlayersTeam != playersTeam &&
           match.scoreDiff >= this.conditionData.points
         ) {
-          this.state = true;
+          this.winAgainstPoints = true;
         }
       }
     }
 
-    if (!this.state) return "InProgress";
+    if (!this.winAgainstPoints) return "InProgress";
+    this.setQuestCompletionData(match);
 
     return "Completed";
   }

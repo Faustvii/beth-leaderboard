@@ -16,6 +16,7 @@ import {
 } from "../lib/quest";
 import { Play1v1Quest } from "../lib/quests/play1v1Quest";
 import { PlayMatchCountQuest } from "../lib/quests/playMatchCountQuest";
+import { questDescriptionGenerator } from "../lib/quests/questDescriptionGenerator";
 import { MapQuests } from "../lib/quests/questMapper";
 import { WinByPointsQuest } from "../lib/quests/winByPointsQuest";
 import { WinCountQuest } from "../lib/quests/winCountQuest";
@@ -130,28 +131,54 @@ function generateQuests(players: Player[]): Quest<unknown>[] {
 }
 
 function generateQuest(playerId: string, type: QuestType): Quest<unknown> {
+  // Random match count between 1 and 5
+  const matchCount = Math.floor(Math.random() * 5) + 1;
   switch (type) {
     case "PlayMatchCount":
-      return new PlayMatchCountQuest(1, playerId, new Date(), "Play 1 match");
-    case "Play1v1":
-      return new Play1v1Quest("", playerId, new Date(), "Play a 1vs1 match");
-    case "WinByPoints":
-      return new WinByPointsQuest(
-        50,
+      return new PlayMatchCountQuest(
+        matchCount,
         playerId,
         new Date(),
-        "Win a match by 50 points",
+        questDescriptionGenerator(type, matchCount),
+      );
+    case "Play1v1":
+      return new Play1v1Quest(
+        "",
+        playerId,
+        new Date(),
+        questDescriptionGenerator(type, null),
+      );
+    case "WinByPoints":
+      // Random points between 50 and 100 in increments of 5
+      const points = Math.floor(Math.random() * 11) * 5 + 50;
+      return new WinByPointsQuest(
+        points,
+        playerId,
+        new Date(),
+        questDescriptionGenerator(type, points),
       );
     case "WinStreak":
       return new WinStreakQuest(
         3,
         playerId,
         new Date(),
-        "Win 3 matches in a row",
+        questDescriptionGenerator(type, 3),
       );
     case "WinCount":
-      return new WinCountQuest(3, playerId, new Date(), "Win 3 matches");
+      // Random win count between 1 and 3
+      const winCount = Math.floor(Math.random() * 3) + 1;
+      return new WinCountQuest(
+        winCount,
+        playerId,
+        new Date(),
+        questDescriptionGenerator(type, winCount),
+      );
     default:
-      return new PlayMatchCountQuest(1, playerId, new Date(), "Play 1 match");
+      return new PlayMatchCountQuest(
+        matchCount,
+        playerId,
+        new Date(),
+        questDescriptionGenerator(type, matchCount),
+      );
   }
 }

@@ -23,7 +23,7 @@ import MatchStatistics, {
   isPlayerInMatchFilter,
   RESULT,
 } from "../lib/matchStatistics";
-import { type Quest } from "../lib/quest";
+import { MaxQuestPerPlayer, type Quest } from "../lib/quest";
 import {
   getRatingSystem,
   type Match,
@@ -90,7 +90,6 @@ async function page(session: Session | null, userId: string, seasonId: number) {
   );
   console.log(`player stats took ${elaspedTimeMs}ms to get from db`);
   const activeQuestsForProfile = await getActiveQuestsForPlayer(userId);
-  console.table(activeQuestsForProfile);
   let profileName = "Your stats";
   if (!session || (session && session.user.id !== userId)) {
     const user = await getUser(userId);
@@ -129,7 +128,9 @@ const profileQuests = (profileQuests: Quest<unknown>[]) => {
   return (
     <>
       <div class="grid grid-cols-3 gap-3">
-        <StatsCardHtml title="Active Quests">
+        <StatsCardHtml
+          title={`Active Quests (${profileQuests.length}/${MaxQuestPerPlayer})`}
+        >
           <>
             {profileQuests.map((quest) => {
               return (

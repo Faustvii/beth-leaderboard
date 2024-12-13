@@ -37,12 +37,13 @@ export type QuestType =
 
 export type QuestEventType = `Quest_${QuestType}${"Failed" | "Completed"}`;
 export type QuestStatus = "InProgress" | "Completed" | "Failed";
+export const MaxQuestPerPlayer = 3;
 
 export class QuestManager<TCondition> {
   private activeQuests: Quest<TCondition>[] = [];
   private completedQuests: Quest<TCondition>[] = [];
   private failedQuests: Quest<TCondition>[] = [];
-  private maxQuestsPerPlayer = 3;
+  private maxQuestsPerPlayer = MaxQuestPerPlayer;
 
   addQuest(quest: Quest<TCondition>): void {
     const playerQuests = this.activeQuests

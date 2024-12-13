@@ -1,5 +1,5 @@
 import { and, eq, gte, inArray, lte } from "drizzle-orm";
-import { readDb } from "..";
+import { readDb, type CrokDbQueryable } from "..";
 import { notEmpty, unique } from "../../lib";
 import { type Match } from "../../lib/rating";
 import { matches, userTbl } from "../schema";
@@ -16,28 +16,32 @@ export const getMatches = async (seasonId: number): Promise<Match[]> => {
 export const getMatchesAfterDate = async (
   seasonId: number,
   date: Date,
+  db?: CrokDbQueryable,
 ): Promise<Match[]> => {
   const result = await readDb.query.matches.findMany({
     where: and(eq(matches.seasonId, seasonId), gte(matches.createdAt, date)),
   });
 
-  return getMatchesWithPlayers(result);
+  return getMatchesWithPlayers(result, db);
 };
 
 export const getMatchesBeforeDate = async (
   seasonId: number,
   date: Date,
+  db?: CrokDbQueryable,
 ): Promise<Match[]> => {
   const result = await readDb.query.matches.findMany({
     where: and(eq(matches.seasonId, seasonId), lte(matches.createdAt, date)),
   });
 
-  return getMatchesWithPlayers(result);
+  return getMatchesWithPlayers(result, db);
 };
 
 export const getMatchesWithPlayers = async (
   result: DbMatch[],
+  db?: CrokDbQueryable,
 ): Promise<Match[]> => {
+  const database = db ?? readDb;
   const userIds = result
     .flatMap((match) => [
       match.blackPlayerOne,
@@ -51,7 +55,7 @@ export const getMatchesWithPlayers = async (
   const players =
     userIds.length === 0
       ? []
-      : await readDb.query.userTbl.findMany({
+      : await database.query.userTbl.findMany({
           where: inArray(userTbl.id, userIds),
           columns: {
             email: false,

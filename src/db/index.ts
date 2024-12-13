@@ -1,5 +1,5 @@
 import { createClient, type Config } from "@libsql/client";
-import { drizzle } from "drizzle-orm/libsql";
+import { drizzle, type LibSQLDatabase } from "drizzle-orm/libsql";
 import { config } from "../config";
 import * as schema from "./schema";
 
@@ -51,3 +51,5 @@ export const readDb = drizzle(readClient, {
   schema,
   logger: false,
 });
+
+export type CrokDbQueryable = Pick<LibSQLDatabase<typeof schema>, "query">;

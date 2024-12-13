@@ -28,6 +28,17 @@ export const questJobs = new Elysia().use(
     pattern:
       config.env.NODE_ENV !== "production" ? "0 0 31 2 *" : "0 0 * * SUN",
     async run() {
+      const activeSeason = await getActiveSeason();
+      if (!activeSeason) {
+        console.log("No active season found");
+        return;
+      }
+
+      if (activeSeason.ratingEventSystem !== "quest") {
+        console.log("Rating event system is not quest");
+        return;
+      }
+
       console.log("Checking progress of quests");
       const questManager = new QuestManager();
       const dbQuests = await readDb.query.questTbl.findMany({
@@ -48,11 +59,6 @@ export const questJobs = new Elysia().use(
       console.log("Oldest match date: ", oldestMatchDate, dbQuests.length);
 
       // Evaluate all season matches against current quests
-      const activeSeason = await getActiveSeason();
-      if (!activeSeason) {
-        console.log("No active season found");
-        return;
-      }
       const matchesForQuests = await getMatchesAfterDate(
         activeSeason.id,
         oldestMatchDate,
@@ -90,11 +96,15 @@ export const questJobs = new Elysia().use(
       const failedQuestIds = failedQuests.map((quest) => quest.id);
 
       await writeDb.transaction(async (trx) => {
-        await trx
-          .update(questTbl)
-          .set({ resolvedAt: new Date() })
-          .where(inArray(questTbl.id, failedQuestIds));
-        await trx.insert(ratingEventTbl).values(penalties);
+        if (failedQuestIds.length > 0)
+          await trx
+            .update(questTbl)
+            .set({ resolvedAt: new Date() })
+            .where(inArray(questTbl.id, failedQuestIds));
+
+        if (penalties.length > 0)
+          await trx.insert(ratingEventTbl).values(penalties);
+
         if (insertQuests.length > 0)
           await trx.insert(questTbl).values(insertQuests);
       });

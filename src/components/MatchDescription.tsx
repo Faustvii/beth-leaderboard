@@ -1,5 +1,5 @@
 import { notEmpty } from "../lib";
-import { Match } from "../lib/rating";
+import { type Match } from "../lib/rating";
 import { MatchDetails } from "../pages/admin/components/MatchDetails";
 import { TeamDetails } from "../pages/admin/components/TeamDetails";
 

@@ -13,7 +13,7 @@ export const questTbl = sqliteTable(
       .references(() => userTbl.id),
     conditionData: text("conditionData", { mode: "json" }).notNull(),
     type: text("type").notNull(),
-    description: text("type").notNull(),
+    description: text("description").notNull().default(""),
     resolvedAt: integer("resolvedAt", { mode: "timestamp" }),
   },
   (table) => {

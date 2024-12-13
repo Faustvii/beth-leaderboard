@@ -98,7 +98,14 @@ export function getMatchRatingDiff<TRating>(
 
   const ratingsAfter = getRatingsAfterMatch(ratingsBefore, matchToDiff, system);
 
-  return diffRatings(ratingsBefore, ratingsAfter, system);
+  const playersInMatch = [
+    matchToDiff.whitePlayerOne.id,
+    matchToDiff.whitePlayerTwo?.id,
+    matchToDiff.blackPlayerOne.id,
+    matchToDiff.blackPlayerTwo?.id,
+  ].filter(isDefined);
+
+  return diffRatings(ratingsBefore, ratingsAfter, playersInMatch, system);
 }
 
 function getRatingsAfterMatch<TRating>(
@@ -180,15 +187,12 @@ function hasPlayer(match: Match, playerId: string): boolean {
 function diffRatings<TRating>(
   before: Record<string, PlayerWithRating<TRating>>,
   after: Record<string, PlayerWithRating<TRating>>,
+  players: string[],
   system: RatingSystem<TRating>,
 ): PlayerWithRatingDiff<TRating>[] {
-  const distinctPlayers = [
-    ...new Set([...Object.keys(before), ...Object.keys(after)]),
-  ];
-
   const diffs: PlayerWithRatingDiff<TRating>[] = [];
 
-  for (const playerId of distinctPlayers) {
+  for (const playerId of players) {
     const ratingBefore = before[playerId]?.rating;
     const ratingAfter = after[playerId]?.rating;
 
@@ -199,15 +203,13 @@ function diffRatings<TRating>(
       .toSorted((a, b) => system.toNumber(b.rating) - system.toNumber(a.rating))
       .findIndex((x) => x.player.id === playerId);
 
-    if (!system.equals(ratingBefore, ratingAfter)) {
-      diffs.push({
-        player: after[playerId].player,
-        ratingBefore: ratingBefore ?? system.defaultRating,
-        ratingAfter,
-        rankBefore: rankBefore === -1 ? undefined : rankBefore + 1,
-        rankAfter: rankAfter + 1,
-      });
-    }
+    diffs.push({
+      player: after[playerId].player,
+      ratingBefore: ratingBefore ?? system.defaultRating,
+      ratingAfter,
+      rankBefore: rankBefore === -1 ? undefined : rankBefore + 1,
+      rankAfter: rankAfter + 1,
+    });
   }
 
   return diffs;

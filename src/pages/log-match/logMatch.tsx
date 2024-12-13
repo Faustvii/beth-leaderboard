@@ -14,7 +14,6 @@ import { matches, questTbl, ratingEventTbl, userTbl } from "../../db/schema";
 import { isHxRequest, redirect } from "../../lib";
 import { syncIfLocal } from "../../lib/dbHelpers";
 import { handleQuestsAfterLoggedMatch } from "../../lib/quest";
-import { type Match } from "../../lib/rating";
 import { toInsertRatingEvent } from "../../lib/ratingEvent";
 
 export const match = new Elysia({
@@ -78,45 +77,16 @@ export const match = new Elysia({
         createdAt: new Date(),
       };
 
-      const matchesForQuests = await getMatchesBeforeDate(
-        activeSeason.id,
-        matchInsert.createdAt,
-      );
-
-      const newMatchWithPlayer: Match = {
-        id: 0,
-        blackPlayerOne: {
-          id: black1Id,
-          name: "",
-        },
-        blackPlayerTwo: black2Id
-          ? {
-              id: black2Id,
-              name: "",
-            }
-          : null,
-        whitePlayerOne: {
-          id: white1Id,
-          name: "",
-        },
-        whitePlayerTwo: white2Id
-          ? {
-              id: white2Id,
-              name: "",
-            }
-          : null,
-        createdAt: matchInsert.createdAt,
-        result: match_winner,
-        scoreDiff: Number(point_difference),
-        seasonId: activeSeason.id,
-      };
-
       const matchId = await writeDb.transaction(async (trans) => {
         const insertResult = await trans.insert(matches).values(matchInsert);
         if (!insertResult.lastInsertRowid) return;
 
-        newMatchWithPlayer.id = Number(insertResult.lastInsertRowid);
-        matchesForQuests.push(newMatchWithPlayer);
+        const matchesForQuests = await getMatchesBeforeDate(
+          activeSeason.id,
+          matchInsert.createdAt,
+          trans,
+        );
+
         const completedQuests =
           await handleQuestsAfterLoggedMatch(matchesForQuests);
 

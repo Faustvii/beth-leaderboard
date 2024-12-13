@@ -68,7 +68,7 @@ export const questJobs = new Elysia().use(
           match.blackPlayerOne,
           match.blackPlayerTwo,
           match.whitePlayerOne,
-          match.blackPlayerTwo,
+          match.whitePlayerTwo,
         ])
         .flat()
         .filter(notEmpty)

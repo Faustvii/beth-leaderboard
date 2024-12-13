@@ -47,7 +47,17 @@ export abstract class BaseQuest<TConditionData>
     this.matchId = match.id;
   }
 
-  protected matchIsValidForQuest(match: Match): boolean {
+  /**
+   * Validates if a given match meets the base criteria for a quest.
+   *
+   * This method checks two conditions:
+   * 1. The player is part of the match.
+   * 2. The match occurred after the quest was created.
+   *
+   * @param match - The match to be validated.
+   * @returns `true` if the match meets both criteria, otherwise `false`.
+   */
+  protected baseMatchValidation(match: Match): boolean {
     return this.isPlayerInMatch(match) && this.isMatchAfterQuestCreation(match);
   }
 

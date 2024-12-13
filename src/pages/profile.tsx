@@ -6,10 +6,12 @@ import { HeaderHtml } from "../components/header";
 import { LayoutHtml } from "../components/Layout";
 import { MatchResultLink } from "../components/MatchResultLink";
 import { NavbarHtml } from "../components/Navbar";
+import { QuestDescription } from "../components/QuestDescription";
 import { SelectGet } from "../components/SelectGet";
 import { StatsCardHtml } from "../components/StatsCard";
 import { ctx } from "../context";
 import { getMatches } from "../db/queries/matchQueries";
+import { getActiveQuestsForPlayer } from "../db/queries/questQueries";
 import {
   getActiveSeason,
   getSeason,
@@ -21,12 +23,14 @@ import MatchStatistics, {
   isPlayerInMatchFilter,
   RESULT,
 } from "../lib/matchStatistics";
+import { type Quest } from "../lib/quest";
 import {
   getRatingSystem,
   type Match,
   type Rating,
   type RatingSystem,
 } from "../lib/rating";
+import { cn } from "../lib/utils";
 
 export const profile = new Elysia({
   prefix: "/profile",
@@ -85,6 +89,8 @@ async function page(session: Session | null, userId: string, seasonId: number) {
     getMatches(seasonId),
   );
   console.log(`player stats took ${elaspedTimeMs}ms to get from db`);
+  const activeQuestsForProfile = await getActiveQuestsForPlayer(userId);
+  console.table(activeQuestsForProfile);
   let profileName = "Your stats";
   if (!session || (session && session.user.id !== userId)) {
     const user = await getUser(userId);
@@ -110,10 +116,40 @@ async function page(session: Session | null, userId: string, seasonId: number) {
           ></SelectGet>
         </div>
       </div>
+      {profileQuests(activeQuestsForProfile)}
       {profileStats(matches, userId, ratingSystem)}
     </>
   );
 }
+
+const profileQuests = (profileQuests: Quest<unknown>[]) => {
+  if (profileQuests.length === 0) {
+    return <></>;
+  }
+  return (
+    <>
+      <div class="grid grid-cols-3 gap-3">
+        <StatsCardHtml title="Active Quests">
+          <>
+            {profileQuests.map((quest) => {
+              return (
+                <div
+                  id={quest.id}
+                  class={cn(
+                    "border-1 mb-3 flex w-full flex-col gap-3 rounded-md border p-4 shadow-md",
+                    "lg:mb-[1%] lg:w-[49.5%]",
+                  )}
+                >
+                  <QuestDescription quest={quest} />
+                </div>
+              );
+            })}
+          </>
+        </StatsCardHtml>
+      </div>
+    </>
+  );
+};
 
 const profileStats = (
   matches: Match[],

@@ -1,0 +1,1 @@
+ALTER TABLE `quest` ADD `description` text DEFAULT '' NOT NULL;

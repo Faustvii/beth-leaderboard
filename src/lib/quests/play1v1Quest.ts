@@ -18,7 +18,7 @@ export class Play1v1Quest extends BaseQuest<string> {
     if (this.hasPlayed) {
       return "Completed";
     }
-    if (!this.matchIsValidForQuest(match)) return "InProgress";
+    if (!this.baseMatchValidation(match)) return "InProgress";
 
     if (match.blackPlayerTwo == null && match.whitePlayerTwo == null)
       this.hasPlayed = true;

@@ -18,7 +18,7 @@ export class PlayMatchCountQuest extends BaseQuest<number> {
     if (this.matchesPlayed >= this.conditionData) {
       return "Completed";
     }
-    if (!this.matchIsValidForQuest(match)) return "InProgress";
+    if (!this.baseMatchValidation(match)) return "InProgress";
 
     this.matchesPlayed++;
 

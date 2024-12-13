@@ -23,7 +23,7 @@ export class WinAgainstByPointsQuest extends BaseQuest<WinAgainstByPointsConditi
     if (this.winAgainstPoints) {
       return "Completed";
     }
-    if (!this.matchIsValidForQuest(match)) return "InProgress";
+    if (!this.baseMatchValidation(match)) return "InProgress";
 
     const playersTeam = this.getPlayersTeam(match);
     if (match.result == playersTeam) {

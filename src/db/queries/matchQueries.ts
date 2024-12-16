@@ -18,7 +18,8 @@ export const getMatchesAfterDate = async (
   date: Date,
   db?: CrokDbQueryable,
 ): Promise<Match[]> => {
-  const result = await readDb.query.matches.findMany({
+  const database = db ?? readDb;
+  const result = await database.query.matches.findMany({
     where: and(eq(matches.seasonId, seasonId), gte(matches.createdAt, date)),
   });
 
@@ -30,7 +31,8 @@ export const getMatchesBeforeDate = async (
   date: Date,
   db?: CrokDbQueryable,
 ): Promise<Match[]> => {
-  const result = await readDb.query.matches.findMany({
+  const database = db ?? readDb;
+  const result = await database.query.matches.findMany({
     where: and(eq(matches.seasonId, seasonId), lte(matches.createdAt, date)),
   });
 

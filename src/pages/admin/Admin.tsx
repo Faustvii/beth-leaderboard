@@ -1,10 +1,10 @@
 import { eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { type Session } from "lucia";
+import { FoldableCard } from "../../components/FoldableCard";
 import { HeaderHtml } from "../../components/header";
 import { LayoutHtml } from "../../components/Layout";
 import { NavbarHtml } from "../../components/Navbar";
-import { StatsCardHtml } from "../../components/StatsCard";
 import { ctx } from "../../context";
 import {
   deleteMatch,
@@ -262,7 +262,7 @@ async function page(session: Session | null) {
     <>
       <NavbarHtml session={session} activePage="admin" />
       <HeaderHtml title="With great power comes great responsibility" />
-      <StatsCardHtml title="Seasons" doubleSize>
+      <FoldableCard title="Seasons" doubleSize>
         <div class="flex w-full flex-col gap-3">
           <ExistingSeasons seasons={seasons} />
           <SeasonForm
@@ -280,8 +280,8 @@ async function page(session: Session | null) {
             amountOfSeasons={seasons.length}
           />
         </div>
-      </StatsCardHtml>
-      <StatsCardHtml title="Latest games" doubleSize>
+      </FoldableCard>
+      <FoldableCard title="Latest games" doubleSize>
         <div class="flex w-full flex-col flex-wrap justify-between lg:flex-row">
           {globalMatchHistory.length !== 0 ? (
             globalMatchHistory.map((match) => <MatchCard match={match} />)
@@ -289,7 +289,7 @@ async function page(session: Session | null) {
             <span class="text-sm">No matches yet</span>
           )}
         </div>
-      </StatsCardHtml>
+      </FoldableCard>
     </>
   );
 }

@@ -1,6 +1,7 @@
 import { eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { type Session } from "lucia";
+import { generateRandomString } from "lucia/utils";
 import { FoldableCard } from "../../components/FoldableCard";
 import { HeaderHtml } from "../../components/header";
 import { LayoutHtml } from "../../components/Layout";
@@ -18,6 +19,7 @@ import {
   getSeasons,
 } from "../../db/queries/seasonQueries";
 import { matches, seasonsTbl } from "../../db/schema";
+import { userTbl, type User } from "../../db/schema/auth";
 import { isHxRequest, redirect } from "../../lib";
 import { fromTimezoneToUTC } from "../../lib/dateUtils";
 import { syncIfLocal } from "../../lib/dbHelpers";
@@ -26,6 +28,7 @@ import { EditSeasonModal } from "./components/EditSeasonModal";
 import { ExistingSeasons } from "./components/ExisitngSeasons";
 import { MatchCard } from "./components/MatchCard";
 import { SeasonForm } from "./components/SeasonForm";
+import { UserForm } from "./components/UserForm";
 
 export const Admin = new Elysia({
   prefix: "/admin",
@@ -174,6 +177,31 @@ export const Admin = new Elysia({
       }),
     },
   )
+  .put(
+    "/guest-user",
+    async ({ set, headers, body: { name }, writeDb }) => {
+      const userToInsert: Omit<User, "picture"> = {
+        id: generateRandomString(15),
+        name: `${name} (Guest)`,
+        email: null,
+        roles: null,
+      };
+
+      const [{ id: userId }] = await writeDb
+        .insert(userTbl)
+        .values(userToInsert)
+        .returning();
+      await syncIfLocal();
+
+      redirect({ headers, set }, `/profile/${userId}`);
+    },
+    {
+      beforeHandle: (_) => undefined,
+      body: t.Object({
+        name: t.String({ minLength: 1 }),
+      }),
+    },
+  )
   .post(
     "/season",
     async ({ set, headers, body, writeDb }) => {
@@ -262,6 +290,11 @@ async function page(session: Session | null) {
     <>
       <NavbarHtml session={session} activePage="admin" />
       <HeaderHtml title="With great power comes great responsibility" />
+      <FoldableCard title="Create guest user" start_open>
+        <div class="flex w-full flex-col gap-3">
+          <UserForm formId="createGuestUser"></UserForm>
+        </div>
+      </FoldableCard>
       <FoldableCard title="Seasons" doubleSize>
         <div class="flex w-full flex-col gap-3">
           <ExistingSeasons seasons={seasons} />

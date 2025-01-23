@@ -40,6 +40,23 @@ export const UserForm = async ({
             Full name
           </label>
         </div>
+        <div class="group relative mb-6 w-full">
+          <textarea
+            form={formId}
+            name="notes"
+            id="notes"
+            placeholder=" "
+            rows="5"
+            required={false}
+            class="peer block w-full appearance-none border-0 border-b-2 border-gray-600 bg-transparent px-0 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-0"
+          />
+          <label
+            for="notes"
+            class="absolute top-3 -z-10 origin-[0] -translate-y-6 scale-75 transform text-sm text-gray-400 duration-300 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:left-0 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:font-medium peer-focus:text-blue-500"
+          >
+            Notes (company, relation, other)
+          </label>
+        </div>
         <button
           hx-put={action_url}
           type="submit"

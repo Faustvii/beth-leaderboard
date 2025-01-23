@@ -179,10 +179,11 @@ export const Admin = new Elysia({
   )
   .put(
     "/guest-user",
-    async ({ set, headers, body: { name }, writeDb }) => {
+    async ({ set, headers, body: { name, notes }, writeDb }) => {
       const userToInsert: Omit<User, "picture"> = {
         id: generateRandomString(15),
         name: `${name} (Guest)`,
+        notes: notes,
         email: null,
         roles: null,
       };
@@ -199,6 +200,7 @@ export const Admin = new Elysia({
       beforeHandle: (_) => undefined,
       body: t.Object({
         name: t.String({ minLength: 1 }),
+        notes: t.Optional(t.String()),
       }),
     },
   )

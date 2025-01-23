@@ -4,6 +4,7 @@ export const userTbl = sqliteTable("user", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
   email: text("email"),
+  notes: text("notes"),
   picture: text("picture")
     .notNull()
     .$defaultFn(() => "/static/crokinole.svg"),

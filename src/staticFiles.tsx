@@ -26,6 +26,14 @@ export const staticController = new Elysia({
     const file = Bun.file("public/crokinole-c.min.svg");
     return etagFileServe(file, ctx.set, ctx.headers);
   })
+  .get("/foldable-open.png", (ctx) => {
+    const file = Bun.file("public/foldable-open.png");
+    return etagFileServe(file, ctx.set, ctx.headers);
+  })
+  .get("/foldable-closed.png", (ctx) => {
+    const file = Bun.file("public/foldable-closed.png");
+    return etagFileServe(file, ctx.set, ctx.headers);
+  })
   .get("/user/:id", async (ctx) => {
     const fileName = `public/user/${ctx.params.id}.webp`;
     const result = await userPicture(ctx.params.id, fileName);

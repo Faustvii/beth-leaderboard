@@ -6,12 +6,12 @@
     "dev": "concurrently \"bun run --hot src/main.ts\" \"bun tw:dev\"",
     "build": "bun build ./src/main.ts --minify --target bun --splitting --outdir ./build",
     "start": "concurrently \"bun tw\" \"bun run src/main.ts\"",
-    "db:studio": "bunx drizzle-kit studio",
+    "db:studio": "bun drizzle-kit studio",
     "db:seed": "bun run src/db/seed.ts",
-    "db:generate": "bunx drizzle-kit generate",
-    "tw": "bunx tailwindcss --minify -i ./src/styles.css -o ./public/styles.css",
-    "tw:dev": "bunx tailwindcss -i ./src/styles.css -o ./public/styles.css --watch",
-    "typecheck": "bunx --bun tsc",
+    "db:generate": "bun drizzle-kit generate",
+    "tw": "bun tailwindcss --minify -i ./src/styles.css -o ./public/styles.css",
+    "tw:dev": "bun tailwindcss -i ./src/styles.css -o ./public/styles.css --watch",
+    "typecheck": "bun --bun tsc",
     "format:check": "prettier --check .",
     "format": "prettier --write . --list-different",
     "lint": "eslint . --report-unused-disable-directives",
@@ -37,7 +37,6 @@
     "eslint-plugin-prettier": "^5.0.0",
     "prettier": "^3.0.3",
     "prettier-plugin-tailwindcss": "^0.5.5",
-    "tailwindcss": "^3.3.3",
     "typescript": "^5.2.2"
   },
   "dependencies": {
@@ -57,6 +56,7 @@
     "openskill": "^3.1.0",
     "sharp": "0.33.0-alpha.9",
     "tailwind-merge": "^1.14.0",
+    "tailwindcss": "^3.3.3",
     "zod": "3.22.2"
   }
 }

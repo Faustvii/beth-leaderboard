@@ -13,7 +13,8 @@ export type Page =
   | "profile"
   | "admin"
   | "help"
-  | "result";
+  | "result"
+  | "news";
 
 interface Props extends PropsWithChildren {
   session: Session | null;
@@ -32,6 +33,7 @@ const pageRoutes: NavbarRoute[] = [
   { name: "Play", page: "play", route: "/play" },
   { name: "Log match", page: "match", route: "/match" },
   { name: "Stats", page: "stats", route: "/stats" },
+  { name: "News", page: "news", route: "/news" },
   { name: "Help", page: "help", route: "/help" },
   { name: "Admin", page: "admin", route: "/admin", roles: ["admin"] },
 ];

@@ -44,23 +44,17 @@
       "indexes": {
         "jq_created_at_idx": {
           "name": "jq_created_at_idx",
-          "columns": [
-            "created_at"
-          ],
+          "columns": ["created_at"],
           "isUnique": false
         },
         "jq_status_idx": {
           "name": "jq_status_idx",
-          "columns": [
-            "status"
-          ],
+          "columns": ["status"],
           "isUnique": false
         },
         "jq_type_idx": {
           "name": "jq_type_idx",
-          "columns": [
-            "type"
-          ],
+          "columns": ["type"],
           "isUnique": false
         }
       },
@@ -98,13 +92,9 @@
         "user_key_user_id_user_id_fk": {
           "name": "user_key_user_id_user_id_fk",
           "tableFrom": "user_key",
-          "columnsFrom": [
-            "user_id"
-          ],
+          "columnsFrom": ["user_id"],
           "tableTo": "user",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         }
@@ -182,16 +172,12 @@
       "indexes": {
         "created_at_idx": {
           "name": "created_at_idx",
-          "columns": [
-            "createdAt"
-          ],
+          "columns": ["createdAt"],
           "isUnique": false
         },
         "match_seasons_idx": {
           "name": "match_seasons_idx",
-          "columns": [
-            "seasonId"
-          ],
+          "columns": ["seasonId"],
           "isUnique": false
         },
         "players_idx": {
@@ -209,65 +195,45 @@
         "match_white_player_one_user_id_fk": {
           "name": "match_white_player_one_user_id_fk",
           "tableFrom": "match",
-          "columnsFrom": [
-            "white_player_one"
-          ],
+          "columnsFrom": ["white_player_one"],
           "tableTo": "user",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         },
         "match_white_player_two_user_id_fk": {
           "name": "match_white_player_two_user_id_fk",
           "tableFrom": "match",
-          "columnsFrom": [
-            "white_player_two"
-          ],
+          "columnsFrom": ["white_player_two"],
           "tableTo": "user",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         },
         "match_black_player_one_user_id_fk": {
           "name": "match_black_player_one_user_id_fk",
           "tableFrom": "match",
-          "columnsFrom": [
-            "black_player_one"
-          ],
+          "columnsFrom": ["black_player_one"],
           "tableTo": "user",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         },
         "match_black_player_two_user_id_fk": {
           "name": "match_black_player_two_user_id_fk",
           "tableFrom": "match",
-          "columnsFrom": [
-            "black_player_two"
-          ],
+          "columnsFrom": ["black_player_two"],
           "tableTo": "user",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         },
         "match_seasonId_season_id_fk": {
           "name": "match_seasonId_season_id_fk",
           "tableFrom": "match",
-          "columnsFrom": [
-            "seasonId"
-          ],
+          "columnsFrom": ["seasonId"],
           "tableTo": "season",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         }
@@ -310,17 +276,12 @@
       "indexes": {
         "season_name_unique": {
           "name": "season_name_unique",
-          "columns": [
-            "name"
-          ],
+          "columns": ["name"],
           "isUnique": true
         },
         "season_period_idx": {
           "name": "season_period_idx",
-          "columns": [
-            "startAt",
-            "endAt"
-          ],
+          "columns": ["startAt", "endAt"],
           "isUnique": true
         }
       },
@@ -365,13 +326,9 @@
         "user_session_user_id_user_id_fk": {
           "name": "user_session_user_id_user_id_fk",
           "tableFrom": "user_session",
-          "columnsFrom": [
-            "user_id"
-          ],
+          "columnsFrom": ["user_id"],
           "tableTo": "user",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         }

@@ -23,7 +23,6 @@ export const BaseHtml = ({ children }: PropsWithChildren) => (
           href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@100;300;400;500;600;700&display=swap"
           rel="stylesheet"
         />
-
       </head>
       <body
         hx-boost="true"

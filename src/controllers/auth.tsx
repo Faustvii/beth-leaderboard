@@ -1,6 +1,5 @@
 import { OAuthRequestError } from "@lucia-auth/oauth";
 import { type AzureADUser } from "@lucia-auth/oauth/providers";
-
 import { eq } from "drizzle-orm";
 import { Elysia } from "elysia";
 import { LuciaError } from "lucia";

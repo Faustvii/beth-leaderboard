@@ -1,8 +1,14 @@
 interface UserFormProps {
   formId: string;
+  action_url: string;
+  submit_text: string;
 }
 
-export const UserForm = async ({ formId }: UserFormProps) => {
+export const UserForm = async ({
+  formId,
+  action_url,
+  submit_text,
+}: UserFormProps) => {
   return (
     <>
       <form
@@ -35,13 +41,13 @@ export const UserForm = async ({ formId }: UserFormProps) => {
           </label>
         </div>
         <button
-          hx-put="/admin/guest-user"
+          hx-put={action_url}
           type="submit"
           class="rounded-lg bg-teal-700 p-2"
           hx-indicator=".progress-bar"
           _="on click set my.innerText to 'Saving...'"
         >
-          Create guest user
+          {submit_text}
         </button>
         <div id="errors" class="text-red-500"></div>
       </form>

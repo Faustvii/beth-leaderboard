@@ -292,7 +292,11 @@ async function page(session: Session | null) {
       <HeaderHtml title="With great power comes great responsibility" />
       <FoldableCard title="Create guest user" start_open>
         <div class="flex w-full flex-col gap-3">
-          <UserForm formId="createGuestUser"></UserForm>
+          <UserForm
+            formId="createGuestUser"
+            action_url="/admin/guest-user"
+            submit_text="Create guest user"
+          ></UserForm>
         </div>
       </FoldableCard>
       <FoldableCard title="Seasons" doubleSize>

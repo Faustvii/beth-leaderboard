@@ -10,6 +10,7 @@ export const LeaderboardRowHtml = async ({
   lastPlayed,
   latestPlayerResults,
   isCurrentSeason,
+  isLowestRanked,
 }: {
   userId: string;
   rank: number;
@@ -22,6 +23,7 @@ export const LeaderboardRowHtml = async ({
     results: RESULT[];
   } | null;
   isCurrentSeason: boolean;
+  isLowestRanked: boolean;
 }) => {
   const { loseStreak, results, winStreak } = latestPlayerResults || {};
 
@@ -30,7 +32,7 @@ export const LeaderboardRowHtml = async ({
 
   return (
     <tr class="border-b border-gray-700 bg-gray-800">
-      <td class="px-1 py-4 pl-2 md:px-3 lg:px-6"><Rank rank={rank} /></td>
+      <td class="px-1 py-4 pl-2 md:px-3 lg:px-6"><Rank rank={rank} isLowestRanked={isLowestRanked} /></td>
       <th
         scope="row"
         class="grid grid-cols-12 items-center gap-3 whitespace-nowrap px-1 py-4 font-medium text-white md:flex md:px-3 lg:px-6"
@@ -64,7 +66,11 @@ export const LeaderboardRowHtml = async ({
   );
 };
 
-const Rank = ({rank}: {rank: number}) => {
+const Rank = ({rank, isLowestRanked}: {rank: number, isLowestRanked: boolean}) => {
+  if (isLowestRanked) {
+    return <span aria-label="last place" class="text-xl">👎</span>;
+  }
+
   switch (rank) {
     case 1:
       return <span aria-label="1st place" class="text-xl">🥇</span>;

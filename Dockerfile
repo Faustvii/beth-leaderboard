@@ -23,6 +23,7 @@ COPY . .
 
 ENV NODE_ENV=production
 RUN bun build --compile ./src/main.ts --outfile leaderboard
+RUN bun tw
 
 # copy production dependencies and source code into final image
 FROM base AS release
@@ -30,6 +31,8 @@ COPY --from=install /temp/prod/node_modules /node_modules
 COPY --from=prerelease /usr/src/app/leaderboard ./leaderboard
 COPY --from=prerelease /usr/src/app/drizzle ./drizzle
 COPY --from=prerelease /usr/src/app/public ./public
+RUN mkdir -p /usr/src/app/public/user
+RUN chown bun:bun /usr/src/app/public/user
 
 ENV migrationFolderTo=/usr/src/app/drizzle/
 

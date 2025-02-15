@@ -29,6 +29,7 @@ FROM base AS release
 COPY --from=install /temp/prod/node_modules /node_modules
 COPY --from=prerelease /usr/src/app/leaderboard ./leaderboard
 COPY --from=prerelease /usr/src/app/drizzle ./drizzle
+COPY --from=prerelease /usr/src/app/public ./public
 
 ENV migrationFolderTo=/usr/src/app/drizzle/
 

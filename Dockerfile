@@ -57,4 +57,4 @@ COPY --from=build --chown=${APP_UID}:${APP_GID} /app /app
 
 # Expose port and start the app
 EXPOSE 3000
-CMD [ "bun", "--smol", "src/main.ts" ]
+CMD [ "bun", "run", "src/main.ts" ]

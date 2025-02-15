@@ -92,7 +92,7 @@ async function userPicture(
       ? await resizeImage(dbUser.picture, { ...resize })
       : dbUser.picture;
     const pictureBuffer = Buffer.from(picture, "base64");
-    await Bun.write(fileName, pictureBuffer);
+    await Bun.write(fileName, pictureBuffer.buffer);
     file = Bun.file(fileName);
   }
   return file;

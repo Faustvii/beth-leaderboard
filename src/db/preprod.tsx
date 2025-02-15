@@ -8,7 +8,10 @@ import { matches, seasonsTbl, userTbl } from "./schema";
 import { type InsertSeason } from "./schema/season";
 
 export async function SeedPreprod(db: typeof readDb) {
-  if (config.env.NODE_ENV === "preprod") {
+  if (
+    config.env.NODE_ENV === "preprod" &&
+    config.env.DATABASE_CONNECTION_TYPE === "local"
+  ) {
     console.log("starting database seeding");
     const activeSeason = await SeedSeason(db);
     if (!activeSeason) throw new Error("Wasn't able to seed an active season");

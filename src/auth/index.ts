@@ -1,6 +1,6 @@
 import { libsql } from "@lucia-auth/adapter-sqlite";
-import { azureAD, google } from "@lucia-auth/oauth/providers";
-import { lucia } from "lucia";
+import { azureAD } from "@lucia-auth/oauth/providers";
+import { lucia, type Env } from "lucia";
 import { elysia } from "lucia/middleware";
 import { config } from "../config";
 import { readClient, writeClient } from "../db";
@@ -8,9 +8,10 @@ import { readClient, writeClient } from "../db";
 const envAliasMap = {
   production: "PROD",
   development: "DEV",
+  preprod: "DEV",
 } as const;
 
-const envAlias = envAliasMap[config.env.NODE_ENV];
+const envAlias: Env = envAliasMap[config.env.NODE_ENV];
 
 export interface ElysiaContext {
   request: Request;
@@ -61,13 +62,6 @@ export const writeAuth = lucia({
 
 export type ReadAuth = typeof readAuth;
 export type WriteAuth = typeof writeAuth;
-
-export const googleAuth = google(writeAuth, {
-  clientId: config.env.GOOGLE_CLIENT_ID,
-  clientSecret: config.env.GOOGLE_CLIENT_SECRET,
-  redirectUri: `${config.env.HOST_URL}/api/auth/google/callback`,
-  scope: ["profile", "email"],
-});
 
 export const azureAuth = azureAD(writeAuth, {
   clientId: config.env.AZURE_CLIENT_ID,

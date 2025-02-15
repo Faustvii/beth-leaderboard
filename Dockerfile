@@ -32,7 +32,9 @@ COPY --from=prerelease /usr/src/app/leaderboard ./leaderboard
 COPY --from=prerelease /usr/src/app/drizzle ./drizzle
 COPY --from=prerelease /usr/src/app/public ./public
 RUN mkdir -p /usr/src/app/public/user
+RUN mkdir -p /usr/src/app/data
 RUN chown bun:bun /usr/src/app/public/user
+RUN chown bun:bun /usr/src/app/data
 
 ENV migrationFolderTo=/usr/src/app/drizzle/
 

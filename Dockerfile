@@ -26,7 +26,11 @@ RUN bun build --compile ./src/main.ts --outfile leaderboard
 
 # copy production dependencies and source code into final image
 FROM base AS release
+COPY --from=install /temp/prod/node_modules /node_modules
 COPY --from=prerelease /usr/src/app/leaderboard ./leaderboard
+COPY --from=prerelease /usr/src/app/drizzle ./drizzle
+
+ENV migrationFolderTo=/usr/src/app/drizzle/
 
 # run the app
 USER bun

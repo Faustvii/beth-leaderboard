@@ -5,7 +5,7 @@ ARG BUN_VERSION=1.0.6
 ARG APP_UID=10000
 ARG APP_GID=10001
 
-FROM oven/bun:${BUN_VERSION}-slim as base
+FROM oven/bun:${BUN_VERSION}-slim AS base
 
 # Redeclare ARG values so they are available in this stage
 ARG APP_UID
@@ -29,7 +29,7 @@ ENV NODE_ENV="production"
 ENV LOG_LEVEL=info
 
 # Throw-away build stage to reduce size of final image
-FROM base as build
+FROM base AS build
 
 # Redeclare numeric UID/GID arguments
 ARG APP_UID

@@ -2,7 +2,6 @@ import { Elysia } from "elysia";
 import { type Session } from "lucia";
 import { HeaderHtml } from "../components/header";
 import { LayoutHtml } from "../components/Layout";
-import { LeaderboardRowHtml } from "../components/LeaderboardRow";
 import { LeaderboardTableHtml } from "../components/LeaderboardTable";
 import { NavbarHtml } from "../components/Navbar";
 import { SelectGet } from "../components/SelectGet";
@@ -18,7 +17,7 @@ import { isHxRequest } from "../lib";
 import MatchStatistics, { type RESULT } from "../lib/matchStatistics";
 import { getRatings, getRatingSystem } from "../lib/rating";
 
-const playerQuery = async (seasonId: number) => {
+const playerQuery = async (seasonId: number, isAuthenticated: boolean) => {
   const season = await getSeason(seasonId);
   const ratingSystem = getRatingSystem(season?.ratingSystem ?? "elo");
 
@@ -38,7 +37,7 @@ const playerQuery = async (seasonId: number) => {
   return players.map((player, index) => ({
     userId: player.player.id,
     rank: index + 1,
-    name: player.player.name,
+    name: isAuthenticated ? player.player.name : shortName(player.player.name),
     rating: ratingSystem.toNumber(player.rating),
     lastPlayed:
       lastPlayed.find((match) => match.player.id === player.player.id)
@@ -83,7 +82,8 @@ async function LeaderboardTable(
   session: Session | null,
   seasonId: number,
 ): Promise<JSX.Element> {
-  const rows = await playerQuery(seasonId);
+  const isAuthenticated = !!session?.user;
+  const rows = await playerQuery(seasonId, isAuthenticated);
   const seasons = await getSeasons();
 
   return (
@@ -117,4 +117,14 @@ function isCurrentSeason(seasonId: number, seasons: Season[]): boolean {
     ({ startAt, endAt }) => now > startAt.getTime() && now < endAt.getTime(),
   ) ?? { id: -1 };
   return currentSeasonId == seasonId;
+}
+
+function shortName(name: string): string {
+  const nameSplit = name.split(" ");
+
+  if (nameSplit.length > 1) {
+    return `${nameSplit[0]} ${nameSplit[1].substring(0, 1)}.`;
+  }
+
+  return nameSplit[0];
 }

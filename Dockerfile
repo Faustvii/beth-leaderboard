@@ -1,60 +1,34 @@
-# syntax = docker/dockerfile:1
+# use the official Bun image
+# see all versions at https://hub.docker.com/r/oven/bun/tags
+FROM oven/bun:1.0.6 AS base
+WORKDIR /usr/src/app
 
-# Define static build arguments (only available before first FROM)
-ARG BUN_VERSION=1.0.6
-ARG APP_UID=10000
-ARG APP_GID=10001
+# install dependencies into temp directory
+# this will cache them and speed up future builds
+FROM base AS install
+RUN mkdir -p /temp/dev
+COPY package.json bun.lockb /temp/dev/
+RUN cd /temp/dev && bun install --frozen-lockfile
 
-FROM oven/bun:${BUN_VERSION}-slim AS base
+# install with --production (exclude devDependencies)
+RUN mkdir -p /temp/prod
+COPY package.json bun.lockb /temp/prod/
+RUN cd /temp/prod && bun install --frozen-lockfile --production
 
-# Redeclare ARG values so they are available in this stage
-ARG APP_UID
-ARG APP_GID
+# copy node_modules from temp directory
+# then copy all (non-ignored) project files into the image
+FROM base AS prerelease
+COPY --from=install /temp/dev/node_modules node_modules
+COPY . .
 
-# Create user and group
-RUN groupadd -g ${APP_GID} nonroot && \
-    useradd -m -u ${APP_UID} -g nonroot nonroot
+ENV NODE_ENV=production
+RUN bun build --compile ./src/main.ts --outfile leaderboard
 
-# Ensure /app is owned by the correct user/group
-RUN mkdir -p /app && chown -R ${APP_UID}:${APP_GID} /app
+# copy production dependencies and source code into final image
+FROM base AS release
+COPY --from=prerelease /usr/src/app/leaderboard ./leaderboard
 
-LABEL fly_launch_runtime="Bun"
-
-# Set working directory and switch user
-WORKDIR /app
-USER ${APP_UID}:${APP_GID}
-
-# Set production environment
-ENV NODE_ENV="production"
-ENV LOG_LEVEL=info
-
-# Throw-away build stage to reduce size of final image
-FROM base AS build
-
-# Redeclare numeric UID/GID arguments
-ARG APP_UID
-ARG APP_GID
-
-# Install node modules
-COPY --link --chown=${APP_UID}:${APP_GID} bun.lockb package.json ./
-RUN bun install -p --ci
-
-# Copy application code
-COPY --link --chown=${APP_UID}:${APP_GID} . .
-
-# Minify CSS
-RUN bun tw
-
-# Final stage for app image
-FROM base
-
-# Redeclare numeric UID/GID arguments
-ARG APP_UID
-ARG APP_GID
-
-# Copy built application
-COPY --from=build --chown=${APP_UID}:${APP_GID} /app /app
-
-# Expose port and start the app
-EXPOSE 3000
-CMD [ "bun", "run", "src/main.ts" ]
+# run the app
+USER bun
+EXPOSE 3000/tcp
+ENTRYPOINT [ "./leaderboard" ]

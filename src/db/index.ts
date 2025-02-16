@@ -1,6 +1,5 @@
 import { mkdir } from "node:fs/promises";
 import { createClient, type Config } from "@libsql/client";
-import Database from "bun:sqlite";
 import { drizzle, type LibSQLDatabase } from "drizzle-orm/libsql";
 import { config } from "../config";
 import * as schema from "./schema";
@@ -12,8 +11,6 @@ if (config.env.DATABASE_CONNECTION_TYPE === "local") {
   if ((await bunFile.exists()) === false) {
     await mkdir("data/", { recursive: true });
   }
-  const db = new Database("data/local.sqlite");
-  db.close();
 }
 
 const options = {

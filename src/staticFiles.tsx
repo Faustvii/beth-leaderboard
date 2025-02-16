@@ -6,39 +6,48 @@ import { ctx } from "./context";
 import { getUserWithPicture } from "./db/queries/userQueries";
 import { isBase64, resizeImage } from "./lib/userImages";
 
+const fileExistLookup = new Map<string, boolean>();
+const fileHashLookup = new Map<string, string>();
+
 export const staticController = new Elysia({
   prefix: "/static",
 })
   .use(ctx)
-  .get("/styles.css", (ctx) => {
-    const file = Bun.file("public/styles.css");
-    return etagFileServe(file, ctx.set, ctx.headers);
+  .get("/styles.css", async (ctx) => {
+    const fileName = "public/styles.css";
+    const file = Bun.file(fileName);
+    return etagFileServe(file, fileName, ctx.set, ctx.headers);
   })
   .get("/favicon.ico", (ctx) => {
-    const file = Bun.file("public/favicon.ico");
-    return etagFileServe(file, ctx.set, ctx.headers);
+    const fileName = "public/favicon.ico";
+    const file = Bun.file(fileName);
+    return etagFileServe(file, fileName, ctx.set, ctx.headers);
   })
   .get("/bar.svg", (ctx) => {
-    const file = Bun.file("public/bar.min.svg");
-    return etagFileServe(file, ctx.set, ctx.headers);
+    const fileName = "public/bar.min.svg";
+    const file = Bun.file(fileName);
+    return etagFileServe(file, fileName, ctx.set, ctx.headers);
   })
   .get("/crokinole.svg", (ctx) => {
-    const file = Bun.file("public/crokinole-c.min.svg");
-    return etagFileServe(file, ctx.set, ctx.headers);
+    const fileName = "public/crokinole-c.min.svg";
+    const file = Bun.file(fileName);
+    return etagFileServe(file, fileName, ctx.set, ctx.headers);
   })
   .get("/foldable-open.png", (ctx) => {
-    const file = Bun.file("public/foldable-open.png");
-    return etagFileServe(file, ctx.set, ctx.headers);
+    const fileName = "public/foldable-open.png";
+    const file = Bun.file(fileName);
+    return etagFileServe(file, fileName, ctx.set, ctx.headers);
   })
   .get("/foldable-closed.png", (ctx) => {
-    const file = Bun.file("public/foldable-closed.png");
-    return etagFileServe(file, ctx.set, ctx.headers);
+    const fileName = "public/foldable-closed.png";
+    const file = Bun.file(fileName);
+    return etagFileServe(file, fileName, ctx.set, ctx.headers);
   })
   .get("/user/:id", async (ctx) => {
     const fileName = `public/user/${ctx.params.id}.webp`;
     const result = await userPicture(ctx.params.id, fileName);
     if (result instanceof Response) return result;
-    return etagFileServe(result, ctx.set, ctx.headers);
+    return etagFileServe(result, fileName, ctx.set, ctx.headers);
   })
   .get("/user/:id/small", async (ctx) => {
     const fileName = `public/user/${ctx.params.id}-32x32.webp`;
@@ -47,11 +56,12 @@ export const staticController = new Elysia({
       height: 32,
     });
     if (result instanceof Response) return result;
-    return etagFileServe(result, ctx.set, ctx.headers);
+    return etagFileServe(result, fileName, ctx.set, ctx.headers);
   });
 
 async function etagFileServe(
   file: BunFile,
+  fileName: string,
   set: {
     headers: Record<string, string> & {
       "Set-Cookie"?: string | string[];
@@ -61,13 +71,18 @@ async function etagFileServe(
   },
   headers: Record<string, string | null>,
 ) {
-  const hash = Bun.hash(await file.arrayBuffer());
+  let hash = fileHashLookup.get(fileName);
+  if (!hash) {
+    hash = Bun.hash(await file.arrayBuffer()).toString();
+    fileHashLookup.set(fileName, hash);
+  }
+
   const expectedHash = headers["if-none-match"];
-  if (expectedHash === hash.toString()) {
+  if (expectedHash === hash) {
     set.status = "Not Modified";
     return;
   }
-  set.headers.etag = hash.toString();
+  set.headers.etag = hash;
   set.headers.age = `${Date.now() - file.lastModified}`;
   if (config.env.NODE_ENV === "production")
     set.headers["Cache-Control"] = "public, max-age=31536000";
@@ -80,7 +95,12 @@ async function userPicture(
   resize?: { width: number; height: number },
 ) {
   let file = Bun.file(fileName);
-  const exists = await file.exists();
+  let exists = fileExistLookup.get(fileName);
+  if (!exists) {
+    exists = await file.exists();
+  }
+  fileExistLookup.set(fileName, exists);
+
   if (!exists) {
     const dbUser = await getUserWithPicture(id);
     if (!dbUser) {

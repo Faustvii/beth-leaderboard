@@ -22,7 +22,7 @@ COPY --from=install /temp/dev/node_modules node_modules
 COPY . .
 
 ENV NODE_ENV=production
-RUN bun build --compile --minify --sourcemap --target=bun ./src/main.ts --outfile leaderboard
+RUN bun build --compile --sourcemap --target=bun ./src/main.ts --outfile leaderboard
 RUN bun tw
 
 # copy production dependencies and source code into final image

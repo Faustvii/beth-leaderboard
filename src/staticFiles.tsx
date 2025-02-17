@@ -113,6 +113,7 @@ async function userPicture(
       : dbUser.picture;
     const pictureBuffer = Buffer.from(picture, "base64");
     await Bun.write(fileName, pictureBuffer.buffer);
+    fileHashLookup.set(fileName, Bun.hash(pictureBuffer).toString());
     file = Bun.file(fileName);
   }
   return file;

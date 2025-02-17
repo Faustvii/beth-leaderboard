@@ -63,6 +63,7 @@ export const questJobs = new Elysia().use(
       const matchesForQuests = await getMatchesAfterDate(
         activeSeason.id,
         oldestMatchDate,
+        true,
       );
       console.log("Matches for quests: ", matchesForQuests.length);
       for (const match of matchesForQuests) {

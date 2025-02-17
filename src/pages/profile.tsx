@@ -23,6 +23,7 @@ import MatchStatistics, {
   isPlayerInMatchFilter,
   RESULT,
 } from "../lib/matchStatistics";
+import { shortName } from "../lib/nameUtils";
 import { MaxQuestPerPlayer, type Quest } from "../lib/quest";
 import {
   getRatingSystem,
@@ -86,14 +87,16 @@ async function page(session: Session | null, userId: string, seasonId: number) {
   const ratingSystem = getRatingSystem(season?.ratingSystem ?? "elo");
 
   const { elaspedTimeMs, result: matches } = await measure(() =>
-    getMatches(seasonId),
+    getMatches(seasonId, !!session?.user),
   );
   console.log(`player stats took ${elaspedTimeMs}ms to get from db`);
   const activeQuestsForProfile = await getActiveQuestsForPlayer(userId);
   let profileName = "Your stats";
   if (!session || (session && session.user.id !== userId)) {
     const user = await getUser(userId);
-    if (user) profileName = `${user.name}'s stats`;
+    if (user) {
+      profileName = `${!!session?.user ? user.name : shortName(user.name)}'s stats`;
+    }
   }
   const header = profileName;
   const seasons = await getSeasons();

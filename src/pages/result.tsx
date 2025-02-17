@@ -33,7 +33,7 @@ async function page(
   const season = await getSeason(seasonId);
   const ratingSystem = getRatingSystem(season?.ratingSystem ?? "elo");
 
-  const allMatchesInSeason = await getMatches(seasonId);
+  const allMatchesInSeason = await getMatches(seasonId, !!session?.user);
   const allMatchesInSeasonSorted = allMatchesInSeason.toSorted(
     (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),
   );

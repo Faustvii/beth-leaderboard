@@ -84,6 +84,7 @@ export const match = new Elysia({
         const matchesForQuests = await getMatchesBeforeDate(
           activeSeason.id,
           matchInsert.createdAt,
+          true,
           trans,
         );
 

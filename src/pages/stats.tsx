@@ -48,7 +48,7 @@ async function statsPage(
 
 async function page(session: Session | null, seasonId: number) {
   const { elaspedTimeMs, result: matches } = await measure(async () => {
-    return await getMatches(seasonId);
+    return await getMatches(seasonId, !!session?.user);
   });
   console.log("stats page database calls", elaspedTimeMs, "ms");
 

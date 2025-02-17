@@ -1,21 +1,26 @@
 import { and, eq, gte, inArray, lte } from "drizzle-orm";
 import { readDb, type CrokDbQueryable } from "..";
 import { notEmpty, unique } from "../../lib";
+import { shortName } from "../../lib/nameUtils";
 import { type Match } from "../../lib/rating";
 import { matches, userTbl } from "../schema";
 import { type Match as DbMatch } from "../schema/matches";
 
-export const getMatches = async (seasonId: number): Promise<Match[]> => {
+export const getMatches = async (
+  seasonId: number,
+  isAuthenticated: boolean,
+): Promise<Match[]> => {
   const result = await readDb.query.matches.findMany({
     where: eq(matches.seasonId, seasonId),
   });
 
-  return getMatchesWithPlayers(result);
+  return getMatchesWithPlayers(result, isAuthenticated);
 };
 
 export const getMatchesAfterDate = async (
   seasonId: number,
   date: Date,
+  isAuthenticated: boolean,
   db?: CrokDbQueryable,
 ): Promise<Match[]> => {
   const database = db ?? readDb;
@@ -23,12 +28,13 @@ export const getMatchesAfterDate = async (
     where: and(eq(matches.seasonId, seasonId), gte(matches.createdAt, date)),
   });
 
-  return getMatchesWithPlayers(result, db);
+  return getMatchesWithPlayers(result, isAuthenticated, db);
 };
 
 export const getMatchesBeforeDate = async (
   seasonId: number,
   date: Date,
+  isAuthenticated: boolean,
   db?: CrokDbQueryable,
 ): Promise<Match[]> => {
   const database = db ?? readDb;
@@ -36,11 +42,12 @@ export const getMatchesBeforeDate = async (
     where: and(eq(matches.seasonId, seasonId), lte(matches.createdAt, date)),
   });
 
-  return getMatchesWithPlayers(result, db);
+  return getMatchesWithPlayers(result, isAuthenticated, db);
 };
 
-export const getMatchesWithPlayers = async (
+const getMatchesWithPlayers = async (
   result: DbMatch[],
+  isAuthenticated: boolean,
   db?: CrokDbQueryable,
 ): Promise<Match[]> => {
   const database = db ?? readDb;
@@ -65,6 +72,12 @@ export const getMatchesWithPlayers = async (
           },
         });
 
+  if (!isAuthenticated) {
+    players.forEach((player) => {
+      player.name = shortName(player.name);
+    });
+  }
+
   return result.map((match) => {
     const blackPlayerOne = players.find(
       (player) => player.id === match.blackPlayerOne,
@@ -86,14 +99,20 @@ export const getMatchesWithPlayers = async (
   });
 };
 
-export const getMatch = async (matchId: number): Promise<Match | undefined> => {
+export const getMatch = async (
+  matchId: number,
+  isAuthenticated: boolean,
+): Promise<Match | undefined> => {
   const match = await readDb.query.matches.findFirst({
     where: eq(matches.id, matchId),
   });
 
   if (!match) return;
 
-  const matchWithPlayers = await getMatchesWithPlayers([match]);
+  const matchWithPlayers = await getMatchesWithPlayers(
+    [match],
+    isAuthenticated,
+  );
   return matchWithPlayers[0];
 };
 

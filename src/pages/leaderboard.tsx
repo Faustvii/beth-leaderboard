@@ -21,7 +21,7 @@ const playerQuery = async (seasonId: number, isAuthenticated: boolean) => {
   const season = await getSeason(seasonId);
   const ratingSystem = getRatingSystem(season?.ratingSystem ?? "elo");
 
-  const matches = await getMatches(seasonId);
+  const matches = await getMatches(seasonId, isAuthenticated);
   const players = getRatings(matches, ratingSystem);
 
   const lastPlayed = MatchStatistics.latestMatch(matches);
@@ -37,7 +37,7 @@ const playerQuery = async (seasonId: number, isAuthenticated: boolean) => {
   return players.map((player, index) => ({
     userId: player.player.id,
     rank: index + 1,
-    name: isAuthenticated ? player.player.name : shortName(player.player.name),
+    name: player.player.name,
     rating: ratingSystem.toNumber(player.rating),
     lastPlayed:
       lastPlayed.find((match) => match.player.id === player.player.id)
@@ -117,14 +117,4 @@ function isCurrentSeason(seasonId: number, seasons: Season[]): boolean {
     ({ startAt, endAt }) => now > startAt.getTime() && now < endAt.getTime(),
   ) ?? { id: -1 };
   return currentSeasonId == seasonId;
-}
-
-function shortName(name: string): string {
-  const nameSplit = name.split(" ");
-
-  if (nameSplit.length > 1) {
-    return `${nameSplit[0]} ${nameSplit[1].substring(0, 1)}.`;
-  }
-
-  return nameSplit[0];
 }

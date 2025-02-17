@@ -2,7 +2,6 @@ import { type BunFile } from "bun";
 import Elysia from "elysia";
 import { type HTTPStatusName } from "elysia/utils";
 import { config } from "./config";
-import { ctx } from "./context";
 import { getUserWithPicture } from "./db/queries/userQueries";
 import { isBase64, resizeImage } from "./lib/userImages";
 
@@ -12,7 +11,6 @@ const fileHashLookup = new Map<string, string>();
 export const staticController = new Elysia({
   prefix: "/static",
 })
-  .use(ctx)
   .get("/styles.css", async (ctx) => {
     const fileName = "public/styles.css";
     const file = Bun.file(fileName);

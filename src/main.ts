@@ -14,8 +14,8 @@ await migrate(writeDb, { migrationsFolder: "./drizzle" });
 console.log("database migrated");
 
 const app = new Elysia()
-  .use(webSockets)
   .use(staticController)
+  .use(webSockets)
   .use(api)
   .use(pages)
   .onError(({ error }) => {

@@ -47,8 +47,8 @@ export const Admin = new Elysia({
   .get("/", async ({ html, session, headers }) => {
     return html(() => adminPage(session, headers));
   })
-  .get("/match/:id", async ({ params: { id } }) => {
-    const matchToEdit = await getMatch(Number(id));
+  .get("/match/:id", async ({ params: { id }, session }) => {
+    const matchToEdit = await getMatch(Number(id), !!session?.user);
 
     if (!matchToEdit) return;
 
@@ -281,7 +281,10 @@ async function page(session: Session | null) {
   const activeSeason = await getActiveSeason();
 
   // Fallback to first season if activeSeason is undefined :shrug:
-  const matchesWithPlayers = await getMatches(activeSeason?.id ?? 0);
+  const matchesWithPlayers = await getMatches(
+    activeSeason?.id ?? 0,
+    !!session?.user,
+  );
   const globalMatchHistory = matchesWithPlayers
     .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
     .slice(0, 8)

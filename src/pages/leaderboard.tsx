@@ -2,7 +2,6 @@ import { Elysia } from "elysia";
 import { type Session } from "lucia";
 import { HeaderHtml } from "../components/header";
 import { LayoutHtml } from "../components/Layout";
-import { LeaderboardRowHtml } from "../components/LeaderboardRow";
 import { LeaderboardTableHtml } from "../components/LeaderboardTable";
 import { NavbarHtml } from "../components/Navbar";
 import { SelectGet } from "../components/SelectGet";
@@ -18,11 +17,11 @@ import { isHxRequest } from "../lib";
 import MatchStatistics, { type RESULT } from "../lib/matchStatistics";
 import { getRatings, getRatingSystem } from "../lib/rating";
 
-const playerQuery = async (seasonId: number) => {
+const playerQuery = async (seasonId: number, isAuthenticated: boolean) => {
   const season = await getSeason(seasonId);
   const ratingSystem = getRatingSystem(season?.ratingSystem ?? "elo");
 
-  const matches = await getMatches(seasonId);
+  const matches = await getMatches(seasonId, isAuthenticated);
   const players = getRatings(matches, ratingSystem);
 
   const lastPlayed = MatchStatistics.latestMatch(matches);
@@ -83,7 +82,8 @@ async function LeaderboardTable(
   session: Session | null,
   seasonId: number,
 ): Promise<JSX.Element> {
-  const rows = await playerQuery(seasonId);
+  const isAuthenticated = !!session?.user;
+  const rows = await playerQuery(seasonId, isAuthenticated);
   const seasons = await getSeasons();
 
   return (

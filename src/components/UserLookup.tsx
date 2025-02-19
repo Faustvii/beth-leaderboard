@@ -10,17 +10,11 @@ interface Props extends JSX.HtmlInputTag {
 
 export const UserLookUp = ({ formId, input, label, user, ...props }: Props) => (
   <>
-    <script>
-      {function checkUserKeydown(event: Event) {
-        // Don't submit a search on enter or when selecting an entry with the mouse
-        return event instanceof KeyboardEvent && event.key !== "Enter";
-      }}
-    </script>
     <SearchIcon />
     <input
       id={`${input}-input`}
       form={formId}
-      hx-trigger="keyup[checkUserKeydown.call(this, event)] changed delay:300ms"
+      hx-trigger="keyup[event.key !== 'Enter'] changed delay:300ms"
       hx-sync="this:replace"
       hx-swap="innerHtml"
       hx-get="/match/search"

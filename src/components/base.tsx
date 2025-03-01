@@ -11,7 +11,6 @@ export const BaseHtml = ({ children }: PropsWithChildren) => (
         <meta name="theme-color" content="#000000" />
         <title>BETH Leaderboard</title>
         <script src="https://unpkg.com/htmx.org@1.9.6"></script>
-        <script src="https://unpkg.com/htmx.org@1.9.6/dist/ext/ws.js"></script>
         <script src="https://unpkg.com/htmx.org@1.9.6/dist/ext/response-targets.js"></script>
         <script src="https://unpkg.com/hyperscript.org@0.9.11"></script>
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

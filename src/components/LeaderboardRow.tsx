@@ -32,7 +32,9 @@ export const LeaderboardRowHtml = async ({
 
   return (
     <tr class="border-b border-gray-700 bg-gray-800">
-      <td class="px-1 py-4 pl-2 md:px-3 lg:px-6"><Rank rank={rank} isLowestRanked={isLowestRanked} /></td>
+      <td class="px-1 py-4 pl-2 md:px-3 lg:px-6">
+        <Rank rank={rank} isLowestRanked={isLowestRanked} />
+      </td>
       <th
         scope="row"
         class="grid grid-cols-12 items-center gap-3 whitespace-nowrap px-1 py-4 font-medium text-white md:flex md:px-3 lg:px-6"
@@ -66,18 +68,40 @@ export const LeaderboardRowHtml = async ({
   );
 };
 
-const Rank = ({rank, isLowestRanked}: {rank: number, isLowestRanked: boolean}) => {
+const Rank = ({
+  rank,
+  isLowestRanked,
+}: {
+  rank: number;
+  isLowestRanked: boolean;
+}) => {
   if (isLowestRanked) {
-    return <span aria-label="last place" class="text-xl">👎</span>;
+    return (
+      <span aria-label="last place" class="text-xl">
+        👎
+      </span>
+    );
   }
 
   switch (rank) {
     case 1:
-      return <span aria-label="1st place" class="text-xl">🥇</span>;
+      return (
+        <span aria-label="1st place" class="text-xl">
+          🥇
+        </span>
+      );
     case 2:
-      return <span aria-label="2nd place" class="text-xl">🥈</span>;
+      return (
+        <span aria-label="2nd place" class="text-xl">
+          🥈
+        </span>
+      );
     case 3:
-      return <span aria-label="3rd place" class="text-xl">🥉</span>;
+      return (
+        <span aria-label="3rd place" class="text-xl">
+          🥉
+        </span>
+      );
     default:
       return <span>{rank}.</span>;
   }

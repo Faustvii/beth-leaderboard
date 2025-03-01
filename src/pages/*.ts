@@ -5,7 +5,6 @@ import { Help } from "./Help";
 import { leaderboard } from "./leaderboard";
 import { match } from "./log-match/logMatch";
 import { login } from "./login";
-import { play } from "./play/play";
 import { profile } from "./profile";
 import { matchResult } from "./result";
 import { stats } from "./stats";
@@ -19,6 +18,6 @@ const publicPages = new Elysia()
   .use(Help)
   .use(matchResult);
 
-const authPages = new Elysia().use(play).use(match).use(Admin);
+const authPages = new Elysia().use(match).use(Admin);
 
 export const pages = new Elysia().use(publicPages).use(authPages);

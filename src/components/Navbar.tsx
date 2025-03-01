@@ -7,7 +7,6 @@ import { HxButton } from "./HxButton";
 
 export type Page =
   | "leaderboard"
-  | "play"
   | "stats"
   | "match"
   | "profile"
@@ -29,7 +28,6 @@ interface NavbarRoute {
 
 const pageRoutes: NavbarRoute[] = [
   { name: "Leaderboard", page: "leaderboard", route: "/leaderboard" },
-  { name: "Play", page: "play", route: "/play" },
   { name: "Log match", page: "match", route: "/match" },
   { name: "Stats", page: "stats", route: "/stats" },
   { name: "Help", page: "help", route: "/help" },

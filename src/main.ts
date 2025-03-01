@@ -7,7 +7,6 @@ import { writeDb } from "./db";
 import { SeedPreprod } from "./db/preprod";
 import { pages } from "./pages/*";
 import { staticController } from "./staticFiles";
-import { webSockets } from "./websockets/*";
 
 console.log("migrating database");
 await migrate(writeDb, { migrationsFolder: "./drizzle" });
@@ -15,7 +14,6 @@ console.log("database migrated");
 
 const app = new Elysia()
   .use(staticController)
-  .use(webSockets)
   .use(api)
   .use(pages)
   .onError(({ error }) => {

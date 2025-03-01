@@ -38,7 +38,11 @@ export const LeaderboardTableHtml = ({
           </thead>
           <tbody id="nextPageData">
             {rows.map((row) => (
-              <LeaderboardRowHtml {...row} isCurrentSeason={isCurrentSeason} isLowestRanked={row.rank === rows.length} />
+              <LeaderboardRowHtml
+                {...row}
+                isCurrentSeason={isCurrentSeason}
+                isLowestRanked={row.rank === rows.length}
+              />
             ))}
           </tbody>
         </table>

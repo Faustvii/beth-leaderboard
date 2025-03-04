@@ -20,6 +20,7 @@ on:
       - "bun.lockdb"
     branches:
       - main
+      - 'feature/pipeline-image-version'
 
 permissions:
   contents: write # to be able to publish a GitHub release
@@ -68,7 +69,12 @@ jobs:
         uses: cycjimmy/semantic-release-action@v4
         with:
           dry_run: true
-          ci: true
+          ci: false
+          branches: |
+            [
+              "main",
+              "feature/pipeline-image-version"
+            ]
 
       - name: Do something with version
         run: echo "The new version is ${{ steps.semantic.outputs.new_release_version }}"

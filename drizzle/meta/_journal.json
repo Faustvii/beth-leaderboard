@@ -78,6 +78,13 @@
       "when": 1734096264186,
       "tag": "0010_new_khan",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "6",
+      "when": 1741104116440,
+      "tag": "0011_regular_callisto",
+      "breakpoints": true
     }
   ]
 }

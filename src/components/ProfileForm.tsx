@@ -1,6 +1,5 @@
 interface ProfileFormProps {
   formId: string;
-  curNickname: string;
 }
 
 export const ProfileForm = async ({ formId }: ProfileFormProps) => {

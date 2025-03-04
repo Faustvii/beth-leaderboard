@@ -25,7 +25,17 @@ export const getUserWithPicture = (id: string) =>
     where: eq(userTbl.id, id),
   });
 
-export const getCurrentAdmins = () =>
-  readDb.query.userTbl.findMany({
+export const getCurrentAdmins = async (isAuthenticated: boolean) => {
+  const players = await readDb.query.userTbl.findMany({
     where: like(userTbl.roles, "%admin%"),
   });
+
+  return players.map((player) => {
+    if (!isAuthenticated) {
+      player.name = player.nickname;
+    } else {
+      player.name = `${player.nickname} (${shortName(player.name)})`;
+    }
+    return player;
+  });
+};

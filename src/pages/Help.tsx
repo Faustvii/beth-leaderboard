@@ -32,7 +32,7 @@ async function helpPage(
 }
 
 async function page(session: Session | null) {
-  const admins = await getCurrentAdmins();
+  const admins = await getCurrentAdmins(!!session?.user);
 
   return (
     <>

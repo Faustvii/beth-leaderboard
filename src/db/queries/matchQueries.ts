@@ -74,7 +74,11 @@ const getMatchesWithPlayers = async (
 
   if (!isAuthenticated) {
     players.forEach((player) => {
-      player.name = shortName(player.name);
+      player.name = player.nickname;
+    });
+  } else {
+    players.forEach((player) => {
+      player.name = `${player.nickname} (${shortName(player.name)})`;
     });
   }
 

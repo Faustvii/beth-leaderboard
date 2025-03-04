@@ -1,11 +1,14 @@
 import { type ChartConfiguration } from "chart.js";
-import Elysia from "elysia";
+import { eq } from "drizzle-orm";
+import Elysia, { t } from "elysia";
 import { type Session } from "lucia";
 import { Chart } from "../components/Chart";
+import { FoldableCard } from "../components/FoldableCard";
 import { HeaderHtml } from "../components/header";
 import { LayoutHtml } from "../components/Layout";
 import { MatchResultLink } from "../components/MatchResultLink";
 import { NavbarHtml } from "../components/Navbar";
+import { ProfileForm } from "../components/ProfileForm";
 import { QuestDescription } from "../components/QuestDescription";
 import { SelectGet } from "../components/SelectGet";
 import { StatsCardHtml } from "../components/StatsCard";
@@ -18,12 +21,13 @@ import {
   getSeasons,
 } from "../db/queries/seasonQueries";
 import { getUser } from "../db/queries/userQueries";
-import { isHxRequest, measure, notEmpty } from "../lib";
+import { userTbl } from "../db/schema/auth";
+import { isHxRequest, measure, notEmpty, redirect } from "../lib";
+import { syncIfLocal } from "../lib/dbHelpers";
 import MatchStatistics, {
   isPlayerInMatchFilter,
   RESULT,
 } from "../lib/matchStatistics";
-import { shortName } from "../lib/nameUtils";
 import { MaxQuestPerPlayer, type Quest } from "../lib/quest";
 import {
   getRatingSystem,
@@ -57,6 +61,25 @@ export const profile = new Elysia({
       profilePage(session, headers, params.userId, activeSeasonId),
     );
   })
+  .put(
+    "/",
+    async ({ set, headers, body: { nickname }, writeDb, session }) => {
+      if (!session || !session.user) return;
+      await writeDb
+        .update(userTbl)
+        .set({ nickname: nickname })
+        .where(eq(userTbl.id, session.user.id));
+      await syncIfLocal();
+
+      redirect({ headers, set }, `/profile/${session.user.id}`);
+    },
+    {
+      beforeHandle: (_) => undefined,
+      body: t.Object({
+        nickname: t.String({ minLength: 1 }),
+      }),
+    },
+  )
   .get(
     "/:userId/season/:seasonId",
     async ({ html, params, headers, session }) => {
@@ -91,21 +114,34 @@ async function page(session: Session | null, userId: string, seasonId: number) {
   );
   console.log(`player stats took ${elaspedTimeMs}ms to get from db`);
   const activeQuestsForProfile = await getActiveQuestsForPlayer(userId);
-  let profileName = "Your stats";
+  const user = await getUser(userId, !!session?.user);
+  let profileName = `Your stats - ${user?.nickname}`;
   if (!session || (session && session.user.id !== userId)) {
-    const user = await getUser(userId);
     if (user) {
-      profileName = `${!!session?.user ? user.name : shortName(user.name)}'s stats`;
+      profileName = `${user.name}'s stats`;
     }
   }
   const header = profileName;
   const seasons = await getSeasons();
+  const isOwnProfile = session?.user.id === userId;
 
   return (
     <>
       <NavbarHtml session={session} activePage="profile" />
       <div class="flex flex-row justify-between">
-        <HeaderHtml title={header} />
+        {isOwnProfile && user ? (
+          <FoldableCard title={header} doubleSize>
+            <div class="flex w-full flex-col flex-wrap justify-between lg:flex-row">
+              <ProfileForm
+                curNickname={user.nickname}
+                formId={user.id}
+              ></ProfileForm>
+            </div>
+          </FoldableCard>
+        ) : (
+          <HeaderHtml title={header} />
+        )}
+
         <div class="p-5">
           <SelectGet
             options={seasons.map((season) => ({

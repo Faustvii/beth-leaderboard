@@ -132,7 +132,7 @@ async function page(session: Session | null, userId: string, seasonId: number) {
         {isOwnProfile && user ? (
           <FoldableCard title={header} doubleSize>
             <div class="flex w-full flex-col flex-wrap justify-between lg:flex-row">
-              <ProfileForm formId={user.id}></ProfileForm>
+              <ProfileForm formId={`profile-form-${user.id}`}></ProfileForm>
             </div>
           </FoldableCard>
         ) : (

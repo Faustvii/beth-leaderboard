@@ -76,7 +76,7 @@ export const profile = new Elysia({
     {
       beforeHandle: (_) => undefined,
       body: t.Object({
-        nickname: t.String({ minLength: 1 }),
+        nickname: t.String({ minLength: 1, maxLength: 30 }),
       }),
     },
   )

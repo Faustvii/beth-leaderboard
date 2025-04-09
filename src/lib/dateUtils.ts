@@ -23,10 +23,7 @@ export function daysBetween(start: Date, end: Date) {
   return Math.round((end.getTime() - start.getTime()) / dayInMs);
 }
 
-export function fromTimezoneToUTC(
-  date: Date,
-  timezone: string = "Europe/Copenhagen",
-) {
+export function fromTimezoneToUTC(date: Date, timezone = "Europe/Copenhagen") {
   const offset = getOffsetMinutes(date, timezone);
   const dateCopy = new Date(date);
   dateCopy.setMinutes(dateCopy.getMinutes() - offset);

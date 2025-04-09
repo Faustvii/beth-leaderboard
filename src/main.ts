@@ -1,7 +1,6 @@
 import "@kitajs/html/register";
 import { migrate } from "drizzle-orm/libsql/migrator";
 import { Elysia } from "elysia";
-import { config } from "./config";
 import { api } from "./controllers/*";
 import { writeDb } from "./db";
 import { SeedPreprod } from "./db/preprod";
@@ -26,6 +25,4 @@ console.log(
   `app is listening on http://${app.server?.hostname}:${app.server?.port}`,
 );
 
-if (config.env.NODE_ENV === "preprod") {
-  await SeedPreprod(writeDb);
-}
+await SeedPreprod(writeDb);

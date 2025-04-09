@@ -7,6 +7,7 @@ import { NavbarHtml } from "../components/Navbar";
 import { SelectGet } from "../components/SelectGet";
 import { ctx } from "../context";
 import { getMatches } from "../db/queries/matchQueries";
+import { getRatingEvents } from "../db/queries/ratingEventQueries";
 import {
   getActiveSeason,
   getSeason,
@@ -19,10 +20,18 @@ import { getRatings, getRatingSystem } from "../lib/rating";
 
 const playerQuery = async (seasonId: number, isAuthenticated: boolean) => {
   const season = await getSeason(seasonId);
-  const ratingSystem = getRatingSystem(season?.ratingSystem ?? "elo");
+  if (!season) {
+    console.error(`Season with ID ${seasonId} not found.`);
+    return [];
+  }
+  const ratingSystem = getRatingSystem(
+    season.ratingSystem ?? "elo",
+    season.ratingEventSystem,
+  );
 
   const matches = await getMatches(seasonId, isAuthenticated);
-  const players = getRatings(matches, ratingSystem);
+  const ratingEvents = await getRatingEvents(seasonId);
+  const players = getRatings(matches, ratingEvents, ratingSystem);
 
   const lastPlayed = MatchStatistics.latestMatch(matches);
   const latestResults: Record<

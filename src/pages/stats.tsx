@@ -1,20 +1,24 @@
 import { type ChartConfiguration } from "chart.js";
-import { Elysia } from "elysia";
+import Elysia from "elysia";
 import { type Session } from "lucia";
 import { Chart } from "../components/Chart";
 import { HeaderHtml } from "../components/header";
 import { LayoutHtml } from "../components/Layout";
 import { MatchResultLink } from "../components/MatchResultLink";
 import { NavbarHtml } from "../components/Navbar";
+import { QuestEventLogTable } from "../components/QuestEventLogTable";
 import { SelectGet } from "../components/SelectGet";
 import { StatsCardHtml } from "../components/StatsCard";
 import { ctx } from "../context";
 import { getMatches } from "../db/queries/matchQueries";
+import { getRatingEvents } from "../db/queries/ratingEventQueries";
 import { getActiveSeason, getSeasons } from "../db/queries/seasonQueries";
-import { isHxRequest, measure, notEmpty } from "../lib";
+import { getUsersByIds } from "../db/queries/userQueries";
+import { isHxRequest, notEmpty, unique } from "../lib";
 import { getDatePartFromDate } from "../lib/dateUtils";
 import MatchStatistics from "../lib/matchStatistics";
-import { type Match } from "../lib/rating";
+import { processQuestEventsForDisplay } from "../lib/questDisplayUtils";
+import { getRatingSystem, type Match } from "../lib/rating";
 
 export const stats = new Elysia({
   prefix: "/stats",
@@ -47,10 +51,92 @@ async function statsPage(
 }
 
 async function page(session: Session | null, seasonId: number) {
-  const { elaspedTimeMs, result: matches } = await measure(async () => {
-    return await getMatches(seasonId, !!session?.user);
-  });
-  console.log("stats page database calls", elaspedTimeMs, "ms");
+  const [season, matches, ratingEvents] = await Promise.all([
+    getActiveSeason(),
+    getMatches(seasonId, !!session?.user),
+    getRatingEvents(seasonId),
+  ]);
+
+  if (!season) {
+    return <LayoutHtml>Season not found</LayoutHtml>;
+  }
+
+  const ratingSystem = getRatingSystem(
+    season.ratingSystem ?? "elo",
+    season.ratingEventSystem,
+  );
+  const seasons = await getSeasons();
+  const isAuthenticated = !!session?.user;
+
+  const playerIdsFromEvents = ratingEvents
+    .map((e) => e.playerId)
+    .filter(unique);
+  const users = await getUsersByIds(playerIdsFromEvents, isAuthenticated);
+  const userIdToNameMap = Object.fromEntries(users.map((u) => [u.id, u.name]));
+
+  const processedEventsRaw = processQuestEventsForDisplay(
+    ratingEvents,
+    ratingSystem,
+  );
+  const questLogItems = processedEventsRaw.map((item) => ({
+    ...item,
+    playerName: userIdToNameMap[item.playerId] ?? "Unknown Player",
+  }));
+
+  const playerQuestStats: Record<
+    string,
+    { completed: number; failed: number }
+  > = {};
+  for (const event of processedEventsRaw) {
+    if (event.outcome === "Completed" || event.outcome === "Failed") {
+      const playerId = event.playerId;
+      if (!playerQuestStats[playerId]) {
+        playerQuestStats[playerId] = { completed: 0, failed: 0 };
+      }
+      if (event.outcome === "Completed") {
+        playerQuestStats[playerId].completed++;
+      } else {
+        playerQuestStats[playerId].failed++;
+      }
+    }
+  }
+
+  const questRatesArray = Object.entries(playerQuestStats)
+    .map(([playerId, stats]) => {
+      const totalAttempts = stats.completed + stats.failed;
+      return {
+        playerId,
+        name: userIdToNameMap[playerId] ?? "Unknown Player",
+        rate: totalAttempts > 0 ? stats.completed / totalAttempts : 0, // Avoid division by zero
+        attempts: totalAttempts,
+      };
+    })
+    .filter((p) => p.attempts > 0);
+
+  // Filter further for players with more than 3 attempts for best/worst calculation
+  const filteredQuestRatesArray = questRatesArray.filter((p) => p.attempts > 3);
+
+  let playerWithHighestRate: {
+    name: string;
+    rate: number;
+    attempts: number;
+  } | null = null;
+  if (filteredQuestRatesArray.length > 0) {
+    playerWithHighestRate = [...filteredQuestRatesArray].sort(
+      (a, b) => b.rate - a.rate,
+    )[0];
+  }
+
+  let playerWithLowestRate: {
+    name: string;
+    rate: number;
+    attempts: number;
+  } | null = null;
+  if (filteredQuestRatesArray.length > 0) {
+    playerWithLowestRate = [...filteredQuestRatesArray].sort(
+      (a, b) => a.rate - b.rate,
+    )[0];
+  }
 
   const globalMatchHistory = matches
     .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
@@ -118,10 +204,176 @@ async function page(session: Session | null, seasonId: number) {
     },
   };
 
-  const seasons = await getSeasons();
+  // --- Calculate Global Quest Outcomes by Type ---
+  const questTypeOutcomes: Record<
+    string,
+    { completed: number; failed: number }
+  > = {};
+  for (const event of processedEventsRaw) {
+    if (
+      (event.outcome === "Completed" || event.outcome === "Failed") &&
+      event.questType
+    ) {
+      const type = event.questType;
+      if (!questTypeOutcomes[type]) {
+        questTypeOutcomes[type] = { completed: 0, failed: 0 };
+      }
+      if (event.outcome === "Completed") {
+        questTypeOutcomes[type].completed++;
+      } else {
+        questTypeOutcomes[type].failed++;
+      }
+    }
+  }
+
+  // Sort types based on total completions (or total outcomes, completions first)
+  const sortedQuestTypes = Object.entries(questTypeOutcomes).sort(
+    ([, outcomeA], [, outcomeB]) => outcomeB.completed - outcomeA.completed,
+  );
+
+  const questTypeLabels = sortedQuestTypes.map(([type]) => type);
+  const questCompletionData = sortedQuestTypes.map(
+    ([, outcomes]) => outcomes.completed,
+  );
+  const questFailureData = sortedQuestTypes.map(
+    ([, outcomes]) => outcomes.failed,
+  );
+
+  const questTypeChartConfig: ChartConfiguration = {
+    type: "bar",
+    data: {
+      labels: questTypeLabels,
+      datasets: [
+        {
+          label: "Completed",
+          data: questCompletionData,
+          backgroundColor: "#4ade80", // Green for success
+          borderColor: "#fffffe",
+          borderWidth: 1,
+        },
+        {
+          label: "Failed",
+          data: questFailureData,
+          backgroundColor: "#f87171", // Red for failure
+          borderColor: "#fffffe",
+          borderWidth: 1,
+        },
+      ],
+    },
+    options: {
+      indexAxis: "y",
+      scales: {
+        x: {
+          stacked: true, // Enable stacking on X axis
+          beginAtZero: true,
+          ticks: {
+            color: "#fffffe",
+            precision: 0,
+          },
+          grid: { color: "rgba(255, 255, 255, 0.2)" },
+        },
+        y: {
+          stacked: true, // Enable stacking on Y axis
+          ticks: { color: "#fffffe" },
+          grid: { display: false },
+        },
+      },
+      plugins: {
+        legend: {
+          display: true, // Show legend
+          position: "top", // Position legend at the top
+          labels: {
+            color: "#fffffe", // Legend label color
+          },
+        },
+        tooltip: {
+          // Optional: Customize tooltips if needed for stacked bars
+        },
+      },
+    },
+  };
+  // --- End Global Quest Outcomes by Type Calculation ---
+
+  // --- Calculate Top & Bottom Players by Quest Points ---
+  const playerQuestPoints: Record<string, number> = {};
+  for (const event of processedEventsRaw) {
+    const points = parseInt(event.bonusString);
+    if (!isNaN(points)) {
+      playerQuestPoints[event.playerId] =
+        (playerQuestPoints[event.playerId] || 0) + points;
+    }
+  }
+
+  // Map all players with their points
+  const allPlayersByPoints = Object.entries(playerQuestPoints)
+    .map(([playerId, points]) => ({
+      name: userIdToNameMap[playerId] ?? "Unknown Player",
+      points: points,
+    }))
+    .filter((p) => p.points !== 0); // Filter out zero net points
+
+  // Get Top 5
+  const top5Players = [...allPlayersByPoints]
+    .sort((a, b) => b.points - a.points)
+    .slice(0, 5);
+
+  // Get Bottom 5
+  const bottom5Players = [...allPlayersByPoints]
+    .sort((a, b) => a.points - b.points)
+    .slice(0, 5);
+
+  // Combine, Deduplicate (by name), and Sort for Display
+  const combinedUniquePlayers = [...top5Players, ...bottom5Players]
+    .filter(
+      (player, index, self) =>
+        index === self.findIndex((p) => p.name === player.name),
+    )
+    .sort((a, b) => b.points - a.points); // Sort final list descending by points
+
+  const topBottomQuestPointsLabels = combinedUniquePlayers.map((p) => p.name);
+  const topBottomQuestPointsData = combinedUniquePlayers.map((p) => p.points);
+
+  // Pre-calculate background colors for the combined list
+  const topBottomQuestPointsColors = topBottomQuestPointsData.map((points) =>
+    points >= 0 ? "#4ade80" : "#f87171",
+  );
+
+  // Update the config to use the new combined data
+  const topQuestPointsConfig: ChartConfiguration = {
+    type: "bar",
+    data: {
+      labels: topBottomQuestPointsLabels,
+      datasets: [
+        {
+          label: "Rating from quests",
+          data: topBottomQuestPointsData,
+          backgroundColor: topBottomQuestPointsColors,
+          borderColor: "#fffffe",
+          borderWidth: 1,
+        },
+      ],
+    },
+    options: {
+      indexAxis: "y",
+      scales: {
+        x: {
+          ticks: { color: "#fffffe" },
+          grid: { color: "rgba(255, 255, 255, 0.2)" },
+        },
+        y: {
+          ticks: { color: "#fffffe" },
+          grid: { display: false },
+        },
+      },
+      plugins: {
+        legend: { display: false },
+      },
+    },
+  };
+  // --- End Top & Bottom Players Calculation ---
 
   return (
-    <>
+    <LayoutHtml>
       <NavbarHtml session={session} activePage="stats" />
       <div class="flex flex-row justify-between">
         <HeaderHtml title="Statistics" />
@@ -154,7 +406,9 @@ async function page(session: Session | null, seasonId: number) {
             </div>
           </>
         </StatsCardHtml>
-        <StatsCardHtml title="Biggest win">{biggestWin(matches)}</StatsCardHtml>
+        <StatsCardHtml title="Biggest win">
+          {await biggestWin(matches)}
+        </StatsCardHtml>
         <StatsCardHtml title="Winrates">
           <div class="flex h-48 w-full items-center justify-center pt-5">
             <Chart id="chartDoughnut" config={config}></Chart>
@@ -247,6 +501,63 @@ async function page(session: Session | null, seasonId: number) {
             </span>
           )}
         </StatsCardHtml>
+        {/* Conditionally render quest stats based on season setting */}
+        {season.ratingEventSystem === "quest" && (
+          <>
+            <StatsCardHtml title="Best Quester">
+              {playerWithHighestRate ? (
+                <span class="text-sm">
+                  <b>{playerWithHighestRate.name}</b> has the highest success
+                  rate with{" "}
+                  <b>{(playerWithHighestRate.rate * 100).toFixed(1)}%</b> over{" "}
+                  <b>{playerWithHighestRate.attempts} quests attempted</b>.
+                </span>
+              ) : (
+                <span class="text-sm">
+                  No quests attempted yet by eligible players (&gt;3 attempts).
+                </span>
+              )}
+            </StatsCardHtml>
+            <StatsCardHtml title="Worst Quester">
+              {playerWithLowestRate ? (
+                <span class="text-sm">
+                  <b>{playerWithLowestRate.name}</b> has the lowest success rate
+                  with <b>{(playerWithLowestRate.rate * 100).toFixed(1)}%</b>{" "}
+                  over <b>{playerWithLowestRate.attempts} quests attempted</b>.
+                </span>
+              ) : (
+                <span class="text-sm">
+                  No quests attempted yet by eligible players (&gt;3 attempts).
+                </span>
+              )}
+            </StatsCardHtml>
+            <StatsCardHtml title="Quest Outcomes by Type">
+              {questTypeLabels.length > 0 ? (
+                <div class="h-64 w-full pt-2">
+                  <Chart
+                    id="questTypeOutcomesChart"
+                    config={questTypeChartConfig}
+                  ></Chart>
+                </div>
+              ) : (
+                <span class="text-sm">No quest outcomes recorded yet.</span>
+              )}
+            </StatsCardHtml>
+            <StatsCardHtml title="Quest Ratings">
+              {topBottomQuestPointsLabels.length > 0 ? (
+                <div class="h-64 w-full pt-2">
+                  <Chart
+                    id="topQuestPointsChart"
+                    config={topQuestPointsConfig}
+                  ></Chart>
+                </div>
+              ) : (
+                <span class="text-sm">No quest points recorded yet.</span>
+              )}
+            </StatsCardHtml>
+          </>
+        )}
+        {/* End conditional quest stats */}
         <StatsCardHtml title="Latest games" doubleSize>
           <>
             <div class="flex flex-col justify-center gap-2">
@@ -263,8 +574,21 @@ async function page(session: Session | null, seasonId: number) {
           </>
         </StatsCardHtml>
       </div>
-      <div class="flex flex-col items-center"></div>
-    </>
+      {/* Conditionally render latest quests table */}
+      {season.ratingEventSystem === "quest" && (
+        <StatsCardHtml title="Latest Quests" doubleSize={true}>
+          <QuestEventLogTable
+            questEvents={questLogItems
+              .sort((a, b) => b.date.getTime() - a.date.getTime())
+              .slice(0, 20)}
+            seasonId={seasonId}
+            showPlayerColumn={true}
+            showDateColumn={true}
+            title={undefined}
+          />
+        </StatsCardHtml>
+      )}
+    </LayoutHtml>
   );
 }
 

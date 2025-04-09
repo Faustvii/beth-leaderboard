@@ -15,6 +15,7 @@ import { StatsCardHtml } from "../components/StatsCard";
 import { ctx } from "../context";
 import { getMatches } from "../db/queries/matchQueries";
 import { getActiveQuestsForPlayer } from "../db/queries/questQueries";
+import { getRatingEventsForPlayer } from "../db/queries/ratingEventQueries";
 import {
   getActiveSeason,
   getSeason,
@@ -29,6 +30,7 @@ import MatchStatistics, {
   RESULT,
 } from "../lib/matchStatistics";
 import { MaxQuestPerPlayer, type Quest } from "../lib/quest";
+import { processQuestEventsForDisplay } from "../lib/questDisplayUtils";
 import {
   getRatingSystem,
   type Match,
@@ -106,15 +108,24 @@ async function profilePage(
 }
 
 async function page(session: Session | null, userId: string, seasonId: number) {
-  const season = await getSeason(seasonId);
-  const ratingSystem = getRatingSystem(season?.ratingSystem ?? "elo");
+  const [season, matches, activeQuestsForProfile, user, seasons, ratingEvents] =
+    await Promise.all([
+      getSeason(seasonId),
+      measure(() => getMatches(seasonId, !!session?.user)).then((res) => {
+        console.log(`player stats took ${res.elaspedTimeMs}ms to get from db`);
+        return res.result;
+      }),
+      getActiveQuestsForPlayer(userId),
+      getUser(userId, !!session?.user),
+      getSeasons(),
+      getRatingEventsForPlayer(userId, seasonId),
+    ]);
 
-  const { elaspedTimeMs, result: matches } = await measure(() =>
-    getMatches(seasonId, !!session?.user),
+  const ratingSystem = getRatingSystem(
+    season?.ratingSystem ?? "elo",
+    season?.ratingEventSystem ?? "none",
   );
-  console.log(`player stats took ${elaspedTimeMs}ms to get from db`);
-  const activeQuestsForProfile = await getActiveQuestsForPlayer(userId);
-  const user = await getUser(userId, !!session?.user);
+
   let profileName = `Your stats - ${user?.nickname}`;
   if (!session || (session && session.user.id !== userId)) {
     if (user) {
@@ -122,8 +133,20 @@ async function page(session: Session | null, userId: string, seasonId: number) {
     }
   }
   const header = profileName;
-  const seasons = await getSeasons();
   const isOwnProfile = session?.user.id === userId;
+
+  // Call shared processing function (imported)
+  const processedQuestItems = processQuestEventsForDisplay(
+    ratingEvents,
+    ratingSystem,
+  );
+
+  // Map to the format expected by ProfileQuestHistoryTable
+  const processedQuestHistory: ProcessedQuestHistoryItem[] =
+    processedQuestItems.map((item) => ({
+      ...item,
+      bonus: item.bonusString,
+    }));
 
   return (
     <>
@@ -151,8 +174,17 @@ async function page(session: Session | null, userId: string, seasonId: number) {
           ></SelectGet>
         </div>
       </div>
-      {profileQuests(activeQuestsForProfile)}
+      {/* Conditionally render Active Quests */}
+      {season?.ratingEventSystem === "quest" &&
+        profileQuests(activeQuestsForProfile)}
       {profileStats(matches, userId, ratingSystem)}
+      {/* Conditionally render Quest History */}
+      {season?.ratingEventSystem === "quest" && (
+        <ProfileQuestHistoryTable
+          questHistory={processedQuestHistory}
+          seasonId={seasonId}
+        />
+      )}
     </>
   );
 }
@@ -522,5 +554,89 @@ function matchOutput(
       {result === RESULT.DRAW ? "tied" : result === RESULT.WIN ? "won" : "lost"}{" "}
       with {match.scoreDiff} points.
     </span>
+  );
+}
+
+// Restore original Profile history interface
+interface ProcessedQuestHistoryItem {
+  id: number;
+  date: Date;
+  description: string;
+  outcome: "Completed" | "Failed" | "Unknown";
+  bonus: string;
+  matchId: number | null;
+}
+
+function ProfileQuestHistoryTable({
+  questHistory,
+  seasonId,
+}: {
+  questHistory: ProcessedQuestHistoryItem[];
+  seasonId: number;
+}): JSX.Element | null {
+  if (questHistory.length === 0) {
+    return null;
+  }
+
+  return (
+    <FoldableCard title="Quest History" start_open={true}>
+      <div class="w-full overflow-x-auto rounded-lg shadow-md">
+        <table class="w-full text-left text-sm text-white">
+          <thead class="bg-gray-700 text-xs uppercase text-gray-400">
+            <tr>
+              <th scope="col" class="px-4 py-3">
+                Date
+              </th>
+              <th scope="col" class="px-4 py-3">
+                Quest
+              </th>
+              <th scope="col" class="px-4 py-3">
+                Outcome
+              </th>
+              <th scope="col" class="px-4 py-3">
+                Result
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {questHistory.map((item) => (
+              <tr class="border-b border-gray-700 bg-gray-800">
+                <td class="whitespace-nowrap px-4 py-2">
+                  {item.date.toLocaleString("en-US", {
+                    day: "numeric",
+                    month: "long",
+                  })}
+                </td>
+                <td class="px-4 py-2">
+                  {item.matchId ? (
+                    <MatchResultLink seasonId={seasonId} matchId={item.matchId}>
+                      {item.description}
+                    </MatchResultLink>
+                  ) : (
+                    <span>{item.description}</span>
+                  )}
+                </td>
+                <td
+                  class={cn("px-4 py-2", {
+                    "text-green-500": item.outcome === "Completed",
+                    "text-red-500": item.outcome === "Failed",
+                  })}
+                >
+                  {item.outcome}
+                </td>
+                <td
+                  class={cn("px-4 py-2", {
+                    "text-green-500": item.outcome === "Completed",
+                    "text-red-500": item.outcome === "Failed",
+                  })}
+                >
+                  {item.bonus}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </FoldableCard>
   );
 }

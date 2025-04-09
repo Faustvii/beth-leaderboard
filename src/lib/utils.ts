@@ -1,16 +1,18 @@
 import clsx, { type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
-export const cn = (...classes: ClassValue[]) => twMerge(clsx(...classes));
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
 
 export const isDefined = <T>(x: T | null | undefined): x is T => {
   return typeof x !== "undefined" && x !== null;
 };
 
 /**
- * @param array Array to pick from
- * @param count Count of elements to pick
- * @returns Array of length count containing distinct elements from input array
+ * @param array Array to pick from.
+ * @param count Count of elements to pick.
+ * @returns Array of length count containing distinct elements from input array.
  */
 export function pick<T>(array: T[], count: number) {
   const result: T[] = [];

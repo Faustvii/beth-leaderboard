@@ -3,6 +3,7 @@ import { getDatePartFromDate, subtractDays } from "../dateUtils";
 import { isDefined } from "../utils";
 import { elo, type EloRating } from "./eloRatingSystem";
 import { openskill, type OpenskillRating } from "./openskillRatingSystem";
+import { scoreDiff } from "./scoreDiffRatingSystem";
 import { xp, type XPRating } from "./xpRatingSystem";
 
 // eslint-disable-next-line @typescript-eslint/no-duplicate-type-constituents
@@ -208,6 +209,8 @@ function diffRatings<TRating>(
 
 export function getRatingSystem(type: RatingSystemType): RatingSystem<Rating> {
   switch (type) {
+    case "scoreDiff":
+      return scoreDiff() as RatingSystem<Rating>;
     case "xp":
       return xp() as RatingSystem<Rating>;
     case "openskill":

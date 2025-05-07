@@ -34,7 +34,7 @@ import {
   type Match,
   type Rating,
   type RatingSystem,
-} from "../lib/rating";
+} from "../lib/ratings/rating";
 import { cn } from "../lib/utils";
 
 export const profile = new Elysia({

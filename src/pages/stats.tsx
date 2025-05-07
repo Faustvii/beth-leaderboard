@@ -14,7 +14,7 @@ import { getActiveSeason, getSeasons } from "../db/queries/seasonQueries";
 import { isHxRequest, measure, notEmpty } from "../lib";
 import { getDatePartFromDate } from "../lib/dateUtils";
 import MatchStatistics from "../lib/matchStatistics";
-import { type Match } from "../lib/rating";
+import { type Match } from "../lib/ratings/rating";
 
 export const stats = new Elysia({
   prefix: "/stats",

@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import MatchStatistics from "../src/lib/matchStatistics";
-import { Match } from "../src/lib/rating";
+import { Match } from "../src/lib/ratings/rating";
 
 describe("stats", () => {
   test("should be able to calculate highest win&lose streaks", () => {

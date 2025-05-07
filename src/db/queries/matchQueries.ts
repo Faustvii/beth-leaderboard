@@ -2,7 +2,7 @@ import { and, eq, gte, inArray, lte } from "drizzle-orm";
 import { readDb, type CrokDbQueryable } from "..";
 import { notEmpty, unique } from "../../lib";
 import { shortName } from "../../lib/nameUtils";
-import { type Match } from "../../lib/rating";
+import { type Match } from "../../lib/ratings/rating";
 import { matches, userTbl } from "../schema";
 import { type Match as DbMatch } from "../schema/matches";
 

@@ -1,5 +1,5 @@
 import { MatchForm } from "../../../components/MatchForm";
-import { type Match } from "../../../lib/rating";
+import { type Match } from "../../../lib/ratings/rating";
 import { cn } from "../../../lib/utils";
 
 interface EditMatchModalProps {

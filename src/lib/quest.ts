@@ -2,7 +2,7 @@ import { isNull } from "drizzle-orm";
 import { readDb } from "../db";
 import { questTbl, type InsertQuest } from "../db/schema/quest";
 import { MapQuests } from "./quests/questMapper";
-import { type Match } from "./rating";
+import { type Match } from "./ratings/rating";
 
 export interface Quest<TConditionData> {
   id: number;

@@ -5,7 +5,7 @@ import {
   type QuestStatus,
   type QuestType,
 } from "../quest";
-import { type Match } from "../rating";
+import { type Match } from "../ratings/rating";
 
 export abstract class BaseQuest<TConditionData>
   implements Quest<TConditionData>

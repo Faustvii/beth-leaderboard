@@ -1,4 +1,4 @@
-import { type Match } from "../lib/rating";
+import { type Match } from "../lib/ratings/rating";
 import { DateAndTimePicker } from "./DateAndTimePicker";
 import { UserLookUp } from "./UserLookup";
 

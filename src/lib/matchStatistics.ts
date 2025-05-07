@@ -5,7 +5,7 @@ import {
   type Match,
   type Rating,
   type RatingSystem,
-} from "./rating";
+} from "./ratings/rating";
 
 export enum RESULT {
   WIN = "WIN",

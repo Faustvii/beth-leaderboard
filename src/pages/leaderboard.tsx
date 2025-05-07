@@ -15,7 +15,7 @@ import {
 import { type Season } from "../db/schema/season";
 import { isHxRequest } from "../lib";
 import MatchStatistics, { type RESULT } from "../lib/matchStatistics";
-import { getRatings, getRatingSystem } from "../lib/rating";
+import { getRatings, getRatingSystem } from "../lib/ratings/rating";
 
 const playerQuery = async (seasonId: number, isAuthenticated: boolean) => {
   const season = await getSeason(seasonId);

@@ -26,3 +26,10 @@
 3. Run `fly secrets set <NAME>=<VALUE>` (probably want to set `NODE_ENV` to `"production"`)
 
 4. Run `fly deploy`
+
+### Generating DB migration
+
+If you are having trouble with generated migrations just delete all tables then it seems to be a problem with Bun.
+Instead you can use node and it seems to work.
+
+Just run `npx drizzle-kit generate`.

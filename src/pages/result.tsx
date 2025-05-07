@@ -8,7 +8,7 @@ import { NavbarHtml } from "../components/Navbar";
 import { ctx } from "../context";
 import { getMatches } from "../db/queries/matchQueries";
 import { getSeason } from "../db/queries/seasonQueries";
-import { getMatchRatingDiff, getRatingSystem } from "../lib/rating";
+import { getMatchRatingDiff, getRatingSystem } from "../lib/ratings/rating";
 import { isDefined } from "../lib/utils";
 
 export const matchResult = new Elysia({

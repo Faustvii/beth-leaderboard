@@ -14,8 +14,12 @@ export const webhookTbl = sqliteTable(
     eventType: text("event_type", {
       enum: ["match", "season_end", "season_start"],
     }).notNull(), // Event type the subscriber is interested in
-    createdAt: integer("created_at").notNull().default(Date.now()), // Creation timestamp
-    updatedAt: integer("updated_at").notNull().default(Date.now()), // Last updated timestamp
+    createdAt: integer("created_at", { mode: "timestamp" })
+      .notNull()
+      .$defaultFn(() => new Date()), // Creation timestamp
+    updatedAt: integer("updated_at", { mode: "timestamp" })
+      .notNull()
+      .$defaultFn(() => new Date()), // Last updated timestamp
   },
   (table) => {
     return {

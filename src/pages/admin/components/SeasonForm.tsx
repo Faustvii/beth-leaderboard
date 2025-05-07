@@ -1,4 +1,8 @@
-import { type Season } from "../../../db/schema/season";
+import {
+  ratingSystemTypes,
+  type RatingSystemType,
+  type Season,
+} from "../../../db/schema/season";
 import { cn } from "../../../lib/utils";
 
 interface SeasonFormProps {
@@ -83,18 +87,13 @@ export const SeasonForm = ({
             form={formId}
             class="h-[34px] rounded-sm px-2 py-1 text-black"
           >
-            <option
-              value="openskill"
-              selected={season?.ratingSystem === "openskill"}
-            >
-              Openskill
-            </option>
-            <option value="elo" selected={season?.ratingSystem === "elo"}>
-              ELO
-            </option>
-            <option value="xp" selected={season?.ratingSystem === "xp"}>
-              XP
-            </option>
+            {ratingSystemTypes.map((type) => {
+              return (
+                <option value={type} selected={season?.ratingSystem === type}>
+                  {prettyRatingSystemType(type)}
+                </option>
+              );
+            })}
           </select>
         </div>
         <div class="flex w-full flex-col">
@@ -128,3 +127,18 @@ export const SeasonForm = ({
     </form>
   );
 };
+
+function prettyRatingSystemType(ratingSystem: RatingSystemType): string {
+  switch (ratingSystem) {
+    case "openskill":
+      return "OpenSkill";
+    case "elo":
+      return "ELO";
+    case "xp":
+      return "XP";
+    case "scoreDiff":
+      return "Score Difference";
+    default:
+      return ratingSystem;
+  }
+}

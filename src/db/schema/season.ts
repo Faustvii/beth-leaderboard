@@ -5,6 +5,13 @@ import {
   uniqueIndex,
 } from "drizzle-orm/sqlite-core";
 
+export const ratingSystemTypes = [
+  "elo",
+  "openskill",
+  "xp",
+  "scoreDiff",
+] as const;
+
 export const seasonsTbl = sqliteTable(
   "season",
   {
@@ -15,7 +22,7 @@ export const seasonsTbl = sqliteTable(
       .$defaultFn(() => new Date()),
     endAt: integer("endAt", { mode: "timestamp" }).notNull(),
     ratingSystem: text("ratingSystem", {
-      enum: ["elo", "openskill", "xp", "scoreDiff"],
+      enum: ratingSystemTypes,
     })
       .notNull()
       .default("elo"),

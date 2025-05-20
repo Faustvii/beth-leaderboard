@@ -8,8 +8,6 @@
 
 PRAGMA foreign_keys=off;--> statement-breakpoint
 
-BEGIN TRANSACTION;--> statement-breakpoint
-
 ALTER TABLE webhooks RENAME TO _webhooks_old;--> statement-breakpoint
 
 CREATE TABLE webhooks (
@@ -26,7 +24,5 @@ INSERT INTO webhooks (id, url, secret, event_type, created_at, updated_at)
   FROM _webhooks_old;--> statement-breakpoint
 
 DROP TABLE _webhooks_old;--> statement-breakpoint
-
-COMMIT;--> statement-breakpoint
 
 PRAGMA foreign_keys=on;

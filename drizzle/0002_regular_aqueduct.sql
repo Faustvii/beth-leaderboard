@@ -12,7 +12,7 @@ CREATE TABLE `new_match` (
     `seasonId` integer NOT NULL REFERENCES season(id)
 );--> statement-breakpoint
 
-insert into "season" ("id", "name", "startAt", "endAt") values (null, "Season 1", 1672527600, 1704063600);--> statement-breakpoint
+insert into "season" ("id", "name", "startAt", "endAt") values (null, 'Season 1', 1672527600, 1704063600);--> statement-breakpoint
 
 INSERT INTO new_match (
         white_player_one,

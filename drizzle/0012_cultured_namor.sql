@@ -6,11 +6,11 @@
  paragraph from https://www.techonthenet.com/sqlite/tables/alter_table.php
 */
 
-PRAGMA foreign_keys=off;
+PRAGMA foreign_keys=off;--> statement-breakpoint
 
-BEGIN TRANSACTION;
+BEGIN TRANSACTION;--> statement-breakpoint
 
-ALTER TABLE webhooks RENAME TO _webhooks_old;
+ALTER TABLE webhooks RENAME TO _webhooks_old;--> statement-breakpoint
 
 CREATE TABLE webhooks (
 	id integer PRIMARY KEY AUTOINCREMENT NOT NULL,
@@ -19,14 +19,14 @@ CREATE TABLE webhooks (
 	event_type text NOT NULL,
 	created_at integer NOT NULL,
 	updated_at integer NOT NULL
-);
+);--> statement-breakpoint
 
 INSERT INTO webhooks (id, url, secret, event_type, created_at, updated_at)
   SELECT id, url, secret, event_type, created_at, updated_at
-  FROM _webhooks_old;
+  FROM _webhooks_old;--> statement-breakpoint
 
-DROP TABLE _webhooks_old;
+DROP TABLE _webhooks_old;--> statement-breakpoint
 
-COMMIT;
+COMMIT;--> statement-breakpoint
 
 PRAGMA foreign_keys=on;

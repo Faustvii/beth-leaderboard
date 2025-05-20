@@ -4,6 +4,7 @@ on:
     paths:
       - "src/**"
       - "test/**"
+      - "drizzle/**"
       - ".github/**"
       - "Dockerfile"
       - "package.json"
@@ -14,6 +15,7 @@ on:
     paths:
       - "src/**"
       - "test/**"
+      - "drizzle/**"
       - ".github/**"
       - "Dockerfile"
       - "package.json"

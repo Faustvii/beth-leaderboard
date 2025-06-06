@@ -5,6 +5,15 @@ import {
   uniqueIndex,
 } from "drizzle-orm/sqlite-core";
 
+export const allTimeSeason: Season = {
+  id: 0,
+  name: "All Time",
+  startAt: new Date(0), // 1970-01-01
+  endAt: new Date(32503676400000), // 3000-01-01
+  ratingSystem: "openskill",
+  ratingEventSystem: "none",
+};
+
 export const ratingSystemTypes = [
   "elo",
   "openskill",

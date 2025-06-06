@@ -107,10 +107,15 @@ async function profilePage(
 
 async function page(session: Session | null, userId: string, seasonId: number) {
   const season = await getSeason(seasonId);
-  const ratingSystem = getRatingSystem(season?.ratingSystem ?? "elo");
+
+  if (!season) {
+    return <LayoutHtml>Season not found</LayoutHtml>;
+  }
+
+  const ratingSystem = getRatingSystem(season.ratingSystem ?? "elo");
 
   const { elaspedTimeMs, result: matches } = await measure(() =>
-    getMatches(seasonId, !!session?.user),
+    getMatches(season, !!session?.user),
   );
   console.log(`player stats took ${elaspedTimeMs}ms to get from db`);
   const activeQuestsForProfile = await getActiveQuestsForPlayer(userId);

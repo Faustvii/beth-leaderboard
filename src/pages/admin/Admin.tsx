@@ -20,6 +20,7 @@ import {
 } from "../../db/queries/seasonQueries";
 import { matches, seasonsTbl } from "../../db/schema";
 import { userTbl, type User } from "../../db/schema/auth";
+import { allTimeSeason } from "../../db/schema/season";
 import { isHxRequest, redirect } from "../../lib";
 import { fromTimezoneToUTC } from "../../lib/dateUtils";
 import { syncIfLocal } from "../../lib/dbHelpers";
@@ -291,13 +292,9 @@ async function adminPage(
 
 async function page(session: Session | null) {
   const seasons = await getSeasons();
-  const activeSeason = await getActiveSeason();
+  const activeSeason = (await getActiveSeason()) ?? allTimeSeason;
 
-  // Fallback to first season if activeSeason is undefined :shrug:
-  const matchesWithPlayers = await getMatches(
-    activeSeason?.id ?? 0,
-    !!session?.user,
-  );
+  const matchesWithPlayers = await getMatches(activeSeason, !!session?.user);
   const globalMatchHistory = matchesWithPlayers
     .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
     .slice(0, 8)

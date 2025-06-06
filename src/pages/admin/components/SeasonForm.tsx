@@ -3,6 +3,7 @@ import {
   type RatingSystemType,
   type Season,
 } from "../../../db/schema/season";
+import { prettyRatingSystemType } from "../../../lib/ratings/rating";
 import { cn } from "../../../lib/utils";
 
 interface SeasonFormProps {
@@ -127,18 +128,3 @@ export const SeasonForm = ({
     </form>
   );
 };
-
-function prettyRatingSystemType(ratingSystem: RatingSystemType): string {
-  switch (ratingSystem) {
-    case "openskill":
-      return "OpenSkill";
-    case "elo":
-      return "ELO";
-    case "xp":
-      return "XP";
-    case "scoreDiff":
-      return "Score Difference";
-    default:
-      return ratingSystem;
-  }
-}

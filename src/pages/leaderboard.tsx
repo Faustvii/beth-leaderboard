@@ -22,6 +22,7 @@ import MatchStatistics, { type RESULT } from "../lib/matchStatistics";
 import {
   getRatings,
   getRatingSystem,
+  prettyRatingSystemType,
   RatingSystem,
 } from "../lib/ratings/rating";
 
@@ -117,22 +118,22 @@ async function LeaderboardTable(
       <NavbarHtml session={session} activePage="leaderboard" />
       <div class="flex flex-row justify-between">
         <HeaderHtml title="Leaderboard" />
-        <div class="p-5">
-          <SelectGet
-            options={ratingSystemTypes.map((type) => ({
-              path: `/leaderboard/?season=${season.id}&ratingSystem=${type}`,
-              text: type,
-            }))}
-            selectedIndex={ratingSystemTypes.findIndex(
-              (type) => ratingSystemType === type,
-            )}
-          ></SelectGet>
+        <div class="flex flex-row gap-2 p-5">
           <SelectGet
             options={seasons.map((season) => ({
               path: `/leaderboard/?season=${season.id}&ratingSystem=${ratingSystemType}`,
               text: season.name,
             }))}
             selectedIndex={seasons.findIndex((s) => s.id === season.id)}
+          ></SelectGet>
+          <SelectGet
+            options={ratingSystemTypes.map((type) => ({
+              path: `/leaderboard/?season=${season.id}&ratingSystem=${type}`,
+              text: prettyRatingSystemType(type),
+            }))}
+            selectedIndex={ratingSystemTypes.findIndex(
+              (type) => ratingSystemType === type,
+            )}
           ></SelectGet>
         </div>
       </div>

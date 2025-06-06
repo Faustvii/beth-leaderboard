@@ -220,3 +220,18 @@ export function getRatingSystem(type: RatingSystemType): RatingSystem<Rating> {
       return elo() as RatingSystem<Rating>;
   }
 }
+
+export function prettyRatingSystemType(ratingSystem: RatingSystemType): string {
+  switch (ratingSystem) {
+    case "openskill":
+      return "OpenSkill";
+    case "elo":
+      return "ELO";
+    case "xp":
+      return "XP";
+    case "scoreDiff":
+      return "Score Difference";
+    default:
+      return ratingSystem;
+  }
+}

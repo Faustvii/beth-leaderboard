@@ -12,16 +12,32 @@ import {
   getSeason,
   getSeasons,
 } from "../db/queries/seasonQueries";
-import { type Season } from "../db/schema/season";
+import {
+  RatingSystemType,
+  ratingSystemTypes,
+  type Season,
+} from "../db/schema/season";
 import { isHxRequest } from "../lib";
 import MatchStatistics, { type RESULT } from "../lib/matchStatistics";
-import { getRatings, getRatingSystem } from "../lib/ratings/rating";
+import {
+  getRatings,
+  getRatingSystem,
+  RatingSystem,
+} from "../lib/ratings/rating";
 
-const playerQuery = async (seasonId: number, isAuthenticated: boolean) => {
+const playerQuery = async (
+  seasonId: number,
+  ratingSystemType: RatingSystemType,
+  isAuthenticated: boolean,
+) => {
   const season = await getSeason(seasonId);
-  const ratingSystem = getRatingSystem(season?.ratingSystem ?? "elo");
+  if (!season) {
+    return [];
+  }
 
-  const matches = await getMatches(seasonId, isAuthenticated);
+  const ratingSystem = getRatingSystem(ratingSystemType ?? season.ratingSystem);
+
+  const matches = await getMatches(season, isAuthenticated);
   const players = getRatings(matches, ratingSystem);
 
   const lastPlayed = MatchStatistics.latestMatch(matches);
@@ -52,27 +68,36 @@ export const leaderboard = new Elysia({
   prefix: "/leaderboard",
 })
   .use(ctx)
-  .get("/", async ({ html, session, headers }) => {
-    const activeSeason = await getActiveSeason();
-    const activeSeasonId = activeSeason?.id ?? 1;
-    return html(() => LeaderboardPage(session, headers, activeSeasonId));
-  })
-  .get("/:seasonId", async ({ html, session, headers, params }) => {
-    const seasonId = parseInt(params.seasonId, 10);
-    return html(() => LeaderboardPage(session, headers, seasonId));
+  .get("/", async ({ html, session, headers, query }) => {
+    const season = query.season
+      ? await getSeason(parseInt(query.season, 10))
+      : await getActiveSeason();
+    if (!season) {
+      return <LayoutHtml>Season not found</LayoutHtml>;
+    }
+    const ratingSystemType = !!query.ratingSystem
+      ? (query.ratingSystem as RatingSystemType)
+      : "openskill";
+
+    return html(() =>
+      LeaderboardPage(session, headers, season, ratingSystemType),
+    );
   });
 
 export async function LeaderboardPage(
   session: Session | null,
   headers: Record<string, string | null>,
-  seasonId: number,
+  season: Season,
+  ratingSystemType: RatingSystemType,
 ) {
   return (
     <>
       {isHxRequest(headers) ? (
-        LeaderboardTable(session, seasonId)
+        LeaderboardTable(session, season, ratingSystemType)
       ) : (
-        <LayoutHtml>{LeaderboardTable(session, seasonId)}</LayoutHtml>
+        <LayoutHtml>
+          {LeaderboardTable(session, season, ratingSystemType)}
+        </LayoutHtml>
       )}
     </>
   );
@@ -80,10 +105,11 @@ export async function LeaderboardPage(
 
 async function LeaderboardTable(
   session: Session | null,
-  seasonId: number,
+  season: Season,
+  ratingSystemType: RatingSystemType,
 ): Promise<JSX.Element> {
   const isAuthenticated = !!session?.user;
-  const rows = await playerQuery(seasonId, isAuthenticated);
+  const rows = await playerQuery(season.id, ratingSystemType, isAuthenticated);
   const seasons = await getSeasons();
 
   return (
@@ -93,19 +119,26 @@ async function LeaderboardTable(
         <HeaderHtml title="Leaderboard" />
         <div class="p-5">
           <SelectGet
+            options={ratingSystemTypes.map((type) => ({
+              path: `/leaderboard/?season=${season.id}&ratingSystem=${type}`,
+              text: type,
+            }))}
+            selectedIndex={ratingSystemTypes.findIndex(
+              (type) => ratingSystemType === type,
+            )}
+          ></SelectGet>
+          <SelectGet
             options={seasons.map((season) => ({
-              path: `/leaderboard/${season.id}`,
+              path: `/leaderboard/?season=${season.id}&ratingSystem=${ratingSystemType}`,
               text: season.name,
             }))}
-            selectedIndex={seasons.findIndex(
-              (season) => season.id === seasonId,
-            )}
+            selectedIndex={seasons.findIndex((s) => s.id === season.id)}
           ></SelectGet>
         </div>
       </div>
       <LeaderboardTableHtml
         rows={rows}
-        isCurrentSeason={isCurrentSeason(seasonId, seasons)}
+        isCurrentSeason={isCurrentSeason(season.id, seasons)}
       ></LeaderboardTableHtml>
     </>
   );

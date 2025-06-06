@@ -31,9 +31,13 @@ async function page(
   matchId: number,
 ) {
   const season = await getSeason(seasonId);
+  if (!season) {
+    return <LayoutHtml>Season not found</LayoutHtml>;
+  }
+
   const ratingSystem = getRatingSystem(season?.ratingSystem ?? "elo");
 
-  const allMatchesInSeason = await getMatches(seasonId, !!session?.user);
+  const allMatchesInSeason = await getMatches(season, !!session?.user);
   const allMatchesInSeasonSorted = allMatchesInSeason.toSorted(
     (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),
   );

@@ -10,7 +10,12 @@ import { SelectGet } from "../components/SelectGet";
 import { StatsCardHtml } from "../components/StatsCard";
 import { ctx } from "../context";
 import { getMatches } from "../db/queries/matchQueries";
-import { getActiveSeason, getSeasons } from "../db/queries/seasonQueries";
+import {
+  getActiveSeason,
+  getSeason,
+  getSeasons,
+} from "../db/queries/seasonQueries";
+import { RatingSystemType, Season } from "../db/schema/season";
 import { isHxRequest, measure, notEmpty } from "../lib";
 import { getDatePartFromDate } from "../lib/dateUtils";
 import MatchStatistics from "../lib/matchStatistics";
@@ -20,35 +25,44 @@ export const stats = new Elysia({
   prefix: "/stats",
 })
   .use(ctx)
-  .get("/", async ({ html, session, headers }) => {
-    const activeSeason = await getActiveSeason();
-    const activeSeasonId = activeSeason?.id ?? 1;
-    return html(() => statsPage(session, headers, activeSeasonId));
-  })
-  .get("/:seasonId", async ({ html, session, headers, params }) => {
-    const seasonId = parseInt(params.seasonId, 10);
-    return html(() => statsPage(session, headers, seasonId));
+  .get("/", async ({ html, session, headers, query }) => {
+    const season = query.season
+      ? await getSeason(parseInt(query.season, 10))
+      : await getActiveSeason();
+    if (!season) {
+      return <LayoutHtml>Season not found</LayoutHtml>;
+    }
+    const ratingSystemType = query.ratingSystem
+      ? (query.ratingSystem as RatingSystemType)
+      : "openskill";
+
+    return html(() => statsPage(session, headers, season, ratingSystemType));
   });
 
 async function statsPage(
   session: Session | null,
   headers: Record<string, string | null>,
-  seasonId: number,
+  season: Season,
+  ratingSystemType: RatingSystemType,
 ) {
   return (
     <>
       {isHxRequest(headers) ? (
-        page(session, seasonId)
+        page(session, season, ratingSystemType)
       ) : (
-        <LayoutHtml>{page(session, seasonId)}</LayoutHtml>
+        <LayoutHtml>{page(session, season, ratingSystemType)}</LayoutHtml>
       )}
     </>
   );
 }
 
-async function page(session: Session | null, seasonId: number) {
+async function page(
+  session: Session | null,
+  season: Season,
+  ratingSystemType: RatingSystemType,
+) {
   const { elaspedTimeMs, result: matches } = await measure(async () => {
-    return await getMatches(seasonId, !!session?.user);
+    return await getMatches(season, !!session?.user);
   });
   console.log("stats page database calls", elaspedTimeMs, "ms");
 
@@ -128,12 +142,10 @@ async function page(session: Session | null, seasonId: number) {
         <div class="p-5">
           <SelectGet
             options={seasons.map((season) => ({
-              path: `/stats/${season.id}`,
+              path: `/stats/?season=${season.id}&ratingSystem=${ratingSystemType}`,
               text: season.name,
             }))}
-            selectedIndex={seasons.findIndex(
-              (season) => season.id === seasonId,
-            )}
+            selectedIndex={seasons.findIndex((s) => s.id === season.id)}
           ></SelectGet>
         </div>
       </div>

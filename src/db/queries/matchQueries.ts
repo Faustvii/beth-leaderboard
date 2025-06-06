@@ -1,4 +1,4 @@
-import { and, eq, gte, inArray, lte } from "drizzle-orm";
+import { and, between, eq, gte, inArray, lte } from "drizzle-orm";
 import { readDb, type CrokDbQueryable } from "..";
 import { notEmpty, unique } from "../../lib";
 import { shortName } from "../../lib/nameUtils";
@@ -7,11 +7,14 @@ import { matches, userTbl } from "../schema";
 import { type Match as DbMatch } from "../schema/matches";
 
 export const getMatches = async (
-  seasonId: number,
+  season: {
+    startAt: Date;
+    endAt: Date;
+  },
   isAuthenticated: boolean,
 ): Promise<Match[]> => {
   const result = await readDb.query.matches.findMany({
-    where: eq(matches.seasonId, seasonId),
+    where: between(matches.createdAt, season.startAt, season.endAt),
   });
 
   return getMatchesWithPlayers(result, isAuthenticated);

@@ -1,22 +1,18 @@
+import { Html } from "@kitajs/html";
 import { Elysia } from "elysia";
 import { type Session } from "lucia";
 import { HeaderHtml } from "../components/header";
 import { LayoutHtml } from "../components/Layout";
 import { LeaderboardTableHtml } from "../components/LeaderboardTable";
 import { NavbarHtml } from "../components/Navbar";
-import { SelectGet } from "../components/SelectGet";
 import { ctx } from "../context";
 import { getMatches } from "../db/queries/matchQueries";
 import { getSeasons } from "../db/queries/seasonQueries";
-import { ratingSystemTypes, type Season } from "../db/schema/season";
+import { type Season } from "../db/schema/season";
 import { isHxRequest } from "../lib";
 import MatchStatistics, { type RESULT } from "../lib/matchStatistics";
-import {
-  getRatings,
-  prettyRatingSystemType,
-  Rating,
-  RatingSystem,
-} from "../lib/ratings/rating";
+import { getRatings, Rating, RatingSystem } from "../lib/ratings/rating";
+import { SeasonPicker } from "./admin/components/SeasonPicker";
 
 const playerQuery = async (
   season: Season,
@@ -91,24 +87,11 @@ async function LeaderboardTable(
       <NavbarHtml session={session} activePage="leaderboard" />
       <div class="flex flex-row justify-between">
         <HeaderHtml title="Leaderboard" />
-        <div class="flex flex-row gap-2 p-5">
-          <SelectGet
-            options={seasons.map((season) => ({
-              path: `/leaderboard/?season=${season.id}&ratingSystem=${ratingSystem.type}`,
-              text: season.name,
-            }))}
-            selectedIndex={seasons.findIndex((s) => s.id === season.id)}
-          ></SelectGet>
-          <SelectGet
-            options={ratingSystemTypes.map((type) => ({
-              path: `/leaderboard/?season=${season.id}&ratingSystem=${type}`,
-              text: prettyRatingSystemType(type),
-            }))}
-            selectedIndex={ratingSystemTypes.findIndex(
-              (type) => ratingSystem.type === type,
-            )}
-          ></SelectGet>
-        </div>
+        <SeasonPicker
+          basePath="/leaderboard"
+          season={season}
+          ratingSystem={ratingSystem}
+        />
       </div>
       <LeaderboardTableHtml
         rows={rows}

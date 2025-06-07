@@ -6,7 +6,6 @@ import { HeaderHtml } from "../components/header";
 import { LayoutHtml } from "../components/Layout";
 import { MatchResultLink } from "../components/MatchResultLink";
 import { NavbarHtml } from "../components/Navbar";
-import { SelectGet } from "../components/SelectGet";
 import { StatsCardHtml } from "../components/StatsCard";
 import { ctx } from "../context";
 import { getMatches } from "../db/queries/matchQueries";
@@ -16,6 +15,7 @@ import { isHxRequest, measure, notEmpty } from "../lib";
 import { getDatePartFromDate } from "../lib/dateUtils";
 import MatchStatistics from "../lib/matchStatistics";
 import { Rating, RatingSystem, type Match } from "../lib/ratings/rating";
+import { SeasonPicker } from "./admin/components/SeasonPicker";
 
 export const stats = new Elysia({
   prefix: "/stats",
@@ -125,15 +125,7 @@ async function page(
       <NavbarHtml session={session} activePage="stats" />
       <div class="flex flex-row justify-between">
         <HeaderHtml title="Statistics" />
-        <div class="p-5">
-          <SelectGet
-            options={seasons.map((season) => ({
-              path: `/stats/?season=${season.id}&ratingSystem=${ratingSystem.type}`,
-              text: season.name,
-            }))}
-            selectedIndex={seasons.findIndex((s) => s.id === season.id)}
-          ></SelectGet>
-        </div>
+        <SeasonPicker basePath="/stats" season={season} />
       </div>
       <div class="grid grid-cols-6 gap-3 md:grid-cols-12">
         <StatsCardHtml title="Games">

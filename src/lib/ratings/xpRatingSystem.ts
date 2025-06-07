@@ -66,6 +66,7 @@ export function xp(config?: XPConfig): RatingSystem<XPRating> {
   }
 
   return {
+    type: "xp",
     defaultRating: 0,
 
     rateMatch(match: MatchWithRatings<XPRating>): PlayerWithRating<XPRating>[] {

@@ -15,13 +15,10 @@ import { StatsCardHtml } from "../components/StatsCard";
 import { ctx } from "../context";
 import { getMatches } from "../db/queries/matchQueries";
 import { getActiveQuestsForPlayer } from "../db/queries/questQueries";
-import {
-  getActiveSeason,
-  getSeason,
-  getSeasons,
-} from "../db/queries/seasonQueries";
+import { getSeasons } from "../db/queries/seasonQueries";
 import { getUser } from "../db/queries/userQueries";
 import { userTbl } from "../db/schema/auth";
+import { Season } from "../db/schema/season";
 import { isHxRequest, measure, notEmpty, redirect } from "../lib";
 import { syncIfLocal } from "../lib/dbHelpers";
 import MatchStatistics, {
@@ -30,7 +27,6 @@ import MatchStatistics, {
 } from "../lib/matchStatistics";
 import { MaxQuestPerPlayer, type Quest } from "../lib/quest";
 import {
-  getRatingSystem,
   type Match,
   type Rating,
   type RatingSystem,
@@ -41,26 +37,25 @@ export const profile = new Elysia({
   prefix: "/profile",
 })
   .use(ctx)
-  .get("/", async ({ html, session, headers }) => {
-    const activeSeason = await getActiveSeason();
-    const activeSeasonId = activeSeason?.id ?? 1;
+  .get("/", async ({ html, session, headers, season, ratingSystem }) => {
     return html(() =>
-      profilePage(session, headers, session?.user?.id ?? "", activeSeasonId),
+      profilePage(
+        session,
+        headers,
+        session?.user?.id ?? "",
+        season,
+        ratingSystem,
+      ),
     );
   })
-  .get("/season/:seasonId", async ({ html, session, headers, params }) => {
-    const seasonId = parseInt(params.seasonId, 10);
-    return html(() =>
-      profilePage(session, headers, session?.user?.id ?? "", seasonId),
-    );
-  })
-  .get("/:userId", async ({ html, params, headers, session }) => {
-    const activeSeason = await getActiveSeason();
-    const activeSeasonId = activeSeason?.id ?? 1;
-    return html(() =>
-      profilePage(session, headers, params.userId, activeSeasonId),
-    );
-  })
+  .get(
+    "/:userId",
+    async ({ html, params, headers, session, season, ratingSystem }) => {
+      return html(() =>
+        profilePage(session, headers, params.userId, season, ratingSystem),
+      );
+    },
+  )
   .put(
     "/",
     async ({ set, headers, body: { nickname }, writeDb, session }) => {
@@ -79,41 +74,32 @@ export const profile = new Elysia({
         nickname: t.String({ minLength: 1, maxLength: 30 }),
       }),
     },
-  )
-  .get(
-    "/:userId/season/:seasonId",
-    async ({ html, params, headers, session }) => {
-      const seasonId = parseInt(params.seasonId, 10);
-      return html(() => profilePage(session, headers, params.userId, seasonId));
-    },
   );
 
 async function profilePage(
   session: Session | null,
   headers: Record<string, string | null>,
   userId: string,
-  seasonId: number,
+  season: Season,
+  ratingSystem: RatingSystem<Rating>,
 ) {
   return (
     <>
       {isHxRequest(headers) ? (
-        page(session, userId, seasonId)
+        page(session, userId, season, ratingSystem)
       ) : (
-        <LayoutHtml>{page(session, userId, seasonId)}</LayoutHtml>
+        <LayoutHtml>{page(session, userId, season, ratingSystem)}</LayoutHtml>
       )}
     </>
   );
 }
 
-async function page(session: Session | null, userId: string, seasonId: number) {
-  const season = await getSeason(seasonId);
-
-  if (!season) {
-    return <LayoutHtml>Season not found</LayoutHtml>;
-  }
-
-  const ratingSystem = getRatingSystem(season.ratingSystem ?? "elo");
-
+async function page(
+  session: Session | null,
+  userId: string,
+  season: Season,
+  ratingSystem: RatingSystem<Rating>,
+) {
   const { elaspedTimeMs, result: matches } = await measure(() =>
     getMatches(season, !!session?.user),
   );
@@ -147,12 +133,10 @@ async function page(session: Session | null, userId: string, seasonId: number) {
         <div class="p-5">
           <SelectGet
             options={seasons.map((season) => ({
-              path: `/profile/${userId}/season/${season.id}`,
+              path: `/profile/${userId}?season=${season.id}`,
               text: season.name,
             }))}
-            selectedIndex={seasons.findIndex(
-              (season) => season.id === seasonId,
-            )}
+            selectedIndex={seasons.findIndex((s) => s.id === season.id)}
           ></SelectGet>
         </div>
       </div>

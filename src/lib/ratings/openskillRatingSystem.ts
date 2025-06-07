@@ -18,6 +18,7 @@ export function openskill(options?: Options): RatingSystem<OpenskillRating> {
   };
 
   return {
+    type: "openskill",
     defaultRating: rating(selectedOptions),
 
     rateMatch(

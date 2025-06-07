@@ -10,6 +10,7 @@ import { xp, type XPRating } from "./xpRatingSystem";
 export type Rating = EloRating | XPRating | OpenskillRating;
 
 export interface RatingSystem<TRating> {
+  type: RatingSystemType;
   defaultRating: TRating;
   rateMatch: (match: MatchWithRatings<TRating>) => PlayerWithRating<TRating>[];
   toNumber: (rating: TRating) => number;

@@ -17,6 +17,7 @@ export function scoreDiff(): RatingSystem<ScoreDiffRating> {
   */
 
   return {
+    type: "scoreDiff",
     defaultRating: 0,
 
     rateMatch(

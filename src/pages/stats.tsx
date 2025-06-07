@@ -10,47 +10,33 @@ import { SelectGet } from "../components/SelectGet";
 import { StatsCardHtml } from "../components/StatsCard";
 import { ctx } from "../context";
 import { getMatches } from "../db/queries/matchQueries";
-import {
-  getActiveSeason,
-  getSeason,
-  getSeasons,
-} from "../db/queries/seasonQueries";
-import { RatingSystemType, Season } from "../db/schema/season";
+import { getSeasons } from "../db/queries/seasonQueries";
+import { Season } from "../db/schema/season";
 import { isHxRequest, measure, notEmpty } from "../lib";
 import { getDatePartFromDate } from "../lib/dateUtils";
 import MatchStatistics from "../lib/matchStatistics";
-import { type Match } from "../lib/ratings/rating";
+import { Rating, RatingSystem, type Match } from "../lib/ratings/rating";
 
 export const stats = new Elysia({
   prefix: "/stats",
 })
   .use(ctx)
-  .get("/", async ({ html, session, headers, query }) => {
-    const season = query.season
-      ? await getSeason(parseInt(query.season, 10))
-      : await getActiveSeason();
-    if (!season) {
-      return <LayoutHtml>Season not found</LayoutHtml>;
-    }
-    const ratingSystemType = query.ratingSystem
-      ? (query.ratingSystem as RatingSystemType)
-      : "openskill";
-
-    return html(() => statsPage(session, headers, season, ratingSystemType));
+  .get("/", async ({ html, session, headers, season, ratingSystem }) => {
+    return html(() => statsPage(session, headers, season, ratingSystem));
   });
 
 async function statsPage(
   session: Session | null,
   headers: Record<string, string | null>,
   season: Season,
-  ratingSystemType: RatingSystemType,
+  ratingSystem: RatingSystem<Rating>,
 ) {
   return (
     <>
       {isHxRequest(headers) ? (
-        page(session, season, ratingSystemType)
+        page(session, season, ratingSystem)
       ) : (
-        <LayoutHtml>{page(session, season, ratingSystemType)}</LayoutHtml>
+        <LayoutHtml>{page(session, season, ratingSystem)}</LayoutHtml>
       )}
     </>
   );
@@ -59,7 +45,7 @@ async function statsPage(
 async function page(
   session: Session | null,
   season: Season,
-  ratingSystemType: RatingSystemType,
+  ratingSystem: RatingSystem<Rating>,
 ) {
   const { elaspedTimeMs, result: matches } = await measure(async () => {
     return await getMatches(season, !!session?.user);
@@ -142,7 +128,7 @@ async function page(
         <div class="p-5">
           <SelectGet
             options={seasons.map((season) => ({
-              path: `/stats/?season=${season.id}&ratingSystem=${ratingSystemType}`,
+              path: `/stats/?season=${season.id}&ratingSystem=${ratingSystem.type}`,
               text: season.name,
             }))}
             selectedIndex={seasons.findIndex((s) => s.id === season.id)}

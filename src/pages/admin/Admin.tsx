@@ -14,7 +14,6 @@ import {
 } from "../../db/queries/matchQueries";
 import {
   deleteSeason,
-  getActiveSeason,
   getSeason,
   getSeasons,
 } from "../../db/queries/seasonQueries";
@@ -292,9 +291,8 @@ async function adminPage(
 
 async function page(session: Session | null) {
   const seasons = await getSeasons();
-  const activeSeason = (await getActiveSeason()) ?? allTimeSeason;
 
-  const matchesWithPlayers = await getMatches(activeSeason, !!session?.user);
+  const matchesWithPlayers = await getMatches(allTimeSeason, !!session?.user);
   const globalMatchHistory = matchesWithPlayers
     .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
     .slice(0, 8)

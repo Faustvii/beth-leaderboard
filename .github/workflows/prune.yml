@@ -29,6 +29,7 @@ jobs:
           container: beth-leaderboard
           dry-run: true # Dry-run first, then change to `false`
           keep-younger-than: 10 # days
-          keep-tags-regexes: |
+          keep-tags: |
             pr-latest
             latest
+          prune-tags-regexes: .*

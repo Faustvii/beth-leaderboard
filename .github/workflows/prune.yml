@@ -1,0 +1,21 @@
+on:
+  schedule:
+    - cron: "0 0 * * *" # Runs every day at midnight
+  workflow_dispatch:
+
+permissions:
+  packages: write # to be able to delete images
+
+jobs:
+  prune:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Prune
+        uses: vlaurin/action-ghcr-prune@v0.6.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          container: beth-leaderboard
+          dry-run: true # Dry-run first, then change to `false`
+          keep-younger-than: 3 # days
+          keep-last: 2
+          prune-untagged: true

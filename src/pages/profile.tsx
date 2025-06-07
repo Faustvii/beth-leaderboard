@@ -10,7 +10,6 @@ import { MatchResultLink } from "../components/MatchResultLink";
 import { NavbarHtml } from "../components/Navbar";
 import { ProfileForm } from "../components/ProfileForm";
 import { QuestDescription } from "../components/QuestDescription";
-import { SelectGet } from "../components/SelectGet";
 import { StatsCardHtml } from "../components/StatsCard";
 import { ctx } from "../context";
 import { getMatches } from "../db/queries/matchQueries";
@@ -32,6 +31,7 @@ import {
   type RatingSystem,
 } from "../lib/ratings/rating";
 import { cn } from "../lib/utils";
+import { SeasonPicker } from "./admin/components/SeasonPicker";
 
 export const profile = new Elysia({
   prefix: "/profile",
@@ -129,16 +129,7 @@ async function page(
         ) : (
           <HeaderHtml title={header} />
         )}
-
-        <div class="p-5">
-          <SelectGet
-            options={seasons.map((season) => ({
-              path: `/profile/${userId}?season=${season.id}`,
-              text: season.name,
-            }))}
-            selectedIndex={seasons.findIndex((s) => s.id === season.id)}
-          ></SelectGet>
-        </div>
+        <SeasonPicker basePath={`/profile/${userId}`} season={season} />
       </div>
       {profileQuests(activeQuestsForProfile)}
       {profileStats(matches, userId, ratingSystem)}

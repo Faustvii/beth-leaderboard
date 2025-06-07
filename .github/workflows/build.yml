@@ -86,16 +86,9 @@ jobs:
       WEBHOOK_SECRET: ${{ secrets.RENOVATE_WEBHOOK_SECRET }}
       TARGET_REPO: ${{ secrets.RENOVATE_TARGET_REPO }}
     steps:
-      - name: Trigger Renovate via Webhook
+      - name: Trigger Renovate via API
         run: |
-          PAYLOAD="{\"event\":\"repository\",\"repository\":\"$TARGET_REPO\"}"
-          echo "Payload: $PAYLOAD"
-          SIGNATURE=$(echo -n "$PAYLOAD" | openssl dgst -sha1 -hmac "$WEBHOOK_SECRET" | sed 's/^.* //')
-          DELIVERY_ID=$(uuidgen)
-
-          curl -X POST "$WEBHOOK_URL" \
+          curl -X POST "$WEBHOOK_URL/api/job/add" \
             -H "Content-Type: application/json" \
-            -H "X-Hub-Signature: sha1=$SIGNATURE" \
-            -H "X-GitHub-Delivery: $DELIVERY_ID" \
-            -H "X-GitHub-Event: repository" \
-            -d "$PAYLOAD"
+            -H "Authorization: $WEBHOOK_SECRET" \
+            -d "{\"repository\": \"$TARGET_REPO\"}"

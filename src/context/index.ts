@@ -4,7 +4,14 @@ import { Elysia } from "elysia";
 import { readAuth, writeAuth } from "../auth";
 import { config } from "../config";
 import { readClient, readDb, writeDb } from "../db";
+import { getActiveSeason, getSeason } from "../db/queries/seasonQueries";
+import {
+  allTimeSeason,
+  RatingSystemType,
+  ratingSystemTypes,
+} from "../db/schema/season";
 import { redirect } from "../lib";
+import { getRatingSystem } from "../lib/ratings/rating";
 import { htmlRender } from "../lib/render";
 
 export const ctx = new Elysia({
@@ -42,4 +49,40 @@ export const ctx = new Elysia({
     const session = await authRequest.validate();
     const userRoles = session?.user.roles?.split(",") ?? [];
     return { session, userRoles };
+  })
+  .derive(async ({ query }) => {
+    // Get season with the following priority:
+    // 1. Season specified in query
+    // 2. Season active in the database
+    // 3. "All time" season
+    let season = allTimeSeason;
+    if (!!query.season) {
+      const selectedSeason = await getSeason(parseInt(query.season, 10));
+      if (selectedSeason) {
+        season = selectedSeason;
+      }
+    } else {
+      const activeSeason = await getActiveSeason();
+      if (activeSeason) {
+        season = activeSeason;
+      }
+    }
+
+    // Get rating system type with the following priority:
+    // 1. Rating system specified in query
+    // 2. Rating system of the season previously found
+    let ratingSystemType: RatingSystemType = season.ratingSystem;
+    if (
+      !!query.ratingSystem &&
+      ratingSystemTypes.includes(query.ratingSystem as RatingSystemType)
+    ) {
+      ratingSystemType = query.ratingSystem as RatingSystemType;
+    }
+
+    const ratingSystem = getRatingSystem(ratingSystemType);
+
+    return {
+      season,
+      ratingSystem,
+    };
   });

@@ -45,6 +45,7 @@ export function elo(config?: EloConfig): RatingSystem<EloRating> {
   }
 
   return {
+    type: "elo",
     defaultRating: 1500,
 
     rateMatch(

@@ -89,6 +89,7 @@ jobs:
       - name: Trigger Renovate via Webhook
         run: |
           PAYLOAD="{\"event\":\"repository\",\"repository\":\"$TARGET_REPO\"}"
+          echo "Payload: $PAYLOAD"
           SIGNATURE=$(echo -n "$PAYLOAD" | openssl dgst -sha1 -hmac "$WEBHOOK_SECRET" | sed 's/^.* //')
           DELIVERY_ID=$(uuidgen)
 

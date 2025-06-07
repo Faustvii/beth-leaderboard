@@ -1,8 +1,4 @@
-import {
-  ratingSystemTypes,
-  type RatingSystemType,
-  type Season,
-} from "../../../db/schema/season";
+import { ratingSystemTypes, type Season } from "../../../db/schema/season";
 import { prettyRatingSystemType } from "../../../lib/ratings/rating";
 import { cn } from "../../../lib/utils";
 

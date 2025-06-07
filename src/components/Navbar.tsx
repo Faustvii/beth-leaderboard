@@ -2,6 +2,7 @@ import { type PropsWithChildren } from "@kitajs/html";
 import { type Session } from "lucia";
 import { AnchorButtonHtml } from "./Button";
 import "@kitajs/html/register";
+import { config } from "../config";
 import { cn } from "../lib/utils";
 import { HxButton } from "./HxButton";
 
@@ -166,7 +167,11 @@ export const NavbarHtml = async ({ session, activePage }: Props) => {
               <>
                 <AnchorButtonHtml
                   class="relative flex rounded-full text-sm text-gray-400 hover:bg-gray-700 hover:text-white focus:text-white "
-                  href="/api/auth/signin/azure"
+                  href={
+                    config.env.NODE_ENV === "development"
+                      ? "/login"
+                      : "/api/auth/signin/azure"
+                  }
                   hx-boost="false"
                 >
                   <span class="absolute -inset-1.5"></span>

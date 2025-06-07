@@ -1,4 +1,4 @@
 import { writeDb } from ".";
-import { SeedPreprod } from "./preprod";
+import { SeedDatabase } from "./preprod";
 
-await SeedPreprod(writeDb);
+await SeedDatabase(writeDb);

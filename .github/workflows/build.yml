@@ -90,8 +90,10 @@ jobs:
         run: |
           PAYLOAD="{\"event\":\"repository\",\"repository\":\"$TARGET_REPO\"}"
           SIGNATURE=$(echo -n "$PAYLOAD" | openssl dgst -sha1 -hmac "$WEBHOOK_SECRET" | cut -d ' ' -f 2)
+          DELIVERY_ID=$(uuidgen)
 
           curl -X POST "$WEBHOOK_URL" \
             -H "Content-Type: application/json" \
             -H "X-Hub-Signature: sha1=$SIGNATURE" \
+            -H "X-GitHub-Delivery: $DELIVERY_ID" \
             -d "$PAYLOAD"

@@ -1,0 +1,30 @@
+name: Trigger Renovate
+
+on:
+  workflow_run:
+    workflows: ["Build"]
+    types:
+      - completed
+  workflow_dispatch: # manual trigger with no inputs
+
+jobs:
+  trigger-renovate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Sleep if triggered by push event
+        if: github.event_name == 'workflow_run'
+        run: |
+          echo "Triggered by push, sleeping for 5 minutes to allow registries to sync..."
+          sleep 300  # 5 minutes
+
+      - name: Trigger Renovate via API
+        env:
+          RENOVATE_API_URL: ${{ secrets.RENOVATE_WEBHOOK_URL }}
+          RENOVATE_API_TOKEN: ${{ secrets.RENOVATE_WEBHOOK_SECRET }}
+          TARGET_REPO: ${{ secrets.RENOVATE_TARGET_REPO }}
+        run: |
+          echo "Triggering Renovate for repo: $TARGET_REPO"
+          curl -X POST "$RENOVATE_API_URL/api/job/add" \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer $RENOVATE_API_TOKEN" \
+            -d "{\"repository\": \"$TARGET_REPO\"}"

@@ -76,19 +76,3 @@ jobs:
             ghcr.io/faustvii/beth-leaderboard:${{ github.ref == 'refs/heads/main' && 'latest' || 'pr-' }}${{ github.ref == 'refs/heads/main' && '' || github.event.number }}${{ github.ref != 'refs/heads/main' && '-latest' || '' }}
             ${{ github.ref == 'refs/heads/main' && 'ghcr.io/faustvii/beth-leaderboard:' || '' }}${{ github.ref == 'refs/heads/main' && github.sha || '' }}
             ${{ github.ref != 'refs/heads/main' && 'ghcr.io/faustvii/beth-leaderboard:' || '' }}${{ github.ref != 'refs/heads/main' && 'pr-latest' || '' }}
-
-  trigger-renovate:
-    runs-on: ubuntu-latest
-    needs: build-and-publish-docker
-    name: Trigger Renovate
-    env:
-      WEBHOOK_URL: ${{ secrets.RENOVATE_WEBHOOK_URL }}
-      WEBHOOK_SECRET: ${{ secrets.RENOVATE_WEBHOOK_SECRET }}
-      TARGET_REPO: ${{ secrets.RENOVATE_TARGET_REPO }}
-    steps:
-      - name: Trigger Renovate via API
-        run: |
-          curl -X POST "$WEBHOOK_URL/api/job/add" \
-            -H "Content-Type: application/json" \
-            -H "Authorization: $WEBHOOK_SECRET" \
-            -d "{\"repository\": \"$TARGET_REPO\"}"

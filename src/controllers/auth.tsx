@@ -32,50 +32,43 @@ export const authController = new Elysia({
     ctx.set.headers["Set-Cookie"] = sessionCookie.serialize();
     redirect(ctx, "/");
   })
-  // .get("/signin/google", async ({ set }) => {
-  //   const [url, state] = await googleAuth.getAuthorizationUrl();
-  //   const stateCookie = serializeCookie("google_auth_state", state, {
-  //     maxAge: 60 * 60,
-  //     secure: config.env.NODE_ENV === "production",
-  //     httpOnly: true,
-  //     path: "/",
-  //   });
+  .get("/signin/local/", async ({ set, query, writeAuth, readDb }) => {
+    if (config.env.NODE_ENV !== "development") {
+      set.status = "Forbidden";
+      return "Local signin is only allowed in development mode";
+    }
 
-  //   set.headers["Set-Cookie"] = stateCookie;
-  //   set.redirect = url.toString();
-  // })
-  // .get("/signin/local/", async ({ set, query, writeAuth, readDb }) => {
-  //   try {
-  //     // This is for test purposes only
-  //     const email = `fake${query.user ?? 0}@fake.crokinole`;
+    try {
+      // This is for test purposes only
+      const email = `fake${query.user ?? 0}@fake.crokinole`;
 
-  //     // Check if the user exists
-  //     const existingUser = await readDb.query.userTbl.findFirst({
-  //       where: eq(userSchema.email, email),
-  //     });
+      // Check if the user exists
+      const existingUser = await readDb.query.userTbl.findFirst({
+        where: eq(userSchema.email, email),
+      });
 
-  //     if (!existingUser) {
-  //       set.status = "Not Found";
-  //       return "User not found";
-  //     }
+      if (!existingUser) {
+        set.status = "Not Found";
+        return "User not found";
+      }
 
-  //     // Create a new session for the user
-  //     const session = await writeAuth.createSession({
-  //       userId: existingUser.id,
-  //       attributes: {},
-  //     });
+      // Create a new session for the user
+      const session = await writeAuth.createSession({
+        userId: existingUser.id,
+        attributes: {},
+      });
 
-  //     const sessionCookie = writeAuth.createSessionCookie(session);
-  //     await syncIfLocal();
+      const sessionCookie = writeAuth.createSessionCookie(session);
+      await syncIfLocal();
 
-  //     set.headers["Set-Cookie"] = sessionCookie.serialize();
-  //     set.redirect = "/";
-  //   } catch (error) {
-  //     console.error("Error in local signin:", error);
-  //     set.status = "Internal Server Error";
-  //     return "An error occurred during signin";
-  //   }
-  // })
+      set.headers["Set-Cookie"] = sessionCookie.serialize();
+      set.redirect = "/";
+    } catch (error) {
+      console.error("Error in local signin:", error);
+      set.status = "Internal Server Error";
+      return "An error occurred during signin";
+    }
+  })
   .get("/signin/azure", async ({ set }) => {
     const [url, codeVerifier, state] = await azureAuth.getAuthorizationUrl();
     const stateCookie = serializeCookie("azure_auth_state", state, {

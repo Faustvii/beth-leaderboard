@@ -96,4 +96,5 @@ jobs:
             -H "Content-Type: application/json" \
             -H "X-Hub-Signature: sha1=$SIGNATURE" \
             -H "X-GitHub-Delivery: $DELIVERY_ID" \
+            -H "X-GitHub-Event: repository"
             -d "$PAYLOAD"

@@ -48,7 +48,7 @@ export const SeasonForm = ({
             type="text"
             value={
               season?.name ??
-              `Season ${amountOfSeasons ? amountOfSeasons + 1 : "name"}`
+              `Season ${amountOfSeasons ? amountOfSeasons : "name"}`
             }
           />
         </div>

@@ -110,7 +110,7 @@ export const match = new Elysia({
 
       execute_webhooks("match", matchInsert).catch(console.log);
 
-      redirect({ headers, set }, `/result/${activeSeason.id}/${matchId}`);
+      redirect({ headers, set }, `/result/${matchId}`);
     },
     {
       error({ code, error }) {

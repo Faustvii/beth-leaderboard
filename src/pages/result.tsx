@@ -11,7 +11,7 @@ import { getMatch, getMatches } from "../db/queries/matchQueries";
 import { getSeason } from "../db/queries/seasonQueries";
 import {
   getMatchRatingDiff,
-  getRatingSystem,
+  Match,
   Rating,
   RatingSystem,
 } from "../lib/ratings/rating";
@@ -40,6 +40,42 @@ async function page(
     return <LayoutHtml>Match does not exist</LayoutHtml>;
   }
 
+  return (
+    <LayoutHtml>
+      <NavbarHtml session={session} activePage="result" />
+      <div class="flex flex-row justify-between">
+        <HeaderHtml className="px-0" title="Match result" />
+        <SeasonPicker
+          basePath={`/result/${matchId}`}
+          season={{ id: match.seasonId }}
+          ratingSystem={ratingSystem}
+        />
+      </div>
+
+      <div class="mb-6 flex flex-col gap-3">
+        <MatchDescription match={match} />
+      </div>
+      <RatingDiff
+        session={session}
+        match={match}
+        seasonId={seasonId}
+        ratingSystem={ratingSystem}
+      />
+    </LayoutHtml>
+  );
+}
+
+async function RatingDiff({
+  session,
+  match,
+  seasonId,
+  ratingSystem,
+}: {
+  session: Session | null;
+  match: Match;
+  seasonId: number | undefined;
+  ratingSystem: RatingSystem<Rating>;
+}) {
   seasonId ??= match?.seasonId;
   const season = await getSeason(seasonId);
   if (!season) {
@@ -48,7 +84,7 @@ async function page(
 
   const allMatchesInSeason = await getMatches(season, !!session?.user);
 
-  if (!allMatchesInSeason.find((x) => x.id === matchId)) {
+  if (!allMatchesInSeason.find((x) => x.id === match.id)) {
     return <LayoutHtml>Match not in season</LayoutHtml>;
   }
 
@@ -57,7 +93,7 @@ async function page(
   );
   const matches = allMatchesInSeasonSorted.slice(
     0,
-    allMatchesInSeasonSorted.findIndex((x) => x.id === matchId) + 1,
+    allMatchesInSeasonSorted.findIndex((x) => x.id === match.id) + 1,
   );
 
   const matchDiff = getMatchRatingDiff(matches, ratingSystem)
@@ -74,26 +110,11 @@ async function page(
     .toSorted((a, b) => a.rankAfter - b.rankAfter);
 
   return (
-    <LayoutHtml>
-      <NavbarHtml session={session} activePage="result" />
-      <div class="flex flex-row justify-between">
-        <HeaderHtml className="px-0" title="Match result" />
-        <SeasonPicker
-          basePath={`/result/${matchId}`}
-          season={season}
-          ratingSystem={ratingSystem}
-        />
-      </div>
-
-      <div class="mb-6 flex flex-col gap-3">
-        <MatchDescription match={match} />
-      </div>
-      <RatingDiffTable>
-        {matchDiff.map((playerDiff) => (
-          <RatingDiffTableRow {...playerDiff} />
-        ))}
-      </RatingDiffTable>
-    </LayoutHtml>
+    <RatingDiffTable>
+      {matchDiff.map((playerDiff) => (
+        <RatingDiffTableRow {...playerDiff} />
+      ))}
+    </RatingDiffTable>
   );
 }
 

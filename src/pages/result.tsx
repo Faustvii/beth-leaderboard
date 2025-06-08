@@ -1,6 +1,7 @@
 import { type PropsWithChildren } from "@kitajs/html";
 import Elysia from "elysia";
 import { type Session } from "lucia";
+import { HeaderHtml } from "../components/header";
 import { HxButton } from "../components/HxButton";
 import { LayoutHtml } from "../components/Layout";
 import { MatchDescription } from "../components/MatchDescription";
@@ -8,24 +9,31 @@ import { NavbarHtml } from "../components/Navbar";
 import { ctx } from "../context";
 import { getMatch, getMatches } from "../db/queries/matchQueries";
 import { getSeason } from "../db/queries/seasonQueries";
-import { getMatchRatingDiff, getRatingSystem } from "../lib/ratings/rating";
+import {
+  getMatchRatingDiff,
+  getRatingSystem,
+  Rating,
+  RatingSystem,
+} from "../lib/ratings/rating";
 import { isDefined } from "../lib/utils";
+import { SeasonPicker } from "./admin/components/SeasonPicker";
 
 export const matchResult = new Elysia({
   prefix: "/result",
 })
   .use(ctx)
-  .get("/:matchId", ({ html, params, session, query }) => {
+  .get("/:matchId", ({ html, params, session, query, ratingSystem }) => {
     // Cannot use "season" from context/middleware as we don't want the "current" season
     const seasonId = query.season ? parseInt(query.season, 10) : undefined;
     const matchId = parseInt(params.matchId, 10);
-    return html(page(session, matchId, seasonId));
+    return html(page(session, matchId, seasonId, ratingSystem));
   });
 
 async function page(
   session: Session | null,
   matchId: number,
-  seasonId?: number,
+  seasonId: number | undefined,
+  ratingSystem: RatingSystem<Rating>,
 ) {
   const match = await getMatch(matchId, !!session?.user);
   if (!match) {
@@ -37,8 +45,6 @@ async function page(
   if (!season) {
     return <LayoutHtml>Season not found</LayoutHtml>;
   }
-
-  const ratingSystem = getRatingSystem(season?.ratingSystem ?? "elo");
 
   const allMatchesInSeason = await getMatches(season, !!session?.user);
 
@@ -70,7 +76,15 @@ async function page(
   return (
     <LayoutHtml>
       <NavbarHtml session={session} activePage="result" />
-      <span class="py-5 text-4xl font-bold">Match result</span>
+      <div class="flex flex-row justify-between">
+        <HeaderHtml className="px-0" title="Match result" />
+        <SeasonPicker
+          basePath={`/result/${matchId}`}
+          season={season}
+          ratingSystem={ratingSystem}
+        />
+      </div>
+
       <div class="mb-6 flex flex-col gap-3">
         <MatchDescription match={match} />
       </div>

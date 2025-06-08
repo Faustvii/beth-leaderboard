@@ -7,7 +7,6 @@
     "build": "bun build ./src/main.ts --minify --target bun --splitting --outdir ./build",
     "start": "concurrently \"bun tw\" \"bun run src/main.ts\"",
     "db:studio": "bun drizzle-kit studio",
-    "db:seed": "bun run src/db/seed.ts",
     "db:generate": "bun drizzle-kit generate",
     "tw": "bun tailwindcss --minify -i ./src/styles.css -o ./public/styles.css",
     "tw:dev": "bun tailwindcss -i ./src/styles.css -o ./public/styles.css --watch",

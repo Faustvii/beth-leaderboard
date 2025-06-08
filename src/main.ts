@@ -3,7 +3,7 @@ import { migrate } from "drizzle-orm/libsql/migrator";
 import { Elysia } from "elysia";
 import { api } from "./controllers/*";
 import { writeDb } from "./db";
-import { SeedDatabase } from "./db/preprod";
+import { SeedDatabase } from "./db/seed";
 import { pages } from "./pages/*";
 import { staticController } from "./staticFiles";
 

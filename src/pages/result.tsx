@@ -6,7 +6,7 @@ import { LayoutHtml } from "../components/Layout";
 import { MatchDescription } from "../components/MatchDescription";
 import { NavbarHtml } from "../components/Navbar";
 import { ctx } from "../context";
-import { getMatches } from "../db/queries/matchQueries";
+import { getMatch, getMatches } from "../db/queries/matchQueries";
 import { getSeason } from "../db/queries/seasonQueries";
 import { getMatchRatingDiff, getRatingSystem } from "../lib/ratings/rating";
 import { isDefined } from "../lib/utils";
@@ -15,21 +15,24 @@ export const matchResult = new Elysia({
   prefix: "/result",
 })
   .use(ctx)
-  .get("/:seasonId/:matchId", ({ html, params, session }) => {
-    return html(
-      page(
-        session,
-        parseInt(params.seasonId, 10),
-        parseInt(params.matchId, 10),
-      ),
-    );
+  .get("/:matchId", ({ html, params, session, query }) => {
+    // Cannot use "season" from context/middleware as we don't want the "current" season
+    const seasonId = query.season ? parseInt(query.season, 10) : undefined;
+    const matchId = parseInt(params.matchId, 10);
+    return html(page(session, matchId, seasonId));
   });
 
 async function page(
   session: Session | null,
-  seasonId: number,
   matchId: number,
+  seasonId?: number,
 ) {
+  const match = await getMatch(matchId, !!session?.user);
+  if (!match) {
+    return <LayoutHtml>Match does not exist</LayoutHtml>;
+  }
+
+  seasonId ??= match?.seasonId;
   const season = await getSeason(seasonId);
   if (!season) {
     return <LayoutHtml>Season not found</LayoutHtml>;
@@ -38,6 +41,11 @@ async function page(
   const ratingSystem = getRatingSystem(season?.ratingSystem ?? "elo");
 
   const allMatchesInSeason = await getMatches(season, !!session?.user);
+
+  if (!allMatchesInSeason.find((x) => x.id === matchId)) {
+    return <LayoutHtml>Match not in season</LayoutHtml>;
+  }
+
   const allMatchesInSeasonSorted = allMatchesInSeason.toSorted(
     (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),
   );
@@ -45,8 +53,6 @@ async function page(
     0,
     allMatchesInSeasonSorted.findIndex((x) => x.id === matchId) + 1,
   );
-
-  const match = matches.at(-1);
 
   const matchDiff = getMatchRatingDiff(matches, ratingSystem)
     .map((x) => ({

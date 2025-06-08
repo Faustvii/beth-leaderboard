@@ -3,11 +3,15 @@ import { getDatePartFromDate, subtractDays } from "../dateUtils";
 import { isDefined } from "../utils";
 import { elo, type EloRating } from "./eloRatingSystem";
 import { openskill, type OpenskillRating } from "./openskillRatingSystem";
-import { scoreDiff } from "./scoreDiffRatingSystem";
+import { scoreDiff, type ScoreDiffRating } from "./scoreDiffRatingSystem";
+import {
+  streakMultiplier,
+  type StreakMultiplierRating,
+} from "./streakMultiplierRatingSystem";
 import { xp, type XPRating } from "./xpRatingSystem";
 
-// eslint-disable-next-line @typescript-eslint/no-duplicate-type-constituents
-export type Rating = EloRating | XPRating | OpenskillRating;
+// eslint-disable-next-line @typescript-eslint/no-duplicate-type-constituents, prettier/prettier
+export type Rating = EloRating | XPRating | ScoreDiffRating | OpenskillRating | StreakMultiplierRating;
 
 export interface RatingSystem<TRating> {
   type: RatingSystemType;
@@ -216,6 +220,8 @@ export function getRatingSystem(type: RatingSystemType): RatingSystem<Rating> {
       return xp() as RatingSystem<Rating>;
     case "openskill":
       return openskill() as RatingSystem<Rating>;
+    case "streakMultiplier":
+      return streakMultiplier() as RatingSystem<Rating>;
     case "elo":
     default:
       return elo() as RatingSystem<Rating>;
@@ -232,6 +238,8 @@ export function prettyRatingSystemType(ratingSystem: RatingSystemType): string {
       return "XP";
     case "scoreDiff":
       return "Score Difference";
+    case "streakMultiplier":
+      return "Streak Multiplier";
     default:
       return ratingSystem;
   }

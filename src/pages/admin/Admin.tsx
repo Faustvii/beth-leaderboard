@@ -19,7 +19,7 @@ import {
 } from "../../db/queries/seasonQueries";
 import { matches, seasonsTbl } from "../../db/schema";
 import { userTbl, type User } from "../../db/schema/auth";
-import { allTimeSeason } from "../../db/schema/season";
+import { allTimeSeason, ratingSystemTypes } from "../../db/schema/season";
 import { isHxRequest, redirect } from "../../lib";
 import { fromTimezoneToUTC } from "../../lib/dateUtils";
 import { syncIfLocal } from "../../lib/dbHelpers";
@@ -29,6 +29,10 @@ import { ExistingSeasons } from "./components/ExisitngSeasons";
 import { MatchCard } from "./components/MatchCard";
 import { SeasonForm } from "./components/SeasonForm";
 import { UserForm } from "./components/UserForm";
+
+const ratingSystemTypesEnum = t.Enum(
+  Object.fromEntries(ratingSystemTypes.map((type) => [type, type])),
+);
 
 export const Admin = new Elysia({
   prefix: "/admin",
@@ -172,12 +176,7 @@ export const Admin = new Elysia({
         seasonName: t.String({ minLength: 1 }),
         seasonStart: t.String({ minLength: 1 }),
         seasonEnd: t.String({ minLength: 1 }),
-        ratingSystem: t.Enum({
-          elo: "elo",
-          openskill: "openskill",
-          xp: "xp",
-          scoreDiff: "scoreDiff",
-        }),
+        ratingSystem: ratingSystemTypesEnum,
         ratingEventSystem: t.Enum({ none: "none", quest: "quest" }),
       }),
     },
@@ -255,12 +254,7 @@ export const Admin = new Elysia({
         seasonName: t.String({ minLength: 1 }),
         seasonStart: t.String({ minLength: 1 }),
         seasonEnd: t.String({ minLength: 1 }),
-        ratingSystem: t.Enum({
-          elo: "elo",
-          openskill: "openskill",
-          xp: "xp",
-          scoreDiff: "scoreDiff",
-        }),
+        ratingSystem: ratingSystemTypesEnum,
         ratingEventSystem: t.Enum({ none: "none", quest: "quest" }),
       }),
     },

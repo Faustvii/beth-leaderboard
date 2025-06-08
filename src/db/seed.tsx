@@ -1,3 +1,4 @@
+import { count } from "drizzle-orm";
 import { generateRandomString } from "lucia/utils";
 import { type readDb } from ".";
 import { config } from "../config";
@@ -9,7 +10,8 @@ import { type InsertSeason } from "./schema/season";
 
 export async function SeedDatabase(db: typeof readDb) {
   if (config.env.DATABASE_CONNECTION_TYPE === "local") {
-    const matchCount = await db.$count(matches);
+    const matchCountResult = await db.select({ count: count() }).from(matches);
+    const matchCount = matchCountResult[0]?.count ?? 0;
     if (matchCount > 0) {
       console.log("database has matches, skipping seeding");
       return;

@@ -440,10 +440,7 @@ function matchFaceoff(biggestWin: {
   return (
     <span class="text-sm">
       On{" "}
-      <MatchResultLink
-        seasonId={biggestWin.match.seasonId}
-        matchId={biggestWin.match.id}
-      >
+      <MatchResultLink matchId={biggestWin.match.id}>
         {biggestWin.match.createdAt.toLocaleString("en-US", {
           day: "numeric",
           month: "long",
@@ -489,7 +486,7 @@ function matchOutput(
   return (
     <span class="text-sm">
       On{" "}
-      <MatchResultLink seasonId={match.seasonId} matchId={match.id}>
+      <MatchResultLink matchId={match.id}>
         {match.createdAt.toLocaleString("en-US", {
           day: "numeric",
           month: "long",

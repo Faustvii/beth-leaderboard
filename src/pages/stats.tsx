@@ -269,10 +269,7 @@ async function biggestWin(matches: Match[]) {
   return (
     <span class="text-sm">
       On{" "}
-      <MatchResultLink
-        seasonId={biggestWinMatch.seasonId}
-        matchId={biggestWinMatch.id}
-      >
+      <MatchResultLink matchId={biggestWinMatch.id}>
         {biggestWinMatch.createdAt.toLocaleString("en-US", {
           day: "numeric",
           month: "long",
@@ -307,7 +304,7 @@ const PrettyMatch = ({ match }: PrettyMatchProps) => {
       return (
         <span class="text-balance">
           <span class="font-bold">
-            <MatchResultLink seasonId={match.seasonId} matchId={match.id}>
+            <MatchResultLink matchId={match.id}>
               {matchhistoryDateToString(match.createdAt)}
             </MatchResultLink>
           </span>{" "}
@@ -334,7 +331,7 @@ const PrettyMatch = ({ match }: PrettyMatchProps) => {
       style={`font-size: ${match.scoreDiff / 40 + 14}px`}
     >
       <span class="font-bold">
-        <MatchResultLink seasonId={match.seasonId} matchId={match.id}>
+        <MatchResultLink matchId={match.id}>
           {matchhistoryDateToString(match.createdAt)}
         </MatchResultLink>
       </span>{" "}

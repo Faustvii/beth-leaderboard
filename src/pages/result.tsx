@@ -47,7 +47,7 @@ async function page(
         <HeaderHtml className="px-0" title="Match result" />
         <SeasonPicker
           basePath={`/result/${matchId}`}
-          season={{ id: match.seasonId }}
+          season={{ id: seasonId ?? match.seasonId }}
           ratingSystem={ratingSystem}
         />
       </div>
@@ -56,7 +56,7 @@ async function page(
       <RatingDiff
         session={session}
         match={match}
-        seasonId={seasonId}
+        seasonId={seasonId ?? match.seasonId}
         ratingSystem={ratingSystem}
       />
     </LayoutHtml>
@@ -71,10 +71,9 @@ async function RatingDiff({
 }: {
   session: Session | null;
   match: Match;
-  seasonId: number | undefined;
+  seasonId: number;
   ratingSystem: RatingSystem<Rating>;
 }) {
-  seasonId ??= match?.seasonId;
   const season = await getSeason(seasonId);
   if (!season) {
     return <LayoutHtml>Season not found</LayoutHtml>;

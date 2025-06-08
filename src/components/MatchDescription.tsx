@@ -18,7 +18,7 @@ export const MatchDescription = ({ match }: { match: Match | undefined }) => {
   };
 
   return (
-    <>
+    <div class="mb-6 flex flex-col gap-3">
       <div class="flex flex-col justify-between gap-3 lg:flex-row">
         <TeamDetails title="Team White" team={teamPlayers.white} />
         <TeamDetails title="Team Black" team={teamPlayers.black} />
@@ -28,6 +28,6 @@ export const MatchDescription = ({ match }: { match: Match | undefined }) => {
         scoreDiff={match.scoreDiff}
         dateLogged={match.createdAt}
       />
-    </>
+    </div>
   );
 };

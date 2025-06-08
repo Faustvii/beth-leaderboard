@@ -1,6 +1,7 @@
 declare namespace JSX {
   interface HtmlTag {
     onblur?: string;
+    onload?: string;
     _?: string;
   }
 }

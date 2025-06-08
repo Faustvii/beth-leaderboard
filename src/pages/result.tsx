@@ -11,9 +11,9 @@ import { getMatch, getMatches } from "../db/queries/matchQueries";
 import { getSeason } from "../db/queries/seasonQueries";
 import {
   getMatchRatingDiff,
-  Match,
-  Rating,
-  RatingSystem,
+  type Match,
+  type Rating,
+  type RatingSystem,
 } from "../lib/ratings/rating";
 import { isDefined } from "../lib/utils";
 import { SeasonPicker } from "./admin/components/SeasonPicker";

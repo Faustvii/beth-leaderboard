@@ -10,8 +10,14 @@ import {
 } from "./streakMultiplierRatingSystem";
 import { xp, type XPRating } from "./xpRatingSystem";
 
-// eslint-disable-next-line @typescript-eslint/no-duplicate-type-constituents, prettier/prettier
-export type Rating = EloRating | XPRating | ScoreDiffRating | OpenskillRating | StreakMultiplierRating;
+/* eslint-disable @typescript-eslint/no-duplicate-type-constituents */
+export type Rating =
+  | EloRating
+  | XPRating
+  | ScoreDiffRating
+  | OpenskillRating
+  | StreakMultiplierRating;
+/* eslint-enable @typescript-eslint/no-duplicate-type-constituents */
 
 export interface RatingSystem<TRating> {
   type: RatingSystemType;
@@ -117,20 +123,20 @@ function getRatingsAfterMatch<TRating>(
       rating: system.defaultRating,
     },
     whitePlayerTwo: match.whitePlayerTwo
-      ? ratings[match.whitePlayerTwo.id] ?? {
+      ? (ratings[match.whitePlayerTwo.id] ?? {
           player: match.whitePlayerTwo,
           rating: system.defaultRating,
-        }
+        })
       : null,
     blackPlayerOne: ratings[match.blackPlayerOne.id] ?? {
       player: match.blackPlayerOne,
       rating: system.defaultRating,
     },
     blackPlayerTwo: match.blackPlayerTwo
-      ? ratings[match.blackPlayerTwo.id] ?? {
+      ? (ratings[match.blackPlayerTwo.id] ?? {
           player: match.blackPlayerTwo,
           rating: system.defaultRating,
-        }
+        })
       : null,
   };
 

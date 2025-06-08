@@ -1,7 +1,10 @@
 # use the official Bun image
 # see all versions at https://hub.docker.com/r/oven/bun/tags
-FROM oven/bun:1.0.6 AS base
+FROM oven/bun:1.2.15-debian AS base
 WORKDIR /usr/src/app
+
+RUN apt update
+RUN apt install -y python3 build-essential
 
 # install dependencies into temp directory
 # this will cache them and speed up future builds

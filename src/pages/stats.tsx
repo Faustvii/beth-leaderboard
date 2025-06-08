@@ -9,44 +9,38 @@ import { NavbarHtml } from "../components/Navbar";
 import { StatsCardHtml } from "../components/StatsCard";
 import { ctx } from "../context";
 import { getMatches } from "../db/queries/matchQueries";
-import { getSeasons } from "../db/queries/seasonQueries";
-import { Season } from "../db/schema/season";
+import { type Season } from "../db/schema/season";
 import { isHxRequest, measure, notEmpty } from "../lib";
 import { getDatePartFromDate } from "../lib/dateUtils";
 import MatchStatistics from "../lib/matchStatistics";
-import { Rating, RatingSystem, type Match } from "../lib/ratings/rating";
+import { type Match } from "../lib/ratings/rating";
 import { SeasonPicker } from "./admin/components/SeasonPicker";
 
 export const stats = new Elysia({
   prefix: "/stats",
 })
   .use(ctx)
-  .get("/", async ({ html, session, headers, season, ratingSystem }) => {
-    return html(() => statsPage(session, headers, season, ratingSystem));
+  .get("/", async ({ html, session, headers, season }) => {
+    return html(() => statsPage(session, headers, season));
   });
 
 async function statsPage(
   session: Session | null,
   headers: Record<string, string | null>,
   season: Season,
-  ratingSystem: RatingSystem<Rating>,
 ) {
   return (
     <>
       {isHxRequest(headers) ? (
-        page(session, season, ratingSystem)
+        page(session, season)
       ) : (
-        <LayoutHtml>{page(session, season, ratingSystem)}</LayoutHtml>
+        <LayoutHtml>{page(session, season)}</LayoutHtml>
       )}
     </>
   );
 }
 
-async function page(
-  session: Session | null,
-  season: Season,
-  ratingSystem: RatingSystem<Rating>,
-) {
+async function page(session: Session | null, season: Season) {
   const { elaspedTimeMs, result: matches } = await measure(async () => {
     return await getMatches(season, !!session?.user);
   });
@@ -117,8 +111,6 @@ async function page(
       },
     },
   };
-
-  const seasons = await getSeasons();
 
   return (
     <>
@@ -277,10 +269,7 @@ async function biggestWin(matches: Match[]) {
   return (
     <span class="text-sm">
       On{" "}
-      <MatchResultLink
-        seasonId={biggestWinMatch.seasonId}
-        matchId={biggestWinMatch.id}
-      >
+      <MatchResultLink matchId={biggestWinMatch.id}>
         {biggestWinMatch.createdAt.toLocaleString("en-US", {
           day: "numeric",
           month: "long",
@@ -315,7 +304,7 @@ const PrettyMatch = ({ match }: PrettyMatchProps) => {
       return (
         <span class="text-balance">
           <span class="font-bold">
-            <MatchResultLink seasonId={match.seasonId} matchId={match.id}>
+            <MatchResultLink matchId={match.id}>
               {matchhistoryDateToString(match.createdAt)}
             </MatchResultLink>
           </span>{" "}
@@ -342,7 +331,7 @@ const PrettyMatch = ({ match }: PrettyMatchProps) => {
       style={`font-size: ${match.scoreDiff / 40 + 14}px`}
     >
       <span class="font-bold">
-        <MatchResultLink seasonId={match.seasonId} matchId={match.id}>
+        <MatchResultLink matchId={match.id}>
           {matchhistoryDateToString(match.createdAt)}
         </MatchResultLink>
       </span>{" "}

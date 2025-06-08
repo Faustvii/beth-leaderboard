@@ -14,10 +14,9 @@ import { StatsCardHtml } from "../components/StatsCard";
 import { ctx } from "../context";
 import { getMatches } from "../db/queries/matchQueries";
 import { getActiveQuestsForPlayer } from "../db/queries/questQueries";
-import { getSeasons } from "../db/queries/seasonQueries";
 import { getUser } from "../db/queries/userQueries";
 import { userTbl } from "../db/schema/auth";
-import { Season } from "../db/schema/season";
+import { type Season } from "../db/schema/season";
 import { isHxRequest, measure, notEmpty, redirect } from "../lib";
 import { syncIfLocal } from "../lib/dbHelpers";
 import MatchStatistics, {
@@ -113,7 +112,6 @@ async function page(
     }
   }
   const header = profileName;
-  const seasons = await getSeasons();
   const isOwnProfile = session?.user.id === userId;
 
   return (
@@ -442,10 +440,7 @@ function matchFaceoff(biggestWin: {
   return (
     <span class="text-sm">
       On{" "}
-      <MatchResultLink
-        seasonId={biggestWin.match.seasonId}
-        matchId={biggestWin.match.id}
-      >
+      <MatchResultLink matchId={biggestWin.match.id}>
         {biggestWin.match.createdAt.toLocaleString("en-US", {
           day: "numeric",
           month: "long",
@@ -491,7 +486,7 @@ function matchOutput(
   return (
     <span class="text-sm">
       On{" "}
-      <MatchResultLink seasonId={match.seasonId} matchId={match.id}>
+      <MatchResultLink matchId={match.id}>
         {match.createdAt.toLocaleString("en-US", {
           day: "numeric",
           month: "long",

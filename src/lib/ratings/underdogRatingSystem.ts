@@ -66,15 +66,16 @@ export function underdog(
         );
         return {
           player: player.player,
-          rating:
+          rating: Math.floor(
             player.rating +
-            averagePoints * teamMultiplier * (isWinner ? 1 : -1),
+              averagePoints * teamMultiplier * (isWinner ? 1 : -1),
+          ),
         };
       }
 
       return {
         player: player.player,
-        rating: player.rating + averagePoints * (isWinner ? 1 : -1),
+        rating: Math.floor(player.rating + averagePoints * (isWinner ? 1 : -1)),
       };
     });
   }
@@ -99,12 +100,12 @@ export function underdog(
   }
 
   function calculatePoints(
-    winnerRating: number,
-    loserRating: number,
+    playerRating: number,
+    opponentRating: number,
     isUpset: boolean,
   ): number {
     const ratingDiff = Math.min(
-      Math.abs(winnerRating - loserRating),
+      Math.abs(playerRating - opponentRating),
       selectedConfig.maxRatingDiff,
     );
 
@@ -156,7 +157,7 @@ export function underdog(
     },
 
     toNumber(rating: UnderdogRating) {
-      return Math.round(rating);
+      return rating;
     },
 
     equals(a: UnderdogRating | undefined, b: UnderdogRating | undefined) {

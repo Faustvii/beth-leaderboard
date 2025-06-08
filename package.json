@@ -17,18 +17,27 @@
     "lint:fix": "eslint . --report-unused-disable-directives --fix"
   },
   "devDependencies": {
+    "@eslint/js": "^9.28.0",
     "@ianvs/prettier-plugin-sort-imports": "^4.1.0",
     "@kitajs/ts-html-plugin": "^1.2.0",
     "@types/chart.js": "^2.9.38",
+    "@types/eslint": "^9.6.1",
     "@types/web": "^0.0.115",
     "better-sqlite3": "^8.6.0",
     "bun-types": "latest",
     "chart.js": "^4.4.0",
     "concurrently": "^8.2.1",
     "drizzle-kit": "0.21.4",
-    "prettier": "^3.0.3",
+    "eslint": "^9.28.0",
+    "eslint-config-prettier": "^10.1.5",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-prettier": "^5.4.1",
+    "globals": "^16.2.0",
+    "prettier": "^3.5.3",
+    "prettier-eslint": "^16.4.2",
     "prettier-plugin-tailwindcss": "^0.5.5",
-    "typescript": "^5.2.2"
+    "typescript": "^5.2.2",
+    "typescript-eslint": "^8.33.1"
   },
   "dependencies": {
     "@elysiajs/cron": "^0.7.0",

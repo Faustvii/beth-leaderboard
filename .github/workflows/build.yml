@@ -41,6 +41,8 @@ jobs:
           bun-version: 1.0.6
       - name: Install Dependencies
         run: bun install
+      - name: Run linting, formatting, and type checking
+        run: bun run lint && bun run format:check && bun run typecheck
       - name: Build
         run: bun run build
       - name: Run Tests

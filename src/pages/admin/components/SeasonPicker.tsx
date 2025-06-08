@@ -9,7 +9,7 @@ import {
 
 interface SeasonPickerProps {
   basePath: string;
-  season: Season;
+  season: { id: number };
   ratingSystem?: RatingSystem<Rating>;
 }
 

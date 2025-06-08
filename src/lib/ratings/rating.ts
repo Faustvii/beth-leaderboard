@@ -10,8 +10,9 @@ import {
 } from "./streakMultiplierRatingSystem";
 import { xp, type XPRating } from "./xpRatingSystem";
 
-// eslint-disable-next-line @typescript-eslint/no-duplicate-type-constituents, prettier/prettier
+/* eslint-disable @typescript-eslint/no-duplicate-type-constituents */
 export type Rating = EloRating | XPRating | ScoreDiffRating | OpenskillRating | StreakMultiplierRating;
+/* eslint-enable @typescript-eslint/no-duplicate-type-constituents */
 
 export interface RatingSystem<TRating> {
   type: RatingSystemType;

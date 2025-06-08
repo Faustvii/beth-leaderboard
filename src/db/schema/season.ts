@@ -20,6 +20,7 @@ export const ratingSystemTypes = [
   "xp",
   "scoreDiff",
   "streakMultiplier",
+  "underdog",
 ] as const;
 
 export const seasonsTbl = sqliteTable(

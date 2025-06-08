@@ -11,7 +11,11 @@ import { getSeasons } from "../db/queries/seasonQueries";
 import { type Season } from "../db/schema/season";
 import { isHxRequest } from "../lib";
 import MatchStatistics, { type RESULT } from "../lib/matchStatistics";
-import { getRatings, Rating, RatingSystem } from "../lib/ratings/rating";
+import {
+  getRatings,
+  type Rating,
+  type RatingSystem,
+} from "../lib/ratings/rating";
 import { SeasonPicker } from "./admin/components/SeasonPicker";
 
 const playerQuery = async (

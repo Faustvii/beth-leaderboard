@@ -1,10 +1,10 @@
 import { SelectGet } from "../../../components/SelectGet";
 import { getSeasons } from "../../../db/queries/seasonQueries";
-import { ratingSystemTypes, Season } from "../../../db/schema/season";
+import { ratingSystemTypes } from "../../../db/schema/season";
 import {
   prettyRatingSystemType,
-  Rating,
-  RatingSystem,
+  type Rating,
+  type RatingSystem,
 } from "../../../lib/ratings/rating";
 
 interface SeasonPickerProps {

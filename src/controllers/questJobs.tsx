@@ -151,6 +151,7 @@ function generateQuest(playerId: string, type: QuestType): Quest<unknown> {
       );
     case "WinByPoints":
       // Random points between 50 and 100 in increments of 5
+      // eslint-disable-next-line no-case-declarations
       const points = Math.floor(Math.random() * 11) * 5 + 50;
       return new WinByPointsQuest(
         points,
@@ -167,6 +168,7 @@ function generateQuest(playerId: string, type: QuestType): Quest<unknown> {
       );
     case "WinCount":
       // Random win count between 1 and 3
+      // eslint-disable-next-line no-case-declarations
       const winCount = Math.floor(Math.random() * 3) + 1;
       return new WinCountQuest(
         winCount,

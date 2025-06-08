@@ -9,44 +9,38 @@ import { NavbarHtml } from "../components/Navbar";
 import { StatsCardHtml } from "../components/StatsCard";
 import { ctx } from "../context";
 import { getMatches } from "../db/queries/matchQueries";
-import { getSeasons } from "../db/queries/seasonQueries";
-import { Season } from "../db/schema/season";
+import { type Season } from "../db/schema/season";
 import { isHxRequest, measure, notEmpty } from "../lib";
 import { getDatePartFromDate } from "../lib/dateUtils";
 import MatchStatistics from "../lib/matchStatistics";
-import { Rating, RatingSystem, type Match } from "../lib/ratings/rating";
+import { type Match } from "../lib/ratings/rating";
 import { SeasonPicker } from "./admin/components/SeasonPicker";
 
 export const stats = new Elysia({
   prefix: "/stats",
 })
   .use(ctx)
-  .get("/", async ({ html, session, headers, season, ratingSystem }) => {
-    return html(() => statsPage(session, headers, season, ratingSystem));
+  .get("/", async ({ html, session, headers, season }) => {
+    return html(() => statsPage(session, headers, season));
   });
 
 async function statsPage(
   session: Session | null,
   headers: Record<string, string | null>,
   season: Season,
-  ratingSystem: RatingSystem<Rating>,
 ) {
   return (
     <>
       {isHxRequest(headers) ? (
-        page(session, season, ratingSystem)
+        page(session, season)
       ) : (
-        <LayoutHtml>{page(session, season, ratingSystem)}</LayoutHtml>
+        <LayoutHtml>{page(session, season)}</LayoutHtml>
       )}
     </>
   );
 }
 
-async function page(
-  session: Session | null,
-  season: Season,
-  ratingSystem: RatingSystem<Rating>,
-) {
+async function page(session: Session | null, season: Season) {
   const { elaspedTimeMs, result: matches } = await measure(async () => {
     return await getMatches(season, !!session?.user);
   });
@@ -117,8 +111,6 @@ async function page(
       },
     },
   };
-
-  const seasons = await getSeasons();
 
   return (
     <>

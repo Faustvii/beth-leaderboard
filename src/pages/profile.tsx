@@ -14,10 +14,9 @@ import { StatsCardHtml } from "../components/StatsCard";
 import { ctx } from "../context";
 import { getMatches } from "../db/queries/matchQueries";
 import { getActiveQuestsForPlayer } from "../db/queries/questQueries";
-import { getSeasons } from "../db/queries/seasonQueries";
 import { getUser } from "../db/queries/userQueries";
 import { userTbl } from "../db/schema/auth";
-import { Season } from "../db/schema/season";
+import { type Season } from "../db/schema/season";
 import { isHxRequest, measure, notEmpty, redirect } from "../lib";
 import { syncIfLocal } from "../lib/dbHelpers";
 import MatchStatistics, {
@@ -113,7 +112,6 @@ async function page(
     }
   }
   const header = profileName;
-  const seasons = await getSeasons();
   const isOwnProfile = session?.user.id === userId;
 
   return (

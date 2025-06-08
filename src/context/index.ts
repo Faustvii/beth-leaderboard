@@ -7,8 +7,8 @@ import { readClient, readDb, writeDb } from "../db";
 import { getActiveSeason, getSeason } from "../db/queries/seasonQueries";
 import {
   allTimeSeason,
-  RatingSystemType,
   ratingSystemTypes,
+  type RatingSystemType,
 } from "../db/schema/season";
 import { redirect } from "../lib";
 import { getRatingSystem } from "../lib/ratings/rating";
@@ -56,7 +56,7 @@ export const ctx = new Elysia({
     // 2. Season active in the database
     // 3. "All time" season
     let season = allTimeSeason;
-    if (!!query.season) {
+    if (query.season) {
       const selectedSeason = await getSeason(parseInt(query.season, 10));
       if (selectedSeason) {
         season = selectedSeason;

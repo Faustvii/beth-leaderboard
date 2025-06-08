@@ -52,9 +52,7 @@ async function page(
         />
       </div>
 
-      <div class="mb-6 flex flex-col gap-3">
-        <MatchDescription match={match} />
-      </div>
+      <MatchDescription match={match} />
       <RatingDiff
         session={session}
         match={match}

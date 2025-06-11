@@ -2,6 +2,7 @@ import { type RatingSystemType } from "../../db/schema/season";
 import { getDatePartFromDate, subtractDays } from "../dateUtils";
 import { isDefined } from "../utils";
 import { elo, type EloRating } from "./eloRatingSystem";
+import { gameCount, type GameCountRating } from "./gameCountRatingSystem";
 import { openskill, type OpenskillRating } from "./openskillRatingSystem";
 import { scoreDiff, type ScoreDiffRating } from "./scoreDiffRatingSystem";
 import {
@@ -12,7 +13,14 @@ import { underdog, type UnderdogRating } from "./underdogRatingSystem";
 import { xp, type XPRating } from "./xpRatingSystem";
 
 // eslint-disable-next-line @typescript-eslint/no-duplicate-type-constituents, prettier/prettier
-export type Rating = EloRating | XPRating | ScoreDiffRating | OpenskillRating | StreakMultiplierRating | UnderdogRating;
+export type Rating =
+  | EloRating
+  | XPRating
+  | ScoreDiffRating
+  | OpenskillRating
+  | StreakMultiplierRating
+  | UnderdogRating
+  | GameCountRating;
 
 export interface RatingSystem<TRating> {
   type: RatingSystemType;
@@ -225,6 +233,8 @@ export function getRatingSystem(type: RatingSystemType): RatingSystem<Rating> {
       return streakMultiplier() as RatingSystem<Rating>;
     case "underdog":
       return underdog() as RatingSystem<Rating>;
+    case "gameCount":
+      return gameCount() as RatingSystem<Rating>;
     case "elo":
     default:
       return elo() as RatingSystem<Rating>;
@@ -245,6 +255,8 @@ export function prettyRatingSystemType(ratingSystem: RatingSystemType): string {
       return "Streak Multiplier";
     case "underdog":
       return "Underdog";
+    case "gameCount":
+      return "Game Count";
     default:
       return ratingSystem;
   }

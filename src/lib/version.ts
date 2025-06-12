@@ -1,8 +1,4 @@
-import { config } from "../config";
-
+// This file is auto-generated during build
 export const VERSION = {
-  gitSha:
-    config.env.NODE_ENV === "development"
-      ? "development"
-      : config.env.GIT_SHA || "unknown",
+  gitSha: "development",
 };

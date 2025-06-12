@@ -23,7 +23,7 @@ COPY . .
 
 ENV NODE_ENV=production
 ARG GIT_SHA
-ENV GIT_SHA=${GIT_SHA}
+RUN bun run scripts/generate-version.ts
 RUN bun build --compile --sourcemap --target=bun ./src/main.ts --outfile leaderboard
 RUN bun tw
 
@@ -39,8 +39,6 @@ RUN chown bun:bun /usr/src/app/public/user
 RUN chown bun:bun /usr/src/app/data
 
 ENV migrationFolderTo=/usr/src/app/drizzle/
-ARG GIT_SHA
-ENV GIT_SHA=${GIT_SHA}
 
 # run the app
 USER bun

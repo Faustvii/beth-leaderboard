@@ -24,7 +24,6 @@
     "@types/web": "^0.0.115",
     "@typescript-eslint/eslint-plugin": "^6.7.0",
     "@typescript-eslint/parser": "^6.7.0",
-    "better-sqlite3": "^8.6.0",
     "bun-types": "latest",
     "chart.js": "^4.4.0",
     "concurrently": "^8.2.1",

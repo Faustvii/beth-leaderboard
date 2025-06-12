@@ -7,8 +7,8 @@ import { readClient, readDb, writeDb } from "../db";
 import { getActiveSeason, getSeason } from "../db/queries/seasonQueries";
 import {
   allTimeSeason,
-  RatingSystemType,
   ratingSystemTypes,
+  type RatingSystemType,
 } from "../db/schema/season";
 import { redirect } from "../lib";
 import { getRatingSystem } from "../lib/ratings/rating";

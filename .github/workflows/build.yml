@@ -38,7 +38,7 @@ jobs:
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2.0.2
         with:
-          bun-version: 1.0.6
+          bun-version: 1.2.15
       - name: Install Dependencies
         run: bun install
       - name: Build

@@ -8,9 +8,9 @@ export const isDefined = <T>(x: T | null | undefined): x is T => {
 };
 
 /**
- * @param array Array to pick from
- * @param count Count of elements to pick
- * @returns Array of length count containing distinct elements from input array
+ * @param array Array to pick from.
+ * @param count Count of elements to pick.
+ * @returns Array of length count containing distinct elements from input array.
  */
 export function pick<T>(array: T[], count: number) {
   const result: T[] = [];

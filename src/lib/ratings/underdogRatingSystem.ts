@@ -110,8 +110,10 @@ export function underdog(
     );
 
     const basePoints = selectedConfig.basePoints;
-    const diffPoints = ratingDiff * selectedConfig.ratingDiffMultiplier;
-    // Only give upset bonus if the rating difference is significant
+    // Only give diffPoints and upsetBonus for upsets
+    const diffPoints = isUpset
+      ? ratingDiff * selectedConfig.ratingDiffMultiplier
+      : 0;
     const upsetPoints =
       isUpset && ratingDiff >= selectedConfig.minUpsetDiff
         ? selectedConfig.upsetBonus

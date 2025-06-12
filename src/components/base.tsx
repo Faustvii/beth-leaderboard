@@ -1,5 +1,6 @@
 import { type PropsWithChildren } from "@kitajs/html";
-import { VERSION } from "../lib/version";
+import { config } from "../config";
+import { GitHubLinkHtml } from "./GitHubLink";
 import { LoadingBarHtml } from "./LoadingBar";
 
 export const BaseHtml = ({ children }: PropsWithChildren) => (
@@ -36,9 +37,9 @@ export const BaseHtml = ({ children }: PropsWithChildren) => (
         text-white
     "
       >
-        <input type="hidden" name="git-sha" value={VERSION.gitSha} />
         <LoadingBarHtml />
         {children}
+        {config.env.NODE_ENV !== "development" && <GitHubLinkHtml />}
       </body>
     </html>
   </>

@@ -39,6 +39,7 @@ RUN chown bun:bun /usr/src/app/public/user
 RUN chown bun:bun /usr/src/app/data
 
 ENV migrationFolderTo=/usr/src/app/drizzle/
+ARG GIT_SHA
 ENV GIT_SHA=${GIT_SHA}
 
 # run the app

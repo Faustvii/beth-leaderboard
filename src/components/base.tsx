@@ -1,5 +1,4 @@
 import { type PropsWithChildren } from "@kitajs/html";
-import { config } from "../config";
 import { GitHubLinkHtml } from "./GitHubLink";
 import { LoadingBarHtml } from "./LoadingBar";
 

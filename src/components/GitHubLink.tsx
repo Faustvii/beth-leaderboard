@@ -1,8 +1,11 @@
-import { VERSION } from "../lib/version";
+import { config } from "../config";
+
+const { GIT_SHA } = config.env;
 
 export const GitHubLinkHtml = () => {
   const repoUrl = "https://github.com/faustvii/beth-leaderboard";
-  const commitUrl = `${repoUrl}/commit/${VERSION.gitSha}`;
+  const commitUrl =
+    GIT_SHA === "development" ? repoUrl : `${repoUrl}/commit/${GIT_SHA}`;
 
   return (
     <a
@@ -10,7 +13,7 @@ export const GitHubLinkHtml = () => {
       target="_blank"
       rel="noopener noreferrer"
       class="fixed bottom-4 right-4 hidden rounded-full bg-slate-700 p-2 transition-colors hover:bg-slate-600 lg:block"
-      title={`View commit ${VERSION.gitSha}`}
+      title={`View commit ${GIT_SHA}`}
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"

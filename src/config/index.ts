@@ -32,6 +32,7 @@ const env = createEnv({
     AZURE_CLIENT_SECRET: z.string(),
     AZURE_TENANT: z.string(),
     HOST_URL: z.string(),
+    GIT_SHA: z.string(),
   },
   runtimeEnv: process.env,
 });

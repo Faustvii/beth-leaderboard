@@ -39,7 +39,7 @@ export const BaseHtml = ({ children }: PropsWithChildren) => (
       >
         <LoadingBarHtml />
         {children}
-        {config.env.NODE_ENV !== "development" && <GitHubLinkHtml />}
+        <GitHubLinkHtml />
       </body>
     </html>
   </>

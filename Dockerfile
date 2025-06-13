@@ -22,8 +22,6 @@ COPY --from=install /temp/dev/node_modules node_modules
 COPY . .
 
 ENV NODE_ENV=production
-ARG GIT_SHA
-RUN bun run scripts/generate-version.ts
 RUN bun build --compile --sourcemap --target=bun ./src/main.ts --outfile leaderboard
 RUN bun tw
 
@@ -42,5 +40,7 @@ ENV migrationFolderTo=/usr/src/app/drizzle/
 
 # run the app
 USER bun
+ARG GIT_SHA=development
+ENV GIT_SHA=$GIT_SHA
 EXPOSE 3000/tcp
 ENTRYPOINT [ "./leaderboard" ]

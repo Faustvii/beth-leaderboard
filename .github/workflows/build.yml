@@ -22,6 +22,7 @@ on:
       - "bun.lockdb"
     branches:
       - main
+  workflow_dispatch: # manual trigger with no inputs
 
 permissions:
   contents: write # to be able to publish a GitHub release

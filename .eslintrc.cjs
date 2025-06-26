@@ -19,6 +19,7 @@ const config = {
       "./www/tsconfig.json",
     ],
   },
+  ignorePatterns: ["node_modules/", "build/", "public/"],
   overrides: [
     // Template files don't have reliable type information
     {

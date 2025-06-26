@@ -28,18 +28,6 @@ const options = {
 
 export const readClient = createClient(options[DATABASE_CONNECTION_TYPE]);
 
-if (config.env.DATABASE_CONNECTION_TYPE === "local-replica") {
-  const now = performance.now();
-  readClient
-    .sync()
-    .then(() => {
-      console.log("Database synced in", performance.now() - now, "ms");
-    })
-    .catch((err) => {
-      console.log("Error syncing database", err);
-    });
-}
-
 const remoteOptions = {
   url: config.env.DATABASE_URL || "",
   authToken: config.env.DATABASE_AUTH_TOKEN!,

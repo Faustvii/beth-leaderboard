@@ -172,6 +172,7 @@ local.sqlite-shm
 local.sqlite-wal
 local.sqlite:Zone.Identifier
 local_backup.sqlite
+local.sqlite-info
 
 beth-cache.sqlite
 

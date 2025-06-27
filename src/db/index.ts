@@ -23,6 +23,7 @@ const options = {
     url: "file:data/local.sqlite",
     syncUrl: config.env.DATABASE_URL,
     authToken: config.env.DATABASE_AUTH_TOKEN!,
+    syncInterval: config.env.DATABASE_SYNC_INTERVAL
   },
 } satisfies Record<typeof DATABASE_CONNECTION_TYPE, Config>;
 

@@ -31,6 +31,7 @@ COPY --from=install /temp/prod/node_modules /node_modules
 COPY --from=prerelease /usr/src/app/leaderboard ./leaderboard
 COPY --from=prerelease /usr/src/app/drizzle ./drizzle
 COPY --from=prerelease /usr/src/app/public ./public
+RUN apt-get update && apt-get install -y ca-certificates
 RUN mkdir -p /usr/src/app/public/user
 RUN mkdir -p /usr/src/app/data
 RUN chown bun:bun /usr/src/app/public/user

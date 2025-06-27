@@ -25,6 +25,7 @@ const env = createEnv({
           ? s && s.length > 0
           : true;
       }),
+    DATABASE_SYNC_INTERVAL: z.number().positive().optional().default(30),
     NODE_ENV: z.enum(["development", "production", "preprod"]),
     GOOGLE_CLIENT_ID: z.string().optional(),
     GOOGLE_CLIENT_SECRET: z.string().optional(),

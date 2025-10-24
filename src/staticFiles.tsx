@@ -104,8 +104,10 @@ async function userPicture(
     if (!dbUser) {
       return new Response(null, { status: 404 });
     }
-    if (!isBase64(dbUser.picture))
-      return Bun.file("public/crokinole-c.min.svg");
+
+    if (!isBase64(dbUser.picture) || dbUser.picture === "")
+      return Bun.file("public/default-user-small.webp");
+
     const picture = resize
       ? await resizeImage(dbUser.picture, { ...resize })
       : dbUser.picture;

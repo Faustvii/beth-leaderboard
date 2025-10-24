@@ -1,4 +1,4 @@
-import { eq, like } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { type Session } from "lucia";
 import { HeaderHtml } from "../../components/header";
@@ -10,7 +10,8 @@ import { ctx } from "../../context";
 import { execute_webhooks } from "../../controllers/webhook";
 import { getMatchesBeforeDate } from "../../db/queries/matchQueries";
 import { getActiveSeason } from "../../db/queries/seasonQueries";
-import { matches, questTbl, ratingEventTbl, userTbl } from "../../db/schema";
+import { listUsersByName } from "../../db/queries/userQueries";
+import { matches, questTbl, ratingEventTbl } from "../../db/schema";
 import { isHxRequest, redirect } from "../../lib";
 import { syncIfLocal } from "../../lib/dbHelpers";
 import { handleQuestsAfterLoggedMatch } from "../../lib/quest";
@@ -31,15 +32,10 @@ export const match = new Elysia({
   })
   .get(
     "/search",
-    async ({ readDb, html, query: { name } }) => {
-      if (name === "") return;
-      const players = await readDb
-        .select({ name: userTbl.name, id: userTbl.id })
-        .from(userTbl)
-        .limit(5)
-        .where(like(userTbl.name, `%${name}%`));
-
-      return html(() => MatchSearchResults(players));
+    async ({ html, query: { name } }) => {
+      if (!name || name === "") return;
+      const results = await listUsersByName(name, 5);
+      return html(() => MatchSearchResults(results));
     },
     {
       query: t.Partial(

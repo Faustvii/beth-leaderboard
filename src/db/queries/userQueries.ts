@@ -1,4 +1,4 @@
-import { eq, like } from "drizzle-orm";
+import { eq, ilike, like } from "drizzle-orm";
 import { readDb } from "..";
 import { shortName } from "../../lib/nameUtils";
 import { userTbl } from "../schema";
@@ -38,4 +38,28 @@ export const getCurrentAdmins = async (isAuthenticated: boolean) => {
     }
     return player;
   });
+};
+
+/**
+ * List users by name, sorted by the similarity of the name to the search term.
+ *
+ * Names in which the search string appears earlier are prioritized, as matches towards the
+ * beginning of the name (e.g., in the first name) are generally more relevant.
+ */
+export const listUsersByName = async (searchString: string, count = 5) => {
+  searchString = searchString.toLowerCase();
+  const players = await readDb
+    .select({ name: userTbl.name, id: userTbl.id })
+    .from(userTbl)
+    .where(ilike(userTbl.name, `%${searchString}%`));
+
+  const bestMatches = players
+    .map((player): [{ name: string; id: string }, number] => {
+      return [player, player.name.toLowerCase().indexOf(searchString)];
+    })
+    .sort((a, b) => a[1] - b[1])
+    .slice(0, count)
+    .map((a) => a[0]);
+
+  return bestMatches;
 };

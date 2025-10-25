@@ -1,4 +1,4 @@
-import { eq, ilike, like } from "drizzle-orm";
+import { eq, like } from "drizzle-orm";
 import { readDb } from "..";
 import { shortName } from "../../lib/nameUtils";
 import { userTbl } from "../schema";
@@ -51,7 +51,7 @@ export const listUsersByName = async (searchString: string, count = 5) => {
   const players = await readDb
     .select({ name: userTbl.name, id: userTbl.id })
     .from(userTbl)
-    .where(ilike(userTbl.name, `%${searchString}%`));
+    .where(like(userTbl.name, `%${searchString}%`));
 
   const bestMatches = players
     .map((player): [{ name: string; id: string }, number] => {

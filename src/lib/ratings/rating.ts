@@ -264,11 +264,12 @@ export function prettyRatingSystemType(ratingSystem: RatingSystemType): string {
 }
 
 /**
- * Calculate rating and rank changes between two time periods
- * @param matches - All matches in the season
- * @param cutoffDate - The date to compare against (e.g., 1 day ago, 1 week ago)
- * @param system - The rating system to use
- * @returns Players with rating/rank changes
+ * Calculate rating and rank changes between two time periods.
+ *
+ * @param matches - All matches in the season.
+ * @param cutoffDate - The date to compare against (e.g., 1 day ago, 1 week ago).
+ * @param system - The rating system to use.
+ * @returns Players with rating/rank changes.
  */
 
 export function getTimeIntervalRatingDiff<TRating>(
@@ -297,7 +298,7 @@ export function getTimeIntervalRatingDiff<TRating>(
   );
 
   // Calculate current ratings (after all matches)
-  const ratingsAfter = orderedMatches.reduce(
+  const ratingsAfter = matchesAfterCutoff.reduce(
     (ratings, match) => getRatingsAfterMatch(ratings, match, system),
     {} as PlayerRatingRecord,
   );
@@ -307,7 +308,6 @@ export function getTimeIntervalRatingDiff<TRating>(
 
   return diffRatings(ratingsBefore, ratingsAfter, allPlayerIds, system);
 }
-
 
 export type TimeInterval = "daily" | "weekly" | "monthly";
 

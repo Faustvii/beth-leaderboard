@@ -262,3 +262,70 @@ export function prettyRatingSystemType(ratingSystem: RatingSystemType): string {
       return ratingSystem;
   }
 }
+
+/**
+ * Calculate rating and rank changes between two time periods
+ * @param matches - All matches in the season
+ * @param cutoffDate - The date to compare against (e.g., 1 day ago, 1 week ago)
+ * @param system - The rating system to use
+ * @returns Players with rating/rank changes
+ */
+
+export function getTimeIntervalRatingDiff<TRating>(
+  matches: Match[],
+  cutoffDate: Date,
+  system: RatingSystem<TRating>,
+): PlayerWithRatingDiff<TRating>[] {
+  const orderedMatches = matches.toSorted(
+    (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),
+  );
+
+  // Split matches into "before cutoff" and "after cutoff"
+  const matchesBeforeCutoff = orderedMatches.filter(
+    (m) => m.createdAt.getTime() <= cutoffDate.getTime(),
+  );
+  const matchesAfterCutoff = orderedMatches.filter(
+    (m) => m.createdAt.getTime() > cutoffDate.getTime(),
+  );
+
+  type PlayerRatingRecord = Record<string, PlayerWithRating<TRating>>;
+
+  // Calculate ratings at the cutoff date
+  const ratingsBefore = matchesBeforeCutoff.reduce(
+    (ratings, match) => getRatingsAfterMatch(ratings, match, system),
+    {} as PlayerRatingRecord,
+  );
+
+  // Calculate current ratings (after all matches)
+  const ratingsAfter = orderedMatches.reduce(
+    (ratings, match) => getRatingsAfterMatch(ratings, match, system),
+    {} as PlayerRatingRecord,
+  );
+
+  // Get all players who have played matches
+  const allPlayerIds = Object.keys(ratingsAfter);
+
+  return diffRatings(ratingsBefore, ratingsAfter, allPlayerIds, system);
+}
+
+
+export type TimeInterval = "daily" | "weekly" | "monthly";
+
+export function getTimeIntervalCutoffDate(interval: TimeInterval): Date {
+  const now = new Date();
+  const cutoff = new Date(now);
+
+  switch (interval) {
+    case "daily":
+      cutoff.setDate(cutoff.getDate() - 1);
+      break;
+    case "weekly":
+      cutoff.setDate(cutoff.getDate() - 7);
+      break;
+    case "monthly":
+      cutoff.setMonth(cutoff.getMonth() - 1);
+      break;
+  }
+
+  return cutoff;
+}

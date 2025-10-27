@@ -5,18 +5,21 @@ import {
   prettyRatingSystemType,
   type Rating,
   type RatingSystem,
+  type TimeInterval,
 } from "../../../lib/ratings/rating";
 
 interface SeasonPickerProps {
   basePath: string;
   season: { id: number };
   ratingSystem?: RatingSystem<Rating>;
+  timeInterval?: TimeInterval;
 }
 
 export const SeasonPicker = async ({
   basePath,
   season,
   ratingSystem,
+  timeInterval,
 }: SeasonPickerProps) => {
   const seasons = await getSeasons();
 
@@ -27,6 +30,7 @@ export const SeasonPicker = async ({
           path: path(basePath, {
             season: s.id.toString(),
             ratingSystem: ratingSystem?.type,
+            interval: timeInterval,
           }),
           text: s.name,
         }))}
@@ -38,6 +42,7 @@ export const SeasonPicker = async ({
             path: path(basePath, {
               season: season.id.toString(),
               ratingSystem: t,
+              interval: timeInterval,
             }),
             text: prettyRatingSystemType(t),
           }))}

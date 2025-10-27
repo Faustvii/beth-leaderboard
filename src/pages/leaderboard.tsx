@@ -44,10 +44,10 @@ const playerQuery = async (
   > = MatchStatistics.currentStreaksByPlayer(matches);
 
   // Calculate rating/rank changes if time interval is specified
-  let ratingChanges: Map<
+  let ratingChanges = new Map<
     string,
     { ratingBefore?: number; rankBefore?: number }
-  > = new Map();
+  >();
 
   if (timeInterval) {
     const cutoffDate = getTimeIntervalCutoffDate(timeInterval);

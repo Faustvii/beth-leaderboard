@@ -1,6 +1,9 @@
-import { type TimeInterval } from "../lib/ratings/rating";
 import { type Season } from "../db/schema/season";
-import { type RatingSystem, type Rating } from "../lib/ratings/rating";
+import {
+  type Rating,
+  type RatingSystem,
+  type TimeInterval,
+} from "../lib/ratings/rating";
 
 export function TimeIntervalPicker({
   basePath,

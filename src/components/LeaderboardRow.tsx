@@ -1,7 +1,7 @@
-import { RESULT } from "../lib/matchStatistics";
-import { HxButton } from "./HxButton";
-import { isDefined } from "../lib/utils";
 import { isDateOlderThanNDays } from "../lib/dateUtils";
+import { RESULT } from "../lib/matchStatistics";
+import { isDefined } from "../lib/utils";
+import { HxButton } from "./HxButton";
 
 export const LeaderboardRowHtml = ({
   userId,
@@ -33,22 +33,18 @@ export const LeaderboardRowHtml = ({
   const { loseStreak, results, winStreak } = latestPlayerResults || {};
   const streak = winStreak || loseStreak || undefined;
   const isWinStreak = !!winStreak;
-  
+
   return (
-  <tr class="border-b border-gray-700 bg-gray-800">
-    <td class="px-1 py-4 pl-2 md:px-3 lg:px-6">
-      <Rank rank={rank} isLowestRanked={isLowestRanked} />
-      <DiffIcon
-        before={rankBefore}
-        after={rank}
-        isHigherBetter={false}
-      />
-    </td>
-    <th
-      scope="row"
-      class="grid grid-cols-12 items-center gap-3 whitespace-nowrap px-1 py-4 font-medium text-white md:flex md:px-3 lg:px-6"
-    >
-      <div class="col-span-2">
+    <tr class="border-b border-gray-700 bg-gray-800">
+      <td class="px-1 py-4 pl-2 md:px-3 lg:px-6">
+        <Rank rank={rank} isLowestRanked={isLowestRanked} />
+        <DiffIcon before={rankBefore} after={rank} isHigherBetter={false} />
+      </td>
+      <th
+        scope="row"
+        class="grid grid-cols-12 items-center gap-3 whitespace-nowrap px-1 py-4 font-medium text-white md:flex md:px-3 lg:px-6"
+      >
+        <div class="col-span-2">
           <WinLoseStreak
             lastPlayed={lastPlayed}
             streak={streak}
@@ -56,31 +52,27 @@ export const LeaderboardRowHtml = ({
             isCurrentSeason={isCurrentSeason}
           />
         </div>
-      <img
-        class="col-span-2 mr-1 inline-block h-8 w-8 rounded-full ring-2 ring-gray-700 lg:mr-3 lg:h-8 lg:w-8"
-        src={`/static/user/${userId}/small`}
-        loading="lazy"
-        alt=""
-      />
-      <div class="col-span-8 flex flex-col gap-0 text-left">
-        <HxButton
-          class="w-44 overflow-hidden truncate whitespace-nowrap text-left md:w-full"
-          hx-get={`/profile/${userId}`}
-        >
-          {name}
-        </HxButton>
-        <LatestResults latestPlayerResults={results} />
-      </div>
-    </th>
-    <td class="px-1 py-4 md:px-3 lg:px-6">
-      <span class="inline-block w-8">{rating}</span>
-      <DiffIcon
-        before={ratingBefore}
-        after={rating}
-        isHigherBetter={true}
-      />
-    </td>
-  </tr>
+        <img
+          class="col-span-2 mr-1 inline-block h-8 w-8 rounded-full ring-2 ring-gray-700 lg:mr-3 lg:h-8 lg:w-8"
+          src={`/static/user/${userId}/small`}
+          loading="lazy"
+          alt=""
+        />
+        <div class="col-span-8 flex flex-col gap-0 text-left">
+          <HxButton
+            class="w-44 overflow-hidden truncate whitespace-nowrap text-left md:w-full"
+            hx-get={`/profile/${userId}`}
+          >
+            {name}
+          </HxButton>
+          <LatestResults latestPlayerResults={results} />
+        </div>
+      </th>
+      <td class="px-1 py-4 md:px-3 lg:px-6">
+        <span class="inline-block w-8">{rating}</span>
+        <DiffIcon before={ratingBefore} after={rating} isHigherBetter={true} />
+      </td>
+    </tr>
   );
 };
 

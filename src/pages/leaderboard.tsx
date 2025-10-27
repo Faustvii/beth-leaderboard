@@ -150,6 +150,7 @@ async function LeaderboardTable(
             basePath="/leaderboard"
             season={season}
             ratingSystem={ratingSystem}
+            timeInterval={timeInterval}
           />
         </div>
       </div>

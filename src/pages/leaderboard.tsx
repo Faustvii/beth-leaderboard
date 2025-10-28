@@ -69,6 +69,11 @@ const playerQuery = async (
   return players.map((player, index) => {
     const changes = ratingChanges.get(player.player.id);
 
+    console.log(`Rank ${index + 1}: ${player.player.name}`, {
+      rankBefore: changes?.rankBefore,
+      ratingBefore: changes?.ratingBefore,
+    });
+
     return {
       userId: player.player.id,
       rank: index + 1,

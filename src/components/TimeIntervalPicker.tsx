@@ -18,9 +18,9 @@ export function TimeIntervalPicker({
 }) {
   const intervals: { value: TimeInterval | "none"; label: string }[] = [
     { value: "none", label: "No Changes" },
-    { value: "daily", label: "Daily" },
-    { value: "weekly", label: "Weekly" },
-    { value: "monthly", label: "Monthly" },
+    { value: "daily", label: "Last 24 hours" },
+    { value: "weekly", label: "Last 7 days" },
+    { value: "monthly", label: "Last 30 days" },
   ];
 
   const selectedValue = currentInterval || "none";

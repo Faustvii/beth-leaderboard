@@ -1,6 +1,5 @@
 import { isDateOlderThanNDays } from "../lib/dateUtils";
 import { RESULT } from "../lib/matchStatistics";
-import { isDefined } from "../lib/utils";
 import { HxButton } from "./HxButton";
 
 export const LeaderboardRowHtml = ({

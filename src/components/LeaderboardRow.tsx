@@ -166,23 +166,20 @@ function DiffIcon({
   before: number | undefined;
   after: number;
   isHigherBetter: boolean;
-}): JSX.Element {
-  const areDefined = isDefined(before) && after;
-  const areEqual = before === after;
-  const shouldDisplay = areDefined && !areEqual;
+}): JSX.Element | null {
+  if (before == null) return null;
 
-  if (!shouldDisplay) {
-    return <></>;
-  }
+  const diff = after - before;
+  if (diff === 0) return null;
 
-  const difference = after - before;
-  const isPositive = difference > 0;
-  const isImproved = isHigherBetter ? isPositive : !isPositive;
+  const isImproved = isHigherBetter ? diff > 0 : diff < 0;
+  const colorClass = isImproved ? "text-green-500" : "text-red-500";
+  const arrow = isImproved ? "▲" : "▼";
 
   return (
-    <span class={["pl-1", isImproved ? "text-green-500" : "text-red-500"]}>
-      {isImproved ? "▲" : "▼"}
-      {Math.abs(difference)}
+    <span class={["pl-1", colorClass].join(" ")}>
+      {arrow}
+      {Math.abs(diff)}
     </span>
   );
 }

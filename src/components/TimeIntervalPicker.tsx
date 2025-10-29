@@ -4,6 +4,7 @@ import {
   type RatingSystem,
   type TimeInterval,
 } from "../lib/ratings/rating";
+import { SelectGet } from "./SelectGet";
 
 export function TimeIntervalPicker({
   basePath,
@@ -25,37 +26,29 @@ export function TimeIntervalPicker({
 
   const selectedValue = currentInterval || "none";
 
-  const buildUrl = (interval: TimeInterval | "none") => {
+  const options = intervals.map((interval) => {
     const params = new URLSearchParams();
     params.set("season", season.id.toString());
     params.set("ratingSystem", ratingSystem.type);
-    if (interval !== "none") {
-      params.set("interval", interval);
+    if (interval.value !== "none") {
+      params.set("interval", interval.value);
     }
-    return `${basePath}?${params.toString()}`;
-  };
+    return {
+      path: `${basePath}?${params.toString()}`,
+      text: interval.label,
+    };
+  });
+
+  const selectedIndex = intervals.findIndex((i) => i.value === selectedValue);
 
   return (
     <div class="flex items-center gap-2">
-      <label class="text-sm text-gray-400">Changes:</label>
-      <select
-        class="rounded-lg border border-gray-600 bg-gray-700 p-2 text-sm text-white focus:border-blue-500 focus:ring-blue-500"
-        _={`on change
-            set targetUrl to event.srcElement.value
-            fetch \`\${targetUrl}\`
-            then put it after #mainContainer
-            then remove #mainContainer
-            then call htmx.process(document.body)`}
-      >
-        {intervals.map((interval) => (
-          <option
-            value={buildUrl(interval.value)}
-            selected={selectedValue === interval.value}
-          >
-            {interval.label}
-          </option>
-        ))}
-      </select>
+      <label class="text-sm text-gray-400"></label>
+      <SelectGet
+        options={options}
+        selectedIndex={selectedIndex}
+        selectClass="rounded-lg border border-gray-600 bg-gray-700 p-2 text-sm text-white focus:border-blue-500 focus:ring-blue-500"
+      />
     </div>
   );
 }

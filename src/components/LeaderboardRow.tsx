@@ -1,5 +1,6 @@
 import { isDateOlderThanNDays } from "../lib/dateUtils";
 import { RESULT } from "../lib/matchStatistics";
+import { DiffIcon } from "./DiffIcon";
 import { HxButton } from "./HxButton";
 
 export const LeaderboardRowHtml = ({
@@ -39,10 +40,7 @@ export const LeaderboardRowHtml = ({
         <Rank rank={rank} isLowestRanked={isLowestRanked} />
         <DiffIcon before={rankBefore} after={rank} isHigherBetter={false} />
       </td>
-      <th
-        scope="row"
-        class="grid grid-cols-12 items-center gap-3 whitespace-nowrap px-1 py-4 font-medium text-white md:flex md:px-3 lg:px-6"
-      >
+      <td class="grid grid-cols-12 items-center gap-3 whitespace-nowrap px-1 py-4 font-medium text-white md:flex md:px-3 lg:px-6">
         <div class="col-span-2">
           <WinLoseStreak
             lastPlayed={lastPlayed}
@@ -66,7 +64,7 @@ export const LeaderboardRowHtml = ({
           </HxButton>
           <LatestResults latestPlayerResults={results} />
         </div>
-      </th>
+      </td>
       <td class="px-1 py-4 md:px-3 lg:px-6">
         <span class="inline-block w-8">{rating}</span>
         <DiffIcon before={ratingBefore} after={rating} isHigherBetter={true} />
@@ -129,7 +127,7 @@ export const WinLoseStreak = ({
     return <span class="pr-2 text-2xl">💤</span>;
   }
   if (streak && streak === 5) {
-    return <span class="pr-2 text-2xl">{isWinStreak ? "🤯" : "🗑️"}</span>;
+    return <span class="pr-2 text-2xl">{isWinStreak ? "🤑" : "🗑️"}</span>;
   }
   if (streak && streak >= 3) {
     return <span class="pr-2 text-2xl">{isWinStreak ? "🔥" : "❄️"}</span>;
@@ -156,29 +154,3 @@ export const LatestResults = ({
     </div>
   );
 };
-
-function DiffIcon({
-  before,
-  after,
-  isHigherBetter,
-}: {
-  before: number | undefined;
-  after: number;
-  isHigherBetter: boolean;
-}): JSX.Element | null {
-  if (before == null) return null;
-
-  const diff = after - before;
-  if (diff === 0) return null;
-
-  const isImproved = isHigherBetter ? diff > 0 : diff < 0;
-  const colorClass = isImproved ? "text-green-500" : "text-red-500";
-  const arrow = isImproved ? "▲" : "▼";
-
-  return (
-    <span class={["pl-1", colorClass].join(" ")}>
-      {arrow}
-      {Math.abs(diff)}
-    </span>
-  );
-}

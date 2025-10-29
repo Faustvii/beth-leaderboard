@@ -25,28 +25,37 @@ export function TimeIntervalPicker({
 
   const selectedValue = currentInterval || "none";
 
+  const buildUrl = (interval: TimeInterval | "none") => {
+    const params = new URLSearchParams();
+    params.set("season", season.id.toString());
+    params.set("ratingSystem", ratingSystem.type);
+    if (interval !== "none") {
+      params.set("interval", interval);
+    }
+    return `${basePath}?${params.toString()}`;
+  };
+
   return (
     <div class="flex items-center gap-2">
       <label class="text-sm text-gray-400">Changes:</label>
       <select
-        name="interval"
         class="rounded-lg border border-gray-600 bg-gray-700 p-2 text-sm text-white focus:border-blue-500 focus:ring-blue-500"
-        hx-get={basePath}
-        hx-target="body"
-        hx-push-url="true"
-        hx-include="[name='season'], [name='ratingSystem']"
+        _={`on change
+            set targetUrl to event.srcElement.value
+            fetch \`\${targetUrl}\`
+            then put it after #mainContainer
+            then remove #mainContainer
+            then call htmx.process(document.body)`}
       >
         {intervals.map((interval) => (
           <option
-            value={interval.value === "none" ? "" : interval.value}
+            value={buildUrl(interval.value)}
             selected={selectedValue === interval.value}
           >
             {interval.label}
           </option>
         ))}
       </select>
-      <input type="hidden" name="season" value={season.id.toString()} />
-      <input type="hidden" name="ratingSystem" value={ratingSystem.type} />
     </div>
   );
 }

@@ -214,8 +214,8 @@ function diffRatings<TRating>(
       player: after[playerId].player,
       ratingBefore: ratingBefore ?? system.defaultRating,
       ratingAfter,
-      rankBefore: rankBefore === -1 ? undefined : rankBefore + 1,
-      rankAfter: rankAfter + 1,
+      rankBefore: rankBefore === -1 ? undefined : rankBefore,
+      rankAfter: rankAfter,
     });
   }
 

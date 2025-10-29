@@ -4,7 +4,6 @@ import { type Session } from "lucia";
 import { HeaderHtml } from "../components/header";
 import { LayoutHtml } from "../components/Layout";
 import { LeaderboardTableHtml } from "../components/LeaderboardTable";
-import { MainContainer } from "../components/MainContainer";
 import { NavbarHtml } from "../components/Navbar";
 import { TimeIntervalPicker } from "../components/TimeIntervalPicker";
 import { ctx } from "../context";
@@ -21,7 +20,6 @@ import {
   type RatingSystem,
   type TimeInterval,
 } from "../lib/ratings/rating";
-import { isDefined } from "../lib/utils";
 import { SeasonPicker } from "./admin/components/SeasonPicker";
 
 const playerQuery = async (
@@ -46,7 +44,7 @@ const playerQuery = async (
   // Calculate rating/rank changes if time interval is specified
   let ratingChanges = new Map<
     string,
-    { ratingBefore?: number; rankBefore?: number }
+    { ratingBefore?: Rating; rankBefore?: number }
   >();
 
   if (timeInterval) {
@@ -57,9 +55,7 @@ const playerQuery = async (
       diffs.map((diff) => [
         diff.player.id,
         {
-          ratingBefore: isDefined(diff.ratingBefore)
-            ? ratingSystem.toNumber(diff.ratingBefore)
-            : undefined,
+          ratingBefore: diff.ratingBefore,
           rankBefore: diff.rankBefore,
         },
       ]),
@@ -69,18 +65,16 @@ const playerQuery = async (
   return players.map((player, index) => {
     const changes = ratingChanges.get(player.player.id);
 
-    console.log(`Rank ${index + 1}: ${player.player.name}`, {
-      rankBefore: changes?.rankBefore,
-      ratingBefore: changes?.ratingBefore,
-    });
-
     return {
       userId: player.player.id,
       rank: index + 1,
+      rankBefore:
+        changes?.rankBefore !== undefined ? changes.rankBefore + 1 : undefined,
       name: player.player.name,
       rating: ratingSystem.toNumber(player.rating),
-      ratingBefore: changes?.ratingBefore,
-      rankBefore: changes?.rankBefore,
+      ratingBefore: changes?.ratingBefore
+        ? ratingSystem.toNumber(changes.ratingBefore)
+        : undefined,
       lastPlayed:
         lastPlayed.find((match) => match.player.id === player.player.id)
           ?.lastPlayed || new Date(0),
@@ -112,9 +106,7 @@ export async function LeaderboardPage(
   return (
     <>
       {isHxRequest(headers) ? (
-        <MainContainer>
-          {LeaderboardTable(session, season, ratingSystem, timeInterval)}
-        </MainContainer>
+        LeaderboardTable(session, season, ratingSystem, timeInterval)
       ) : (
         <LayoutHtml>
           {LeaderboardTable(session, season, ratingSystem, timeInterval)}

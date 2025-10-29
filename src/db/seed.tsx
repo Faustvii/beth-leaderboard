@@ -51,7 +51,7 @@ async function SeedPlayers(db: typeof readDb) {
       name: `Player ${index}`,
       email: `fake${index}@fake.crokinole`,
       roles: index === 0 ? "admin" : "",
-      picture: "../../public/crokinole.svg",
+      picture: "",
       nickname: `PNick${index}`,
     };
 

@@ -355,7 +355,7 @@ function matchhistoryDateToString(date: Date) {
   const daysBetween = milisecondsBetween / (1000 * 60 * 60 * 24);
   switch (daysBetween) {
     case 0: {
-      return "Twoday:";
+      return "IT Minds:";
     }
     case 1: {
       return "Yesterday:";

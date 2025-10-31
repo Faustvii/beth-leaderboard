@@ -29,3 +29,14 @@ export function pick<T>(array: T[], count: number) {
 
   return result;
 }
+
+/**
+ * Merges two arrays using a mapping function
+ */
+export const zip = <Ta, Tb, Tout>(arrA: Ta[], arrB: Tb[], mapFn: (a: Ta, b: Tb) => Tout): Tout[] => {
+  const result: Tout[] = [];
+  for(let i = 0; i < arrA.length; i++){
+    result.push(mapFn(arrA[i], arrB[i]))
+  }
+  return result;
+};

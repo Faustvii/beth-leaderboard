@@ -9,17 +9,17 @@ import {
 
 export type OpenskillRating = Rating;
 
-export function openskill(options?: Options): RatingSystem<OpenskillRating> {
-  const selectedOptions: Options = options ?? {
-    mu: 1000, // skill level, higher is better
-    sigma: 500, // certainty, lower is more certain
-    tau: 0.3, // tau prevents model from getting too certain about a players skill level
-    z: 2, // used in calculation of ordinal `my - z * sigma`
-  };
+export const OPENSKILL_OPTIONS = {
+  mu: 1000, // skill level, higher is better
+  sigma: 500, // certainty, lower is more certain
+  tau: 0.3, // tau prevents model from getting too certain about a players skill level
+  z: 2, // used in calculation of ordinal `my - z * sigma`
+} satisfies Options;
 
+export function openskill(): RatingSystem<OpenskillRating> {
   return {
     type: "openskill",
-    defaultRating: rating(selectedOptions),
+    defaultRating: rating(OPENSKILL_OPTIONS),
 
     rateMatch(
       match: MatchWithRatings<OpenskillRating>,
@@ -46,7 +46,7 @@ export function openskill(options?: Options): RatingSystem<OpenskillRating> {
         [whitePlayerOneNewRating, whitePlayerTwoNewRating],
         [blackPlayerOneNewRating, blackPlayerTwoNewRating],
       ] = rate([whiteTeam, blackTeam], {
-        ...selectedOptions,
+        ...OPENSKILL_OPTIONS,
         rank: outcomeRanking,
       });
 
@@ -79,7 +79,7 @@ export function openskill(options?: Options): RatingSystem<OpenskillRating> {
     },
 
     toNumber(rating: OpenskillRating) {
-      return Math.floor(ordinal(rating, selectedOptions));
+      return Math.floor(ordinal(rating, OPENSKILL_OPTIONS));
     },
 
     equals(a: OpenskillRating | undefined, b: OpenskillRating | undefined) {

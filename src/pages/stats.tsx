@@ -14,7 +14,7 @@ import { isHxRequest, measure, notEmpty } from "../lib";
 import { getDatePartFromDate } from "../lib/dateUtils";
 import MatchStatistics from "../lib/matchStatistics";
 import { type Match } from "../lib/ratings/rating";
-import { SeasonPicker } from "./admin/components/SeasonPicker";
+import { SeasonPicker } from "../components/SeasonPicker";
 
 export const stats = new Elysia({
   prefix: "/stats",

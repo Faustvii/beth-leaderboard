@@ -41,14 +41,5 @@ export function TimeIntervalPicker({
 
   const selectedIndex = intervals.findIndex((i) => i.value === selectedValue);
 
-  return (
-    <div class="flex items-center gap-2">
-      <label class="text-sm text-gray-400"></label>
-      <SelectGet
-        options={options}
-        selectedIndex={selectedIndex}
-        selectClass="rounded-lg border border-gray-600 bg-gray-700 p-2 text-sm text-white focus:border-blue-500 focus:ring-blue-500"
-      />
-    </div>
-  );
+  return <SelectGet options={options} selectedIndex={selectedIndex} />;
 }

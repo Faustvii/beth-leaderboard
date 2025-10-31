@@ -5,7 +5,7 @@ import { HeaderHtml } from "../components/header";
 import { LayoutHtml } from "../components/Layout";
 import { LeaderboardTableHtml } from "../components/LeaderboardTable";
 import { NavbarHtml } from "../components/Navbar";
-import { TimeIntervalPicker } from "../components/TimeIntervalPicker";
+import { FilterBar } from "../components/FilterBar";
 import { ctx } from "../context";
 import { getMatches } from "../db/queries/matchQueries";
 import { getSeasons } from "../db/queries/seasonQueries";
@@ -20,7 +20,6 @@ import {
   type RatingSystem,
   type TimeInterval,
 } from "../lib/ratings/rating";
-import { SeasonPicker } from "./admin/components/SeasonPicker";
 
 const playerQuery = async (
   season: Season,
@@ -134,22 +133,14 @@ async function LeaderboardTable(
   return (
     <>
       <NavbarHtml session={session} activePage="leaderboard" />
-      <div class="flex flex-row items-center justify-between gap-2">
+      <div class="flex flex-row justify-between">
         <HeaderHtml title="Leaderboard" />
-        <div class="flex gap-2">
-          <TimeIntervalPicker
-            basePath="/leaderboard"
-            currentInterval={timeInterval}
-            season={season}
-            ratingSystem={ratingSystem}
-          />
-          <SeasonPicker
-            basePath="/leaderboard"
-            season={season}
-            ratingSystem={ratingSystem}
-            timeInterval={timeInterval}
-          />
-        </div>
+        <FilterBar
+          basePath="/leaderboard"
+          season={season}
+          ratingSystem={ratingSystem}
+          timeInterval={timeInterval}
+        />
       </div>
       <LeaderboardTableHtml
         rows={rows}

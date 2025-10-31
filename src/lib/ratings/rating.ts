@@ -214,8 +214,8 @@ function diffRatings<TRating>(
       player: after[playerId].player,
       ratingBefore: ratingBefore ?? system.defaultRating,
       ratingAfter,
-      rankBefore: rankBefore === -1 ? undefined : rankBefore + 1,
-      rankAfter: rankAfter + 1,
+      rankBefore: rankBefore === -1 ? undefined : rankBefore,
+      rankAfter: rankAfter,
     });
   }
 
@@ -261,4 +261,63 @@ export function prettyRatingSystemType(ratingSystem: RatingSystemType): string {
     default:
       return ratingSystem;
   }
+}
+
+/**
+ * Calculate rating and rank changes between two time periods.
+ *
+ * @param matches - All matches in the season.
+ * @param cutoffDate - The date to compare against (e.g., 1 day ago, 1 week ago).
+ * @param system - The rating system to use.
+ * @returns Players with rating/rank changes.
+ */
+
+export function getTimeIntervalRatingDiff<TRating>(
+  matches: Match[],
+  cutoffDate: Date,
+  system: RatingSystem<TRating>,
+): PlayerWithRatingDiff<TRating>[] {
+  const orderedMatches = matches.toSorted(
+    (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),
+  );
+  const matchesBeforeCutoff = orderedMatches.filter(
+    (m) => m.createdAt.getTime() <= cutoffDate.getTime(),
+  );
+
+  type PlayerRatingRecord = Record<string, PlayerWithRating<TRating>>;
+
+  const ratingsBefore = matchesBeforeCutoff.reduce(
+    (ratings, match) => getRatingsAfterMatch(ratings, match, system),
+    {} as PlayerRatingRecord,
+  );
+
+  const ratingsAfter = orderedMatches.reduce(
+    (ratings, match) => getRatingsAfterMatch(ratings, match, system),
+    {} as PlayerRatingRecord,
+  );
+
+  const allPlayerIds = Object.keys(ratingsAfter);
+
+  return diffRatings(ratingsBefore, ratingsAfter, allPlayerIds, system);
+}
+
+export type TimeInterval = "daily" | "weekly" | "monthly";
+
+export function getTimeIntervalCutoffDate(interval: TimeInterval): Date {
+  const now = new Date();
+  const cutoff = new Date(now);
+
+  switch (interval) {
+    case "daily":
+      cutoff.setDate(cutoff.getDate() - 1);
+      break;
+    case "weekly":
+      cutoff.setDate(cutoff.getDate() - 7);
+      break;
+    case "monthly":
+      cutoff.setMonth(cutoff.getMonth() - 1);
+      break;
+  }
+
+  return cutoff;
 }

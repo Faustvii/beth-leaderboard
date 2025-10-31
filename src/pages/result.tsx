@@ -16,7 +16,7 @@ import {
   type RatingSystem,
 } from "../lib/ratings/rating";
 import { isDefined } from "../lib/utils";
-import { SeasonPicker } from "./admin/components/SeasonPicker";
+import { SeasonPicker } from "../components/SeasonPicker";
 
 export const matchResult = new Elysia({
   prefix: "/result",
@@ -45,13 +45,7 @@ async function page(
       <NavbarHtml session={session} activePage="result" />
       <div class="flex flex-row justify-between">
         <HeaderHtml className="px-0" title="Match result" />
-        <SeasonPicker
-          basePath={`/result/${matchId}`}
-          season={{ id: seasonId ?? match.seasonId }}
-          ratingSystem={ratingSystem}
-        />
       </div>
-
       <MatchDescription match={match} />
       <RatingDiff
         session={session}

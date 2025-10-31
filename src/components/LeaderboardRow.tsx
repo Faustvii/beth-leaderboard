@@ -1,12 +1,15 @@
 import { isDateOlderThanNDays } from "../lib/dateUtils";
 import { RESULT } from "../lib/matchStatistics";
+import { DiffIcon } from "./DiffIcon";
 import { HxButton } from "./HxButton";
 
-export const LeaderboardRowHtml = async ({
+export const LeaderboardRowHtml = ({
   userId,
   rank,
   name,
   rating,
+  ratingBefore,
+  rankBefore,
   lastPlayed,
   latestPlayerResults,
   isCurrentSeason,
@@ -16,6 +19,8 @@ export const LeaderboardRowHtml = async ({
   rank: number;
   name: string;
   rating: number;
+  ratingBefore?: number;
+  rankBefore?: number;
   lastPlayed: Date;
   latestPlayerResults: {
     winStreak: number;
@@ -26,7 +31,6 @@ export const LeaderboardRowHtml = async ({
   isLowestRanked: boolean;
 }) => {
   const { loseStreak, results, winStreak } = latestPlayerResults || {};
-
   const streak = winStreak || loseStreak || undefined;
   const isWinStreak = !!winStreak;
 
@@ -34,11 +38,9 @@ export const LeaderboardRowHtml = async ({
     <tr class="border-b border-gray-700 bg-gray-800">
       <td class="px-1 py-4 pl-2 md:px-3 lg:px-6">
         <Rank rank={rank} isLowestRanked={isLowestRanked} />
+        <DiffIcon before={rankBefore} after={rank} isHigherBetter={false} />
       </td>
-      <th
-        scope="row"
-        class="grid grid-cols-12 items-center gap-3 whitespace-nowrap px-1 py-4 font-medium text-white md:flex md:px-3 lg:px-6"
-      >
+      <td class="grid grid-cols-12 items-center gap-3 whitespace-nowrap px-1 py-4 font-medium text-white md:flex md:px-3 lg:px-6">
         <div class="col-span-2">
           <WinLoseStreak
             lastPlayed={lastPlayed}
@@ -62,8 +64,11 @@ export const LeaderboardRowHtml = async ({
           </HxButton>
           <LatestResults latestPlayerResults={results} />
         </div>
-      </th>
-      <td class="px-1 py-4 md:px-3 lg:px-6">{rating}</td>
+      </td>
+      <td class="px-1 py-4 md:px-3 lg:px-6">
+        <span class="inline-block w-8">{rating}</span>
+        <DiffIcon before={ratingBefore} after={rating} isHigherBetter={true} />
+      </td>
     </tr>
   );
 };
@@ -103,7 +108,7 @@ const Rank = ({
         </span>
       );
     default:
-      return <span>{rank}.</span>;
+      return <span class="inline-block w-4">{rank}.</span>;
   }
 };
 
@@ -124,11 +129,9 @@ export const WinLoseStreak = ({
   if (streak && streak === 5) {
     return <span class="pr-2 text-2xl">{isWinStreak ? "🤑" : "🗑️"}</span>;
   }
-
   if (streak && streak >= 3) {
     return <span class="pr-2 text-2xl">{isWinStreak ? "🔥" : "❄️"}</span>;
   }
-
   return <span class="invisible pr-2 text-2xl">〰️</span>;
 };
 

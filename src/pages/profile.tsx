@@ -30,7 +30,7 @@ import {
   type RatingSystem,
 } from "../lib/ratings/rating";
 import { cn } from "../lib/utils";
-import { SeasonPicker } from "./admin/components/SeasonPicker";
+import { SeasonPicker } from "../components/SeasonPicker";
 
 export const profile = new Elysia({
   prefix: "/profile",

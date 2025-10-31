@@ -1,7 +1,8 @@
-import { type ChartConfiguration } from "chart.js";
 import { eq } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 import { type Session } from "lucia";
+import { playerWinRateChartConfig } from "../charts/playerWinRate";
+import { ratingTrendChartConfig } from "../charts/ratingHistory";
 import { Chart } from "../components/Chart";
 import { FoldableCard } from "../components/FoldableCard";
 import { HeaderHtml } from "../components/header";
@@ -200,101 +201,8 @@ const profileStats = (
     20,
   );
 
-  const colorWinrateData = {
-    labels: ["Won", "Lost", "Draw"],
-    datasets: [
-      {
-        label: "Matches",
-        data: [winRate.wonGames, winRate.lostGames, winRate.draws],
-        backgroundColor: ["#fffffe", "rgb(35, 43, 43)", "#ff8906"],
-        hoverOffset: 4,
-      },
-    ],
-  };
-
-  const winrateConfig: ChartConfiguration = {
-    type: "doughnut",
-    data: colorWinrateData,
-    options: {
-      plugins: {
-        legend: {
-          display: false,
-          labels: {
-            color: "#fffffe",
-          },
-          position: "left",
-        },
-      },
-      elements: {
-        arc: {
-          borderWidth: 0,
-        },
-      },
-    },
-  };
-
-  const colorFromPrevious = (cur: number, i: number, arr: number[]) => {
-    if (i === 0) {
-      return "#00FF00";
-    }
-
-    const prev = arr[i - 1];
-
-    if (cur >= prev) {
-      return "#00FF00";
-    }
-
-    return "#FF0000";
-  };
-
-  const ratings = ratingHistory.map((x) => ratingSystem.toNumber(x.rating));
-  const ratingColor = ratings.map(colorFromPrevious);
-
-  const ratingData = {
-    labels: ratingHistory.map((x) =>
-      x.date.toLocaleString("en-US", {
-        day: "numeric",
-        month: "long",
-      }),
-    ),
-
-    datasets: [
-      {
-        label: "Rating",
-        borderColor: "#ff8906",
-        data: ratings,
-        hoverOffset: 4,
-        pointBackgroundColor: ratingColor,
-        pointBorderColor: ratingColor,
-        tension: 0.1,
-      },
-    ],
-  };
-
-  const ratingTrendConfig: ChartConfiguration = {
-    type: "line",
-    data: ratingData,
-    options: {
-      scales: {
-        y: {
-          ticks: {
-            color: "#fffffe",
-          },
-        },
-        x: {
-          ticks: {
-            color: "#fffffe",
-          },
-        },
-      },
-      responsive: true,
-      plugins: {
-        legend: {
-          display: false,
-        },
-      },
-    },
-  };
+  const winrateConfig = playerWinRateChartConfig(winRate);
+  const ratingTrendConfig = ratingTrendChartConfig(ratingSystem, ratingHistory);
   console.log("metrics took ", performance.now() - now + "ms to run");
 
   return (

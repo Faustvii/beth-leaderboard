@@ -1,6 +1,6 @@
-import { type ChartConfiguration } from "chart.js";
 import { Elysia } from "elysia";
 import { type Session } from "lucia";
+import { colorWinRateChartConfig } from "../charts/colorWinRate";
 import { Chart } from "../components/Chart";
 import { HeaderHtml } from "../components/header";
 import { LayoutHtml } from "../components/Layout";
@@ -74,43 +74,7 @@ async function page(session: Session | null, season: Season) {
   const gameResults = MatchStatistics.winsByResult(matches);
   console.log("metrics took ", performance.now() - now + "ms  to run");
 
-  const data = {
-    labels: ["White win", "Black win", "Draw"],
-    datasets: [
-      {
-        label: "Matches",
-        data: [
-          gameResults.whiteWins.wins,
-          gameResults.blackWins.wins,
-          gameResults.numOfDraws.draws,
-        ],
-        backgroundColor: ["#fffffe", "rgb(35, 43, 43)", "#D3D3D3"],
-        hoverOffset: 4,
-      },
-    ],
-  };
-
-  const config: ChartConfiguration = {
-    type: "doughnut",
-    data: data,
-    options: {
-      plugins: {
-        legend: {
-          display: false,
-          labels: {
-            color: "#fffffe",
-          },
-          position: "left",
-        },
-      },
-      elements: {
-        arc: {
-          borderWidth: 2,
-          borderColor: "#ff8906",
-        },
-      },
-    },
-  };
+  const config = colorWinRateChartConfig(gameResults);
 
   return (
     <>

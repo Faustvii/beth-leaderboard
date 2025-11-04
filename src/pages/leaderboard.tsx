@@ -89,7 +89,16 @@ export const leaderboard = new Elysia({
 })
   .use(ctx)
   .get("/", async ({ html, session, headers, season, ratingSystem, query }) => {
-    const timeInterval = query.interval as TimeInterval | undefined;
+    const rawInterval = query.interval as string | undefined;
+  
+    // Handle the three cases:
+    // 1. No param (first load) → default to "today"
+    // 2. interval=none (user selected "No Changes") → undefined
+    // 3. interval=today/daily/etc → use that value
+  const timeInterval: TimeInterval | undefined = 
+    rawInterval === undefined ? "today" :
+    rawInterval === "none" ? undefined :
+    rawInterval as TimeInterval;
     return html(() =>
       LeaderboardPage(session, headers, season, ratingSystem, timeInterval),
     );

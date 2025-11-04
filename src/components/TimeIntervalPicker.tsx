@@ -13,25 +13,28 @@ export function TimeIntervalPicker({
   ratingSystem,
 }: {
   basePath: string;
-  currentInterval: TimeInterval | undefined;
+  currentInterval: TimeInterval | undefined | "simple";
   season: Season | { id: number };
   ratingSystem: RatingSystem<Rating>;
 }) {
-  const intervals: { value: TimeInterval | "none"; label: string }[] = [
-    { value: "none", label: "No Changes" },
-    { value: "daily", label: "Last 24 hours" },
+  const intervals: { value: TimeInterval | "simple"; label: string }[] = [
+    { value: "simple", label: "No Changes" },
+    { value: "today", label: "Today" },
+    { value: "daily", label: "Yesterday" },
     { value: "weekly", label: "Last 7 days" },
     { value: "monthly", label: "Last 30 days" },
   ];
 
-  const selectedValue = currentInterval || "none";
+  const selectedValue = currentInterval ?? "today";
 
   const options = intervals.map((interval) => {
     const params = new URLSearchParams();
     params.set("season", season.id.toString());
     params.set("ratingSystem", ratingSystem.type);
-    if (interval.value !== "none") {
+    if (interval.value !== "simple") {
       params.set("interval", interval.value);
+    } else {
+      params.set("interval", "simple");
     }
     return {
       path: `${basePath}?${params.toString()}`,

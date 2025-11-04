@@ -270,18 +270,22 @@ export function prettyRatingSystemType(ratingSystem: RatingSystemType): string {
  * @param cutoffDate - The date to compare against (e.g., 1 day ago, 1 week ago).
  * @param system - The rating system to use.
  * @returns Players with rating/rank changes.
- */
+ * 
+ * OLD IMPLEMENTATION BELOW FOR REFERENCE
+
 
 export function getTimeIntervalRatingDiff<TRating>(
   matches: Match[],
   cutoffDate: Date,
   system: RatingSystem<TRating>,
 ): PlayerWithRatingDiff<TRating>[] {
+
+
   const orderedMatches = matches.toSorted(
     (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),
   );
   const matchesBeforeCutoff = orderedMatches.filter(
-    (m) => m.createdAt.getTime() <= cutoffDate.getTime(),
+    (m) => m.createdAt.getTime() < cutoffDate.getTime(),
   );
 
   type PlayerRatingRecord = Record<string, PlayerWithRating<TRating>>;
@@ -299,15 +303,56 @@ export function getTimeIntervalRatingDiff<TRating>(
   const allPlayerIds = Object.keys(ratingsAfter);
 
   return diffRatings(ratingsBefore, ratingsAfter, allPlayerIds, system);
+} */
+
+/* NEW IMPLEMENTATION BELOW - MORE EFFICIENT */
+export function getTimeIntervalRatingDiff<TRating>(
+  matches: Match[],
+  cutoffDate: Date,
+  system: RatingSystem<TRating>,
+): PlayerWithRatingDiff<TRating>[] {
+  
+  // Sort FIRST
+  const sortedMatches = matches.toSorted(
+    (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),
+  );
+  
+  // Find index on SORTED array
+  const cutoffIndex = sortedMatches.findIndex(
+    (m) => m.createdAt.getTime() > cutoffDate.getTime(),
+  );
+  
+  // Handle edge case: all matches before cutoff
+  const actualCutoffIndex = cutoffIndex === -1 ? sortedMatches.length : cutoffIndex;
+  
+  const matchesBeforeCutoff = sortedMatches.slice(0, actualCutoffIndex);
+  const matchesAfterCutoff = sortedMatches.slice(actualCutoffIndex);
+  
+  const ratingsBefore = matchesBeforeCutoff.reduce(
+    (ratings, match) => getRatingsAfterMatch(ratings, match, system),
+    {} as Record<string, PlayerWithRating<TRating>>,
+  );
+  
+  // Continue from ratingsBefore (efficient!)
+  const ratingsAfter = matchesAfterCutoff.reduce(
+    (ratings, match) => getRatingsAfterMatch(ratings, match, system),
+    ratingsBefore,
+  );
+  
+  const allPlayerIds = Object.keys(ratingsAfter);
+  return diffRatings(ratingsBefore, ratingsAfter, allPlayerIds, system);
 }
 
-export type TimeInterval = "daily" | "weekly" | "monthly";
+
+export type TimeInterval = "today" | "daily" | "weekly" | "monthly";
 
 export function getTimeIntervalCutoffDate(interval: TimeInterval): Date {
-  const now = new Date();
-  const cutoff = new Date(now);
+  const cutoff = new Date();
 
   switch (interval) {
+    case "today":
+      cutoff.setHours(0, 0, 0, 0);
+      break;
     case "daily":
       cutoff.setDate(cutoff.getDate() - 1);
       break;
@@ -315,7 +360,7 @@ export function getTimeIntervalCutoffDate(interval: TimeInterval): Date {
       cutoff.setDate(cutoff.getDate() - 7);
       break;
     case "monthly":
-      cutoff.setMonth(cutoff.getMonth() - 1);
+      cutoff.setMonth(cutoff.getDate() - 29);
       break;
   }
 

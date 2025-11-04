@@ -66,7 +66,7 @@ export const LeaderboardRowHtml = ({
         </div>
       </td>
       <td class="px-1 py-4 md:px-3 lg:px-6">
-        <span class="inline-block w-8">{rating}</span>
+        <span>{rating}</span>
         <DiffIcon before={ratingBefore} after={rating} isHigherBetter={true} />
       </td>
     </tr>
@@ -108,7 +108,7 @@ const Rank = ({
         </span>
       );
     default:
-      return <span class="inline-block w-4">{rank}.</span>;
+      return <span>{rank}</span>;
   }
 };
 

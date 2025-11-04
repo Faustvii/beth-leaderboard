@@ -117,7 +117,7 @@ async function page(
   return (
     <>
       <NavbarHtml session={session} activePage="profile" />
-      <div class="flex flex-row justify-between">
+      <div class="flex flex-row justify-between items-center">
         {isOwnProfile && user ? (
           <FoldableCard title={header} doubleSize>
             <div class="flex w-full flex-col flex-wrap justify-between lg:flex-row">
@@ -127,7 +127,9 @@ async function page(
         ) : (
           <HeaderHtml title={header} />
         )}
-        <SeasonPicker basePath={`/profile/${userId}`} season={season} />
+        <div class="flex-shrink-0">
+          <SeasonPicker basePath={`/profile/${userId}`} season={season} />
+        </div>
       </div>
       {profileQuests(activeQuestsForProfile)}
       {profileStats(matches, userId, ratingSystem)}

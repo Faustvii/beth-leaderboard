@@ -267,7 +267,6 @@ async function biggestWin(matches: Match[]) {
       biggestWinMatch.whitePlayerTwo?.name,
     ].filter(notEmpty),
   };
-
   return (
     <span class="text-sm">
       On{" "}
@@ -350,7 +349,7 @@ const PrettyMatch = ({ match }: PrettyMatchProps) => {
   );
 };
 
-function matchhistoryDateToString(date: Date) {
+export function matchhistoryDateToString(date: Date) {
   const milisecondsBetween =
     new Date(getDatePartFromDate(new Date())).getTime() -
     new Date(getDatePartFromDate(date)).getTime();
@@ -374,7 +373,7 @@ function matchhistoryDateToString(date: Date) {
   }
 }
 
-function fancyInBetweenText(scoreDiff: number, losers: string) {
+export function fancyInBetweenText(scoreDiff: number, losers: string) {
   switch (true) {
     case scoreDiff > 200:
       return (

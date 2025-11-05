@@ -7,8 +7,8 @@ import { MatchForm } from "../../components/MatchForm";
 import { MatchSearchResults } from "../../components/MatchSearchResults";
 import { NavbarHtml } from "../../components/Navbar";
 import { ctx } from "../../context";
-import { execute_webhooks } from "../../controllers/webhook";
-import { getMatchesBeforeDate } from "../../db/queries/matchQueries";
+import { execute_webhooks } from "../../controllers/webhookController";
+import { getMatch, getMatchesBeforeDate } from "../../db/queries/matchQueries";
 import { getActiveSeason } from "../../db/queries/seasonQueries";
 import { listUsersByName } from "../../db/queries/userQueries";
 import { matches, questTbl, ratingEventTbl } from "../../db/schema";
@@ -101,7 +101,24 @@ export const match = new Elysia({
         return Number(insertResult.lastInsertRowid);
       });
 
-      execute_webhooks("match", matchInsert).catch(console.log);
+      if (!matchId) {
+        return new Response(
+          `<div id="errors" class="text-red-500">Failed to create match</div>`,
+          { status: 500 },
+        );
+      }
+
+      //await syncIfLocal(); //fire and forget
+      const completeMatch = await getMatch(matchId, true);
+      if (completeMatch) {
+        execute_webhooks("match", completeMatch).catch(console.error);
+      }
+
+      // console.log("=== REDIRECT DEBUG ===");
+      // console.log("Match ID:", matchId);
+      // console.log("Is HX Request:", headers["hx-request"]);
+      // console.log("Redirect URL:", `/result/${matchId}`);
+      // console.log("=====================");
 
       redirect({ headers, set }, `/result/${matchId}`);
     },

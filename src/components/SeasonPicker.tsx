@@ -1,11 +1,10 @@
-import { SelectGet } from "./SelectGet";
 import { getSeasons } from "../db/queries/seasonQueries";
 import {
-  prettyRatingSystemType,
   type Rating,
   type RatingSystem,
   type TimeInterval,
 } from "../lib/ratings/rating";
+import { SelectGet } from "./SelectGet";
 
 interface SeasonPickerProps {
   basePath: string;
@@ -42,13 +41,13 @@ export const SeasonPicker = async ({
   return <SelectGet options={options} selectedIndex={selectedIndex} />;
 };
 
-const path = (basePath: string, params: Record<string, string | undefined>) => {
-  const paramPart = Object.entries(params)
-    .filter(
-      ([_, value]) => value !== undefined && value !== null && value !== "",
-    )
-    .map(([key, value]) => `${key}=${value}`)
-    .join("&");
+// const path = (basePath: string, params: Record<string, string | undefined>) => {
+//   const paramPart = Object.entries(params)
+//     .filter(
+//       ([_, value]) => value !== undefined && value !== null && value !== "",
+//     )
+//     .map(([key, value]) => `${key}=${value}`)
+//     .join("&");
 
-  return `${basePath}?${paramPart}`;
-};
+//   return `${basePath}?${paramPart}`;
+// };

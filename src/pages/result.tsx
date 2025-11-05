@@ -16,7 +16,6 @@ import {
   type RatingSystem,
 } from "../lib/ratings/rating";
 import { isDefined } from "../lib/utils";
-import { SeasonPicker } from "../components/SeasonPicker";
 
 export const matchResult = new Elysia({
   prefix: "/result",

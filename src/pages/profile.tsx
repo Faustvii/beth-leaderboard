@@ -10,6 +10,7 @@ import { MatchResultLink } from "../components/MatchResultLink";
 import { NavbarHtml } from "../components/Navbar";
 import { ProfileForm } from "../components/ProfileForm";
 import { QuestDescription } from "../components/QuestDescription";
+import { SeasonPicker } from "../components/SeasonPicker";
 import { StatsCardHtml } from "../components/StatsCard";
 import { ctx } from "../context";
 import { getMatches } from "../db/queries/matchQueries";
@@ -30,7 +31,6 @@ import {
   type RatingSystem,
 } from "../lib/ratings/rating";
 import { cn } from "../lib/utils";
-import { SeasonPicker } from "../components/SeasonPicker";
 
 export const profile = new Elysia({
   prefix: "/profile",
@@ -117,7 +117,7 @@ async function page(
   return (
     <>
       <NavbarHtml session={session} activePage="profile" />
-      <div class="flex flex-row justify-between items-center">
+      <div class="flex flex-row items-center justify-between">
         {isOwnProfile && user ? (
           <FoldableCard title={header} doubleSize>
             <div class="flex w-full flex-col flex-wrap justify-between lg:flex-row">

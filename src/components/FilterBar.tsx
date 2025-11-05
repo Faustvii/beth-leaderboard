@@ -1,8 +1,12 @@
-import { SeasonPicker } from "./SeasonPicker";
-import { RatingSystemPicker } from "./RatingSystemPicker";
-import { TimeIntervalPicker } from "./TimeIntervalPicker";
 import { type Season } from "../db/schema/season";
-import { type RatingSystem, type Rating, type TimeInterval } from "../lib/ratings/rating";
+import {
+  type Rating,
+  type RatingSystem,
+  type TimeInterval,
+} from "../lib/ratings/rating";
+import { RatingSystemPicker } from "./RatingSystemPicker";
+import { SeasonPicker } from "./SeasonPicker";
+import { TimeIntervalPicker } from "./TimeIntervalPicker";
 
 export async function FilterBar({
   basePath,

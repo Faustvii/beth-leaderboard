@@ -6,6 +6,7 @@ import { HeaderHtml } from "../components/header";
 import { LayoutHtml } from "../components/Layout";
 import { MatchResultLink } from "../components/MatchResultLink";
 import { NavbarHtml } from "../components/Navbar";
+import { SeasonPicker } from "../components/SeasonPicker";
 import { StatsCardHtml } from "../components/StatsCard";
 import { ctx } from "../context";
 import { getMatches } from "../db/queries/matchQueries";
@@ -14,7 +15,6 @@ import { isHxRequest, measure, notEmpty } from "../lib";
 import { getDatePartFromDate } from "../lib/dateUtils";
 import MatchStatistics from "../lib/matchStatistics";
 import { type Match } from "../lib/ratings/rating";
-import { SeasonPicker } from "../components/SeasonPicker";
 
 export const stats = new Elysia({
   prefix: "/stats",
@@ -115,9 +115,11 @@ async function page(session: Session | null, season: Season) {
   return (
     <>
       <NavbarHtml session={session} activePage="stats" />
-      <div class="flex flex-row justify-between">
+      <div class="flex flex-row items-center justify-between">
         <HeaderHtml title="Statistics" />
-        <SeasonPicker basePath="/stats" season={season} />
+        <div class="flex-shrink-0">
+          <SeasonPicker basePath="/stats" season={season} />
+        </div>
       </div>
       <div class="grid grid-cols-6 gap-3 md:grid-cols-12">
         <StatsCardHtml title="Games">

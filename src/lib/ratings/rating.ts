@@ -270,40 +270,7 @@ export function prettyRatingSystemType(ratingSystem: RatingSystemType): string {
  * @param cutoffDate - The date to compare against (e.g., 1 day ago, 1 week ago).
  * @param system - The rating system to use.
  * @returns Players with rating/rank changes.
- * 
- * OLD IMPLEMENTATION BELOW FOR REFERENCE
-
-
-export function getTimeIntervalRatingDiff<TRating>(
-  matches: Match[],
-  cutoffDate: Date,
-  system: RatingSystem<TRating>,
-): PlayerWithRatingDiff<TRating>[] {
-
-
-  const orderedMatches = matches.toSorted(
-    (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),
-  );
-  const matchesBeforeCutoff = orderedMatches.filter(
-    (m) => m.createdAt.getTime() < cutoffDate.getTime(),
-  );
-
-  type PlayerRatingRecord = Record<string, PlayerWithRating<TRating>>;
-
-  const ratingsBefore = matchesBeforeCutoff.reduce(
-    (ratings, match) => getRatingsAfterMatch(ratings, match, system),
-    {} as PlayerRatingRecord,
-  );
-
-  const ratingsAfter = orderedMatches.reduce(
-    (ratings, match) => getRatingsAfterMatch(ratings, match, system),
-    {} as PlayerRatingRecord,
-  );
-
-  const allPlayerIds = Object.keys(ratingsAfter);
-
-  return diffRatings(ratingsBefore, ratingsAfter, allPlayerIds, system);
-} */
+ */
 
 /* NEW IMPLEMENTATION BELOW - MORE EFFICIENT */
 export function getTimeIntervalRatingDiff<TRating>(
@@ -311,38 +278,37 @@ export function getTimeIntervalRatingDiff<TRating>(
   cutoffDate: Date,
   system: RatingSystem<TRating>,
 ): PlayerWithRatingDiff<TRating>[] {
-  
-  // Sort FIRST
+  // Sort FIRST.
   const sortedMatches = matches.toSorted(
     (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),
   );
-  
-  // Find index on SORTED array
+
+  // Find index on SORTED array.
   const cutoffIndex = sortedMatches.findIndex(
     (m) => m.createdAt.getTime() > cutoffDate.getTime(),
   );
-  
-  // Handle edge case: all matches before cutoff
-  const actualCutoffIndex = cutoffIndex === -1 ? sortedMatches.length : cutoffIndex;
-  
+
+  // Handle edge case: all matches before cutoff.
+  const actualCutoffIndex =
+    cutoffIndex === -1 ? sortedMatches.length : cutoffIndex;
+
   const matchesBeforeCutoff = sortedMatches.slice(0, actualCutoffIndex);
   const matchesAfterCutoff = sortedMatches.slice(actualCutoffIndex);
-  
+
   const ratingsBefore = matchesBeforeCutoff.reduce(
     (ratings, match) => getRatingsAfterMatch(ratings, match, system),
     {} as Record<string, PlayerWithRating<TRating>>,
   );
-  
-  // Continue from ratingsBefore (efficient!)
+
+  // Continue from ratingsBefore (efficient!).
   const ratingsAfter = matchesAfterCutoff.reduce(
     (ratings, match) => getRatingsAfterMatch(ratings, match, system),
     ratingsBefore,
   );
-  
+
   const allPlayerIds = Object.keys(ratingsAfter);
   return diffRatings(ratingsBefore, ratingsAfter, allPlayerIds, system);
 }
-
 
 export type TimeInterval = "today" | "daily" | "weekly" | "monthly";
 

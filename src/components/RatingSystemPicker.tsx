@@ -1,4 +1,3 @@
-import { SelectGet } from "./SelectGet";
 import { ratingSystemTypes } from "../db/schema/season";
 import {
   prettyRatingSystemType,
@@ -6,6 +5,7 @@ import {
   type RatingSystem,
   type TimeInterval,
 } from "../lib/ratings/rating";
+import { SelectGet } from "./SelectGet";
 
 interface RatingSystemPickerProps {
   basePath: string;

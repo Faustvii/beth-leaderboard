@@ -106,7 +106,7 @@ export const match = new Elysia({
       if (!matchId) {
         return new Response(
           `<div id="errors" class="text-red-500">Failed to create match</div>`,
-          { status: 500 }
+          { status: 500 },
         );
       }
 

@@ -1,11 +1,11 @@
 import { Html } from "@kitajs/html";
 import { Elysia } from "elysia";
 import { type Session } from "lucia";
+import { FilterBar } from "../components/FilterBar";
 import { HeaderHtml } from "../components/header";
 import { LayoutHtml } from "../components/Layout";
 import { LeaderboardTableHtml } from "../components/LeaderboardTable";
 import { NavbarHtml } from "../components/Navbar";
-import { FilterBar } from "../components/FilterBar";
 import { ctx } from "../context";
 import { getMatches } from "../db/queries/matchQueries";
 import { getSeasons } from "../db/queries/seasonQueries";
@@ -90,15 +90,17 @@ export const leaderboard = new Elysia({
   .use(ctx)
   .get("/", async ({ html, session, headers, season, ratingSystem, query }) => {
     const rawInterval = query.interval as string | undefined;
-  
+
     // Handle the three cases:
     // 1. No param (first load) → default to "today"
     // 2. interval=none (user selected "No Changes") → undefined
     // 3. interval=today/daily/etc → use that value
-  const timeInterval: TimeInterval | undefined = 
-    rawInterval === undefined ? "today" :
-    rawInterval === "none" ? undefined :
-    rawInterval as TimeInterval;
+    const timeInterval: TimeInterval | undefined =
+      rawInterval === undefined
+        ? "today"
+        : rawInterval === "none"
+          ? undefined
+          : (rawInterval as TimeInterval);
     return html(() =>
       LeaderboardPage(session, headers, season, ratingSystem, timeInterval),
     );

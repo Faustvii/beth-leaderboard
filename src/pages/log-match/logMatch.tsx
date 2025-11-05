@@ -7,7 +7,7 @@ import { MatchForm } from "../../components/MatchForm";
 import { MatchSearchResults } from "../../components/MatchSearchResults";
 import { NavbarHtml } from "../../components/Navbar";
 import { ctx } from "../../context";
-import { execute_webhooks } from "../../controllers/webhook";
+import { execute_webhooks } from "../../controllers/webhookController";
 import { getMatchesBeforeDate } from "../../db/queries/matchQueries";
 import { getActiveSeason } from "../../db/queries/seasonQueries";
 import { listUsersByName } from "../../db/queries/userQueries";
@@ -16,6 +16,7 @@ import { isHxRequest, redirect } from "../../lib";
 import { syncIfLocal } from "../../lib/dbHelpers";
 import { handleQuestsAfterLoggedMatch } from "../../lib/quest";
 import { toInsertRatingEvent } from "../../lib/ratingEvent";
+import { getMatch } from "../../db/queries/matchQueries";
 
 export const match = new Elysia({
   prefix: "/match",
@@ -109,14 +110,17 @@ export const match = new Elysia({
         );
       }
 
-      await syncIfLocal();
-      execute_webhooks("match", matchInsert).catch(console.log);
+      //await syncIfLocal(); //fire and forget
+      const completeMatch = await getMatch(matchId, true);
+      if (completeMatch) {
+        execute_webhooks("match", completeMatch).catch(console.error);
+      }
 
-      console.log("=== REDIRECT DEBUG ===");
-      console.log("Match ID:", matchId);
-      console.log("Is HX Request:", headers["hx-request"]);
-      console.log("Redirect URL:", `/result/${matchId}`);
-      console.log("=====================");
+      // console.log("=== REDIRECT DEBUG ===");
+      // console.log("Match ID:", matchId);
+      // console.log("Is HX Request:", headers["hx-request"]);
+      // console.log("Redirect URL:", `/result/${matchId}`);
+      // console.log("=====================");
 
       redirect({ headers, set }, `/result/${matchId}`);
     },

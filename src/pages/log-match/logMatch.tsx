@@ -8,13 +8,15 @@ import { MatchSearchResults } from "../../components/MatchSearchResults";
 import { NavbarHtml } from "../../components/Navbar";
 import { ctx } from "../../context";
 import { execute_webhooks } from "../../controllers/webhookController";
-import { getMatchesBeforeDate } from "../../db/queries/matchQueries";
+import { getMatch, getMatchesBeforeDate } from "../../db/queries/matchQueries";
 import { getActiveSeason } from "../../db/queries/seasonQueries";
 import { listUsersByName } from "../../db/queries/userQueries";
 import { matches, questTbl, ratingEventTbl } from "../../db/schema";
 import { isHxRequest, redirect } from "../../lib";
 import { handleQuestsAfterLoggedMatch } from "../../lib/quest";
 import { toInsertRatingEvent } from "../../lib/ratingEvent";
+import { addMatchSummary } from "../../lib/addMatchSummary";
+
 
 export const match = new Elysia({
   prefix: "/match",
@@ -74,7 +76,6 @@ export const match = new Elysia({
 
       const matchId = await writeDb.transaction(async (trans) => {
         const insertResult = await trans.insert(matches).values(matchInsert);
-        if (!insertResult.lastInsertRowid) return;
 
         const matchesForQuests = await getMatchesBeforeDate(
           activeSeason.id,
@@ -101,7 +102,11 @@ export const match = new Elysia({
         return Number(insertResult.lastInsertRowid);
       });
 
-      execute_webhooks("match", matchInsert).catch(console.log);
+      const completeMatch = await getMatch(matchId, true);
+      if (completeMatch) {
+        const MatchWithSummary = addMatchSummary(completeMatch);
+        execute_webhooks("match", MatchWithSummary).catch(console.error);
+      }
 
       redirect({ headers, set }, `/result/${matchId}`);
     },

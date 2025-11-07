@@ -314,10 +314,10 @@ export type TimeInterval = "today" | "daily" | "weekly" | "monthly";
 
 export function getTimeIntervalCutoffDate(interval: TimeInterval): Date {
   const cutoff = new Date();
+  cutoff.setHours(0, 0, 0, 0);
 
   switch (interval) {
     case "today":
-      cutoff.setHours(0, 0, 0, 0);
       break;
     case "daily":
       cutoff.setDate(cutoff.getDate() - 1);
@@ -326,9 +326,22 @@ export function getTimeIntervalCutoffDate(interval: TimeInterval): Date {
       cutoff.setDate(cutoff.getDate() - 7);
       break;
     case "monthly":
-      cutoff.setMonth(cutoff.getDate() - 29);
+      cutoff.setMonth(cutoff.getMonth() - 1);
       break;
   }
 
   return cutoff;
 }
+
+export const parseTimeInterval = (
+  rawInterval: string | undefined,
+): TimeInterval | undefined => {
+  // Handle the three cases:
+  // 1. No param (first load) → default to "today"
+  // 2. interval=simple (user selected "No Changes") → undefined
+  // 3. interval=today/daily/etc → use that value
+
+  if (!isDefined(rawInterval)) return "today";
+  if (rawInterval == "simple") return undefined;
+  return rawInterval as TimeInterval;
+};

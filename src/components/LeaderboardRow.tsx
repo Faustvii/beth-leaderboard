@@ -108,7 +108,7 @@ const Rank = ({
         </span>
       );
     default:
-      return <span>{rank}</span>;
+      return <span>{rank}.</span>;
   }
 };
 

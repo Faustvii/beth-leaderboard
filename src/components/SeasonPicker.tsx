@@ -40,14 +40,3 @@ export const SeasonPicker = async ({
 
   return <SelectGet options={options} selectedIndex={selectedIndex} />;
 };
-
-// const path = (basePath: string, params: Record<string, string | undefined>) => {
-//   const paramPart = Object.entries(params)
-//     .filter(
-//       ([_, value]) => value !== undefined && value !== null && value !== "",
-//     )
-//     .map(([key, value]) => `${key}=${value}`)
-//     .join("&");
-
-//   return `${basePath}?${paramPart}`;
-// };

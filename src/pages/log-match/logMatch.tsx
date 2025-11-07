@@ -99,28 +99,10 @@ export const match = new Elysia({
             .values(toInsertRatingEvent(questEvent, activeSeason.id));
         }
 
-        return Number(insertResult.lastInsertRowid); //bigINT to number
+        return Number(insertResult.lastInsertRowid);
       });
 
-      if (!matchId) {
-        return new Response(
-          `<div id="errors" class="text-red-500">Failed to create match</div>`,
-          { status: 500 },
-        );
-      }
-
-      //await syncIfLocal(); //fire and forget
-      const completeMatch = await getMatch(matchId, true);
-      if (completeMatch) {
-        const MatchWithSummary = addMatchSummary(completeMatch);
-        execute_webhooks("match", MatchWithSummary).catch(console.error);
-      }
-
-      // console.log("=== REDIRECT DEBUG ===");
-      // console.log("Match ID:", matchId);
-      // console.log("Is HX Request:", headers["hx-request"]);
-      // console.log("Redirect URL:", `/result/${matchId}`);
-      // console.log("=====================");
+      execute_webhooks("match", matchInsert).catch(console.log);
 
       redirect({ headers, set }, `/result/${matchId}`);
     },

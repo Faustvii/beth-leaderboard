@@ -6,6 +6,8 @@ import { HxButton } from "../components/HxButton";
 import { LayoutHtml } from "../components/Layout";
 import { MatchDescription } from "../components/MatchDescription";
 import { NavbarHtml } from "../components/Navbar";
+import { RatingSystemPicker } from "../components/RatingSystemPicker";
+import { SeasonPicker } from "../components/SeasonPicker";
 import { ctx } from "../context";
 import { getMatch, getMatches } from "../db/queries/matchQueries";
 import { getSeason } from "../db/queries/seasonQueries";
@@ -39,11 +41,28 @@ async function page(
     return <LayoutHtml>Match does not exist</LayoutHtml>;
   }
 
+  const season = await getSeason(seasonId ?? match.seasonId);
+  if (!season) {
+    return <LayoutHtml>Season not found</LayoutHtml>;
+  }
+
   return (
     <LayoutHtml>
       <NavbarHtml session={session} activePage="result" />
-      <div class="flex flex-row justify-between">
+      <div class="flex flex-row items-center justify-between">
         <HeaderHtml className="px-0" title="Match result" />
+        <div class="flex flex-row items-center gap-2 p-5">
+          <SeasonPicker
+            basePath={`/result/${matchId}`}
+            season={season}
+            ratingSystem={ratingSystem}
+          />
+          <RatingSystemPicker
+            basePath={`/result/${matchId}`}
+            season={season}
+            ratingSystem={ratingSystem}
+          />
+        </div>
       </div>
       <MatchDescription match={match} />
       <RatingDiff

@@ -8,15 +8,14 @@ import { MatchSearchResults } from "../../components/MatchSearchResults";
 import { NavbarHtml } from "../../components/Navbar";
 import { ctx } from "../../context";
 import { execute_webhooks } from "../../controllers/webhookController";
-import { getMatchesBeforeDate } from "../../db/queries/matchQueries";
+import { getMatch, getMatchesBeforeDate } from "../../db/queries/matchQueries";
 import { getActiveSeason } from "../../db/queries/seasonQueries";
 import { listUsersByName } from "../../db/queries/userQueries";
 import { matches, questTbl, ratingEventTbl } from "../../db/schema";
 import { isHxRequest, redirect } from "../../lib";
-import { syncIfLocal } from "../../lib/dbHelpers";
+import { addMatchSummary } from "../../lib/addMatchSummary";
 import { handleQuestsAfterLoggedMatch } from "../../lib/quest";
 import { toInsertRatingEvent } from "../../lib/ratingEvent";
-import { getMatch } from "../../db/queries/matchQueries";
 
 export const match = new Elysia({
   prefix: "/match",
@@ -113,7 +112,8 @@ export const match = new Elysia({
       //await syncIfLocal(); //fire and forget
       const completeMatch = await getMatch(matchId, true);
       if (completeMatch) {
-        execute_webhooks("match", completeMatch).catch(console.error);
+        const MatchWithSummary = addMatchSummary(completeMatch);
+        execute_webhooks("match", MatchWithSummary).catch(console.error);
       }
 
       // console.log("=== REDIRECT DEBUG ===");

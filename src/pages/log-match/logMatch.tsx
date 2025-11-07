@@ -8,12 +8,11 @@ import { MatchSearchResults } from "../../components/MatchSearchResults";
 import { NavbarHtml } from "../../components/Navbar";
 import { ctx } from "../../context";
 import { execute_webhooks } from "../../controllers/webhookController";
-import { getMatch, getMatchesBeforeDate } from "../../db/queries/matchQueries";
+import { getMatchesBeforeDate } from "../../db/queries/matchQueries";
 import { getActiveSeason } from "../../db/queries/seasonQueries";
 import { listUsersByName } from "../../db/queries/userQueries";
 import { matches, questTbl, ratingEventTbl } from "../../db/schema";
 import { isHxRequest, redirect } from "../../lib";
-import { addMatchSummary } from "../../lib/addMatchSummary";
 import { handleQuestsAfterLoggedMatch } from "../../lib/quest";
 import { toInsertRatingEvent } from "../../lib/ratingEvent";
 

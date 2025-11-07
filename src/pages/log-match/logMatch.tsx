@@ -13,6 +13,7 @@ import { getActiveSeason } from "../../db/queries/seasonQueries";
 import { listUsersByName } from "../../db/queries/userQueries";
 import { matches, questTbl, ratingEventTbl } from "../../db/schema";
 import { isHxRequest, redirect } from "../../lib";
+import { addMatchSummary } from "../../lib/addMatchSummary";
 import { handleQuestsAfterLoggedMatch } from "../../lib/quest";
 import { toInsertRatingEvent } from "../../lib/ratingEvent";
 
@@ -111,7 +112,8 @@ export const match = new Elysia({
       //await syncIfLocal(); //fire and forget
       const completeMatch = await getMatch(matchId, true);
       if (completeMatch) {
-        execute_webhooks("match", completeMatch).catch(console.error);
+        const MatchWithSummary = addMatchSummary(completeMatch);
+        execute_webhooks("match", MatchWithSummary).catch(console.error);
       }
 
       // console.log("=== REDIRECT DEBUG ===");

@@ -13,4 +13,5 @@ interface MatchWithPlayers {
 interface Player {
   id: string;
   name: string;
+  nickname: string;
 }

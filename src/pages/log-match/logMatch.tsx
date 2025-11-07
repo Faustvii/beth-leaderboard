@@ -8,11 +8,12 @@ import { MatchSearchResults } from "../../components/MatchSearchResults";
 import { NavbarHtml } from "../../components/Navbar";
 import { ctx } from "../../context";
 import { execute_webhooks } from "../../controllers/webhookController";
-import { getMatchesBeforeDate } from "../../db/queries/matchQueries";
+import { getMatch, getMatchesBeforeDate } from "../../db/queries/matchQueries";
 import { getActiveSeason } from "../../db/queries/seasonQueries";
 import { listUsersByName } from "../../db/queries/userQueries";
 import { matches, questTbl, ratingEventTbl } from "../../db/schema";
 import { isHxRequest, redirect } from "../../lib";
+import { addMatchSummary } from "../../lib/addMatchSummary";
 import { handleQuestsAfterLoggedMatch } from "../../lib/quest";
 import { toInsertRatingEvent } from "../../lib/ratingEvent";
 
@@ -74,7 +75,6 @@ export const match = new Elysia({
 
       const matchId = await writeDb.transaction(async (trans) => {
         const insertResult = await trans.insert(matches).values(matchInsert);
-        if (!insertResult.lastInsertRowid) return;
 
         const matchesForQuests = await getMatchesBeforeDate(
           activeSeason.id,
@@ -101,25 +101,11 @@ export const match = new Elysia({
         return Number(insertResult.lastInsertRowid);
       });
 
-      if (!matchId) {
-        return new Response(
-          `<div id="errors" class="text-red-500">Failed to create match</div>`,
-          { status: 500 },
-        );
-      }
-
-      //await syncIfLocal(); //fire and forget
       const completeMatch = await getMatch(matchId, true);
       if (completeMatch) {
         const MatchWithSummary = addMatchSummary(completeMatch);
         execute_webhooks("match", MatchWithSummary).catch(console.error);
       }
-
-      // console.log("=== REDIRECT DEBUG ===");
-      // console.log("Match ID:", matchId);
-      // console.log("Is HX Request:", headers["hx-request"]);
-      // console.log("Redirect URL:", `/result/${matchId}`);
-      // console.log("=====================");
 
       redirect({ headers, set }, `/result/${matchId}`);
     },

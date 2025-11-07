@@ -24,7 +24,10 @@ export const webhookTbl = sqliteTable(
   },
   (table) => {
     return {
-      urlEventTypeIdx: uniqueIndex("url_event_type_idx").on(table.url, table.eventType),
+      urlEventTypeIdx: uniqueIndex("url_event_type_idx").on(
+        table.url,
+        table.eventType,
+      ),
     };
   },
 );

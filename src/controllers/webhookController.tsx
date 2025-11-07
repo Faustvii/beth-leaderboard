@@ -3,7 +3,6 @@ import Elysia, { t } from "elysia";
 import { ctx } from "../context";
 import { readDb } from "../db";
 import { webhookTbl, type WebhookEventType } from "../db/schema/webhooks";
-import { type Match } from "../lib/ratings/rating";
 
 export const webhookController = new Elysia({ prefix: "/webhook" })
   .use(ctx)

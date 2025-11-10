@@ -13,10 +13,9 @@ import { getActiveSeason } from "../../db/queries/seasonQueries";
 import { listUsersByName } from "../../db/queries/userQueries";
 import { matches, questTbl, ratingEventTbl } from "../../db/schema";
 import { isHxRequest, redirect } from "../../lib";
+import { addMatchSummary } from "../../lib/addMatchSummary";
 import { handleQuestsAfterLoggedMatch } from "../../lib/quest";
 import { toInsertRatingEvent } from "../../lib/ratingEvent";
-import { addMatchSummary } from "../../lib/addMatchSummary";
-
 
 export const match = new Elysia({
   prefix: "/match",

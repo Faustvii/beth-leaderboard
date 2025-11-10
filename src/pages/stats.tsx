@@ -518,6 +518,14 @@ function fancyInBetweenText(scoreDiff: number, losers: string) {
         scoreDiff +
         " points - core memory unlocked"
       );
+    case scoreDiff < 10:
+      return (
+        " hit a lil sigma arc - left " +
+        losers +
+        " crying over a " +
+        scoreDiff +
+        " point lol"
+      );
     default:
       return "won ? against ";
   }

@@ -376,88 +376,147 @@ function fancyInBetweenText(scoreDiff: number, losers: string) {
   switch (true) {
     case scoreDiff > 200:
       return (
-        "cleaned the floor winning by " +
-        scoreDiff +
-        " points humiliating " +
+        " went full sigma grindset on " +
         losers +
-        " for life"
+        " &#128128 and cooked them for " +
+        scoreDiff +
+        " points. shits cray cray"
       );
     case scoreDiff > 180:
-      return "won by " + scoreDiff + " using their feet against " + losers;
-    case scoreDiff > 160:
       return (
-        "needs to call an &#128511 ambulance &#128511 for " +
+        "tag-teamed " +
         losers +
-        " as they lost by " +
+        " like final bosses &#128293; — pure alpha energy " +
         scoreDiff +
         " points"
       );
+    case scoreDiff > 160:
+      return (
+        "cooked " +
+        losers +
+        " so hard, they respawned in Ohio &#128128 &#128293; dropping a diff of  " +
+        scoreDiff +
+        " points like it's nothing"
+      );
     case scoreDiff > 140:
-      return "tryharded way too hard on " + losers + " winning by " + scoreDiff;
+      return (
+        "deleted " +
+        losers +
+        " off the map with " +
+        scoreDiff +
+        " points - literally a war crime"
+      );
     case scoreDiff > 120:
       return (
-        "absolutely scooby doo doo'd " +
+        "humiliated " +
         losers +
-        " by winning with " +
-        scoreDiff
+        " on main &#127909;&#128514; — cooked up a " +
+        scoreDiff +
+        " point diff for real for real"
+      );
+    case scoreDiff > 110:
+      return (
+        "absolutely pulled up with a main character energy " +
+        losers +
+        " got side charactered with " +
+        scoreDiff +
+        " points, no cap"
       );
     case scoreDiff > 100:
       return (
-        "found their inner Slater-power and smashed " +
+        "caught " +
         losers +
-        " winnning by " +
-        scoreDiff
+        " lacking in 4K &#128249, that's a war crime with " +
+        scoreDiff +
+        " points"
+      );
+    case scoreDiff > 90:
+      return (
+        "absolutely demolished " +
+        losers +
+        " &#128165; - took it home with " +
+        scoreDiff +
+        " points, no cap"
       );
     case scoreDiff > 80:
       return (
-        "took a well deserved breather while winning against " +
+        "gaslit, girlbossed & gatekeeped &#128131;&#128170; " +
         losers +
-        " with " +
+        " by " +
         scoreDiff +
-        " points"
+        " points no cap"
       );
     case scoreDiff > 60:
       return (
-        "comfortably manhandled " +
+        "made " +
         losers +
-        " winning with " +
+        " question their life choices - walked off with " +
         scoreDiff +
-        " points"
+        " points like a menace &#128520;"
       );
     case scoreDiff > 50:
       return (
-        "got an undeserved victory against " +
+        "lowkey cooked " +
         losers +
-        " winning by pathetic " +
+        " for dinner - took it by " +
         scoreDiff +
-        " points"
+        " points, no filter"
+      );
+    case scoreDiff > 45:
+      return (
+        "had all the skibidi rizz against " +
+        losers +
+        " and flexed a " +
+        scoreDiff +
+        " point win, no cap"
       );
     case scoreDiff > 40:
       return (
-        "won a hard fought battle against " +
+        "had " +
         losers +
-        " with " +
+        " fighting demons &#128128;&#128553; — still lost by " +
         scoreDiff +
-        " points"
+        " points LMAO"
+      );
+    case scoreDiff > 35:
+      return (
+        "gaslit " +
+        losers +
+        " out of existence - cleaned " +
+        scoreDiff +
+        " points ahead &#128128;"
       );
     case scoreDiff > 30:
       return (
-        "won by simply being better against " +
+        "outplayed " +
         losers +
-        " winning by " +
+        "  while scrolling TikTok - secured a " +
         scoreDiff +
-        " points"
+        " diff effortlessly"
+      );
+    case scoreDiff >= 25:
+      return (
+        " went alpha-lite mode on " +
+        losers +
+        " and dropped a " +
+        scoreDiff +
+        " diff like it's light work"
       );
     case scoreDiff >= 20:
       return (
-        "won by sheer luck against " + losers + " with " + scoreDiff + " points"
-      );
-    case scoreDiff >= 5:
-      return (
-        "got the tightest of tightest wins against " +
+        "dropped a mild menace win." +
         losers +
-        " winning by " +
-        scoreDiff
+        " still crying, by losing with " +
+        scoreDiff +
+        " point diff"
+      );
+    case scoreDiff >= 10:
+      return (
+        "escaped defeat by " +
+        losers +
+        " &#128128; with " +
+        scoreDiff +
+        " points - core memory unlocked"
       );
     default:
       return "won ? against ";

@@ -268,6 +268,13 @@ export function skibidiInBetweenText(scoreDiff: number, losers: string) {
         scoreDiff +
         " points - core memory unlocked"
       );
+    case scoreDiff >= 5:
+    return (
+      "got the tightest of toight wins against " +
+      losers +
+      " winning by " +
+      scoreDiff
+    );
     default:
       return "won ? against ";
   }

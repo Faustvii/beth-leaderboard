@@ -12,6 +12,7 @@ import { ctx } from "../context";
 import { getMatches } from "../db/queries/matchQueries";
 import { type Season } from "../db/schema/season";
 import { isHxRequest, measure, notEmpty } from "../lib";
+import { skibidiInBetweenText } from "../lib/addMatchSummary.tsx";
 import { getDatePartFromDate } from "../lib/dateUtils";
 import MatchStatistics from "../lib/matchStatistics";
 import { type Match } from "../lib/ratings/rating";
@@ -344,7 +345,7 @@ const PrettyMatch = ({ match }: PrettyMatchProps) => {
       >
         {winners.join(" & ")}
       </span>{" "}
-      {fancyInBetweenText(match.scoreDiff, losers.join(" & "))}
+      {skibidiInBetweenText(match.scoreDiff, losers.join(" & "))}
     </span>
   );
 };
@@ -370,97 +371,5 @@ export function matchhistoryDateToString(date: Date) {
         }) + ":"
       );
     }
-  }
-}
-
-export function fancyInBetweenText(scoreDiff: number, losers: string) {
-  switch (true) {
-    case scoreDiff > 200:
-      return (
-        "cleaned the floor winning by " +
-        scoreDiff +
-        " points humiliating " +
-        losers +
-        " for life"
-      );
-    case scoreDiff > 180:
-      return "won by " + scoreDiff + " using their feet against " + losers;
-    case scoreDiff > 160:
-      return (
-        "needs to call an &#128511 ambulance &#128511 for " +
-        losers +
-        " as they lost by " +
-        scoreDiff +
-        " points"
-      );
-    case scoreDiff > 140:
-      return "tryharded way too hard on " + losers + " winning by " + scoreDiff;
-    case scoreDiff > 120:
-      return (
-        "absolutely scooby doo doo'd " +
-        losers +
-        " by winning with " +
-        scoreDiff
-      );
-    case scoreDiff > 100:
-      return (
-        "found their inner Slater-power and smashed " +
-        losers +
-        " winnning by " +
-        scoreDiff
-      );
-    case scoreDiff > 80:
-      return (
-        "took a well deserved breather while winning against " +
-        losers +
-        " with " +
-        scoreDiff +
-        " points"
-      );
-    case scoreDiff > 60:
-      return (
-        "comfortably manhandled " +
-        losers +
-        " winning with " +
-        scoreDiff +
-        " points"
-      );
-    case scoreDiff > 50:
-      return (
-        "got an undeserved victory against " +
-        losers +
-        " winning by pathetic " +
-        scoreDiff +
-        " points"
-      );
-    case scoreDiff > 40:
-      return (
-        "won a hard fought battle against " +
-        losers +
-        " with " +
-        scoreDiff +
-        " points"
-      );
-    case scoreDiff > 30:
-      return (
-        "won by simply being better against " +
-        losers +
-        " winning by " +
-        scoreDiff +
-        " points"
-      );
-    case scoreDiff >= 20:
-      return (
-        "won by sheer luck against " + losers + " with " + scoreDiff + " points"
-      );
-    case scoreDiff >= 5:
-      return (
-        "got the tightest of tightest wins against " +
-        losers +
-        " winning by " +
-        scoreDiff
-      );
-    default:
-      return "won ? against ";
   }
 }

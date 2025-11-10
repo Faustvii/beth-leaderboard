@@ -254,7 +254,7 @@ export function skibidiInBetweenText(scoreDiff: number, losers: string) {
       );
     case scoreDiff >= 20:
       return (
-        "dropped a mild menace win." +
+        "dropped a mild menace win. " +
         losers +
         " still crying, by losing with " +
         scoreDiff +
@@ -270,10 +270,11 @@ export function skibidiInBetweenText(scoreDiff: number, losers: string) {
       );
     case scoreDiff >= 5:
     return (
-      "got the tightest of toight wins against " +
+       " hit a lil sigma arc - left " +
       losers +
-      " winning by " +
-      scoreDiff
+      " crying over a " +
+      scoreDiff +
+      " point diff lol - skill issue tbh"
     );
     default:
       return "won ? against ";

@@ -574,7 +574,7 @@ class MatchStatistics {
     const filteredPlayers = players.filter((pl) => playerWins[pl.id].total > 4);
     if (filteredPlayers.length === 0)
       return {
-        player: { name: "N/A", id: "" },
+        player: { name: "N/A", id: "", nickname: "N/A" },
         winrate: 0,
         totalGames: 0,
       };

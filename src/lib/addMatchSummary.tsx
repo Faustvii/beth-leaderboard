@@ -269,13 +269,13 @@ export function skibidiInBetweenText(scoreDiff: number, losers: string) {
         " points - core memory unlocked"
       );
     case scoreDiff >= 5:
-    return (
-       " hit a lil sigma arc - left " +
-      losers +
-      " crying over a " +
-      scoreDiff +
-      " point diff lol - skill issue tbh"
-    );
+      return (
+        " hit a lil sigma arc - left " +
+        losers +
+        " crying over a " +
+        scoreDiff +
+        " point diff lol - skill issue tbh"
+      );
     default:
       return "won ? against ";
   }

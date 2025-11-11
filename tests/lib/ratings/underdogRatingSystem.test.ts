@@ -23,7 +23,7 @@ describe("Underdog Rating System", () => {
     id: string,
     rating: number,
   ): PlayerWithRating<number> => ({
-    player: { id, name: `Player ${id}` },
+    player: { id, name: `Player ${id}`, nickname: `P${id}` },
     rating,
   });
 

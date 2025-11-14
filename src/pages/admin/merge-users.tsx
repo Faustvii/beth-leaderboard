@@ -178,19 +178,33 @@ async function handleMergeUsers(
   );
 
   await writeDb.transaction(async (trx) => {
+    await transferUserKeys(targetUserId, sourceUserId, trx);
     await transferUserSessions(targetUserId, sourceUserId, trx);
 
     await transferMatches(targetUserId, sourceUserId, trx);
     await transferQuests(targetUserId, sourceUserId, trx);
     await transferRatingEvents(targetUserId, sourceUserId, trx);
 
-    await deleteUserKeys(sourceUserId, trx);
     await deleteUser(sourceUserId, trx);
   });
 }
 
 function isGuest(user: User) {
   return user.email === null;
+}
+
+async function transferUserKeys(
+  targetUserId: string,
+  sourceUserId: string,
+  trx: Transaction,
+) {
+  // User keys are possible login providers, so it's normal to have multiple.
+  // Users already have more than one, and this is how you can link e.g. 2 Azure accounts to the same user.
+
+  await trx
+    .update(key)
+    .set({ userId: targetUserId })
+    .where(eq(key.userId, sourceUserId));
 }
 
 async function transferUserSessions(
@@ -247,10 +261,6 @@ async function transferRatingEvents(
     .update(ratingEventTbl)
     .set({ playerId: targetUserId })
     .where(eq(ratingEventTbl.playerId, sourceUserId));
-}
-
-async function deleteUserKeys(userId: string, trx: Transaction) {
-  await trx.delete(key).where(eq(key.userId, userId));
 }
 
 async function deleteUser(userId: string, trx: Transaction) {

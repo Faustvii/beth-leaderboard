@@ -190,7 +190,7 @@ export function skibidiInBetweenText(scoreDiff: number, losers: string) {
       );
     case scoreDiff > 80:
       return (
-        "gaslit, girlbossed & gatekeeped &#128131;&#128170; " +
+        "gaslit, girlbossed & gatekept &#128131;&#128170; " +
         losers +
         " by " +
         scoreDiff +

@@ -29,6 +29,7 @@ import { ExistingSeasons } from "./components/ExisitngSeasons";
 import { MatchCard } from "./components/MatchCard";
 import { SeasonForm } from "./components/SeasonForm";
 import { UserForm } from "./components/UserForm";
+import { MergeUsers } from "./merge-users";
 
 const ratingSystemTypesEnum = t.Enum(
   Object.fromEntries(ratingSystemTypes.map((type) => [type, type])),
@@ -48,6 +49,7 @@ export const Admin = new Elysia({
       return true;
     }
   })
+  .use(MergeUsers)
   .get("/", async ({ html, session, headers }) => {
     return html(() => adminPage(session, headers));
   })

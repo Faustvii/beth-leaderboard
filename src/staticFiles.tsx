@@ -46,6 +46,11 @@ export const staticController = new Elysia({
     const file = Bun.file(fileName);
     return etagFileServe(file, fileName, ctx.set, ctx.headers);
   })
+  .get("/santa-hat.svg", (ctx) => {
+    const fileName = "public/santa-hat.svg";
+    const file = Bun.file(fileName);
+    return etagFileServe(file, fileName, ctx.set, ctx.headers);
+  })
   .get("/user/:id", async (ctx) => {
     const fileName = `public/user/${ctx.params.id}.webp`;
     const result = await userPicture(ctx.params.id, fileName);

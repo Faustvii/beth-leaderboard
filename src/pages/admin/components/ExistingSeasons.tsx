@@ -49,7 +49,7 @@ export const ExistingSeasons = ({ seasons }: ExistingSeasonsProps) => {
             class={cn("mb-2 ml-auto mt-4 flex w-full md:mb-0 md:mt-0 md:w-24")}
           >
             <button
-              hx-get={`admin/season/${season.id}`}
+              hx-get={`season/${season.id}`}
               hx-target="#mainContainer"
               hx-swap="afterend"
               class={cn(
@@ -71,7 +71,7 @@ export const ExistingSeasons = ({ seasons }: ExistingSeasonsProps) => {
               )}
               hx-indicator=".progress-bar"
               hx-target="#mainContainer"
-              hx-delete={`admin/season/${season.id}`}
+              hx-delete={`season/${season.id}`}
               hx-disabled-elt="this"
               hx-confirm="Are you sure you wish to delete this season?"
               _="on htmx:beforeRequest set innerText of <p/> in me to 'Deleting...'"

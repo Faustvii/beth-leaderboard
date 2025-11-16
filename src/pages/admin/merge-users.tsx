@@ -40,20 +40,19 @@ export const MergeUsers = new Elysia({
   .post(
     "/",
     async ({ body: { targetId, sourceId }, writeDb }) => {
-      try {
-        await handleMergeUsers(targetId, sourceId, writeDb);
-        await syncIfLocal();
-        return new Response("OK", { status: 200 });
-      } catch (error: unknown) {
+      await handleMergeUsers(targetId, sourceId, writeDb);
+      await syncIfLocal();
+      return new Response("OK", { status: 200 });
+    },
+    {
+      error({ error }) {
         if (error instanceof Error) {
           return new Response(error.message, { status: 200 });
         }
 
         console.error("Unknown error when merging users", error);
         return new Response("Error merging users", { status: 500 });
-      }
-    },
-    {
+      },
       beforeHandle: ({ body }) => {
         if (body.targetId === body.sourceId) {
           return new Response("Target and source user cannot be the same", {

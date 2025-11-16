@@ -31,6 +31,7 @@ import { ExistingSeasons } from "./components/ExisitngSeasons";
 import { MatchCard } from "./components/MatchCard";
 import { SeasonForm } from "./components/SeasonForm";
 import { UserForm } from "./components/UserForm";
+import { Match } from "./match";
 import { MergeUsers } from "./merge-users";
 
 const ratingSystemTypesEnum = t.Enum(
@@ -51,17 +52,11 @@ export const Admin = new Elysia({
       return true;
     }
   })
+  .use(Match)
   .use(MergeUsers)
   .get("/", async ({ html, session, headers }) => {
     return html(() => adminPage(session, headers));
   });
-//   .get("/match/:id", async ({ params: { id }, session }) => {
-//     const matchToEdit = await getMatch(Number(id), !!session?.user);
-
-//     if (!matchToEdit) return;
-
-//     return <EditMatchModal match={matchToEdit} />;
-//   })
 //   .get("/season/:id", async ({ params: { id } }) => {
 //     const seasonToEdit = await getSeason(Number(id));
 
@@ -69,95 +64,7 @@ export const Admin = new Elysia({
 
 //     return <EditSeasonModal season={seasonToEdit} />;
 //   })
-//   .put(
-//     "/match",
-//     async ({ set, headers, body, writeDb }) => {
-//       const createdAtFromUser = new Date(
-//         `${body.date_played}T${body.time_played}`,
-//       );
-//       const createdAt = fromTimezoneToUTC(
-//         createdAtFromUser,
-//         "Europe/Copenhagen",
-//       );
 
-//       await writeDb
-//         .update(matches)
-//         .set({
-//           whitePlayerOne: body.white1Id,
-//           whitePlayerTwo: body.white2Id,
-//           blackPlayerOne: body.black1Id,
-//           blackPlayerTwo: body.black2Id,
-//           result: body.match_winner,
-//           scoreDiff: Number(body.point_difference),
-//           createdAt,
-//         })
-//         .where(eq(matches.id, Number(body.match_id)));
-
-//       redirect({ headers, set }, `/admin`);
-//     },
-//     {
-//       error({ code, error }) {
-//         switch (code) {
-//           case "VALIDATION":
-//             return new Response(
-//               `<div id="errors" class="text-red-500">${error.message}</div>`,
-//               {
-//                 status: 400,
-//               },
-//             );
-//         }
-//       },
-//       beforeHandle: ({ body }) => {
-//         const userIds = [
-//           body.white1Id,
-//           body.white2Id,
-//           body.black1Id,
-//           body.black2Id,
-//         ].filter((id) => id !== "");
-
-//         const uniqueIds = new Set(userIds);
-//         if (uniqueIds.size !== userIds.length) {
-//           return new Response(
-//             `<div id="errors" class="text-red-500">The same player can't participate multiple times</div>`,
-//             {
-//               status: 400,
-//             },
-//           );
-//         }
-//         if (uniqueIds.size % 2 !== 0) {
-//           return new Response(
-//             `<div id="errors" class="text-red-500">The teams must have the same amount of players</div>`,
-//             {
-//               status: 400,
-//             },
-//           );
-//         }
-//         return;
-//       },
-//       transform({ body }) {
-//         const id = +body.match_id;
-//         const diff = +body.point_difference;
-
-//         if (!Number.isNaN(id)) body.match_id = id;
-//         if (!Number.isNaN(diff)) body.point_difference = diff;
-//       },
-//       body: t.Object({
-//         white1Id: t.String({ minLength: 1 }),
-//         white2Id: t.Optional(t.String()),
-//         black1Id: t.String({ minLength: 1 }),
-//         black2Id: t.Optional(t.String()),
-//         match_winner: t.Enum({
-//           White: "White",
-//           Black: "Black",
-//           Draw: "Draw",
-//         }),
-//         point_difference: t.Number({ minimum: 0, maximum: 960, multipleOf: 5 }),
-//         match_id: t.Number(),
-//         date_played: t.String(),
-//         time_played: t.String(),
-//       }),
-//     },
-//   )
 //   .put(
 //     "/season",
 //     async ({ set, headers, body, writeDb }) => {
@@ -263,10 +170,7 @@ export const Admin = new Elysia({
 //       }),
 //     },
 //   )
-//   .delete("/match/:id", async ({ params: { id }, session }) => {
-//     await deleteMatch(parseInt(id));
-//     return page(session);
-//   })
+
 //   .delete("/season/:id", async ({ params: { id }, session }) => {
 //     await deleteSeason(parseInt(id));
 //     return page(session);
@@ -299,7 +203,7 @@ async function page(session: Session | null) {
         <ActionCard title="Create Guest User" icon="👤">
           Add a temporary or limited-access user.
         </ActionCard>
-        <ActionCard title="Edit Previous Match" icon="⚽">
+        <ActionCard title="Edit Previous Match" icon="⚽" action="/admin/match">
           Update match results, scores, or details.
         </ActionCard>
         <ActionCard title="Merge Users" icon="🔗" action="/admin/merge-users">

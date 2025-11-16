@@ -18,7 +18,7 @@ export const MatchCard = ({ match }: MatchCardProps) => {
       <MatchDescription match={match} />
       <div class={cn("mt-auto flex")}>
         <button
-          hx-get={`admin/match/${match.id}`}
+          hx-get={`match/${match.id}`}
           hx-target="#mainContainer"
           hx-swap="afterend"
           class={cn(
@@ -37,7 +37,7 @@ export const MatchCard = ({ match }: MatchCardProps) => {
             "bg-red-700 p-2 hover:bg-red-700/85 disabled:bg-gray-600",
           )}
           hx-indicator=".progress-bar"
-          hx-delete={`admin/match/${match.id}`}
+          hx-delete={`match/${match.id}`}
           hx-target="#mainContainer"
           hx-disabled-elt="this"
           hx-confirm="Are you sure you wish to delete this match?"

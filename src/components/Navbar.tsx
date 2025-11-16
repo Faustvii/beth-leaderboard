@@ -234,28 +234,19 @@ const navBarButton = (
   activePage: Page,
   href?: string,
   classes?: string,
-) =>
-  isActivePage(page, activePage) ? (
-    <span
-      class={cn(
-        "rounded px-3 py-2 text-sm font-bold hover:bg-primary/50",
-        { "bg-primary hover:bg-primary": isActivePage(page, activePage) },
-        { classes: classes !== undefined },
-      )}
-    >
-      {text}
-    </span>
-  ) : (
-    <button
-      {...(href && { "hx-get": href })}
-      hx-indicator=".progress-bar"
-      hx-target="#mainContainer"
-      hx-swap="innerHTML"
-      hx-push-url="true"
-      class={cn("rounded px-3 py-2 text-sm font-bold hover:bg-primary/50", {
-        "bg-primary hover:bg-primary": isActivePage(page, activePage),
-      })}
-    >
-      {text}
-    </button>
-  );
+) => (
+  <button
+    {...(href && { "hx-get": href })}
+    hx-indicator=".progress-bar"
+    hx-target="#mainContainer"
+    hx-swap="innerHTML"
+    hx-push-url="true"
+    class={cn(
+      "rounded px-3 py-2 text-sm font-bold hover:bg-primary/50",
+      { "bg-primary hover:bg-primary": isActivePage(page, activePage) },
+      { classes: classes !== undefined && isActivePage(page, activePage) },
+    )}
+  >
+    {text}
+  </button>
+);

@@ -1,36 +1,11 @@
-import { eq } from "drizzle-orm";
-import { Elysia, t } from "elysia";
+import { Elysia } from "elysia";
 import { type Session } from "lucia";
-import { generateRandomString } from "lucia/utils";
 import { ActionCard } from "../../components/ActionCard";
-import { FoldableCard } from "../../components/FoldableCard";
 import { HeaderHtml } from "../../components/header";
 import { LayoutHtml } from "../../components/Layout";
 import { NavbarHtml } from "../../components/Navbar";
-import { StatsCardHtml } from "../../components/StatsCard";
 import { ctx } from "../../context";
-import {
-  deleteMatch,
-  getMatch,
-  getMatches,
-} from "../../db/queries/matchQueries";
-import {
-  deleteSeason,
-  getSeason,
-  getSeasons,
-} from "../../db/queries/seasonQueries";
-import { matches, seasonsTbl } from "../../db/schema";
-import { userTbl, type User } from "../../db/schema/auth";
-import { allTimeSeason, ratingSystemTypes } from "../../db/schema/season";
 import { isHxRequest, redirect } from "../../lib";
-import { fromTimezoneToUTC } from "../../lib/dateUtils";
-import { syncIfLocal } from "../../lib/dbHelpers";
-import { EditMatchModal } from "./components/EditMatchModal";
-import { EditSeasonModal } from "./components/EditSeasonModal";
-import { ExistingSeasons } from "./components/ExistingSeasons";
-import { MatchCard } from "./components/MatchCard";
-import { SeasonForm } from "./components/SeasonForm";
-import { UserForm } from "./components/UserForm";
 import { GuestUser } from "./guest-user";
 import { Match } from "./match";
 import { MergeUsers } from "./merge-users";

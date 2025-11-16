@@ -31,6 +31,7 @@ import { ExistingSeasons } from "./components/ExistingSeasons";
 import { MatchCard } from "./components/MatchCard";
 import { SeasonForm } from "./components/SeasonForm";
 import { UserForm } from "./components/UserForm";
+import { GuestUser } from "./guest-user";
 import { Match } from "./match";
 import { MergeUsers } from "./merge-users";
 import { Season } from "./season";
@@ -50,39 +51,12 @@ export const Admin = new Elysia({
     }
   })
   .use(Season)
+  .use(GuestUser)
   .use(Match)
   .use(MergeUsers)
   .get("/", async ({ html, session, headers }) => {
     return html(() => adminPage(session, headers));
   });
-//   .put(
-//     "/guest-user",
-//     async ({ set, headers, body: { name, nickname }, writeDb }) => {
-//       const guestName = `${name} (Guest)`;
-//       const userToInsert: Omit<User, "picture"> = {
-//         id: generateRandomString(15),
-//         name: guestName,
-//         email: null,
-//         roles: null,
-//         nickname: nickname,
-//       };
-
-//       const [{ id: userId }] = await writeDb
-//         .insert(userTbl)
-//         .values(userToInsert)
-//         .returning();
-//       await syncIfLocal();
-
-//       redirect({ headers, set }, `/profile/${userId}`);
-//     },
-//     {
-//       beforeHandle: (_) => undefined,
-//       body: t.Object({
-//         name: t.String({ minLength: 1 }),
-//         nickname: t.String({ minLength: 1 }),
-//       }),
-//     },
-//   )
 
 async function adminPage(
   session: Session | null,
@@ -108,7 +82,11 @@ async function page(session: Session | null) {
         <ActionCard title="Manage Seasons" icon="🗓️" action="/admin/season">
           Start a new season or manage and configure settings.
         </ActionCard>
-        <ActionCard title="Create Guest User" icon="👤">
+        <ActionCard
+          title="Create Guest User"
+          icon="👤"
+          action="/admin/guest-user"
+        >
           Add a temporary or limited-access user.
         </ActionCard>
         <ActionCard title="Edit Previous Match" icon="⚽" action="/admin/match">

@@ -1,5 +1,7 @@
+import { getIsItChristmas } from "../controllers/christmas";
 import { isDateOlderThanNDays } from "../lib/dateUtils";
 import { RESULT } from "../lib/matchStatistics";
+import { cn } from "../lib/utils";
 import { DiffIcon } from "./DiffIcon";
 import { HxButton } from "./HxButton";
 
@@ -49,12 +51,7 @@ export const LeaderboardRowHtml = ({
             isCurrentSeason={isCurrentSeason}
           />
         </div>
-        <img
-          class="col-span-2 mr-1 inline-block h-8 w-8 rounded-full ring-2 ring-gray-700 lg:mr-3 lg:h-8 lg:w-8"
-          src={`/static/user/${userId}/small`}
-          loading="lazy"
-          alt=""
-        />
+        <UserIcon userId={userId} />
         <div class="col-span-8 flex flex-col gap-0 text-left">
           <HxButton
             class="w-44 overflow-hidden truncate whitespace-nowrap text-left md:w-full"
@@ -70,6 +67,37 @@ export const LeaderboardRowHtml = ({
         <DiffIcon before={ratingBefore} after={rating} isHigherBetter={true} />
       </td>
     </tr>
+  );
+};
+
+const UserIcon = ({ userId }: { userId: string }) => {
+  if (getIsItChristmas()) {
+    return (
+      <div class="relative col-span-2">
+        <img
+          class={cn(
+            "absolute",
+            "md:-left-4 md:-top-10 md:h-16 md:w-16",
+            "-left-2 -top-5 h-8 w-8",
+          )}
+          src={`/static/santa-hat.svg`}
+          loading="lazy"
+        />
+        <img
+          class="mr-1 inline-block h-8 w-8 rounded-full ring-2 ring-gray-700 lg:mr-3"
+          src={`/static/user/${userId}/small`}
+          loading="lazy"
+        />
+      </div>
+    );
+  }
+
+  return (
+    <img
+      class="col-span-2 mr-1 inline-block h-8 w-8 rounded-full ring-2 ring-gray-700 lg:mr-3 lg:h-8 lg:w-8"
+      src={`/static/user/${userId}/small`}
+      loading="lazy"
+    />
   );
 };
 

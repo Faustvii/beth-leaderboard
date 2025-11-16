@@ -3,6 +3,7 @@ import { type Session } from "lucia";
 import { AnchorButtonHtml } from "./Button";
 import "@kitajs/html/register";
 import { config } from "../config";
+import { getIsItChristmas } from "../controllers/christmas";
 import { cn } from "../lib/utils";
 import { HxButton } from "./HxButton";
 
@@ -93,11 +94,7 @@ export const NavbarHtml = async ({ session, activePage }: Props) => {
           <div class="flex flex-1 items-center justify-center lg:items-stretch lg:justify-start">
             <div class="flex flex-shrink-0 items-center">
               <HxButton hx-get="/">
-                <img
-                  class="h-8 w-auto"
-                  src="/static/crokinole.svg"
-                  alt="Crokinole"
-                />
+                <Logo />
               </HxButton>
             </div>
             <div class="hidden lg:ml-6 lg:block">
@@ -212,6 +209,20 @@ export const NavbarHtml = async ({ session, activePage }: Props) => {
     </nav>
   );
 };
+
+function Logo() {
+  if (getIsItChristmas()) {
+    return (
+      <img
+        class="h-10 w-auto"
+        src="/static/crokinole-christmas.avif"
+        alt="Crokinole"
+      />
+    );
+  }
+
+  return <img class="h-8 w-auto" src="/static/crokinole.svg" alt="Crokinole" />;
+}
 
 function isActivePage(page: Page, activePage: Page) {
   return page === activePage;

@@ -26,6 +26,11 @@ export const staticController = new Elysia({
     const file = Bun.file(fileName);
     return etagFileServe(file, fileName, ctx.set, ctx.headers);
   })
+  .get("/crokinole-christmas.avif", (ctx) => {
+    const fileName = "public/crokinole-christmas.avif";
+    const file = Bun.file(fileName);
+    return etagFileServe(file, fileName, ctx.set, ctx.headers);
+  })
   .get("/crokinole.svg", (ctx) => {
     const fileName = "public/crokinole-c.min.svg";
     const file = Bun.file(fileName);

@@ -3,6 +3,7 @@ declare namespace JSX {
     onblur?: string;
     onload?: string;
     _?: string;
+    frameborder?: string;
   }
 }
 

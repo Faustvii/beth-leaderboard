@@ -46,8 +46,8 @@ export const staticController = new Elysia({
     const file = Bun.file(fileName);
     return etagFileServe(file, fileName, ctx.set, ctx.headers);
   })
-  .get("/santa-hat.svg", (ctx) => {
-    const fileName = "public/santa-hat.svg";
+  .get("/santa-hat/:id", (ctx) => {
+    const fileName = `public/santa-hat-${ctx.params.id}.svg`;
     const file = Bun.file(fileName);
     return etagFileServe(file, fileName, ctx.set, ctx.headers);
   })

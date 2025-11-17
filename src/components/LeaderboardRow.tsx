@@ -1,7 +1,7 @@
 import { getIsItChristmas } from "../controllers/christmas";
 import { isDateOlderThanNDays } from "../lib/dateUtils";
 import { RESULT } from "../lib/matchStatistics";
-import { cn } from "../lib/utils";
+import { cn, hashCode } from "../lib/utils";
 import { DiffIcon } from "./DiffIcon";
 import { HxButton } from "./HxButton";
 
@@ -72,15 +72,16 @@ export const LeaderboardRowHtml = ({
 
 const UserIcon = ({ userId }: { userId: string }) => {
   if (getIsItChristmas()) {
+    const pictureId = (Math.abs(hashCode(userId)) % 5);
     return (
       <div class="relative col-span-2">
         <img
           class={cn(
             "absolute",
-            "md:-left-4 md:-top-10 md:h-16 md:w-16",
-            "-left-2 -top-5 h-8 w-8",
+            "md:-left-2 md:-top-10 md:h-16 md:w-16",
+            "-left-1 -top-5 h-8 w-8",
           )}
-          src={`/static/santa-hat.svg`}
+          src={`/static/santa-hat/${pictureId}`}
           loading="lazy"
         />
         <img

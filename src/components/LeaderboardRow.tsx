@@ -72,7 +72,31 @@ export const LeaderboardRowHtml = ({
 
 const UserIcon = ({ userId }: { userId: string }) => {
   if (getIsItChristmas()) {
-    const pictureId = (Math.abs(hashCode(userId)) % 5);
+    const userHashcode = hashCode(userId);
+
+    const isGrinch = userHashcode === 447356100;
+    if (isGrinch) {
+      return (
+        <div class="relative col-span-2">
+          <img
+            class={cn(
+              "absolute",
+              "md:-left-2 md:-top-8 md:h-16 md:w-16",
+              "-left-1 -top-4 h-10 w-10",
+            )}
+            src="/static/grinch"
+            loading="lazy"
+          />
+          <img
+            class="mr-1 inline-block h-8 w-8 rounded-full ring-2 ring-gray-700 lg:mr-3"
+            src={`/static/user/${userId}/small`}
+            loading="lazy"
+          />
+        </div>
+      );
+    }
+
+    const pictureId = Math.abs(userHashcode) % 5;
     return (
       <div class="relative col-span-2">
         <img

@@ -31,10 +31,11 @@ export function pick<T>(array: T[], count: number) {
 }
 
 /**
- * Returns a hash code for a string.
- * Compatible to Java's `String.hashCode()`.
+ * Returns a hash code for a string. Compatible to Java's `String.hashCode()`.
  *
- * @link https://gist.github.com/hyamamoto/fd435505d29ebfa3d9716fd2be8d42f0?permalink_comment_id=2694461#gistcomment-2694461 .
+ * @link
+ * https://gist.github.com/hyamamoto/fd435505d29ebfa3d9716fd2be8d42f0?permalink_comment_id=2694461#gistcomment-2694461
+ * .
  *
  * @param s Input string.
  * @returns Hash code of the input string.

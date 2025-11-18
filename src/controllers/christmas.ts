@@ -18,7 +18,7 @@ export function getIsItChristmas() {
 export function updateIsItChristmas() {
   // getMonth is zero indexed
   if (new Date().getMonth() === 11) {
-     process.env.IS_CHRISTMAS = "true";
+    process.env.IS_CHRISTMAS = "true";
   } else {
     process.env.IS_CHRISTMAS = "false";
   }

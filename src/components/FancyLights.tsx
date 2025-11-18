@@ -1,31 +1,40 @@
 const colors = [
-    '#D00010', '#FEC641', '#7D0006', '#2F8A27', '#FE0016', 
-    '#5C6C94', '#6B0D05', '#63C13B', '#DB1913', '#FEE34A' 
+  "#D00010",
+  "#FEC641",
+  "#7D0006",
+  "#2F8A27",
+  "#FE0016",
+  "#5C6C94",
+  "#6B0D05",
+  "#63C13B",
+  "#DB1913",
+  "#FEE34A",
 ];
 
 export const BokehLightsHtml = () => {
   const lightsCount = 150;
-  
-//   const colors = [
-//     '#FCF1BD',
-//   ];
-//   const colors = [
-//     '#F4A43B', '#0AB1AA', '#FDFEE4', '#F42618', '#ADFEDD', 
-//     '#FF5F24', '#FEF14F', '#FD361B', '#30398D', '#FEE086'
-//   ];
+
+  //   const colors = [
+  //     '#FCF1BD',
+  //   ];
+  //   const colors = [
+  //     '#F4A43B', '#0AB1AA', '#FDFEE4', '#F42618', '#ADFEDD',
+  //     '#FF5F24', '#FEF14F', '#FD361B', '#30398D', '#FEE086'
+  //   ];
 
   // Generate styles for each light
   const generateLightStyles = () => {
-    return Array.from({ length: lightsCount }).map((_, i) => {
-      const lightWidth = 75 + Math.random() * 25;
-      const lightVertical = 8 + Math.random() * 92;
-      const lightHorizontal = Math.random() * 100;
-      const lightBlur = 2 + Math.random() * 2;
-      const lightDelay = 10 + Math.random() * 25;
-      const bgColor = colors[Math.floor(Math.random() * colors.length)];
-      const animation = 1 + Math.floor(Math.random() * 5);
-      
-      return `
+    return Array.from({ length: lightsCount })
+      .map((_, i) => {
+        const lightWidth = 75 + Math.random() * 25;
+        const lightVertical = 8 + Math.random() * 92;
+        const lightHorizontal = Math.random() * 100;
+        const lightBlur = 2 + Math.random() * 2;
+        const lightDelay = 10 + Math.random() * 25;
+        const bgColor = colors[Math.floor(Math.random() * colors.length)];
+        const animation = 1 + Math.floor(Math.random() * 5);
+
+        return `
         .light:nth-child(${i + 1}) {
           width: ${lightWidth}px;
           height: ${lightWidth}px;
@@ -36,7 +45,8 @@ export const BokehLightsHtml = () => {
           animation: ${lightDelay}s light${animation} linear infinite;
         }
       `;
-    }).join('');
+      })
+      .join("");
   };
 
   return (
@@ -93,7 +103,7 @@ export const BokehLightsHtml = () => {
         }
         `}
       </style>
-      
+
       <div class="bokeh">
         {Array.from({ length: lightsCount }).map(() => (
           <div class="light"></div>
@@ -105,14 +115,14 @@ export const BokehLightsHtml = () => {
 
 export const SideLightsHtml = () => {
   const lightCount = 60;
-  
+
   // Variables matching the original CodePen
   const globeWidth = 12;
   const globeHeight = 28;
   const globeSpacing = 30;
   const globeSpread = 10;
   const lightOffOpacity = 0.4;
-  
+
   return (
     <>
       <style>
@@ -165,7 +175,9 @@ export const SideLightsHtml = () => {
             transform: rotate(-90deg);
           }
 
-          ${colors.map((color, index) => `
+          ${colors
+            .map(
+              (color, index) => `
             .lightrope-left li:nth-child(${colors.length}n+${index + 1}),
             .lightrope-right li:nth-child(${colors.length}n+${index + 1}) {
               background: ${color};
@@ -180,11 +192,15 @@ export const SideLightsHtml = () => {
                 box-shadow: ${globeHeight / 6}px 0px ${globeWidth * 2}px ${globeSpread}px ${color};
               }
               50% {
-                background: ${color}${Math.round(lightOffOpacity * 255).toString(16).padStart(2, '0')};
+                background: ${color}${Math.round(lightOffOpacity * 255)
+                  .toString(16)
+                  .padStart(2, "0")};
                 box-shadow: ${globeHeight / 6}px 0px ${globeWidth * 2}px ${globeSpread}px ${color}33;
               }
             }
-          `).join('')}
+          `,
+            )
+            .join("")}
           
           .lightrope-left li:before, .lightrope-right li:before {
             content: "";
@@ -219,15 +235,15 @@ export const SideLightsHtml = () => {
 
         `}
       </style>
-      
+
       <ul class="lightrope-left">
-        {Array.from({ length: lightCount }).map((_, i) => (
+        {Array.from({ length: lightCount }).map(() => (
           <li></li>
         ))}
       </ul>
-      
+
       <ul class="lightrope-right">
-        {Array.from({ length: lightCount }).map((_, i) => (
+        {Array.from({ length: lightCount }).map(() => (
           <li></li>
         ))}
       </ul>

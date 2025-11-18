@@ -77,7 +77,9 @@ export const BaseHtml = ({ children }: PropsWithChildren) => {
                   animation-timing-function: linear;
                 }
                 
-                ${Array.from({ length: snowflakeCount }).map((_, i) => `
+                ${Array.from({ length: snowflakeCount })
+                  .map(
+                    (_, i) => `
                   .snowflake:nth-of-type(${i + 1}) {
                   left: ${Math.random() * 100}%;
                   animation-delay: ${Math.random() * 3}s;
@@ -86,7 +88,9 @@ export const BaseHtml = ({ children }: PropsWithChildren) => {
                   .snowflake:nth-of-type(${i + 1}) .inner {
                     animation-delay: ${-Math.random() * 10}s; /* Start at random points in animation */
                   }
-                `).join('')}
+                `,
+                  )
+                  .join("")}
             
             `}
               </style>

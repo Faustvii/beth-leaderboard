@@ -1,26 +1,33 @@
-const colors = [
-  "#D00010",
-  "#FEC641",
-  "#7D0006",
-  "#2F8A27",
-  "#FE0016",
-  "#5C6C94",
-  "#6B0D05",
-  "#63C13B",
-  "#DB1913",
-  "#FEE34A",
-];
+type ShapeType = 'circle' | 'heart'; //extendable for more shapes later
 
-export const BokehLightsHtml = () => {
+interface FancyLightProps {
+  colors: string[];
+  shape?: ShapeType;
+};
+
+export const SoftGlowingLightsHtml = ({ colors, shape = 'circle' }:FancyLightProps) => {
   const lightsCount = 150;
 
-  //   const colors = [
-  //     '#FCF1BD',
-  //   ];
-  //   const colors = [
-  //     '#F4A43B', '#0AB1AA', '#FDFEE4', '#F42618', '#ADFEDD',
-  //     '#FF5F24', '#FEF14F', '#FD361B', '#30398D', '#FEE086'
-  //   ];
+  //meant to be extendible with additional shapes later
+  const shapePaths = {
+  heart: 'M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z',
+};
+
+  const getShapeStyles = () => {
+    if (shape === "circle") return 'border-radius: 50%;';
+
+    // Path is defined in a 24x24 viewbox; we scale it up to the light size (≈ 100px)
+    // Scaling to 4.2 gives a perfect match for your sizes 75–100px
+    const scale = 4.2;
+
+    return `
+      clip-path: path('${shapePaths[shape]}');
+      -webkit-clip-path: path('${shapePaths[shape]}');
+      transform: scale(${scale});
+      transform-origin: center;
+    `;
+  };
+
 
   // Generate styles for each light
   const generateLightStyles = () => {
@@ -51,6 +58,7 @@ export const BokehLightsHtml = () => {
 
   return (
     <>
+
       <style>
         {`
         .bokeh {
@@ -60,12 +68,11 @@ export const BokehLightsHtml = () => {
           pointer-events: none;
           top: 0;
           left: 0;
-          z-index: 0;
         }
         
         .light {
           position: absolute;
-          border-radius: 50%;
+          ${getShapeStyles()}
           opacity: 0;
         }
         
@@ -113,7 +120,10 @@ export const BokehLightsHtml = () => {
   );
 };
 
-export const SideLightsHtml = () => {
+
+
+
+export const SideLightsHtml = ({ colors }:FancyLightProps) => {
   const lightCount = 60;
 
   // Variables matching the original CodePen
@@ -131,7 +141,6 @@ export const SideLightsHtml = () => {
             white-space: nowrap;
             overflow: visible;
             position: fixed;
-            z-index: 1;
             margin: 0;
             padding: 0 30px;
             pointer-events: none;

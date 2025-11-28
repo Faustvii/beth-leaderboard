@@ -2,7 +2,7 @@ import "@kitajs/html/register";
 import { migrate } from "drizzle-orm/libsql/migrator";
 import { Elysia } from "elysia";
 import { api } from "./controllers/*";
-import { Christmas, updateIsItChristmas } from "./controllers/christmas";
+import { holidayCron, updateAllHolidays } from "./controllers/holidays/holidayController";
 import { writeDb } from "./db";
 import { SeedDatabase } from "./db/seed";
 import { pages } from "./pages/*";
@@ -12,13 +12,13 @@ console.log("migrating database");
 await migrate(writeDb, { migrationsFolder: "./drizzle" });
 console.log("database migrated");
 
-updateIsItChristmas();
+updateAllHolidays();
 
 const app = new Elysia()
   .use(staticController)
   .use(api)
   .use(pages)
-  .use(Christmas)
+  .use(holidayCron)
   .onError(({ error }) => {
     console.error(error);
   })

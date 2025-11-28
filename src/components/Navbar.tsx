@@ -3,7 +3,7 @@ import { type Session } from "lucia";
 import { AnchorButtonHtml } from "./Button";
 import "@kitajs/html/register";
 import { config } from "../config";
-import { getIsItChristmas } from "../controllers/christmas";
+import { getIsItChristmas } from "../controllers/holidays/christmas";
 import { cn } from "../lib/utils";
 import { HxButton } from "./HxButton";
 

@@ -1,4 +1,4 @@
-import { getIsItChristmas } from "../controllers/christmas";
+import { getIsItChristmas } from "../controllers/holidays/christmas";
 import { isDateOlderThanNDays } from "../lib/dateUtils";
 import { RESULT } from "../lib/matchStatistics";
 import { cn, hashCode } from "../lib/utils";

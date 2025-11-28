@@ -13,23 +13,17 @@ export function updateIsItHalloween() {
   }
 }
 
-export const HalloweenHtml = ({renderLayer}: {renderLayer?: string}) => {
-
+export const HalloweenHtml = ({ renderLayer }: { renderLayer?: string }) => {
   const musicVideos = [
     "ZVuToMilP0A", // (This is Halloween)
     "4V90AmXnguw", // (Thriller)
-    "sVjk5nrb_lI",   // (spooky scary skeletons)
+    "sVjk5nrb_lI", // (spooky scary skeletons)
   ];
 
-  const randomVideo = musicVideos[Math.floor(Math.random() * musicVideos.length)];
+  const randomVideo =
+    musicVideos[Math.floor(Math.random() * musicVideos.length)];
 
-  const HalloweenColors = [
-  '#FFFFFF',
-  '#000',
-  '#FFA100',
-  '#FF5C00'
-  ];
-
+  const HalloweenColors = ["#FFFFFF", "#000", "#FFA100", "#FF5C00"];
 
   if (renderLayer === "background") {
     return (
@@ -39,12 +33,11 @@ export const HalloweenHtml = ({renderLayer}: {renderLayer?: string}) => {
       </>
     );
   }
-  
-   if (renderLayer === "effects") {
+
+  if (renderLayer === "effects") {
     return (
       <>
-        <style>
-        </style>
+        <style></style>
         {/* mute button */}
         <div
           class="fixed bottom-4 left-4 hidden rounded-full bg-slate-700 p-2 transition-colors hover:bg-slate-600 lg:block"
@@ -77,9 +70,9 @@ export const HalloweenHtml = ({renderLayer}: {renderLayer?: string}) => {
         ></iframe>
       </>
     );
-   };
+  }
 
-   return (
+  return (
     <>
       <SideLightsHtml colors={HalloweenColors} />
       <SoftGlowingLightsHtml colors={HalloweenColors} />

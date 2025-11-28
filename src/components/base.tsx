@@ -1,9 +1,9 @@
 import { type PropsWithChildren } from "@kitajs/html";
-import { getCurrentHolidays } from "../controllers/holidays/holidayController";
 import { ChristmasHtml } from "../controllers/holidays/christmas";
-import { ValentineHtml } from "../controllers/holidays/valentine";
-import { HalloweenHtml } from "../controllers/holidays/halloween";
 import { FridayHtml } from "../controllers/holidays/friday";
+import { HalloweenHtml } from "../controllers/holidays/halloween";
+import { getCurrentHolidays } from "../controllers/holidays/holidayController";
+import { ValentineHtml } from "../controllers/holidays/valentine";
 import { GitHubLinkHtml } from "./GitHubLink";
 import { LoadingBarHtml } from "./LoadingBar";
 
@@ -50,15 +50,15 @@ export const BaseHtml = ({ children }: PropsWithChildren) => {
         text-white
         "
         >
-          {isItChristmas && <ChristmasHtml renderLayer="background"/>}
-          {isItFriday && <FridayHtml renderLayer="background"/>}
-          {isItValentine && <ValentineHtml renderLayer="background"/>}
-          {isItHalloween && <HalloweenHtml renderLayer="background"/>}
+          {isItChristmas && <ChristmasHtml renderLayer="background" />}
+          {isItFriday && <FridayHtml renderLayer="background" />}
+          {isItValentine && <ValentineHtml renderLayer="background" />}
+          {isItHalloween && <HalloweenHtml renderLayer="background" />}
           <LoadingBarHtml />
           <div style="position: relative;">{children}</div>
-          {isItFriday && <FridayHtml renderLayer="effects"/>}
-          {isItHalloween && <HalloweenHtml renderLayer="effects"/>}
-          {isItValentine && <ValentineHtml renderLayer="effects"/>}
+          {isItFriday && <FridayHtml renderLayer="effects" />}
+          {isItHalloween && <HalloweenHtml renderLayer="effects" />}
+          {isItValentine && <ValentineHtml renderLayer="effects" />}
           {isItChristmas && <ChristmasHtml renderLayer="effects" />}
           <GitHubLinkHtml />
         </body>

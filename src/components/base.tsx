@@ -56,7 +56,7 @@ export const BaseHtml = ({ children }: PropsWithChildren) => {
           {isItHalloween && <HalloweenHtml renderLayer="background" />}
           <LoadingBarHtml />
           <div style="position: relative;">{children}</div>
-          {isItFriday && <FridayHtml renderLayer="effects" />}
+          {/* {isItFriday && <FridayHtml renderLayer="effects" />} REENABLE EFTER JUL*/}
           {isItHalloween && <HalloweenHtml renderLayer="effects" />}
           {isItValentine && <ValentineHtml renderLayer="effects" />}
           {isItChristmas && <ChristmasHtml renderLayer="effects" />}

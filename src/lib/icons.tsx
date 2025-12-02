@@ -57,3 +57,48 @@ export const TrashIcon = () => {
     </svg>
   );
 };
+
+export const InfoIcon = () => {
+  return (
+    <svg
+      class="h-6 w-6 flex-shrink-0"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+    >
+      <circle
+        cx="12"
+        cy="12"
+        r="10"
+        stroke="currentColor"
+        stroke-width="2"
+        fill="#fde68a"
+      />
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        d="M12 8v4m0 4h.01"
+      />
+    </svg>
+  );
+};
+
+export const CloseIcon = () => {
+  return (
+    <svg
+      class="h-5 w-5"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      stroke-width="2"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        d="M6 6l12 12M6 18L18 6"
+      />
+    </svg>
+  );
+};

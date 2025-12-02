@@ -16,6 +16,7 @@ import { isHxRequest, redirect } from "../../lib";
 import { addMatchSummary } from "../../lib/addMatchSummary";
 import { handleQuestsAfterLoggedMatch } from "../../lib/quest";
 import { toInsertRatingEvent } from "../../lib/ratingEvent";
+import { isDefined } from "../../lib/utils";
 
 export const match = new Elysia({
   prefix: "/match",
@@ -32,15 +33,23 @@ export const match = new Elysia({
   })
   .get(
     "/search",
-    async ({ html, query: { name } }) => {
+    async ({ html, query: { name, includeEmail } }) => {
       if (!name || name === "") return;
       const results = await listUsersByName(name, 5);
-      return html(() => MatchSearchResults(results));
+
+      const includeEmailBoolean = isDefined(includeEmail)
+        ? includeEmail === "true"
+        : undefined;
+
+      return html(() =>
+        MatchSearchResults({ results, includeEmail: includeEmailBoolean }),
+      );
     },
     {
       query: t.Partial(
         t.Object({
           name: t.String(),
+          includeEmail: t.String({ enum: ["true", "false"] }),
         }),
       ),
     },

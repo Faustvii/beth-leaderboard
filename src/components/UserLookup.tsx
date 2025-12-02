@@ -6,11 +6,25 @@ interface Props extends JSX.HtmlInputTag {
   input: string;
   label: string;
   user?: Player | null;
+  includeEmail?: boolean;
 }
 
-export const UserLookUp = ({ formId, input, label, user, ...props }: Props) => (
+export const UserLookUp = ({
+  formId,
+  input,
+  label,
+  user,
+  includeEmail = false,
+  ...props
+}: Props) => (
   <>
     <SearchIcon />
+    <input
+      type="hidden"
+      name="includeEmail"
+      value={includeEmail ? "true" : "false"}
+      id={`${input}-includeEmail-input`}
+    />
     <input
       id={`${input}-input`}
       form={formId}
@@ -18,9 +32,10 @@ export const UserLookUp = ({ formId, input, label, user, ...props }: Props) => (
       hx-sync="this:replace"
       hx-swap="innerHtml"
       hx-get="/match/search"
+      hx-include={`#${input}-includeEmail-input`}
       hx-indicator=".progress-bar"
       hx-target={`#${input}-results`}
-      hx-params="name"
+      hx-params="name,includeEmail"
       name="name"
       placeholder=" "
       value={user?.name}

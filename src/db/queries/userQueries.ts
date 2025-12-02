@@ -2,6 +2,7 @@ import { eq, like } from "drizzle-orm";
 import { readDb } from "..";
 import { shortName } from "../../lib/nameUtils";
 import { userTbl } from "../schema";
+import { type User } from "../schema/auth";
 
 export const getUser = async (id: string, isAuthenticated: boolean) => {
   const player = await readDb.query.userTbl.findFirst({
@@ -48,13 +49,13 @@ export const getCurrentAdmins = async (isAuthenticated: boolean) => {
  */
 export const listUsersByName = async (searchString: string, count = 5) => {
   searchString = searchString.toLowerCase();
-  const players = await readDb
-    .select({ name: userTbl.name, id: userTbl.id })
+  const players: User[] = await readDb
+    .select()
     .from(userTbl)
     .where(like(userTbl.name, `%${searchString}%`));
 
   const bestMatches = players
-    .map((player): [{ name: string; id: string }, number] => {
+    .map((player): [User, number] => {
       return [player, player.name.toLowerCase().indexOf(searchString)];
     })
     .sort((a, b) => a[1] - b[1])

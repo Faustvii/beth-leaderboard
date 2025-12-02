@@ -133,6 +133,7 @@ function MergeUsersForm() {
           label="Target user"
           input="target"
           required={true}
+          includeEmail={true}
         />
       </div>
       <div class="group relative mb-6 w-full">
@@ -141,6 +142,7 @@ function MergeUsersForm() {
           label="Source user (will be deleted)"
           input="source"
           required={true}
+          includeEmail={true}
         />
       </div>
       <button

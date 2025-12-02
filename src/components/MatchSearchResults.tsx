@@ -1,6 +1,15 @@
 import clsx from "clsx";
+import { type User } from "../db/schema/auth";
 
-export const MatchSearchResults = (results: { name: string; id: string }[]) => {
+interface MatchSearchResultsProps {
+  includeEmail?: boolean;
+  results: User[];
+}
+
+export const MatchSearchResults = ({
+  results,
+  includeEmail = false,
+}: MatchSearchResultsProps) => {
   return (
     <>
       {results.map((result) => (
@@ -14,6 +23,9 @@ export const MatchSearchResults = (results: { name: string; id: string }[]) => {
           _="on click halt the event then add @hidden to the closest <div/> then put my value into the value of the previous <input/> from me then put my id into the value of the next <input/>"
         >
           {result.name}
+          {includeEmail && (
+            <span class="pl-2 text-sm text-gray-400">{result.email}</span>
+          )}
         </button>
       ))}
     </>

@@ -210,7 +210,11 @@ export const NavbarHtml = async ({ session, activePage }: Props) => {
         </div>
       </nav>
 
-      <NewsBanner description="Grundet migrationer i Azure vil du muligvis få en ny bruger når du logger ind. En admin kan fikse dette, men først EFTER du er logget ind. Når du er logget ind vil du kunne tilgå admin siden og kan kontakte dem på Slack." />
+      <NewsBanner
+        description={
+          'Grundet migrationer i Azure vil du muligvis få en ny bruger når du logger ind. En admin kan fikse dette, men først EFTER du er logget ind. Du kan se en liste af admins på "Help" siden.'
+        }
+      />
     </>
   );
 };

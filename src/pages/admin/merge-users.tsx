@@ -124,7 +124,7 @@ function MergeUsersForm() {
       hx-sync="this:abort"
       hx-swap="outerHTML"
       hx-target={`#${formId}`}
-      hx-params="not name"
+      hx-params="not name,includeEmail"
       hx-target-400="#errors"
     >
       <div class="group relative mb-6 w-full">

@@ -42,7 +42,7 @@ export const MatchForm = async ({
         hx-sync="this:abort"
         hx-swap="outerHTML"
         hx-target={`#${formId}`}
-        hx-params="not name"
+        hx-params="not name,includeEmail"
         hx-target-400="#errors"
       >
         {/* TODO: Use flex with gap instead */}

@@ -6,7 +6,7 @@ import { LayoutHtml } from "../../components/Layout";
 import { NavbarHtml } from "../../components/Navbar";
 import { ctx } from "../../context";
 import { userTbl, type User } from "../../db/schema/auth";
-import { isHxRequest, redirect } from "../../lib";
+import { redirect } from "../../lib";
 import { syncIfLocal } from "../../lib/dbHelpers";
 import { UserForm } from "./components/UserForm";
 
@@ -50,15 +50,7 @@ export async function guestUserPage(
   session: Session | null,
   headers: Record<string, string | null>,
 ) {
-  return (
-    <>
-      {isHxRequest(headers) ? (
-        page(session)
-      ) : (
-        <LayoutHtml>{page(session)}</LayoutHtml>
-      )}
-    </>
-  );
+  return <LayoutHtml headers={headers}>{page(session)}</LayoutHtml>;
 }
 
 async function page(session: Session | null) {

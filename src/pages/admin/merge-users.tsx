@@ -20,7 +20,6 @@ import {
   ratingEventTbl,
   session,
 } from "../../db/schema/index";
-import { isHxRequest } from "../../lib";
 import { syncIfLocal } from "../../lib/dbHelpers";
 
 type Transaction = SQLiteTransaction<
@@ -72,15 +71,7 @@ export async function mergeUsersPage(
   session: Session | null,
   headers: Record<string, string | null>,
 ) {
-  return (
-    <>
-      {isHxRequest(headers) ? (
-        page(session)
-      ) : (
-        <LayoutHtml>{page(session)}</LayoutHtml>
-      )}
-    </>
-  );
+  return <LayoutHtml headers={headers}>{page(session)}</LayoutHtml>;
 }
 
 async function page(session: Session | null) {

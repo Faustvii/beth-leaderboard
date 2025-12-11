@@ -18,7 +18,7 @@ import { getActiveQuestsForPlayer } from "../db/queries/questQueries";
 import { getUser } from "../db/queries/userQueries";
 import { userTbl } from "../db/schema/auth";
 import { type Season } from "../db/schema/season";
-import { isHxRequest, measure, notEmpty, redirect } from "../lib";
+import { measure, notEmpty, redirect } from "../lib";
 import { syncIfLocal } from "../lib/dbHelpers";
 import MatchStatistics, {
   isPlayerInMatchFilter,
@@ -83,13 +83,9 @@ async function profilePage(
   ratingSystem: RatingSystem<Rating>,
 ) {
   return (
-    <>
-      {isHxRequest(headers) ? (
-        page(session, userId, season, ratingSystem)
-      ) : (
-        <LayoutHtml>{page(session, userId, season, ratingSystem)}</LayoutHtml>
-      )}
-    </>
+    <LayoutHtml headers={headers}>
+      {page(session, userId, season, ratingSystem)}
+    </LayoutHtml>
   );
 }
 

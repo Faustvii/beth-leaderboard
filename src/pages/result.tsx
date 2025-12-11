@@ -23,12 +23,19 @@ export const matchResult = new Elysia({
   prefix: "/result",
 })
   .use(ctx)
-  .get("/:matchId", ({ html, params, session, query, ratingSystem }) => {
-    // Cannot use "season" from context/middleware as we don't want the "current" season
-    const seasonId = query.season ? parseInt(query.season, 10) : undefined;
-    const matchId = parseInt(params.matchId, 10);
-    return html(page(session, matchId, seasonId, ratingSystem));
-  });
+  .get(
+    "/:matchId",
+    ({ html, params, session, query, ratingSystem, headers }) => {
+      // Cannot use "season" from context/middleware as we don't want the "current" season
+      const seasonId = query.season ? parseInt(query.season, 10) : undefined;
+      const matchId = parseInt(params.matchId, 10);
+      return html(() => (
+        <LayoutHtml headers={headers}>
+          {page(session, matchId, seasonId, ratingSystem)}
+        </LayoutHtml>
+      ));
+    },
+  );
 
 async function page(
   session: Session | null,
@@ -38,16 +45,16 @@ async function page(
 ) {
   const match = await getMatch(matchId, !!session?.user);
   if (!match) {
-    return <LayoutHtml>Match does not exist</LayoutHtml>;
+    return <>Match does not exist</>;
   }
 
   const season = await getSeason(seasonId ?? match.seasonId);
   if (!season) {
-    return <LayoutHtml>Season not found</LayoutHtml>;
+    return <>Season not found</>;
   }
 
   return (
-    <LayoutHtml>
+    <>
       <NavbarHtml session={session} activePage="result" />
       <div class="flex flex-row items-center justify-between">
         <HeaderHtml className="px-0" title="Match result" />
@@ -71,7 +78,7 @@ async function page(
         seasonId={seasonId ?? match.seasonId}
         ratingSystem={ratingSystem}
       />
-    </LayoutHtml>
+    </>
   );
 }
 
@@ -88,13 +95,13 @@ async function RatingDiff({
 }) {
   const season = await getSeason(seasonId);
   if (!season) {
-    return <LayoutHtml>Season not found</LayoutHtml>;
+    return <>Season not found</>;
   }
 
   const allMatchesInSeason = await getMatches(season, !!session?.user);
 
   if (!allMatchesInSeason.find((x) => x.id === match.id)) {
-    return <LayoutHtml>Match not in season</LayoutHtml>;
+    return <>Match not in season</>;
   }
 
   const allMatchesInSeasonSorted = allMatchesInSeason.toSorted(

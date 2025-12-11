@@ -6,9 +6,9 @@ import { ctx } from "../context";
 
 export const login = new Elysia({ prefix: "/login" })
   .use(ctx)
-  .get("/", async ({ html, session }) => {
+  .get("/", async ({ html, session, headers }) => {
     return html(() => (
-      <LayoutHtml>
+      <LayoutHtml headers={headers}>
         <NavbarHtml session={session} activePage="leaderboard" />
         <HeaderHtml title="Leaderboard" />
 

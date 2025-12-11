@@ -12,7 +12,7 @@ import { getMatch, getMatchesBeforeDate } from "../../db/queries/matchQueries";
 import { getActiveSeason } from "../../db/queries/seasonQueries";
 import { listUsersByName } from "../../db/queries/userQueries";
 import { matches, questTbl, ratingEventTbl } from "../../db/schema";
-import { isHxRequest, redirect } from "../../lib";
+import { redirect } from "../../lib";
 import { addMatchSummary } from "../../lib/addMatchSummary";
 import { handleQuestsAfterLoggedMatch } from "../../lib/quest";
 import { toInsertRatingEvent } from "../../lib/ratingEvent";
@@ -176,15 +176,7 @@ function MatchPage(
   session: Session | null,
   headers: Record<string, string | null>,
 ) {
-  return (
-    <>
-      {isHxRequest(headers) ? (
-        LogMatchPage(session)
-      ) : (
-        <LayoutHtml>{LogMatchPage(session)}</LayoutHtml>
-      )}
-    </>
-  );
+  return <LayoutHtml headers={headers}>{LogMatchPage(session)}</LayoutHtml>;
 }
 
 function LogMatchPage(session: Session | null) {

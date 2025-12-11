@@ -11,7 +11,7 @@ import { StatsCardHtml } from "../components/StatsCard";
 import { ctx } from "../context";
 import { getMatches } from "../db/queries/matchQueries";
 import { type Season } from "../db/schema/season";
-import { isHxRequest, measure, notEmpty } from "../lib";
+import { measure, notEmpty } from "../lib";
 import { skibidiInBetweenText } from "../lib/addMatchSummary.tsx";
 import { getDatePartFromDate } from "../lib/dateUtils";
 import MatchStatistics from "../lib/matchStatistics";
@@ -30,15 +30,7 @@ async function statsPage(
   headers: Record<string, string | null>,
   season: Season,
 ) {
-  return (
-    <>
-      {isHxRequest(headers) ? (
-        page(session, season)
-      ) : (
-        <LayoutHtml>{page(session, season)}</LayoutHtml>
-      )}
-    </>
-  );
+  return <LayoutHtml headers={headers}>{page(session, season)}</LayoutHtml>;
 }
 
 async function page(session: Session | null, season: Season) {

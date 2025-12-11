@@ -6,7 +6,6 @@ import { NavbarHtml } from "../components/Navbar";
 import { StatsCardHtml } from "../components/StatsCard";
 import { ctx } from "../context";
 import { getCurrentAdmins } from "../db/queries/userQueries";
-import { isHxRequest } from "../lib";
 
 export const Help = new Elysia({
   prefix: "/help",
@@ -20,15 +19,7 @@ async function helpPage(
   session: Session | null,
   headers: Record<string, string | null>,
 ) {
-  return (
-    <>
-      {isHxRequest(headers) ? (
-        page(session)
-      ) : (
-        <LayoutHtml>{page(session)}</LayoutHtml>
-      )}
-    </>
-  );
+  return <LayoutHtml headers={headers}>{page(session)}</LayoutHtml>;
 }
 
 async function page(session: Session | null) {

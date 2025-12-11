@@ -12,7 +12,7 @@ import {
 } from "../../db/queries/matchQueries";
 import { matches } from "../../db/schema";
 import { allTimeSeason } from "../../db/schema/season";
-import { isHxRequest, redirect } from "../../lib";
+import { redirect } from "../../lib";
 import { fromTimezoneToUTC } from "../../lib/dateUtils";
 import { EditMatchModal } from "./components/EditMatchModal";
 import { MatchCard } from "./components/MatchCard";
@@ -127,15 +127,7 @@ export async function matchPage(
   session: Session | null,
   headers: Record<string, string | null>,
 ) {
-  return (
-    <>
-      {isHxRequest(headers) ? (
-        page(session)
-      ) : (
-        <LayoutHtml>{page(session)}</LayoutHtml>
-      )}
-    </>
-  );
+  return <LayoutHtml headers={headers}>{page(session)}</LayoutHtml>;
 }
 
 async function page(session: Session | null) {

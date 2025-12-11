@@ -12,7 +12,7 @@ import {
 } from "../../db/queries/seasonQueries";
 import { seasonsTbl } from "../../db/schema/index";
 import { ratingSystemTypes } from "../../db/schema/season";
-import { isHxRequest, redirect } from "../../lib";
+import { redirect } from "../../lib";
 import { syncIfLocal } from "../../lib/dbHelpers";
 import { EditSeasonModal } from "./components/EditSeasonModal";
 import { ExistingSeasons } from "./components/ExistingSeasons";
@@ -123,15 +123,7 @@ async function seasonPage(
   session: Session | null,
   headers: Record<string, string | null>,
 ) {
-  return (
-    <>
-      {isHxRequest(headers) ? (
-        page(session)
-      ) : (
-        <LayoutHtml>{page(session)}</LayoutHtml>
-      )}
-    </>
-  );
+  return <LayoutHtml headers={headers}>{page(session)}</LayoutHtml>;
 }
 
 async function page(session: Session | null) {

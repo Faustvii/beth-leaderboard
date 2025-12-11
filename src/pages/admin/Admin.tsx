@@ -5,7 +5,7 @@ import { HeaderHtml } from "../../components/header";
 import { LayoutHtml } from "../../components/Layout";
 import { NavbarHtml } from "../../components/Navbar";
 import { ctx } from "../../context";
-import { isHxRequest, redirect } from "../../lib";
+import { redirect } from "../../lib";
 import { GuestUser } from "./guest-user";
 import { Match } from "./match";
 import { MergeUsers } from "./merge-users";
@@ -37,15 +37,7 @@ async function adminPage(
   session: Session | null,
   headers: Record<string, string | null>,
 ) {
-  return (
-    <>
-      {isHxRequest(headers) ? (
-        page(session)
-      ) : (
-        <LayoutHtml>{page(session)}</LayoutHtml>
-      )}
-    </>
-  );
+  return <LayoutHtml headers={headers}>{page(session)}</LayoutHtml>;
 }
 
 async function page(session: Session | null) {

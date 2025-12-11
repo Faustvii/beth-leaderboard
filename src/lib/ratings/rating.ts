@@ -4,6 +4,7 @@ import { isDefined } from "../utils";
 import { elo, type EloRating } from "./eloRatingSystem";
 import { gameCount, type GameCountRating } from "./gameCountRatingSystem";
 import { openskill, type OpenskillRating } from "./openskillRatingSystem";
+import { scoreAvg, type ScoreAvgRating } from "./scoreAvgRatingSystem";
 import { scoreDiff, type ScoreDiffRating } from "./scoreDiffRatingSystem";
 import {
   streakMultiplier,
@@ -17,6 +18,7 @@ export type Rating =
   | EloRating
   | XPRating
   | ScoreDiffRating
+  | ScoreAvgRating
   | OpenskillRating
   | StreakMultiplierRating
   | UnderdogRating
@@ -226,6 +228,8 @@ export function getRatingSystem(type: RatingSystemType): RatingSystem<Rating> {
   switch (type) {
     case "scoreDiff":
       return scoreDiff() as RatingSystem<Rating>;
+    case "scoreAvg":
+      return scoreAvg() as RatingSystem<Rating>;
     case "xp":
       return xp() as RatingSystem<Rating>;
     case "openskill":
@@ -252,6 +256,8 @@ export function prettyRatingSystemType(ratingSystem: RatingSystemType): string {
       return "XP";
     case "scoreDiff":
       return "Score Difference";
+    case "scoreAvg":
+      return "Average Score";
     case "streakMultiplier":
       return "Streak Multiplier";
     case "underdog":

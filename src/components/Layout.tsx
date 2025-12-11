@@ -7,14 +7,16 @@ type LayoutProps = PropsWithChildren & {
   headers: Record<string, string | null>;
 };
 
-export const LayoutHtml = ({ children, headers }: LayoutProps) => (
-  <>
-    {isHxRequest(headers) ? (
-      children
-    ) : (
-      <BaseHtml>
+export const LayoutHtml = ({ children, headers }: LayoutProps) => {
+  return (
+    <>
+      {isHxRequest(headers) ? (
         <MainContainer>{children}</MainContainer>
-      </BaseHtml>
-    )}
-  </>
-);
+      ) : (
+        <BaseHtml>
+          <MainContainer>{children}</MainContainer>
+        </BaseHtml>
+      )}
+    </>
+  );
+};

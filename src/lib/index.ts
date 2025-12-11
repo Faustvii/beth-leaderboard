@@ -24,7 +24,15 @@ export function redirect(
 }
 
 export function isHxRequest(headers: Record<string, string | null>) {
-  return headers["hx-request"] === "true";
+  if (headers["hx-request"]) {
+    return headers["hx-request"] === "true";
+  }
+
+  // When using hyperscript like we do in SelectGet the hx-* headers are not included,
+  // so we fall back to a reserved header.
+  // See https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Sec-Fetch-Dest#empty
+  // HTMX uses XMLHttpRequest
+  return headers["sec-fetch-dest"] === "empty";
 }
 
 export function notEmpty<TValue>(

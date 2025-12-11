@@ -19,6 +19,7 @@ export const ratingSystemTypes = [
   "openskill",
   "xp",
   "scoreDiff",
+  "scoreAvg",
   "streakMultiplier",
   "underdog",
   "gameCount",

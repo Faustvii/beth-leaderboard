@@ -11,6 +11,10 @@ import {
   type StreakMultiplierRating,
 } from "./streakMultiplierRatingSystem";
 import { underdog, type UnderdogRating } from "./underdogRatingSystem";
+import {
+  uniqueOpponentsBeaten,
+  type UniqueOpponentsBeatenRating,
+} from "./uniqueOpponentsBeaten";
 import { xp, type XPRating } from "./xpRatingSystem";
 
 /* eslint-disable @typescript-eslint/no-duplicate-type-constituents */
@@ -22,7 +26,8 @@ export type Rating =
   | OpenskillRating
   | StreakMultiplierRating
   | UnderdogRating
-  | GameCountRating;
+  | GameCountRating
+  | UniqueOpponentsBeatenRating;
 /* eslint-enable @typescript-eslint/no-duplicate-type-constituents */
 
 export interface RatingSystem<TRating> {
@@ -240,8 +245,9 @@ export function getRatingSystem(type: RatingSystemType): RatingSystem<Rating> {
       return underdog() as RatingSystem<Rating>;
     case "gameCount":
       return gameCount() as RatingSystem<Rating>;
+    case "uniqueOpponentsBeaten":
+      return uniqueOpponentsBeaten() as RatingSystem<Rating>;
     case "elo":
-    default:
       return elo() as RatingSystem<Rating>;
   }
 }
@@ -264,8 +270,8 @@ export function prettyRatingSystemType(ratingSystem: RatingSystemType): string {
       return "Underdog";
     case "gameCount":
       return "Game Count";
-    default:
-      return ratingSystem;
+    case "uniqueOpponentsBeaten":
+      return "Unique Opponents Beaten";
   }
 }
 

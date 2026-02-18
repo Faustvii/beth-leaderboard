@@ -127,7 +127,6 @@ const UserIcon = ({ userId }: { userId: string }) => {
   );
 };
 
-
 export const WinLoseStreak = ({
   streak,
   isWinStreak,

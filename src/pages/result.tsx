@@ -183,7 +183,8 @@ function RatingDiffTableRow({
   isLowestRanked: boolean;
 }): JSX.Element {
   const displayRank = rankAfter + 1;
-  const displayRankBefore = rankBefore !== undefined ? rankBefore + 1 : undefined;
+  const displayRankBefore =
+    rankBefore !== undefined ? rankBefore + 1 : undefined;
 
   return (
     <>

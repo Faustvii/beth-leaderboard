@@ -6,6 +6,7 @@ import { HxButton } from "../components/HxButton";
 import { LayoutHtml } from "../components/Layout";
 import { MatchDescription } from "../components/MatchDescription";
 import { NavbarHtml } from "../components/Navbar";
+import { Rank } from "../components/Rank";
 import { RatingSystemPicker } from "../components/RatingSystemPicker";
 import { SeasonPicker } from "../components/SeasonPicker";
 import { ctx } from "../context";
@@ -127,8 +128,11 @@ async function RatingDiff({
 
   return (
     <RatingDiffTable>
-      {matchDiff.map((playerDiff) => (
-        <RatingDiffTableRow {...playerDiff} />
+      {matchDiff.map((playerDiff, index) => (
+        <RatingDiffTableRow
+          {...playerDiff}
+          isLowestRanked={index === matchDiff.length - 1}
+        />
       ))}
     </RatingDiffTable>
   );
@@ -168,6 +172,7 @@ function RatingDiffTableRow({
   ratingAfter,
   rankBefore,
   rankAfter,
+  isLowestRanked,
 }: {
   playerId: string;
   playerName: string;
@@ -175,15 +180,23 @@ function RatingDiffTableRow({
   ratingAfter: number;
   rankBefore: number | undefined;
   rankAfter: number;
+  isLowestRanked: boolean;
 }): JSX.Element {
+  const displayRank = rankAfter + 1;
+  const displayRankBefore = rankBefore !== undefined ? rankBefore + 1 : undefined;
+
   return (
     <>
       <tr class="border-b border-gray-700 bg-gray-800">
         <td class="px-1 py-4 pl-2 md:px-3 lg:px-6">
-          <span class="inline-block	w-4">{rankAfter}.</span>
+          <Rank
+            rank={displayRank}
+            isLowestRanked={isLowestRanked}
+            showLastPlaceMedal={false}
+          />
           <DiffIcon
-            before={rankBefore}
-            after={rankAfter}
+            before={displayRankBefore}
+            after={displayRank}
             isHigherBetter={false}
           />
         </td>

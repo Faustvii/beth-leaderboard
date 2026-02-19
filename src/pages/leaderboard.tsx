@@ -11,6 +11,7 @@ import { getMatches } from "../db/queries/matchQueries";
 import { getSeasons } from "../db/queries/seasonQueries";
 import { type Season } from "../db/schema/season";
 import MatchStatistics, { type RESULT } from "../lib/matchStatistics";
+import { isMobileRequest } from "../lib";
 import {
   getRatings,
   getTimeIntervalCutoffDate,
@@ -111,7 +112,7 @@ export async function LeaderboardPage(
   timeInterval: TimeInterval | undefined,
 ) {
   return (
-    <LayoutHtml headers={headers}>
+    <LayoutHtml headers={headers} showBackgroundLights={!isMobileRequest(headers)}>
       {LeaderboardTable(session, season, ratingSystem, timeInterval)}
     </LayoutHtml>
   );

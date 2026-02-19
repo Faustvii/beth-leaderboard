@@ -9,7 +9,7 @@ export const SoftGlowingLightsHtml = ({
   colors,
   shape = "circle",
 }: FancyLightProps) => {
-  const lightsCount = 150;
+  const lightsCount = 75;
 
   //meant to be extendible with additional shapes later
   const shapePaths = {

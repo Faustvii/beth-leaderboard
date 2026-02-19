@@ -53,10 +53,18 @@ export const BaseHtml = ({
         text-white
         "
         >
-          {isItChristmas && showBackgroundLights && <ChristmasHtml renderLayer="background" />}
-          {isItFriday && showBackgroundLights && <FridayHtml renderLayer="background" />}
-          {isItValentine && showBackgroundLights && <ValentineHtml renderLayer="background" />}
-          {isItHalloween && showBackgroundLights && <HalloweenHtml renderLayer="background" />}
+          {isItChristmas && showBackgroundLights && (
+            <ChristmasHtml renderLayer="background" />
+          )}
+          {isItFriday && showBackgroundLights && (
+            <FridayHtml renderLayer="background" />
+          )}
+          {isItValentine && showBackgroundLights && (
+            <ValentineHtml renderLayer="background" />
+          )}
+          {isItHalloween && showBackgroundLights && (
+            <HalloweenHtml renderLayer="background" />
+          )}
           <LoadingBarHtml />
           <div style="position: relative;">{children}</div>
           {/* {isItFriday && <FridayHtml renderLayer="effects" />} REENABLE EFTER JUL*/}

@@ -8,7 +8,11 @@ type LayoutProps = PropsWithChildren & {
   showBackgroundLights?: boolean;
 };
 
-export const LayoutHtml = ({ children, headers, showBackgroundLights }: LayoutProps) => {
+export const LayoutHtml = ({
+  children,
+  headers,
+  showBackgroundLights,
+}: LayoutProps) => {
   return (
     <>
       {isHxRequest(headers) ? (

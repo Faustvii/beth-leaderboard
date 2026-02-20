@@ -8,6 +8,7 @@ import { MatchSearchResults } from "../../components/MatchSearchResults";
 import { NavbarHtml } from "../../components/Navbar";
 import { ctx } from "../../context";
 import { execute_webhooks } from "../../controllers/webhookController";
+import { syncIfLocal } from "../../../src/lib/dbHelpers.ts";
 import { getMatch, getMatchesBeforeDate } from "../../db/queries/matchQueries";
 import { getActiveSeason } from "../../db/queries/seasonQueries";
 import { listUsersByName } from "../../db/queries/userQueries";
@@ -109,6 +110,8 @@ export const match = new Elysia({
 
         return Number(insertResult.lastInsertRowid);
       });
+
+      await syncIfLocal();
 
       const completeMatch = await getMatch(matchId, true);
       if (completeMatch) {

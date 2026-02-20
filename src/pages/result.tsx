@@ -128,11 +128,8 @@ async function RatingDiff({
 
   return (
     <RatingDiffTable>
-      {matchDiff.map((playerDiff, index) => (
-        <RatingDiffTableRow
-          {...playerDiff}
-          isLowestRanked={index === matchDiff.length - 1}
-        />
+      {matchDiff.map((playerDiff) => (
+        <RatingDiffTableRow {...playerDiff} />
       ))}
     </RatingDiffTable>
   );
@@ -180,7 +177,7 @@ function RatingDiffTableRow({
   ratingAfter: number;
   rankBefore: number | undefined;
   rankAfter: number;
-  isLowestRanked: boolean;
+  isLowestRanked?: boolean;
 }): JSX.Element {
   const displayRank = rankAfter + 1;
   const displayRankBefore =
@@ -190,11 +187,7 @@ function RatingDiffTableRow({
     <>
       <tr class="border-b border-gray-700 bg-gray-800">
         <td class="px-1 py-4 pl-2 md:px-3 lg:px-6">
-          <Rank
-            rank={displayRank}
-            isLowestRanked={isLowestRanked}
-            showLastPlaceMedal={false}
-          />
+          <Rank rank={displayRank} isLowestRanked={isLowestRanked} />
           <DiffIcon
             before={displayRankBefore}
             after={displayRank}

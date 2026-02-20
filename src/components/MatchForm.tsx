@@ -100,7 +100,7 @@ export const MatchForm = async ({
             name="match_winner"
             form={formId}
             id="match_winner"
-            class="peer block w-full appearance-none border-0 border-b-2 border-gray-300 bg-transparent px-0 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-0"
+            class="peer block w-full appearance-none border-0 border-b-2 border-gray-300 bg-transparent px-0 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-0 [&>option]:text-gray-900"
             required={true}
           >
             <option disabled value="" selected={match ? false : true}>

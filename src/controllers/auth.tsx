@@ -9,6 +9,7 @@ import { config } from "../config";
 import { ctx } from "../context";
 import { userTbl as userSchema } from "../db/schema/auth";
 import { syncIfLocal } from "../lib/dbHelpers";
+import { generateTempNickname } from "../lib/nameUtils";
 
 export const authController = new Elysia({
   prefix: "/auth",
@@ -94,7 +95,7 @@ export const authController = new Elysia({
   })
   .get(
     "/azure/callback",
-    async ({ set, query, headers, writeAuth, redirect, readDb }) => {
+    async ({ set, query, headers, writeAuth, writeDb, redirect, readDb }) => {
       const { code, state } = query;
       const cookies = parseCookie(headers.cookie || "");
       const state_cookie = cookies.azure_auth_state;
@@ -171,6 +172,11 @@ export const authController = new Elysia({
                   : null,
             },
           });
+
+          await writeDb
+            .update(userSchema)
+            .set({ nickname: generateTempNickname(name) })
+            .where(eq(userSchema.id, newUser.userId));
 
           return newUser;
         };

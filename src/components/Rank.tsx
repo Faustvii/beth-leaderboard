@@ -1,13 +1,11 @@
 export function Rank({
   rank,
   isLowestRanked,
-  showLastPlaceMedal = true,
 }: {
   rank: number;
-  isLowestRanked: boolean;
-  showLastPlaceMedal?: boolean;
+  isLowestRanked?: boolean;
 }): JSX.Element {
-  if (isLowestRanked && showLastPlaceMedal) {
+  if (isLowestRanked) {
     return (
       <span aria-label="last place" class="text-xl">
         👎

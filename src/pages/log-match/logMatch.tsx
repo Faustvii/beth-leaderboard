@@ -1,6 +1,7 @@
 import { eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { type Session } from "lucia";
+import { syncIfLocal } from "../../../src/lib/dbHelpers.ts";
 import { HeaderHtml } from "../../components/header";
 import { LayoutHtml } from "../../components/Layout";
 import { MatchForm } from "../../components/MatchForm";
@@ -8,7 +9,6 @@ import { MatchSearchResults } from "../../components/MatchSearchResults";
 import { NavbarHtml } from "../../components/Navbar";
 import { ctx } from "../../context";
 import { execute_webhooks } from "../../controllers/webhookController";
-import { syncIfLocal } from "../../../src/lib/dbHelpers.ts";
 import { getMatch, getMatchesBeforeDate } from "../../db/queries/matchQueries";
 import { getActiveSeason } from "../../db/queries/seasonQueries";
 import { listUsersByName } from "../../db/queries/userQueries";

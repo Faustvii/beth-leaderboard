@@ -43,7 +43,7 @@ jobs:
           environment: preview
           ref: ${{ github.sha }}
           description: "Leaderboard image: ${{ inputs.image || github.event.inputs.image }}"
-          auto_merge: false
+          auto-merge: false
 
       - name: Dispatch to cluster repo
         uses: peter-evans/repository-dispatch@v3
@@ -76,7 +76,7 @@ jobs:
           environment: production
           ref: ${{ github.sha }}
           description: "Leaderboard image: ${{ inputs.image || github.event.inputs.image }}"
-          auto_merge: false
+          auto-merge: false
 
       - name: Dispatch to cluster repo
         uses: peter-evans/repository-dispatch@v3

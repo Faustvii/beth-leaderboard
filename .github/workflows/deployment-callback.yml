@@ -5,6 +5,9 @@ on:
     types:
       - leaderboard_deployed
 
+permissions:
+  deployments: write # to be able to update deployment status
+
 jobs:
   deployment-status:
     runs-on: ubuntu-latest

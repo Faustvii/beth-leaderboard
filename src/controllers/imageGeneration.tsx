@@ -8,6 +8,7 @@ import { type JobQueue } from "../db/schema/jobQueue";
 import { applyCronJitter } from "../lib/cronJitter";
 import { syncIfLocal } from "../lib/dbHelpers";
 import { isBase64 } from "../lib/userImages";
+import { isDefined } from "../lib/utils";
 
 type newJob = typeof job_queue.$inferInsert;
 
@@ -65,22 +66,32 @@ export const imageGen = new Elysia()
       name: "imageGen-worker",
       pattern:
         config.env.NODE_ENV !== "production" ? "0 0 31 2 *" : "*/15 * * * * *",
+      protect: () =>
+        console.log(
+          "[imageGen-worker] image cron skipped as it's already running",
+        ),
       async run() {
         try {
           await applyCronJitter("imageGen-worker", 30_000);
-          const usersMissingPictures = await readDb.query.job_queue.findMany({
-            where: and(
-              eq(job_queue.type, "image"),
-              eq(job_queue.status, "pending"),
-            ),
-          });
 
-          for (const missingPictureJob of usersMissingPictures) {
+          const getNextJob = async () => {
+            return await readDb.query.job_queue.findFirst({
+              where: and(
+                eq(job_queue.type, "image"),
+                eq(job_queue.status, "pending"),
+              ),
+            });
+          };
+
+          while (true) {
+            const missingPictureJob = await getNextJob();
+            if (!isDefined(missingPictureJob)) break;
+
             await writeDb
               .update(job_queue)
               .set({ status: "processing" })
               .where(eq(job_queue.id, missingPictureJob.id));
-            void generateImageForUser(
+            await generateImageForUser(
               missingPictureJob.data.userId,
               missingPictureJob,
             );

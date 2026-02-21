@@ -28,7 +28,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           environment: ${{ inputs.target }}
-          state: 'in_progress'
+          state: "in_progress"
           description: "Leaderboard image: ${{ inputs.image }}"
           auto-merge: false
 

@@ -55,9 +55,6 @@ jobs:
             {
               "target":"preview",
               "image":"${{ inputs.image || github.event.inputs.image }}",
-              "source_repo":"${{ github.repository }}",
-              "source_sha":"${{ github.sha }}",
-              "source_run_id":"${{ github.run_id }}",
               "deployment_id":"${{ steps.deploy.outputs.deployment_id }}"
             }
 
@@ -88,8 +85,5 @@ jobs:
             {
               "target":"prod",
               "image":"${{ inputs.image || github.event.inputs.image }}",
-              "source_repo":"${{ github.repository }}",
-              "source_sha":"${{ github.sha }}",
-              "source_run_id":"${{ github.run_id }}",
               "deployment_id":"${{ steps.deploy.outputs.deployment_id }}"
             }

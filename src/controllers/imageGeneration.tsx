@@ -5,6 +5,7 @@ import { config } from "../config";
 import { readDb, writeDb } from "../db";
 import { job_queue, userTbl } from "../db/schema";
 import { type JobQueue } from "../db/schema/jobQueue";
+import { applyCronJitter } from "../lib/cronJitter";
 import { syncIfLocal } from "../lib/dbHelpers";
 import { isBase64 } from "../lib/userImages";
 
@@ -15,42 +16,47 @@ export const imageGen = new Elysia()
     cron({
       name: "imageGen-queue",
       pattern:
-        config.env.NODE_ENV !== "production" ? "0 0 31 2 *" : "*/5 * * * * *",
+        config.env.NODE_ENV !== "production" ? "0 0 31 2 *" : "*/15 * * * * *",
       async run() {
-        const usersMissingPictures = await readDb.query.userTbl.findMany({
-          columns: {
-            id: true,
-          },
-          where: or(
-            eq(userTbl.picture, "/static/crokinole.svg"),
-            like(userTbl.picture, "http%"),
-          ),
-        });
-        if (usersMissingPictures.length <= 0) return;
-
-        for (const userMissingPicture of usersMissingPictures) {
-          const usersAlreadyInQueueForPicture =
-            await readDb.query.job_queue.findFirst({
-              where: and(
-                inArray(job_queue.status, ["pending", "processing"]),
-                like(job_queue.data, `%${userMissingPicture.id}%`),
-              ),
-            });
-          if (usersAlreadyInQueueForPicture) continue;
-          console.log(
-            `Adding user ${userMissingPicture.id} to image generation queue`,
-          );
-          const newJob: newJob = {
-            type: "image",
-            data: {
-              userId: userMissingPicture.id,
+        try {
+          await applyCronJitter("imageGen-queue", 10_000);
+          const usersMissingPictures = await readDb.query.userTbl.findMany({
+            columns: {
+              id: true,
             },
-            createdAt: new Date(),
-            status: "pending",
-          };
-          await writeDb.insert(job_queue).values(newJob);
+            where: or(
+              eq(userTbl.picture, "/static/crokinole.svg"),
+              like(userTbl.picture, "http%"),
+            ),
+          });
+          if (usersMissingPictures.length <= 0) return;
+
+          for (const userMissingPicture of usersMissingPictures) {
+            const usersAlreadyInQueueForPicture =
+              await readDb.query.job_queue.findFirst({
+                where: and(
+                  inArray(job_queue.status, ["pending", "processing"]),
+                  like(job_queue.data, `%${userMissingPicture.id}%`),
+                ),
+              });
+            if (usersAlreadyInQueueForPicture) continue;
+            console.log(
+              `Adding user ${userMissingPicture.id} to image generation queue`,
+            );
+            const newJob: newJob = {
+              type: "image",
+              data: {
+                userId: userMissingPicture.id,
+              },
+              createdAt: new Date(),
+              status: "pending",
+            };
+            await writeDb.insert(job_queue).values(newJob);
+          }
+          await syncIfLocal();
+        } catch (error) {
+          console.error("[imageGen-queue] image cron failed", error);
         }
-        await syncIfLocal();
       },
     }),
   )
@@ -58,24 +64,29 @@ export const imageGen = new Elysia()
     cron({
       name: "imageGen-worker",
       pattern:
-        config.env.NODE_ENV !== "production" ? "0 0 31 2 *" : "*/5 * * * * *",
+        config.env.NODE_ENV !== "production" ? "0 0 31 2 *" : "*/15 * * * * *",
       async run() {
-        const usersMissingPictures = await readDb.query.job_queue.findMany({
-          where: and(
-            eq(job_queue.type, "image"),
-            eq(job_queue.status, "pending"),
-          ),
-        });
+        try {
+          await applyCronJitter("imageGen-worker", 30_000);
+          const usersMissingPictures = await readDb.query.job_queue.findMany({
+            where: and(
+              eq(job_queue.type, "image"),
+              eq(job_queue.status, "pending"),
+            ),
+          });
 
-        for (const missingPictureJob of usersMissingPictures) {
-          await writeDb
-            .update(job_queue)
-            .set({ status: "processing" })
-            .where(eq(job_queue.id, missingPictureJob.id));
-          void generateImageForUser(
-            missingPictureJob.data.userId,
-            missingPictureJob,
-          );
+          for (const missingPictureJob of usersMissingPictures) {
+            await writeDb
+              .update(job_queue)
+              .set({ status: "processing" })
+              .where(eq(job_queue.id, missingPictureJob.id));
+            void generateImageForUser(
+              missingPictureJob.data.userId,
+              missingPictureJob,
+            );
+          }
+        } catch (error) {
+          console.error("[imageGen-worker] image cron failed", error);
         }
       },
     }),
@@ -86,11 +97,19 @@ export const imageGen = new Elysia()
       pattern:
         config.env.NODE_ENV !== "production" ? "0 0 31 2 *" : "0 0 23 * * *",
       async run() {
-        await writeDb
-          .delete(job_queue)
-          .where(
-            and(eq(job_queue.type, "image"), eq(job_queue.status, "complete")),
-          );
+        try {
+          await applyCronJitter("imageGen-cleanup", 30_000);
+          await writeDb
+            .delete(job_queue)
+            .where(
+              and(
+                eq(job_queue.type, "image"),
+                inArray(job_queue.status, ["complete", "error"]),
+              ),
+            );
+        } catch (error) {
+          console.error("[imageGen-cleanup] image cron failed", error);
+        }
       },
     }),
   );

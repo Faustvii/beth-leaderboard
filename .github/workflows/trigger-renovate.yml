@@ -39,7 +39,7 @@ jobs:
           TARGET_REPO: ${{ secrets.RENOVATE_TARGET_REPO }}
         run: |
           echo "Triggering Renovate for repo: $TARGET_REPO"
-          curl -X POST "$RENOVATE_API_URL/api/job/add" \
+          curl -X POST "$RENOVATE_API_URL/api/v1/repos/$TARGET_REPO/-/jobs/run" \
             -H "Content-Type: application/json" \
-            -H "Authorization: Bearer $RENOVATE_API_TOKEN" \
-            -d "{\"repository\": \"$TARGET_REPO\"}"
+            -H "Authorization: $RENOVATE_API_TOKEN" \
+            -d "{}"

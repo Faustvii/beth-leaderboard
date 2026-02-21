@@ -29,8 +29,8 @@ on:
         required: true
         type: choice
         options:
-          - prod
-        default: prod
+          - production
+        default: production
 
 permissions:
   contents: write # to be able to publish a GitHub release
@@ -106,12 +106,10 @@ jobs:
 
   deploy-prod:
     needs: build-and-publish-docker
-    if: |
-      github.event_name == 'push' ||
-      (github.event_name == 'workflow_dispatch' && inputs.target == 'prod')
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     uses: ./.github/workflows/trigger-deploy.yml
     with:
-      target: prod
+      target: production
       image: latest@${{ needs.build-and-publish-docker.outputs.image_digest }}
     secrets:
       CLUSTER_REPO_DISPATCH_TOKEN: ${{ secrets.CLUSTER_REPO_DISPATCH_TOKEN }}

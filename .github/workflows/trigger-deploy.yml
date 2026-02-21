@@ -1,49 +1,36 @@
 name: Dispatch Cluster Deploy
 
 on:
-  workflow_dispatch:
-    inputs:
-      target:
-        description: "Deployment target"
-        required: true
-        type: choice
-        options:
-          - preview
-          - prod
-      image:
-        description: "Image reference tag@sha256:<digest>"
-        required: true
-        type: string
   workflow_call:
     inputs:
       target:
         required: true
         type: string
+        description: "preview or production"
       image:
         required: true
         type: string
+        description: "Image reference tag@sha256:<digest>"
     secrets:
       CLUSTER_REPO_DISPATCH_TOKEN:
         required: true
       CLUSTER_REPO:
         required: true
+
 jobs:
-  deploy-preview:
-    if: inputs.target == 'preview' || github.event.inputs.target == 'preview'
+  deploy:
     runs-on: ubuntu-latest
-    environment: preview
-    outputs:
-      deployment_id: ${{ steps.deploy.outputs.deployment_id }}
+    environment: ${{ inputs.target }}
     steps:
-      - name: Create and dispatch preview deployment
+      - name: Create deployment
         id: deploy
         uses: chrnorm/deployment-action@v2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          environment: preview
+          environment: ${{ inputs.target }}
           ref: ${{ github.sha }}
-          description: "Leaderboard image: ${{ inputs.image || github.event.inputs.image }}"
-          auto-merge: false
+          description: "Leaderboard image: ${{ inputs.image }}"
+          auto_merge: false
 
       - name: Dispatch to cluster repo
         uses: peter-evans/repository-dispatch@v3
@@ -53,37 +40,8 @@ jobs:
           event-type: leaderboard_deploy
           client-payload: >-
             {
-              "target":"preview",
-              "image":"${{ inputs.image || github.event.inputs.image }}",
+              "target":"${{ inputs.target }}",
+              "image":"${{ inputs.image }}",
               "deployment_id":"${{ steps.deploy.outputs.deployment_id }}"
             }
 
-  deploy-prod:
-    if: inputs.target == 'prod' || github.event.inputs.target == 'prod'
-    runs-on: ubuntu-latest
-    environment: production
-    outputs:
-      deployment_id: ${{ steps.deploy.outputs.deployment_id }}
-    steps:
-      - name: Create and dispatch production deployment
-        id: deploy
-        uses: chrnorm/deployment-action@v2
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          environment: production
-          ref: ${{ github.sha }}
-          description: "Leaderboard image: ${{ inputs.image || github.event.inputs.image }}"
-          auto-merge: false
-
-      - name: Dispatch to cluster repo
-        uses: peter-evans/repository-dispatch@v3
-        with:
-          token: ${{ secrets.CLUSTER_REPO_DISPATCH_TOKEN }}
-          repository: ${{ secrets.CLUSTER_REPO }}
-          event-type: leaderboard_deploy
-          client-payload: >-
-            {
-              "target":"prod",
-              "image":"${{ inputs.image || github.event.inputs.image }}",
-              "deployment_id":"${{ steps.deploy.outputs.deployment_id }}"
-            }

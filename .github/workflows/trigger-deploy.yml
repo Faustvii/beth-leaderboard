@@ -28,30 +28,68 @@ on:
       CLUSTER_REPO:
         required: true
 jobs:
-  dispatch-preview:
+  deploy-preview:
     if: inputs.target == 'preview' || github.event.inputs.target == 'preview'
     runs-on: ubuntu-latest
     environment: preview
+    outputs:
+      deployment_id: ${{ steps.deploy.outputs.deployment_id }}
     steps:
-      - name: Dispatch preview deploy event
+      - name: Create and dispatch preview deployment
+        id: deploy
+        uses: chrnorm/deployment-action@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          environment: preview
+          ref: ${{ github.sha }}
+          description: "Leaderboard image: ${{ inputs.image || github.event.inputs.image }}"
+          auto_merge: false
+
+      - name: Dispatch to cluster repo
         uses: peter-evans/repository-dispatch@v3
         with:
           token: ${{ secrets.CLUSTER_REPO_DISPATCH_TOKEN }}
           repository: ${{ secrets.CLUSTER_REPO }}
           event-type: leaderboard_deploy
           client-payload: >-
-            {"target":"preview","image":"${{ inputs.image || github.event.inputs.image }}"}
+            {
+              "target":"preview",
+              "image":"${{ inputs.image || github.event.inputs.image }}",
+              "source_repo":"${{ github.repository }}",
+              "source_sha":"${{ github.sha }}",
+              "source_run_id":"${{ github.run_id }}",
+              "deployment_id":"${{ steps.deploy.outputs.deployment_id }}"
+            }
 
-  dispatch-prod:
+  deploy-prod:
     if: inputs.target == 'prod' || github.event.inputs.target == 'prod'
     runs-on: ubuntu-latest
     environment: production
+    outputs:
+      deployment_id: ${{ steps.deploy.outputs.deployment_id }}
     steps:
-      - name: Dispatch production deploy event
+      - name: Create and dispatch production deployment
+        id: deploy
+        uses: chrnorm/deployment-action@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          environment: production
+          ref: ${{ github.sha }}
+          description: "Leaderboard image: ${{ inputs.image || github.event.inputs.image }}"
+          auto_merge: false
+
+      - name: Dispatch to cluster repo
         uses: peter-evans/repository-dispatch@v3
         with:
           token: ${{ secrets.CLUSTER_REPO_DISPATCH_TOKEN }}
           repository: ${{ secrets.CLUSTER_REPO }}
           event-type: leaderboard_deploy
           client-payload: >-
-            {"target":"prod","image":"${{ inputs.image || github.event.inputs.image }}"}
+            {
+              "target":"prod",
+              "image":"${{ inputs.image || github.event.inputs.image }}",
+              "source_repo":"${{ github.repository }}",
+              "source_sha":"${{ github.sha }}",
+              "source_run_id":"${{ github.run_id }}",
+              "deployment_id":"${{ steps.deploy.outputs.deployment_id }}"
+            }

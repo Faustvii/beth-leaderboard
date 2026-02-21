@@ -1,0 +1,26 @@
+name: Deployment Callback Handler
+
+on:
+  repository_dispatch:
+    types:
+      - leaderboard_deployed
+
+jobs:
+  deployment-status:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate callback payload
+        run: |
+          if [ -z "${{ github.event.client_payload.deployment_id }}" ]; then
+            echo "Error: deployment_id not provided in callback payload"
+            exit 1
+          fi
+
+      - name: Mark deployment success
+        uses: chrnorm/deployment-status@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          deployment-id: ${{ github.event.client_payload.deployment_id }}
+          state: success
+          description: "Deployed to ${{ github.event.client_payload.target }}"
+          environment-url: ${{ github.event.client_payload.environment_url }}

@@ -44,4 +44,3 @@ jobs:
               "image":"${{ inputs.image }}",
               "deployment_id":"${{ steps.deploy.outputs.deployment_id }}"
             }
-

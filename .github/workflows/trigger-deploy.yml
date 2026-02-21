@@ -1,0 +1,57 @@
+name: Dispatch Cluster Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "Deployment target"
+        required: true
+        type: choice
+        options:
+          - preview
+          - prod
+      image:
+        description: "Image reference tag@sha256:<digest>"
+        required: true
+        type: string
+  workflow_call:
+    inputs:
+      target:
+        required: true
+        type: string
+      image:
+        required: true
+        type: string
+    secrets:
+      CLUSTER_REPO_DISPATCH_TOKEN:
+        required: true
+      CLUSTER_REPO:
+        required: true
+jobs:
+  dispatch-preview:
+    if: inputs.target == 'preview' || github.event.inputs.target == 'preview'
+    runs-on: ubuntu-latest
+    environment: preview
+    steps:
+      - name: Dispatch preview deploy event
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.CLUSTER_REPO_DISPATCH_TOKEN }}
+          repository: ${{ secrets.CLUSTER_REPO }}
+          event-type: leaderboard_deploy
+          client-payload: >-
+            {"target":"preview","image":"${{ inputs.image || github.event.inputs.image }}"}
+
+  dispatch-prod:
+    if: inputs.target == 'prod' || github.event.inputs.target == 'prod'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Dispatch production deploy event
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.CLUSTER_REPO_DISPATCH_TOKEN }}
+          repository: ${{ secrets.CLUSTER_REPO }}
+          event-type: leaderboard_deploy
+          client-payload: >-
+            {"target":"prod","image":"${{ inputs.image || github.event.inputs.image }}"}

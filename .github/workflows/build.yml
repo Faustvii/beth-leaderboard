@@ -100,6 +100,7 @@ jobs:
     with:
       target: preview
       image: pr-latest@${{ needs.build-and-publish-docker.outputs.image_digest }}
+      source_ref: ${{ github.head_ref || github.ref_name }}
     secrets:
       CLUSTER_REPO_DISPATCH_TOKEN: ${{ secrets.CLUSTER_REPO_DISPATCH_TOKEN }}
       CLUSTER_REPO: ${{ secrets.CLUSTER_REPO }}
@@ -111,6 +112,7 @@ jobs:
     with:
       target: production
       image: latest@${{ needs.build-and-publish-docker.outputs.image_digest }}
+      source_ref: ${{ github.ref_name }}
     secrets:
       CLUSTER_REPO_DISPATCH_TOKEN: ${{ secrets.CLUSTER_REPO_DISPATCH_TOKEN }}
       CLUSTER_REPO: ${{ secrets.CLUSTER_REPO }}

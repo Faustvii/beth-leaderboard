@@ -11,6 +11,10 @@ on:
         required: true
         type: string
         description: "Image reference tag@sha256:<digest>"
+      source_ref:
+        required: true
+        type: string
+        description: "Source branch or PR head branch"
     secrets:
       CLUSTER_REPO_DISPATCH_TOKEN:
         required: true
@@ -28,8 +32,9 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           environment: ${{ inputs.target }}
-          state: "in_progress"
           description: "Leaderboard image: ${{ inputs.image }}"
+          sha: ${{ github.sha }}
+          ref: ${{ inputs.source_ref }}
           auto-merge: false
 
       - name: Dispatch to cluster repo

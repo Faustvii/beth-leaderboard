@@ -169,7 +169,6 @@ function RatingDiffTableRow({
   ratingAfter,
   rankBefore,
   rankAfter,
-  isLowestRanked,
 }: {
   playerId: string;
   playerName: string;
@@ -177,7 +176,6 @@ function RatingDiffTableRow({
   ratingAfter: number;
   rankBefore: number | undefined;
   rankAfter: number;
-  isLowestRanked?: boolean;
 }): JSX.Element {
   const displayRank = rankAfter + 1;
   const displayRankBefore =
@@ -187,7 +185,7 @@ function RatingDiffTableRow({
     <>
       <tr class="border-b border-gray-700 bg-gray-800">
         <td class="px-1 py-4 pl-2 md:px-3 lg:px-6">
-          <Rank rank={displayRank} isLowestRanked={isLowestRanked} />
+          <Rank rank={displayRank} />
           <DiffIcon
             before={displayRankBefore}
             after={displayRank}

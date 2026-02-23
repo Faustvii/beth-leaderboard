@@ -163,6 +163,7 @@ export const authController = new Elysia({
           const newUser = await createUser({
             attributes: {
               name: name,
+              nickname: generateTempNickname(name),
               email: normalizedAzureUser.email ?? null,
               picture: normalizedAzureUser.picture ?? null,
               roles:
@@ -173,10 +174,10 @@ export const authController = new Elysia({
             },
           });
 
-          await writeDb
-            .update(userSchema)
-            .set({ nickname: generateTempNickname(name) })
-            .where(eq(userSchema.id, newUser.userId));
+          // await writeDb
+          //   .update(userSchema)
+          //   .set({ nickname: generateTempNickname(name) })
+          //   .where(eq(userSchema.id, newUser.userId));
 
           return newUser;
         };

@@ -22,13 +22,22 @@ on:
       - "bun.lockdb"
     branches:
       - main
-  workflow_dispatch: # manual trigger with no inputs
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "Deployment target"
+        required: true
+        type: choice
+        options:
+          - production
+        default: production
 
 permissions:
   contents: write # to be able to publish a GitHub release
   packages: write # to be able to publish a package
   pull-requests: write # to be able to comment on released pull requests
   issues: write # to be able to comment on released issues
+  deployments: write
 
 jobs:
   build-and-test:
@@ -52,6 +61,8 @@ jobs:
   build-and-publish-docker:
     needs: build-and-test
     runs-on: ubuntu-latest
+    outputs:
+      image_digest: ${{ steps.docker_build.outputs.digest }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -82,10 +93,26 @@ jobs:
             ${{ github.ref == 'refs/heads/main' && 'ghcr.io/faustvii/beth-leaderboard:' || '' }}${{ github.ref == 'refs/heads/main' && github.sha || '' }}
             ${{ github.ref != 'refs/heads/main' && 'ghcr.io/faustvii/beth-leaderboard:' || '' }}${{ github.ref != 'refs/heads/main' && 'pr-latest' || '' }}
 
-  trigger-renovate:
+  deploy-preview:
     needs: build-and-publish-docker
-    uses: ./.github/workflows/trigger-renovate.yml
+    if: github.event_name == 'pull_request'
+    uses: ./.github/workflows/trigger-deploy.yml
+    with:
+      target: preview
+      image: pr-latest@${{ needs.build-and-publish-docker.outputs.image_digest }}
+      source_ref: ${{ github.head_ref || github.ref_name }}
     secrets:
-      RENOVATE_WEBHOOK_URL: ${{ secrets.RENOVATE_WEBHOOK_URL }}
-      RENOVATE_WEBHOOK_SECRET: ${{ secrets.RENOVATE_WEBHOOK_SECRET }}
-      RENOVATE_TARGET_REPO: ${{ secrets.RENOVATE_TARGET_REPO }}
+      CLUSTER_REPO_DISPATCH_TOKEN: ${{ secrets.CLUSTER_REPO_DISPATCH_TOKEN }}
+      CLUSTER_REPO: ${{ secrets.CLUSTER_REPO }}
+
+  deploy-prod:
+    needs: build-and-publish-docker
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    uses: ./.github/workflows/trigger-deploy.yml
+    with:
+      target: production
+      image: latest@${{ needs.build-and-publish-docker.outputs.image_digest }}
+      source_ref: ${{ github.ref_name }}
+    secrets:
+      CLUSTER_REPO_DISPATCH_TOKEN: ${{ secrets.CLUSTER_REPO_DISPATCH_TOKEN }}
+      CLUSTER_REPO: ${{ secrets.CLUSTER_REPO }}

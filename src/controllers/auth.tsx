@@ -9,6 +9,7 @@ import { config } from "../config";
 import { ctx } from "../context";
 import { userTbl as userSchema } from "../db/schema/auth";
 import { syncIfLocal } from "../lib/dbHelpers";
+import { generateTempNickname } from "../lib/nameUtils";
 
 export const authController = new Elysia({
   prefix: "/auth",
@@ -162,6 +163,7 @@ export const authController = new Elysia({
           const newUser = await createUser({
             attributes: {
               name: name,
+              nickname: generateTempNickname(name),
               email: normalizedAzureUser.email ?? null,
               picture: normalizedAzureUser.picture ?? null,
               roles:

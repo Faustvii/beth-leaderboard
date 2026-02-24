@@ -1,0 +1,51 @@
+name: Dispatch Cluster Deploy
+
+on:
+  workflow_call:
+    inputs:
+      target:
+        required: true
+        type: string
+        description: "preview or production"
+      image:
+        required: true
+        type: string
+        description: "Image reference tag@sha256:<digest>"
+      source_ref:
+        required: true
+        type: string
+        description: "Source branch or PR head branch"
+    secrets:
+      CLUSTER_REPO_DISPATCH_TOKEN:
+        required: true
+      CLUSTER_REPO:
+        required: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.target }}
+    steps:
+      - name: Create deployment
+        id: deploy
+        uses: chrnorm/deployment-action@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          environment: ${{ inputs.target }}
+          description: "Leaderboard image: ${{ inputs.image }}"
+          sha: ${{ github.sha }}
+          ref: ${{ inputs.source_ref }}
+          auto-merge: false
+
+      - name: Dispatch to cluster repo
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.CLUSTER_REPO_DISPATCH_TOKEN }}
+          repository: ${{ secrets.CLUSTER_REPO }}
+          event-type: leaderboard_deploy
+          client-payload: >-
+            {
+              "target":"${{ inputs.target }}",
+              "image":"${{ inputs.image }}",
+              "deployment_id":"${{ steps.deploy.outputs.deployment_id }}"
+            }

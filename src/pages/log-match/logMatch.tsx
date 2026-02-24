@@ -1,6 +1,7 @@
 import { eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { type Session } from "lucia";
+import { syncIfLocal } from "../../../src/lib/dbHelpers.ts";
 import { HeaderHtml } from "../../components/header";
 import { LayoutHtml } from "../../components/Layout";
 import { MatchForm } from "../../components/MatchForm";
@@ -109,6 +110,8 @@ export const match = new Elysia({
 
         return Number(insertResult.lastInsertRowid);
       });
+
+      await syncIfLocal();
 
       const completeMatch = await getMatch(matchId, true);
       if (completeMatch) {

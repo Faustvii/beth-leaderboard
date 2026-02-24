@@ -7,7 +7,10 @@ import { ValentineHtml } from "../controllers/holidays/valentine";
 import { GitHubLinkHtml } from "./GitHubLink";
 import { LoadingBarHtml } from "./LoadingBar";
 
-export const BaseHtml = ({ children }: PropsWithChildren) => {
+export const BaseHtml = ({
+  children,
+  showBackgroundLights = true,
+}: PropsWithChildren & { showBackgroundLights?: boolean }) => {
   const holiday = getCurrentHolidays();
   const isItChristmas = holiday.christmas;
   const isItValentine = holiday.valentine;
@@ -50,10 +53,18 @@ export const BaseHtml = ({ children }: PropsWithChildren) => {
         text-white
         "
         >
-          {isItChristmas && <ChristmasHtml renderLayer="background" />}
-          {isItFriday && <FridayHtml renderLayer="background" />}
-          {isItValentine && <ValentineHtml renderLayer="background" />}
-          {isItHalloween && <HalloweenHtml renderLayer="background" />}
+          {isItChristmas && showBackgroundLights && (
+            <ChristmasHtml renderLayer="background" />
+          )}
+          {isItFriday && showBackgroundLights && (
+            <FridayHtml renderLayer="background" />
+          )}
+          {isItValentine && showBackgroundLights && (
+            <ValentineHtml renderLayer="background" />
+          )}
+          {isItHalloween && showBackgroundLights && (
+            <HalloweenHtml renderLayer="background" />
+          )}
           <LoadingBarHtml />
           <div style="position: relative;">{children}</div>
           {/* {isItFriday && <FridayHtml renderLayer="effects" />} REENABLE EFTER JUL*/}

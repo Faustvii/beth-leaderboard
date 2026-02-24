@@ -10,6 +10,7 @@ import { ctx } from "../context";
 import { getMatches } from "../db/queries/matchQueries";
 import { getSeasons } from "../db/queries/seasonQueries";
 import { type Season } from "../db/schema/season";
+import { isMobileRequest } from "../lib";
 import MatchStatistics, { type RESULT } from "../lib/matchStatistics";
 import {
   getRatings,
@@ -111,7 +112,10 @@ export async function LeaderboardPage(
   timeInterval: TimeInterval | undefined,
 ) {
   return (
-    <LayoutHtml headers={headers}>
+    <LayoutHtml
+      headers={headers}
+      showBackgroundLights={!isMobileRequest(headers)}
+    >
       {LeaderboardTable(session, season, ratingSystem, timeInterval)}
     </LayoutHtml>
   );

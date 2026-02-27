@@ -228,7 +228,7 @@ function DiffIcon({
   after: number;
   isHigherBetter: boolean;
 }): JSX.Element {
-  const areDefined = isDefined(before) && after;
+  const areDefined = isDefined(before) && isDefined(after);
   const areEqual = before === after;
   const shouldDisplay = areDefined && !areEqual;
 

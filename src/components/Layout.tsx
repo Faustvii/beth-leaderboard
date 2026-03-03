@@ -5,20 +5,20 @@ import { MainContainer } from "./MainContainer";
 
 type LayoutProps = PropsWithChildren & {
   headers: Record<string, string | null>;
-  showBackgroundLights?: boolean;
+  showFestivities?: boolean;
 };
 
 export const LayoutHtml = ({
   children,
   headers,
-  showBackgroundLights,
+  showFestivities,
 }: LayoutProps) => {
   return (
     <>
       {isHxRequest(headers) ? (
         <MainContainer>{children}</MainContainer>
       ) : (
-        <BaseHtml showBackgroundLights={showBackgroundLights}>
+        <BaseHtml showFestivities={showFestivities}>
           <MainContainer>{children}</MainContainer>
         </BaseHtml>
       )}

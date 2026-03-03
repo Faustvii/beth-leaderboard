@@ -9,8 +9,8 @@ import { LoadingBarHtml } from "./LoadingBar";
 
 export const BaseHtml = ({
   children,
-  showBackgroundLights = true,
-}: PropsWithChildren & { showBackgroundLights?: boolean }) => {
+  showFestivities = true,
+}: PropsWithChildren & { showFestivities?: boolean }) => {
   const holiday = getCurrentHolidays();
   const isItChristmas = holiday.christmas;
   const isItValentine = holiday.valentine;
@@ -53,24 +53,32 @@ export const BaseHtml = ({
         text-white
         "
         >
-          {isItChristmas && showBackgroundLights && (
+          {isItChristmas && showFestivities && (
             <ChristmasHtml renderLayer="background" />
           )}
-          {isItFriday && showBackgroundLights && (
+          {isItFriday && showFestivities && (
             <FridayHtml renderLayer="background" />
           )}
-          {isItValentine && showBackgroundLights && (
+          {isItValentine && showFestivities && (
             <ValentineHtml renderLayer="background" />
           )}
-          {isItHalloween && showBackgroundLights && (
+          {isItHalloween && showFestivities && (
             <HalloweenHtml renderLayer="background" />
           )}
           <LoadingBarHtml />
           <div style="position: relative;">{children}</div>
-          {/* {isItFriday && <FridayHtml renderLayer="effects" />} REENABLE EFTER JUL*/}
-          {isItHalloween && <HalloweenHtml renderLayer="effects" />}
-          {isItValentine && <ValentineHtml renderLayer="effects" />}
-          {isItChristmas && <ChristmasHtml renderLayer="effects" />}
+          {isItFriday && showFestivities && (
+            <FridayHtml renderLayer="effects" />
+          )}
+          {isItHalloween && showFestivities && (
+            <HalloweenHtml renderLayer="effects" />
+          )}
+          {isItValentine && showFestivities && (
+            <ValentineHtml renderLayer="effects" />
+          )}
+          {isItChristmas && showFestivities && (
+            <ChristmasHtml renderLayer="effects" />
+          )}
           <GitHubLinkHtml />
         </body>
       </html>

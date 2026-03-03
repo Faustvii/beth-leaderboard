@@ -114,7 +114,7 @@ export async function LeaderboardPage(
   return (
     <LayoutHtml
       headers={headers}
-      showBackgroundLights={!isMobileRequest(headers)}
+      showFestivities={!isMobileRequest(headers)}
     >
       {LeaderboardTable(session, season, ratingSystem, timeInterval)}
     </LayoutHtml>

@@ -112,10 +112,7 @@ export async function LeaderboardPage(
   timeInterval: TimeInterval | undefined,
 ) {
   return (
-    <LayoutHtml
-      headers={headers}
-      showFestivities={!isMobileRequest(headers)}
-    >
+    <LayoutHtml headers={headers} showFestivities={!isMobileRequest(headers)}>
       {LeaderboardTable(session, season, ratingSystem, timeInterval)}
     </LayoutHtml>
   );

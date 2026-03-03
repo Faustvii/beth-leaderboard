@@ -12,6 +12,7 @@ import { SeasonPicker } from "../components/SeasonPicker";
 import { ctx } from "../context";
 import { getMatch, getMatches } from "../db/queries/matchQueries";
 import { getSeason } from "../db/queries/seasonQueries";
+import { syncIfLocal } from "../lib/dbHelpers";
 import {
   getMatchRatingDiff,
   type Match,
@@ -44,6 +45,7 @@ async function page(
   seasonId: number | undefined,
   ratingSystem: RatingSystem<Rating>,
 ) {
+  await syncIfLocal();
   const match = await getMatch(matchId, !!session?.user);
   if (!match) {
     return <>Match does not exist</>;

@@ -5,6 +5,10 @@ export function getIsItChristmas() {
 }
 
 export function updateIsItChristmas() {
+  if (process.env.TEST_OVERRIDE_IS_CHRISTMAS !== undefined) {
+    process.env.IS_CHRISTMAS = process.env.TEST_OVERRIDE_IS_CHRISTMAS;
+    return;
+  }
   // getMonth is zero indexed
   if (new Date().getMonth() === 11) {
     process.env.IS_CHRISTMAS = "true";

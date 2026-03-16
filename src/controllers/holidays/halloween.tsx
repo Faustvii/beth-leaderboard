@@ -5,6 +5,10 @@ export function getIsItHalloween() {
 }
 
 export function updateIsItHalloween() {
+  if (process.env.TEST_OVERRIDE_IS_HALLOWEEN !== undefined) {
+    process.env.IS_HALLOWEEN = process.env.TEST_OVERRIDE_IS_HALLOWEEN;
+    return;
+  }
   // getMonth is zero indexed
   if (new Date().getMonth() === 8) {
     process.env.IS_HALLOWEEN = "true";

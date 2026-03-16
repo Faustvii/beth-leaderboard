@@ -7,7 +7,10 @@ import { ValentineHtml } from "../controllers/holidays/valentine";
 import { GitHubLinkHtml } from "./GitHubLink";
 import { LoadingBarHtml } from "./LoadingBar";
 
-export const BaseHtml = ({ children }: PropsWithChildren) => {
+export const BaseHtml = ({
+  children,
+  showFestivities = true,
+}: PropsWithChildren & { showFestivities?: boolean }) => {
   const holiday = getCurrentHolidays();
   const isItChristmas = holiday.christmas;
   const isItValentine = holiday.valentine;
@@ -50,16 +53,32 @@ export const BaseHtml = ({ children }: PropsWithChildren) => {
         text-white
         "
         >
-          {isItChristmas && <ChristmasHtml renderLayer="background" />}
-          {isItFriday && <FridayHtml renderLayer="background" />}
-          {isItValentine && <ValentineHtml renderLayer="background" />}
-          {isItHalloween && <HalloweenHtml renderLayer="background" />}
+          {isItChristmas && showFestivities && (
+            <ChristmasHtml renderLayer="background" />
+          )}
+          {isItFriday && showFestivities && (
+            <FridayHtml renderLayer="background" />
+          )}
+          {isItValentine && showFestivities && (
+            <ValentineHtml renderLayer="background" />
+          )}
+          {isItHalloween && showFestivities && (
+            <HalloweenHtml renderLayer="background" />
+          )}
           <LoadingBarHtml />
           <div style="position: relative;">{children}</div>
-          {/* {isItFriday && <FridayHtml renderLayer="effects" />} REENABLE EFTER JUL*/}
-          {isItHalloween && <HalloweenHtml renderLayer="effects" />}
-          {isItValentine && <ValentineHtml renderLayer="effects" />}
-          {isItChristmas && <ChristmasHtml renderLayer="effects" />}
+          {isItFriday && showFestivities && (
+            <FridayHtml renderLayer="effects" />
+          )}
+          {isItHalloween && showFestivities && (
+            <HalloweenHtml renderLayer="effects" />
+          )}
+          {isItValentine && showFestivities && (
+            <ValentineHtml renderLayer="effects" />
+          )}
+          {isItChristmas && showFestivities && (
+            <ChristmasHtml renderLayer="effects" />
+          )}
           <GitHubLinkHtml />
         </body>
       </html>

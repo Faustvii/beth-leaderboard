@@ -5,6 +5,10 @@ export function getIsItFriday() {
 }
 
 export function updateIsItFriday() {
+  if (process.env.TEST_OVERRIDE_IS_FRIDAY !== undefined) {
+    process.env.IS_FRIDAY = process.env.TEST_OVERRIDE_IS_FRIDAY;
+    return;
+  }
   // getMonth is zero indexed
   if (new Date().getDay() === 5) {
     process.env.IS_FRIDAY = "true";

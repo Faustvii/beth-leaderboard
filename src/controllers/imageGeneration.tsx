@@ -129,17 +129,11 @@ const generateImageForUser = async (userId: string, job: JobQueue) => {
   try {
     if (config.env.NODE_ENV !== "production") return;
     console.log("Generating image for user", userId);
-    const controller = new AbortController();
-    const timeoutSeconds = 1000 * 600;
-    const signal = controller.signal;
-    const model = "Deliberate";
-    const prompt = `Funny image with a software engineer playing crokinole. The person is either happy, mad or excited`;
-    setTimeout(() => controller.abort(), timeoutSeconds);
-    const result = await fetch(
-      `https://crokinole.teamsams.dk/profile-image/create?model=${model}&prompt=${prompt}`,
-      { signal },
-    );
-    const base64Image = await result.text();
+
+    var file = Bun.file(`public/default-user-small.webp`);
+    const arrayBuffer = await file.arrayBuffer();
+    const base64Image = Buffer.from(arrayBuffer).toString("base64");
+
     if (!isBase64(base64Image)) throw new Error("Not a base64 image");
     await writeDb.transaction(async (trx) => {
       await trx

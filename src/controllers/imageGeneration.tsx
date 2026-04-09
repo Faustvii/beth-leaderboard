@@ -17,7 +17,7 @@ export const imageGen = new Elysia()
     cron({
       name: "imageGen-queue",
       pattern:
-        config.env.NODE_ENV !== "production" ? "0 0 31 2 *" : "*/15 * * * * *",
+        config.env.NODE_ENV !== "production" ? "0 0 31 2 *" : "0 */15 * * * *",
       async run() {
         try {
           await applyCronJitter("imageGen-queue", 10_000);
@@ -65,7 +65,7 @@ export const imageGen = new Elysia()
     cron({
       name: "imageGen-worker",
       pattern:
-        config.env.NODE_ENV !== "production" ? "0 0 31 2 *" : "*/15 * * * * *",
+        config.env.NODE_ENV !== "production" ? "0 0 31 2 *" : "0 */15 * * * *",
       protect: () =>
         console.log(
           "[imageGen-worker] image cron skipped as it's already running",

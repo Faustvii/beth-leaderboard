@@ -130,7 +130,7 @@ const generateImageForUser = async (userId: string, job: JobQueue) => {
     if (config.env.NODE_ENV !== "production") return;
     console.log("Generating image for user", userId);
 
-    var file = Bun.file(`public/default-user-small.webp`);
+    const file = Bun.file(`public/default-user-small.webp`);
     const arrayBuffer = await file.arrayBuffer();
     const base64Image = Buffer.from(arrayBuffer).toString("base64");
 

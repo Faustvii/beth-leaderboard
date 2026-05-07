@@ -153,7 +153,6 @@ const lineChartRacePluginScript = `(function () {
       // down off the chart, illustrating that the player lost rank rather
       // than just blinking out.
       ctx.save();
-      ctx.lineCap = "round";
       ctx.lineWidth = 2;
       var trailDx = 12;
       var trailDy = 26;
@@ -177,28 +176,16 @@ const lineChartRacePluginScript = `(function () {
           var color = ds2.borderColor || "#fff";
           ctx.strokeStyle = color;
           ctx.fillStyle = color;
-          ctx.globalAlpha = 0.7;
           ctx.beginPath();
           ctx.moveTo(trailPx, trailPy);
           ctx.lineTo(endX, endY);
           ctx.stroke();
 
-          // Arrowhead at the tip pointing along the trail direction.
-          var angle = Math.atan2(endY - trailPy, endX - trailPx);
-          var arrowL = 10;
-          var spread = 0.75;
-          var leftCornerX = endX - Math.cos(angle - spread) * arrowL;
-          var leftCornerY = endY - Math.sin(angle - spread) * arrowL;
-          var rightCornerX = endX - Math.cos(angle + spread) * arrowL;
-          var rightCornerY = endY - Math.sin(angle + spread) * arrowL;
-          ctx.globalAlpha = 1;
-          ctx.beginPath();
-          ctx.moveTo(endX, endY);
-          ctx.lineTo(leftCornerX, leftCornerY);
-          ctx.lineTo(rightCornerX, rightCornerY);
-          ctx.closePath();
-          ctx.fill();
-          ctx.globalAlpha = 0.7;
+          // Skull emoji at the trail tip — the player's reign in top N has died.
+          ctx.font = "16px 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif";
+          ctx.textBaseline = "middle";
+          ctx.textAlign = "center";
+          ctx.fillText("\u{1F480}", endX, endY);
         }
       }
       ctx.restore();

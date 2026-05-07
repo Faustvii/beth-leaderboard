@@ -16,6 +16,7 @@ import { skibidiInBetweenText } from "../lib/addMatchSummary.tsx";
 import { getDatePartFromDate } from "../lib/dateUtils";
 import MatchStatistics from "../lib/matchStatistics";
 import {
+  getRatingSystem,
   type Match,
   type Rating,
   type RatingSystem,
@@ -105,7 +106,7 @@ async function page(
   const lineChartRaceTopN = 10;
   const lineChartRace = MatchStatistics.getLineChartRace(
     matches,
-    ratingSystem,
+    getRatingSystem("openskill"),
     lineChartRaceTopN,
   );
 
@@ -114,6 +115,22 @@ async function page(
     data: {
       datasets: lineChartRace.map((series) => {
         const color = colorForPlayerId(series.playerId);
+        // Mark the last point before a null gap so the drop-out is visible
+        // instead of the line silently vanishing. Require a preceding non-null
+        // point so we only dot the end of an actually-rendered line segment;
+        // otherwise brief one-match top-10 stints would show a dot with no
+        // line leading to it.
+        const pointRadii = series.points.map((p, i) => {
+          const prev = series.points[i - 1];
+          const next = series.points[i + 1];
+          return p.y !== null &&
+            prev &&
+            prev.y !== null &&
+            next &&
+            next.y === null
+            ? 2.5
+            : 0;
+        });
         return {
           label: series.name,
           // Chart.js types require y: number, but at runtime y: null marks
@@ -122,7 +139,9 @@ async function page(
           borderColor: color,
           backgroundColor: color,
           borderWidth: 2,
-          pointRadius: 0,
+          pointRadius: pointRadii,
+          pointBackgroundColor: color,
+          pointBorderColor: color,
         };
       }),
     },
@@ -139,16 +158,17 @@ async function page(
           grid: { color: "rgba(255,255,255,0.05)" },
         },
         y: {
-          reverse: true,
-          min: 1,
-          max: lineChartRaceTopN,
           ticks: {
             color: "#fffffe",
-            stepSize: 1,
             autoSkip: true,
-            maxTicksLimit: 10,
+            maxTicksLimit: 8,
           },
           grid: { color: "rgba(255,255,255,0.05)" },
+          title: {
+            display: true,
+            text: "OpenSkill rating",
+            color: "rgba(255,255,255,0.55)",
+          },
         },
       },
       plugins: {
@@ -158,7 +178,7 @@ async function page(
         lineChartRace: {
           enabled: true,
           autoplay: true,
-          stepMs: 80,
+          totalRaceMs: 75000,
           windowSize: 50,
           playButtonId: "lineRacePlayBtn",
         },

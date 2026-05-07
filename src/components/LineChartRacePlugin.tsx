@@ -18,45 +18,39 @@ const lineChartRacePluginScript = `(function () {
   }
 
   function applyWindow(chart) {
-    var state = chart.$race;
-    if (!state || !state.windowSize || state.xValues.length === 0) return;
-    var ws = state.windowSize;
-    var n = state.xValues.length;
-    var rightIdx = Math.max(state.idx, Math.min(ws - 1, n - 1));
-    var leftIdx = Math.max(0, rightIdx - (ws - 1));
-    chart.options.scales.x.min = state.xValues[leftIdx];
-    chart.options.scales.x.max = state.xValues[rightIdx];
+    var s = chart.$race;
+    if (!s || !s.windowDuration) return;
+    var rightX = Math.max(s.cursorX, s.dataMin + s.windowDuration);
+    var leftX = Math.max(s.dataMin, rightX - s.windowDuration);
+    if (chart.options && chart.options.scales && chart.options.scales.x) {
+      chart.options.scales.x.min = leftX;
+      chart.options.scales.x.max = rightX;
+    }
   }
 
   function startTickLoop(chart) {
     function tick() {
-      var state = chart.$race;
-      if (!state || !state.playing) return;
+      var s = chart.$race;
+      if (!s || !s.playing) return;
       var now = performance.now();
-      var dt = now - state.lastFrame;
-      if (dt >= state.stepMs) {
-        var steps = Math.floor(dt / state.stepMs);
-        var newIdx = Math.min(state.idx + steps, state.xValues.length - 1);
-        state.lastFrame += steps * state.stepMs;
-        if (newIdx !== state.idx) {
-          state.idx = newIdx;
-          applyWindow(chart);
-          if (state.idx >= state.xValues.length - 1) {
-            state.playing = false;
-            var btn = state.playButtonId && document.getElementById(state.playButtonId);
-            if (btn) btn.textContent = "Play";
-          }
-          chart.update("none");
-        }
+      var dt = now - s.lastFrame;
+      s.lastFrame = now;
+      s.cursorX = Math.min(s.dataMax, s.cursorX + dt * s.velocity);
+      applyWindow(chart);
+      chart.update("none");
+      if (s.cursorX >= s.dataMax) {
+        s.playing = false;
+        var btn = s.playButtonId && document.getElementById(s.playButtonId);
+        if (btn) btn.textContent = "Play";
       }
-      if (state.playing) requestAnimationFrame(tick);
+      if (s.playing) requestAnimationFrame(tick);
     }
     requestAnimationFrame(tick);
   }
 
   Chart.register({
     id: "lineChartRace",
-    defaults: { enabled: false, autoplay: true, stepMs: 80 },
+    defaults: { enabled: false, autoplay: true, totalRaceMs: 20000, windowSize: 50 },
     afterInit: function (chart, _args, opts) {
       if (!opts || !opts.enabled) return;
       var xSet = new Set();
@@ -64,14 +58,24 @@ const lineChartRacePluginScript = `(function () {
         ds.data.forEach(function (p) { xSet.add(p.x); });
       });
       var xValues = Array.from(xSet).sort(function (a, b) { return a - b; });
+      if (xValues.length === 0) return;
+
+      var dataMin = xValues[0];
+      var dataMax = xValues[xValues.length - 1];
+      var totalRaceMs = opts.totalRaceMs || 20000;
+      var ws = Math.max(1, opts.windowSize || 50);
+      var windowFraction = Math.min(1, ws / xValues.length);
+      var windowDuration = (dataMax - dataMin) * windowFraction;
+
       chart.$race = {
-        idx: 0,
+        cursorX: dataMin,
+        velocity: (dataMax - dataMin) / totalRaceMs,
         playing: !!opts.autoplay,
         lastFrame: performance.now(),
-        stepMs: opts.stepMs || 80,
-        xValues: xValues,
+        dataMin: dataMin,
+        dataMax: dataMax,
+        windowDuration: windowDuration,
         playButtonId: opts.playButtonId,
-        windowSize: opts.windowSize || null,
       };
       applyWindow(chart);
       requestAnimationFrame(function () {
@@ -81,11 +85,11 @@ const lineChartRacePluginScript = `(function () {
     },
     beforeDatasetsDraw: function (chart, _args, opts) {
       if (!opts || !opts.enabled) return;
-      var state = chart.$race;
-      if (!state || state.xValues.length === 0) return;
+      var s = chart.$race;
+      if (!s) return;
       var ctx = chart.ctx;
       var area = chart.chartArea;
-      var cursorX = chart.scales.x.getPixelForValue(state.xValues[state.idx]);
+      var cursorX = chart.scales.x.getPixelForValue(s.cursorX);
       ctx.save();
       ctx.beginPath();
       ctx.rect(area.left, area.top, Math.max(0, cursorX - area.left) + 0.5, area.bottom - area.top);
@@ -93,11 +97,11 @@ const lineChartRacePluginScript = `(function () {
     },
     afterDatasetsDraw: function (chart, _args, opts) {
       if (!opts || !opts.enabled) return;
-      var state = chart.$race;
-      if (!state || state.xValues.length === 0) return;
+      var s = chart.$race;
+      if (!s) return;
       var ctx = chart.ctx;
       var area = chart.chartArea;
-      var cursorVal = state.xValues[state.idx];
+      var cursorVal = s.cursorX;
       var cursorX = chart.scales.x.getPixelForValue(cursorVal);
       ctx.restore();
 
@@ -144,6 +148,60 @@ const lineChartRacePluginScript = `(function () {
         ctx.fillText(" " + (ds.label || ""), cursorX, py);
       });
       ctx.restore();
+
+      // Fall trails: short diagonal strokes from each drop-out point heading
+      // down off the chart, illustrating that the player lost rank rather
+      // than just blinking out.
+      ctx.save();
+      ctx.lineCap = "round";
+      ctx.lineWidth = 2;
+      var trailDx = 12;
+      var trailDy = 26;
+      for (var di = 0; di < chart.data.datasets.length; di++) {
+        var ds2 = chart.data.datasets[di];
+        var meta2 = chart.getDatasetMeta(di);
+        if (!meta2 || meta2.hidden) continue;
+        var pts = ds2.data;
+        for (var pi = 1; pi < pts.length - 1; pi++) {
+          var p = pts[pi];
+          var prevP = pts[pi - 1];
+          var nextP = pts[pi + 1];
+          if (!p || p.y === null) continue;
+          if (!prevP || prevP.y === null) continue;
+          if (!nextP || nextP.y !== null) continue;
+          var trailPx = chart.scales.x.getPixelForValue(p.x);
+          if (trailPx < area.left || trailPx > cursorX) continue;
+          var trailPy = chart.scales.y.getPixelForValue(p.y);
+          var endX = trailPx + trailDx;
+          var endY = Math.min(area.bottom + 6, trailPy + trailDy);
+          var color = ds2.borderColor || "#fff";
+          ctx.strokeStyle = color;
+          ctx.fillStyle = color;
+          ctx.globalAlpha = 0.7;
+          ctx.beginPath();
+          ctx.moveTo(trailPx, trailPy);
+          ctx.lineTo(endX, endY);
+          ctx.stroke();
+
+          // Arrowhead at the tip pointing along the trail direction.
+          var angle = Math.atan2(endY - trailPy, endX - trailPx);
+          var arrowL = 10;
+          var spread = 0.75;
+          var leftCornerX = endX - Math.cos(angle - spread) * arrowL;
+          var leftCornerY = endY - Math.sin(angle - spread) * arrowL;
+          var rightCornerX = endX - Math.cos(angle + spread) * arrowL;
+          var rightCornerY = endY - Math.sin(angle + spread) * arrowL;
+          ctx.globalAlpha = 1;
+          ctx.beginPath();
+          ctx.moveTo(endX, endY);
+          ctx.lineTo(leftCornerX, leftCornerY);
+          ctx.lineTo(rightCornerX, rightCornerY);
+          ctx.closePath();
+          ctx.fill();
+          ctx.globalAlpha = 0.7;
+        }
+      }
+      ctx.restore();
     },
   });
 
@@ -151,14 +209,12 @@ const lineChartRacePluginScript = `(function () {
     play: function (id, btnId) {
       var c = Chart.getChart(id);
       if (!c || !c.$race) return;
-      var wasAtEnd = c.$race.idx >= c.$race.xValues.length - 1;
-      if (wasAtEnd) c.$race.idx = 0;
+      if (c.$race.cursorX >= c.$race.dataMax) c.$race.cursorX = c.$race.dataMin;
       c.$race.playing = true;
       c.$race.lastFrame = performance.now();
       applyWindow(c);
       var btn = btnId && document.getElementById(btnId);
       if (btn) btn.textContent = "Pause";
-      if (wasAtEnd) c.update("none");
       startTickLoop(c);
     },
     pause: function (id, btnId) {
@@ -177,7 +233,7 @@ const lineChartRacePluginScript = `(function () {
     reset: function (id, btnId) {
       var c = Chart.getChart(id);
       if (!c || !c.$race) return;
-      c.$race.idx = 0;
+      c.$race.cursorX = c.$race.dataMin;
       c.$race.playing = false;
       applyWindow(c);
       var btn = btnId && document.getElementById(btnId);

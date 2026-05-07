@@ -360,7 +360,8 @@ export function getLineChartRaceHistory<TRating>(
 
     ranked.forEach((entry, index) => {
       const rank = index + 1;
-      const currentY: number | null = rank <= topN ? rank : null;
+      const currentY: number | null =
+        rank <= topN ? system.toNumber(entry.rating) : null;
       const existing = series.get(entry.player.id);
 
       if (!existing) {

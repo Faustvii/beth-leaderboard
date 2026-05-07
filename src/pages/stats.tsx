@@ -15,39 +15,25 @@ import { measure, notEmpty } from "../lib";
 import { skibidiInBetweenText } from "../lib/addMatchSummary.tsx";
 import { getDatePartFromDate } from "../lib/dateUtils";
 import MatchStatistics from "../lib/matchStatistics";
-import {
-  getRatingSystem,
-  type Match,
-  type Rating,
-  type RatingSystem,
-} from "../lib/ratings/rating";
+import { getRatingSystem, type Match } from "../lib/ratings/rating";
 
 export const stats = new Elysia({
   prefix: "/stats",
 })
   .use(ctx)
-  .get("/", async ({ html, session, headers, season, ratingSystem }) => {
-    return html(() => statsPage(session, headers, season, ratingSystem));
+  .get("/", async ({ html, session, headers, season }) => {
+    return html(() => statsPage(session, headers, season));
   });
 
 async function statsPage(
   session: Session | null,
   headers: Record<string, string | null>,
   season: Season,
-  ratingSystem: RatingSystem<Rating>,
 ) {
-  return (
-    <LayoutHtml headers={headers}>
-      {page(session, season, ratingSystem)}
-    </LayoutHtml>
-  );
+  return <LayoutHtml headers={headers}>{page(session, season)}</LayoutHtml>;
 }
 
-async function page(
-  session: Session | null,
-  season: Season,
-  ratingSystem: RatingSystem<Rating>,
-) {
+async function page(session: Session | null, season: Season) {
   const { elaspedTimeMs, result: matches } = await measure(async () => {
     return await getMatches(season, !!session?.user);
   });

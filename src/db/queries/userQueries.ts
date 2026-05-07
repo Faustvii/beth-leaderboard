@@ -1,4 +1,4 @@
-import { eq, like } from "drizzle-orm";
+import { asc, eq, like } from "drizzle-orm";
 import { readDb } from "..";
 import { shortName } from "../../lib/nameUtils";
 import { userTbl } from "../schema";
@@ -63,4 +63,9 @@ export const listUsersByName = async (searchString: string, count = 5) => {
     .map((a) => a[0]);
 
   return bestMatches;
+};
+
+/** Full user rows for admin UIs; ordered by display name. No cap. */
+export const listAllUsersForAdmin = async (): Promise<User[]> => {
+  return readDb.select().from(userTbl).orderBy(asc(userTbl.name));
 };

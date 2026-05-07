@@ -322,6 +322,77 @@ export function getTimeIntervalRatingDiff<TRating>(
   return diffRatings(ratingsBefore, ratingsAfter, allPlayerIds, system);
 }
 
+export interface LineChartRaceSeries {
+  playerId: string;
+  name: string;
+  points: { x: number; y: number | null }[];
+}
+
+export function getLineChartRaceHistory<TRating>(
+  matches: Match[],
+  system: RatingSystem<TRating>,
+  topN = 10,
+): LineChartRaceSeries[] {
+  if (matches.length === 0) return [];
+
+  const sortedMatches = matches.toSorted(
+    (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),
+  );
+
+  const series = new Map<
+    string,
+    {
+      name: string;
+      points: { x: number; y: number | null }[];
+      lastY: number | null;
+    }
+  >();
+  let ratings: Record<string, PlayerWithRating<TRating>> = {};
+
+  for (const match of sortedMatches) {
+    ratings = getRatingsAfterMatch(ratings, match, system);
+
+    const ranked = Object.values(ratings).toSorted(
+      (a, b) => system.toNumber(b.rating) - system.toNumber(a.rating),
+    );
+
+    const x = match.createdAt.getTime();
+
+    ranked.forEach((entry, index) => {
+      const rank = index + 1;
+      const currentY: number | null = rank <= topN ? rank : null;
+      const existing = series.get(entry.player.id);
+
+      if (!existing) {
+        if (currentY !== null) {
+          series.set(entry.player.id, {
+            name: entry.player.name,
+            points: [{ x, y: currentY }],
+            lastY: currentY,
+          });
+        }
+      } else if (existing.lastY !== currentY) {
+        existing.points.push({ x, y: currentY });
+        existing.lastY = currentY;
+      }
+    });
+  }
+
+  const finalX = sortedMatches[sortedMatches.length - 1].createdAt.getTime();
+  for (const entry of series.values()) {
+    const last = entry.points[entry.points.length - 1];
+    if (last.x !== finalX) {
+      entry.points.push({ x: finalX, y: entry.lastY });
+    }
+  }
+
+  return Array.from(series.entries()).map(([playerId, entry]) => ({
+    playerId,
+    name: entry.name,
+    points: entry.points,
+  }));
+}
+
 export type TimeInterval = "today" | "daily" | "weekly" | "monthly";
 
 export function getTimeIntervalCutoffDate(interval: TimeInterval): Date {

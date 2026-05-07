@@ -15,25 +15,38 @@ import { measure, notEmpty } from "../lib";
 import { skibidiInBetweenText } from "../lib/addMatchSummary.tsx";
 import { getDatePartFromDate } from "../lib/dateUtils";
 import MatchStatistics from "../lib/matchStatistics";
-import { type Match } from "../lib/ratings/rating";
+import {
+  type Match,
+  type Rating,
+  type RatingSystem,
+} from "../lib/ratings/rating";
 
 export const stats = new Elysia({
   prefix: "/stats",
 })
   .use(ctx)
-  .get("/", async ({ html, session, headers, season }) => {
-    return html(() => statsPage(session, headers, season));
+  .get("/", async ({ html, session, headers, season, ratingSystem }) => {
+    return html(() => statsPage(session, headers, season, ratingSystem));
   });
 
 async function statsPage(
   session: Session | null,
   headers: Record<string, string | null>,
   season: Season,
+  ratingSystem: RatingSystem<Rating>,
 ) {
-  return <LayoutHtml headers={headers}>{page(session, season)}</LayoutHtml>;
+  return (
+    <LayoutHtml headers={headers}>
+      {page(session, season, ratingSystem)}
+    </LayoutHtml>
+  );
 }
 
-async function page(session: Session | null, season: Season) {
+async function page(
+  session: Session | null,
+  season: Season,
+  ratingSystem: RatingSystem<Rating>,
+) {
   const { elaspedTimeMs, result: matches } = await measure(async () => {
     return await getMatches(season, !!session?.user);
   });
@@ -65,22 +78,92 @@ async function page(session: Session | null, season: Season) {
   );
 
   const gameResults = MatchStatistics.winsByResult(matches);
+  const decisiveMatches = matches.filter((m) => m.result !== "Draw");
+  const bigWins = decisiveMatches.filter((m) => m.scoreDiff >= 50).length;
+  const smallWins = decisiveMatches.length - bigWins;
+  const winTypePct = (n: number) =>
+    gameResults.totalGames > 0
+      ? ((n / gameResults.totalGames) * 100).toFixed(2)
+      : "0.00";
   console.log("metrics took ", performance.now() - now + "ms  to run");
 
   const data = {
-    labels: ["White win", "Black win", "Draw"],
+    labels: ["Wins", "Draw"],
     datasets: [
       {
         label: "Matches",
         data: [
-          gameResults.whiteWins.wins,
-          gameResults.blackWins.wins,
+          gameResults.whiteWins.wins + gameResults.blackWins.wins,
           gameResults.numOfDraws.draws,
         ],
-        backgroundColor: ["#fffffe", "rgb(35, 43, 43)", "#D3D3D3"],
+        backgroundColor: ["#fffffe", "#ff8906"],
         hoverOffset: 4,
       },
     ],
+  };
+
+  const lineChartRaceTopN = 10;
+  const lineChartRace = MatchStatistics.getLineChartRace(
+    matches,
+    ratingSystem,
+    lineChartRaceTopN,
+  );
+
+  const lineChartRaceConfig: ChartConfiguration = {
+    type: "line",
+    data: {
+      datasets: lineChartRace.map((series) => {
+        const color = colorForPlayerId(series.playerId);
+        return {
+          label: series.name,
+          // Chart.js types require y: number, but at runtime y: null marks
+          // a gap in the line when used with parsing: false.
+          data: series.points as unknown as { x: number; y: number }[],
+          borderColor: color,
+          backgroundColor: color,
+          borderWidth: 2,
+          pointRadius: 0,
+        };
+      }),
+    },
+    options: {
+      parsing: false,
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: false,
+      layout: { padding: { right: 110, bottom: 24 } },
+      scales: {
+        x: {
+          type: "linear",
+          ticks: { display: false },
+          grid: { color: "rgba(255,255,255,0.05)" },
+        },
+        y: {
+          reverse: true,
+          min: 1,
+          max: lineChartRaceTopN,
+          ticks: {
+            color: "#fffffe",
+            stepSize: 1,
+            autoSkip: true,
+            maxTicksLimit: 10,
+          },
+          grid: { color: "rgba(255,255,255,0.05)" },
+        },
+      },
+      plugins: {
+        legend: { display: false },
+        tooltip: { enabled: false },
+        // @ts-expect-error custom plugin registered in base.tsx
+        lineChartRace: {
+          enabled: true,
+          autoplay: true,
+          stepMs: 80,
+          windowSize: 50,
+          playButtonId: "lineRacePlayBtn",
+        },
+      },
+    },
   };
 
   const config: ChartConfiguration = {
@@ -137,28 +220,24 @@ async function page(session: Session | null, season: Season) {
             <Chart id="chartDoughnut" config={config}></Chart>
           </div>
         </StatsCardHtml>
-        <StatsCardHtml title="Winrate By Color">
+        <StatsCardHtml title="Types of wins">
           <>
             <div class="flex flex-col items-center justify-center gap-1">
-              <span class="text-5xl">{gameResults.whiteWins.wins}</span>
-              <span class="text-md">
-                {gameResults.whiteWins.procentage.toFixed(2)}%
-              </span>
-              <span class="text-xl">White wins</span>
+              <span class="text-5xl">{bigWins}</span>
+              <span class="text-md">{winTypePct(bigWins)}%</span>
+              <span class="text-xl">Big wins</span>
             </div>
             <div class="flex flex-col items-center justify-center gap-1">
+              <span class="text-5xl">{smallWins}</span>
+              <span class="text-md">{winTypePct(smallWins)}%</span>
+              <span class="text-xl">Small wins</span>
+            </div>
+            <div class="flex h-full flex-col items-center justify-center gap-1">
               <span class="text-5xl">{gameResults.numOfDraws.draws}</span>
               <span class="text-md">
                 {gameResults.numOfDraws.procentage.toFixed(2)}%
               </span>
               <span class="text-xl">Draws</span>
-            </div>
-            <div class="flex h-full flex-col items-center justify-center gap-1">
-              <span class="text-5xl">{gameResults.blackWins.wins}</span>
-              <span class="text-md">
-                {gameResults.blackWins.procentage.toFixed(2)}%
-              </span>
-              <span class="text-xl">Black wins</span>
             </div>
           </>
         </StatsCardHtml>
@@ -224,6 +303,39 @@ async function page(session: Session | null, season: Season) {
             </span>
           )}
         </StatsCardHtml>
+        <StatsCardHtml title="Season Progress" doubleSize>
+          <div class="flex w-full flex-col gap-3">
+            {lineChartRace.length > 0 ? (
+              <>
+                <div class="flex flex-row gap-2">
+                  <button
+                    id="lineRacePlayBtn"
+                    type="button"
+                    class="rounded-lg bg-blue-500 px-3 py-1 text-sm transition duration-200 hover:bg-blue-600"
+                    onclick="window.__lineRace.toggle('chartLineRace', 'lineRacePlayBtn')"
+                  >
+                    Pause
+                  </button>
+                  <button
+                    type="button"
+                    class="rounded-lg bg-slate-600 px-3 py-1 text-sm transition duration-200 hover:bg-slate-500"
+                    onclick="window.__lineRace.reset('chartLineRace', 'lineRacePlayBtn')"
+                  >
+                    Reset
+                  </button>
+                </div>
+                <div class="h-96 w-full">
+                  <Chart
+                    id="chartLineRace"
+                    config={lineChartRaceConfig}
+                  ></Chart>
+                </div>
+              </>
+            ) : (
+              <span class="text-sm">No matches yet</span>
+            )}
+          </div>
+        </StatsCardHtml>
         <StatsCardHtml title="Latest games" doubleSize>
           <>
             <div class="flex flex-col justify-center gap-2">
@@ -243,6 +355,14 @@ async function page(session: Session | null, season: Season) {
       <div class="flex flex-col items-center"></div>
     </>
   );
+}
+
+function colorForPlayerId(id: string) {
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) {
+    hash = (hash * 31 + id.charCodeAt(i)) >>> 0;
+  }
+  return `hsl(${hash % 360}, 70%, 60%)`;
 }
 
 async function biggestWin(matches: Match[]) {

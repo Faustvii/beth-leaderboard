@@ -1,6 +1,7 @@
 import { notEmpty, unique } from ".";
 import { getDatePartFromDate } from "./dateUtils";
 import {
+  getLineChartRaceHistory,
   getPlayerRatingHistory,
   type Match,
   type Rating,
@@ -136,6 +137,14 @@ class MatchStatistics {
           highestLoseStreak: playerStreak.highestLoseStreak,
         }
       : { highestStreak: 0, loseStreak: 0 };
+  }
+
+  static getLineChartRace(
+    matches: Match[],
+    ratingSystem: RatingSystem<Rating>,
+    topN?: number,
+  ) {
+    return getLineChartRaceHistory(matches, ratingSystem, topN);
   }
 
   static getRatingHistory(

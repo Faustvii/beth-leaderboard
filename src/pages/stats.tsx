@@ -213,12 +213,12 @@ async function page(session: Session | null, season: Season) {
             <div class="flex flex-col items-center justify-center gap-1">
               <span class="text-5xl">{bigWins}</span>
               <span class="text-md">{winTypePct(bigWins)}%</span>
-              <span class="text-xl">Big wins</span>
+              <span class="text-xl">Wins farmed</span>
             </div>
             <div class="flex flex-col items-center justify-center gap-1">
               <span class="text-5xl">{smallWins}</span>
               <span class="text-md">{winTypePct(smallWins)}%</span>
-              <span class="text-xl">Small wins</span>
+              <span class="text-xl">Close games</span>
             </div>
             <div class="flex h-full flex-col items-center justify-center gap-1">
               <span class="text-5xl">{gameResults.numOfDraws.draws}</span>

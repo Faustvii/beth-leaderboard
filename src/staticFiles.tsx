@@ -2,7 +2,7 @@ import { type BunFile } from "bun";
 import Elysia from "elysia";
 import { type HTTPStatusName } from "elysia/utils";
 import { config } from "./config";
-import { getUserWithPicture } from "./db/queries/userQueries";
+import { getUserPicture } from "./db/queries/userQueries";
 import { isBase64, resizeImage } from "./lib/userImages";
 
 const fileExistLookup = new Map<string, boolean>();
@@ -115,17 +115,17 @@ async function userPicture(
   fileExistLookup.set(fileName, exists);
 
   if (!exists) {
-    const dbUser = await getUserWithPicture(id);
-    if (!dbUser) {
+    const dbPicture = await getUserPicture(id);
+    if (!dbPicture) {
       return new Response(null, { status: 404 });
     }
 
-    if (!isBase64(dbUser.picture) || dbUser.picture === "")
+    if (!isBase64(dbPicture) || dbPicture === "")
       return Bun.file("public/default-user-small.webp");
 
     const picture = resize
-      ? await resizeImage(dbUser.picture, { ...resize })
-      : dbUser.picture;
+      ? await resizeImage(dbPicture, { ...resize })
+      : dbPicture;
     const pictureBuffer = Buffer.from(picture, "base64");
     await Bun.write(fileName, pictureBuffer.buffer);
     fileHashLookup.set(fileName, Bun.hash(pictureBuffer).toString());

@@ -21,7 +21,7 @@ export const GuestUser = new Elysia({
     "/",
     async ({ set, headers, body: { name, nickname }, writeDb }) => {
       const guestName = `${name} (Guest)`;
-      const userToInsert: Omit<User, "picture"> = {
+      const userToInsert: User = {
         id: generateRandomString(15),
         name: guestName,
         email: null,

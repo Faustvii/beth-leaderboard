@@ -45,6 +45,7 @@ export const authController = new Elysia({
 
       // Check if the user exists
       const existingUser = await readDb.query.userTbl.findFirst({
+        columns: { picture: false },
         where: eq(userSchema.email, email),
       });
 
@@ -146,6 +147,7 @@ export const authController = new Elysia({
           if (normalizedAzureUser.email) {
             console.log("linking existing user with azureAd");
             const existingDbUser = await readDb.query.userTbl.findFirst({
+              columns: { picture: false },
               where: eq(userSchema.email, normalizedAzureUser.email),
             });
 

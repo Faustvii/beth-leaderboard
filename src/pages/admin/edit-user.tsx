@@ -6,10 +6,7 @@ import { HeaderHtml } from "../../components/header";
 import { LayoutHtml } from "../../components/Layout";
 import { NavbarHtml } from "../../components/Navbar";
 import { ctx } from "../../context";
-import {
-  listAllUsersForAdmin,
-  listUsersByName,
-} from "../../db/queries/userQueries";
+import { listAllUsers, listUsersByName } from "../../db/queries/userQueries";
 import { userTbl } from "../../db/schema/auth";
 import { redirect } from "../../lib";
 import { syncIfLocal } from "../../lib/dbHelpers";
@@ -91,7 +88,7 @@ async function editUserPage(
 }
 
 async function page(session: Session | null) {
-  const allUsers = await listAllUsersForAdmin();
+  const allUsers = await listAllUsers();
 
   return (
     <>

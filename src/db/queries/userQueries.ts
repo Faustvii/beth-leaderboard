@@ -4,11 +4,12 @@ import { shortName } from "../../lib/nameUtils";
 import { userTbl } from "../schema";
 import { type User } from "../schema/auth";
 
-export const getUser = async (id: string, isAuthenticated: boolean) => {
+export const getUser = async (
+  id: string,
+  isAuthenticated: boolean,
+): Promise<User | undefined> => {
   const player = await readDb.query.userTbl.findFirst({
-    with: {
-      picture: false,
-    },
+    columns: { picture: false },
     where: eq(userTbl.id, id),
   });
   if (player) {
@@ -21,13 +22,19 @@ export const getUser = async (id: string, isAuthenticated: boolean) => {
   return player;
 };
 
-export const getUserWithPicture = (id: string) =>
-  readDb.query.userTbl.findFirst({
+export const getUserPicture = async (id: string) => {
+  const dbUser = await readDb.query.userTbl.findFirst({
+    columns: { picture: true },
     where: eq(userTbl.id, id),
   });
+  return dbUser?.picture;
+};
 
-export const getCurrentAdmins = async (isAuthenticated: boolean) => {
+export const getCurrentAdmins = async (
+  isAuthenticated: boolean,
+): Promise<User[]> => {
   const players = await readDb.query.userTbl.findMany({
+    columns: { picture: false },
     where: like(userTbl.roles, "%admin%"),
   });
 
@@ -47,12 +54,15 @@ export const getCurrentAdmins = async (isAuthenticated: boolean) => {
  * Names in which the search string appears earlier are prioritized, as matches towards the
  * beginning of the name (e.g., in the first name) are generally more relevant.
  */
-export const listUsersByName = async (searchString: string, count = 5) => {
+export const listUsersByName = async (
+  searchString: string,
+  count = 5,
+): Promise<User[]> => {
   searchString = searchString.toLowerCase();
-  const players: User[] = await readDb
-    .select()
-    .from(userTbl)
-    .where(like(userTbl.name, `%${searchString}%`));
+  const players: User[] = await readDb.query.userTbl.findMany({
+    columns: { picture: false },
+    where: like(userTbl.name, `%${searchString}%`),
+  });
 
   const bestMatches = players
     .map((player): [User, number] => {
@@ -65,7 +75,9 @@ export const listUsersByName = async (searchString: string, count = 5) => {
   return bestMatches;
 };
 
-/** Full user rows for admin UIs; ordered by display name. No cap. */
-export const listAllUsersForAdmin = async (): Promise<User[]> => {
-  return readDb.select().from(userTbl).orderBy(asc(userTbl.name));
+export const listAllUsers = async (): Promise<User[]> => {
+  return readDb.query.userTbl.findMany({
+    columns: { picture: false },
+    orderBy: asc(userTbl.name),
+  });
 };

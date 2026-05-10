@@ -32,4 +32,4 @@ export const key = sqliteTable("user_key", {
   hashedPassword: text("hashed_password"),
 });
 
-export type User = typeof userTbl.$inferSelect;
+export type User = Omit<typeof userTbl.$inferSelect, "picture">;

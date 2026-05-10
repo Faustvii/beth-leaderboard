@@ -76,10 +76,8 @@ const playerQuery = async (
         : undefined,
       lastPlayed:
         lastPlayed.find((match) => match.player.id === player.player.id)
-          ?.lastPlayed || new Date(0),
-      latestPlayerResults: latestResults[player.player.id]
-        ? latestResults[player.player.id]
-        : null,
+          ?.lastPlayed ?? new Date(0),
+      latestPlayerResults: latestResults[player.player.id] ?? [],
     };
   });
 };

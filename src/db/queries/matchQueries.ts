@@ -90,12 +90,12 @@ const getMatchesWithPlayers = async (
       (player) => player.id === match.blackPlayerOne,
     )!;
     const blackPlayerTwo =
-      players.find((player) => player.id === match.blackPlayerTwo) || null;
+      players.find((player) => player.id === match.blackPlayerTwo) ?? null;
     const whitePlayerOne = players.find(
       (player) => player.id === match.whitePlayerOne,
     )!;
     const whitePlayerTwo =
-      players.find((player) => player.id === match.whitePlayerTwo) || null;
+      players.find((player) => player.id === match.whitePlayerTwo) ?? null;
     return {
       ...match,
       blackPlayerOne,

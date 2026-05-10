@@ -17,7 +17,7 @@ export const Admin = new Elysia({
 })
   .use(ctx)
   .onBeforeHandle(({ session, headers, set, userRoles }) => {
-    if (!session || !session.user) {
+    if (!session?.user) {
       redirect({ set, headers }, "/api/auth/signin/azure");
       return true;
     }

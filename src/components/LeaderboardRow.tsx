@@ -29,12 +29,12 @@ export const LeaderboardRowHtml = ({
     winStreak: number;
     loseStreak: number;
     results: RESULT[];
-  } | null;
+  };
   isCurrentSeason: boolean;
   isLowestRanked: boolean;
 }) => {
-  const { loseStreak, results, winStreak } = latestPlayerResults || {};
-  const streak = winStreak || loseStreak || undefined;
+  const { loseStreak, results, winStreak } = latestPlayerResults;
+  const streak = Math.max(winStreak, loseStreak);
   const isWinStreak = !!winStreak;
 
   return (
@@ -153,7 +153,7 @@ export const WinLoseStreak = ({
 export const LatestResults = ({
   latestPlayerResults,
 }: {
-  latestPlayerResults: RESULT[] | undefined;
+  latestPlayerResults: RESULT[];
 }) => {
   return (
     <div class="flex gap-2">

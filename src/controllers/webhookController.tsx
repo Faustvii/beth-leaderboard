@@ -61,7 +61,7 @@ export const execute_webhooks = async (
         body: JSON.stringify({
           ...payload,
           // Keep secret in body for backward compatibility if needed
-          secret: webhook.secret || undefined,
+          secret: webhook.secret ?? undefined,
         }),
       });
 

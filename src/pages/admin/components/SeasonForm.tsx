@@ -42,10 +42,7 @@ export const SeasonForm = ({
             form={formId}
             class="rounded-sm px-2 py-1 text-black"
             type="text"
-            value={
-              season?.name ??
-              `Season ${amountOfSeasons ? amountOfSeasons : "name"}`
-            }
+            value={season?.name ?? `Season ${amountOfSeasons ?? "name"}`}
           />
         </div>
         <div class="flex w-full flex-col">

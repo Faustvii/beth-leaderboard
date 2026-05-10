@@ -17,7 +17,7 @@ export const LeaderboardTableHtml = ({
       winStreak: number;
       loseStreak: number;
       results: RESULT[];
-    } | null;
+    };
   }[];
   isCurrentSeason: boolean;
 }) => (

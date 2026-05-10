@@ -98,7 +98,7 @@ export const authController = new Elysia({
     "/azure/callback",
     async ({ set, query, headers, writeAuth, redirect, readDb }) => {
       const { code, state } = query;
-      const cookies = parseCookie(headers.cookie || "");
+      const cookies = parseCookie(headers.cookie ?? "");
       const state_cookie = cookies.azure_auth_state;
       const verifier_cookie = cookies.azure_auth_code_verifier;
 

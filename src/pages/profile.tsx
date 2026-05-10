@@ -58,7 +58,7 @@ export const profile = new Elysia({
   .put(
     "/",
     async ({ set, headers, body: { nickname }, writeDb, session }) => {
-      if (!session || !session.user) return;
+      if (!session?.user) return;
       await writeDb
         .update(userTbl)
         .set({ nickname: nickname })

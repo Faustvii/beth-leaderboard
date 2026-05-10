@@ -24,7 +24,7 @@ export const match = new Elysia({
 })
   .use(ctx)
   .onBeforeHandle(({ session, headers, set }) => {
-    if (!session || !session.user) {
+    if (!session?.user) {
       redirect({ set, headers }, "/api/auth/signin/azure");
       return true;
     }
@@ -76,9 +76,9 @@ export const match = new Elysia({
         result: match_winner,
         scoreDiff: Number(point_difference),
         whitePlayerOne: white1Id,
-        whitePlayerTwo: white2Id ? white2Id : null,
+        whitePlayerTwo: white2Id ?? null,
         blackPlayerOne: black1Id,
-        blackPlayerTwo: black2Id ? black2Id : null,
+        blackPlayerTwo: black2Id ?? null,
         seasonId: activeSeason.id,
         createdAt: new Date(),
       };

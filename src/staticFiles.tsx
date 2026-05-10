@@ -108,10 +108,7 @@ async function userPicture(
   resize?: { width: number; height: number },
 ) {
   let file = Bun.file(fileName);
-  let exists = fileExistLookup.get(fileName);
-  if (!exists) {
-    exists = await file.exists();
-  }
+  const exists = fileExistLookup.get(fileName) ?? (await file.exists());
   fileExistLookup.set(fileName, exists);
 
   if (!exists) {

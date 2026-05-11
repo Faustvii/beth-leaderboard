@@ -5,7 +5,6 @@ import { HalloweenHtml } from "../controllers/holidays/halloween";
 import { getCurrentHolidays } from "../controllers/holidays/holidayController";
 import { ValentineHtml } from "../controllers/holidays/valentine";
 import { GitHubLinkHtml } from "./GitHubLink";
-import { LineChartRacePluginHtml } from "./LineChartRacePlugin";
 import { LoadingBarHtml } from "./LoadingBar";
 
 export const BaseHtml = ({ children }: PropsWithChildren) => {
@@ -30,7 +29,8 @@ export const BaseHtml = ({ children }: PropsWithChildren) => {
           <script src="https://unpkg.com/htmx.org@1.9.6/dist/ext/response-targets.js"></script>
           <script src="https://unpkg.com/hyperscript.org@0.9.11"></script>
           <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-          <LineChartRacePluginHtml />
+          <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+          <script src="/static/LineChartRace.js"></script>
           <link href="/static/styles.css" rel="stylesheet" />
           <link rel="icon" type="image/x-icon" href="/static/favicon.ico" />
           <link rel="preconnect" href="https://fonts.googleapis.com" />

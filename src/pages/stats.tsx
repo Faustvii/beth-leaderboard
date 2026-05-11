@@ -86,7 +86,7 @@ async function page(
   //   gameResults.totalGames > 0
   //     ? ((n / gameResults.totalGames) * 100).toFixed(2)
   //     : "0.00";
-  // console.log("metrics took ", performance.now() - now + "ms  to run");
+  console.log("metrics took ", performance.now() - now + "ms  to run");
   const gameResults = MatchStatistics.winsByResult(matches);
 
   const data = {
@@ -226,7 +226,6 @@ async function page(
                   >
                     Reset
                   </button>
-
                 </div>
                 <div class="h-96 w-full">
                   <Chart

@@ -339,14 +339,13 @@ export function getLineChartRaceHistory<TRating>(
     (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),
   );
 
-  const series = new Map<
-    string,
-    {
-      name: string;
-      points: { x: number; y: number | null }[];
-      lastY: number | null;
-    }
-  >();
+  interface SeriesAccumulator {
+    name: string;
+    points: { x: number; y: number | null }[];
+    lastY: number | null;
+  }
+
+  const seriesByPlayerId: Record<string, SeriesAccumulator> = {};
   let ratings: Record<string, PlayerWithRating<TRating>> = {};
 
   for (const match of sortedMatches) {
@@ -362,15 +361,15 @@ export function getLineChartRaceHistory<TRating>(
       const rank = index + 1;
       const currentY: number | null =
         rank <= topN ? system.toNumber(entry.rating) : null;
-      const existing = series.get(entry.player.id);
+      const existing = seriesByPlayerId[entry.player.id];
 
       if (!existing) {
         if (currentY !== null) {
-          series.set(entry.player.id, {
+          seriesByPlayerId[entry.player.id] = {
             name: entry.player.name,
             points: [{ x, y: currentY }],
             lastY: currentY,
-          });
+          };
         }
       } else if (existing.lastY !== currentY) {
         existing.points.push({ x, y: currentY });
@@ -380,14 +379,14 @@ export function getLineChartRaceHistory<TRating>(
   }
 
   const finalX = sortedMatches[sortedMatches.length - 1].createdAt.getTime();
-  for (const entry of series.values()) {
+  for (const entry of Object.values(seriesByPlayerId)) {
     const last = entry.points[entry.points.length - 1];
     if (last.x !== finalX) {
       entry.points.push({ x: finalX, y: entry.lastY });
     }
   }
 
-  return Array.from(series.entries()).map(([playerId, entry]) => ({
+  return Object.entries(seriesByPlayerId).map(([playerId, entry]) => ({
     playerId,
     name: entry.name,
     points: entry.points,

@@ -124,6 +124,7 @@ dist
 
 # public
 public/styles.css
+public/LineChartRace.js
 
 # vuepress build output
 

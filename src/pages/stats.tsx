@@ -160,7 +160,7 @@ async function page(
         // @ts-expect-error custom plugin registered in base.tsx
         lineChartRace: {
           enabled: true,
-          autoplay: true,
+          autoplay: false,
           totalRaceMs: 75000,
           windowSize: 50,
           playButtonId: "lineRacePlayBtn",
@@ -215,17 +215,18 @@ async function page(
                     id="lineRacePlayBtn"
                     type="button"
                     class="rounded-lg bg-blue-500 px-3 py-1 text-sm transition duration-200 hover:bg-blue-600"
-                    onclick="window.__lineRace.toggle('chartLineRace', 'lineRacePlayBtn')"
+                    _="on click call window.__lineRace.toggle('chartLineRace', 'lineRacePlayBtn')"
                   >
-                    Pause
+                    Play
                   </button>
                   <button
                     type="button"
                     class="rounded-lg bg-slate-600 px-3 py-1 text-sm transition duration-200 hover:bg-slate-500"
-                    onclick="window.__lineRace.reset('chartLineRace', 'lineRacePlayBtn')"
+                    _="on click call window.__lineRace.reset('chartLineRace', 'lineRacePlayBtn')"
                   >
                     Reset
                   </button>
+
                 </div>
                 <div class="h-96 w-full">
                   <Chart

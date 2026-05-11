@@ -68,7 +68,7 @@ const lineChartRacePluginScript = `(function () {
       var windowDuration = (dataMax - dataMin) * windowFraction;
 
       chart.$race = {
-        cursorX: dataMin,
+        cursorX: opts.autoplay ? dataMin : dataMax,
         velocity: (dataMax - dataMin) / totalRaceMs,
         playing: !!opts.autoplay,
         lastFrame: performance.now(),

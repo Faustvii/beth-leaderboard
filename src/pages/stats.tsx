@@ -6,6 +6,7 @@ import { HeaderHtml } from "../components/header";
 import { LayoutHtml } from "../components/Layout";
 import { MatchResultLink } from "../components/MatchResultLink";
 import { NavbarHtml } from "../components/Navbar";
+import { RatingSystemPicker } from "../components/RatingSystemPicker";
 import { SeasonPicker } from "../components/SeasonPicker";
 import { StatsCardHtml } from "../components/StatsCard";
 import { ctx } from "../context";
@@ -15,8 +16,11 @@ import { measure, notEmpty } from "../lib";
 import { skibidiInBetweenText } from "../lib/addMatchSummary.tsx";
 import { getDatePartFromDate } from "../lib/dateUtils";
 import MatchStatistics from "../lib/matchStatistics";
-import { type Match, type Rating, type RatingSystem } from "../lib/ratings/rating";
-import { RatingSystemPicker } from "../components/RatingSystemPicker";
+import {
+  type Match,
+  type Rating,
+  type RatingSystem,
+} from "../lib/ratings/rating";
 
 export const stats = new Elysia({
   prefix: "/stats",
@@ -26,17 +30,24 @@ export const stats = new Elysia({
     return html(() => statsPage(session, headers, season, ratingSystem));
   });
 
-
 async function statsPage(
   session: Session | null,
   headers: Record<string, string | null>,
   season: Season,
   ratingSystem: RatingSystem<Rating>,
 ) {
-  return <LayoutHtml headers={headers}>{page(session, season, ratingSystem)}</LayoutHtml>;
+  return (
+    <LayoutHtml headers={headers}>
+      {page(session, season, ratingSystem)}
+    </LayoutHtml>
+  );
 }
 
-async function page(session: Session | null, season: Season, ratingSystem: RatingSystem<Rating>) {
+async function page(
+  session: Session | null,
+  season: Season,
+  ratingSystem: RatingSystem<Rating>,
+) {
   const { elaspedTimeMs, result: matches } = await measure(async () => {
     return await getMatches(season, !!session?.user);
   });
@@ -67,15 +78,16 @@ async function page(session: Session | null, season: Season, ratingSystem: Ratin
     true,
   );
 
+  // const gameResults = MatchStatistics.winsByResult(matches);
+  // const decisiveMatches = matches.filter((m) => m.result !== "Draw");
+  // const bigWins = decisiveMatches.filter((m) => m.scoreDiff >= 50).length;
+  // const smallWins = decisiveMatches.length - bigWins;
+  // const winTypePct = (n: number) =>
+  //   gameResults.totalGames > 0
+  //     ? ((n / gameResults.totalGames) * 100).toFixed(2)
+  //     : "0.00";
+  // console.log("metrics took ", performance.now() - now + "ms  to run");
   const gameResults = MatchStatistics.winsByResult(matches);
-  const decisiveMatches = matches.filter((m) => m.result !== "Draw");
-  const bigWins = decisiveMatches.filter((m) => m.scoreDiff >= 50).length;
-  const smallWins = decisiveMatches.length - bigWins;
-  const winTypePct = (n: number) =>
-    gameResults.totalGames > 0
-      ? ((n / gameResults.totalGames) * 100).toFixed(2)
-      : "0.00";
-  console.log("metrics took ", performance.now() - now + "ms  to run");
 
   const data = {
     labels: ["Wins", "Draw"],
@@ -98,7 +110,6 @@ async function page(session: Session | null, season: Season, ratingSystem: Ratin
     ratingSystem,
     lineChartRaceTopN,
   );
-
 
   const lineChartRaceConfig: ChartConfiguration = {
     type: "line",
@@ -195,7 +206,7 @@ async function page(session: Session | null, season: Season, ratingSystem: Ratin
         </div>
       </div>
       <div class="grid grid-cols-6 gap-3 md:grid-cols-12">
-      <StatsCardHtml title="Season Progress" doubleSize>
+        <StatsCardHtml title="Season Progress" doubleSize>
           <div class="flex w-full flex-col gap-3">
             {lineChartRace.length > 0 ? (
               <>
@@ -253,13 +264,17 @@ async function page(session: Session | null, season: Season, ratingSystem: Ratin
         <StatsCardHtml title="Types of wins">
           <>
             <div class="flex flex-col items-center justify-center gap-1">
-              <span class="text-5xl">{bigWins}</span>
-              <span class="text-md">{winTypePct(bigWins)}%</span>
+              <span class="text-5xl">{gameResults.bigWins.wins}</span>
+              <span class="text-md">
+                {gameResults.bigWins.procentage.toFixed(2)}%
+              </span>
               <span class="text-xl">Wins farmed</span>
             </div>
             <div class="flex flex-col items-center justify-center gap-1">
-              <span class="text-5xl">{smallWins}</span>
-              <span class="text-md">{winTypePct(smallWins)}%</span>
+              <span class="text-5xl">{gameResults.smallWins.wins}</span>
+              <span class="text-md">
+                {gameResults.smallWins.procentage.toFixed(2)}%
+              </span>
               <span class="text-xl">Close games</span>
             </div>
             <div class="flex h-full flex-col items-center justify-center gap-1">

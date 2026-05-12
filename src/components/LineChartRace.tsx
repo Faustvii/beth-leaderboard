@@ -260,44 +260,67 @@ if (typeof Chart !== "undefined") {
       });
       ctx.restore();
 
-      // Fall trails: short diagonal strokes from each drop-out point heading
-      // down off the chart, illustrating that the player lost rank rather
-      // than just blinking out.
+      // Fall trails (skulls) on drop-out and launch trails (rockets) on entry.
+      // Both require a connected segment on the chart side — i.e. the neighbor
+      // in the relevant direction must also be in top N — so we don't render
+      // emojis next to invisible single-point "blip" entries or exits.
       ctx.save();
       ctx.lineWidth = 2;
       const trailDx = 12;
       const trailDy = 26;
+      const emojiFont =
+        "16px 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif";
+
       for (let di = 0; di < chart.data.datasets.length; di++) {
         const ds2 = chart.data.datasets[di];
         const meta2 = chart.getDatasetMeta(di);
         if (!meta2 || meta2.hidden) continue;
         const pts = ds2.data;
-        for (let pi = 1; pi < pts.length - 1; pi++) {
+
+        for (let pi = 0; pi < pts.length; pi++) {
           const p = pts[pi];
-          const prevP = pts[pi - 1];
-          const nextP = pts[pi + 1];
-          if (p?.y == null) continue;
-          if (prevP?.y == null) continue;
-          if (!nextP || nextP.y !== null) continue;
+          if (p?.y === null) continue;
+          const prevP = pi > 0 ? pts[pi - 1] : null;
+          const nextP = pi < pts.length - 1 ? pts[pi + 1] : null;
+
+          const isDropOut =
+            !!prevP && prevP.y !== null && !!nextP && nextP.y === null;
+          const isReentry =
+            !!prevP && prevP.y === null && !!nextP && nextP.y !== null;
+          const isFirstAppearance =
+            pi === 0 && p.x > s.dataMin && !!nextP && nextP.y !== null;
+          const isEntry = isReentry || isFirstAppearance;
+
+          if (!isDropOut && !isEntry) continue;
+
           const trailPx = chart.scales.x.getPixelForValue(p.x);
           if (trailPx < area.left || trailPx > cursorX) continue;
           const trailPy = chart.scales.y.getPixelForValue(p.y);
-          const endX = trailPx + trailDx;
-          const endY = Math.min(area.bottom + 6, trailPy + trailDy);
+
           const color = ds2.borderColor ?? "#fff";
           ctx.strokeStyle = color;
           ctx.fillStyle = color;
-          ctx.beginPath();
-          ctx.moveTo(trailPx, trailPy);
-          ctx.lineTo(endX, endY);
-          ctx.stroke();
-
-          // Skull emoji at the trail tip — the player's reign in top N has died.
-          ctx.font =
-            "16px 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif";
+          ctx.font = emojiFont;
           ctx.textBaseline = "middle";
           ctx.textAlign = "center";
-          ctx.fillText("\u{1F480}", endX, endY);
+
+          if (isDropOut) {
+            const endX = trailPx + trailDx;
+            const endY = Math.min(area.bottom + 6, trailPy + trailDy);
+            ctx.beginPath();
+            ctx.moveTo(trailPx, trailPy);
+            ctx.lineTo(endX, endY);
+            ctx.stroke();
+            ctx.fillText("\u{1F480}", endX, endY);
+          } else {
+            const startX = trailPx - trailDx;
+            const startY = Math.min(area.bottom + 6, trailPy + trailDy);
+            ctx.beginPath();
+            ctx.moveTo(startX, startY);
+            ctx.lineTo(trailPx, trailPy);
+            ctx.stroke();
+            ctx.fillText("\u{1F680}", startX, startY);
+          }
         }
       }
       ctx.restore();

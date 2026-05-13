@@ -31,6 +31,7 @@ interface DatasetMeta {
 
 interface RaceChart {
   ctx: CanvasRenderingContext2D;
+  canvas: HTMLCanvasElement;
   chartArea: ChartArea;
   scales: { x: ChartScale; y: ChartScale };
   data: { datasets: ChartDataset[] };
@@ -140,10 +141,92 @@ if (typeof Chart !== "undefined") {
           ? document.getElementById(s.playButtonId)
           : null;
         if (btn) btn.textContent = "Play";
+        chart.canvas.style.cursor = "grab";
       }
       if (s.playing) requestAnimationFrame(tick);
     }
     requestAnimationFrame(tick);
+  }
+
+  function setupScrollHandler(chart: RaceChart): void {
+    const canvas = chart.canvas;
+    let isDragging = false;
+    let dragStartClientX = 0;
+    let dragStartCursorX = 0;
+
+    function canScroll(): boolean {
+      return chart.$race?.playing === false;
+    }
+
+    function updateCursor(): void {
+      canvas.style.cursor = canScroll() ? "grab" : "";
+    }
+
+    function onStart(clientX: number): boolean {
+      if (!canScroll()) return false;
+      const s = chart.$race!;
+      isDragging = true;
+      dragStartClientX = clientX;
+      dragStartCursorX = s.cursorX;
+      canvas.style.cursor = "grabbing";
+      return true;
+    }
+
+    function onMove(clientX: number): void {
+      if (!isDragging) return;
+      const s = chart.$race;
+      if (!s) return;
+      const rect = canvas.getBoundingClientRect();
+      const xMin = chart.scales.x.min ?? s.dataMin;
+      const xMax = chart.scales.x.max ?? s.dataMax;
+      const visibleRange = xMax - xMin;
+      if (visibleRange <= 0 || rect.width <= 0) return;
+      const pxDelta = clientX - dragStartClientX;
+      const valDelta = (pxDelta / rect.width) * visibleRange;
+      const minCursor = s.dataMin + s.windowDuration;
+      s.cursorX = Math.max(
+        minCursor,
+        Math.min(s.dataMax, dragStartCursorX - valDelta),
+      );
+      applyWindow(chart);
+      chart.update("none");
+    }
+
+    function onEnd(): void {
+      if (!isDragging) return;
+      isDragging = false;
+      canvas.style.cursor = canScroll() ? "grab" : "";
+    }
+
+    canvas.addEventListener("mousedown", (e) => {
+      if (onStart(e.clientX)) e.preventDefault();
+    });
+    window.addEventListener("mousemove", (e) => onMove(e.clientX));
+    window.addEventListener("mouseup", onEnd);
+
+    canvas.addEventListener(
+      "touchstart",
+      (e) => {
+        if (e.touches.length === 1 && onStart(e.touches[0].clientX)) {
+          e.preventDefault();
+        }
+      },
+      { passive: false },
+    );
+    canvas.addEventListener(
+      "touchmove",
+      (e) => {
+        if (isDragging && e.touches.length === 1) {
+          e.preventDefault();
+          onMove(e.touches[0].clientX);
+        }
+      },
+      { passive: false },
+    );
+    canvas.addEventListener("touchend", onEnd);
+    canvas.addEventListener("touchcancel", onEnd);
+
+    updateCursor();
   }
 
   Chart.register({
@@ -180,6 +263,7 @@ if (typeof Chart !== "undefined") {
         windowDuration,
         playButtonId: opts.playButtonId,
       };
+      setupScrollHandler(chart);
       applyWindow(chart);
       requestAnimationFrame(() => {
         chart.update("none");
@@ -246,18 +330,53 @@ if (typeof Chart !== "undefined") {
       ctx.lineTo(cursorX, area.bottom);
       ctx.stroke();
 
-      ctx.font = "11px 'Roboto Mono', monospace";
-      ctx.textBaseline = "middle";
-      ctx.textAlign = "left";
+      const lineHeight = 14; // px — vertical padding between labels
+      interface Label {
+        text: string;
+        color: string;
+        y: number;
+      }
+      const labels: Label[] = [];
       chart.data.datasets.forEach((ds, i) => {
         const meta = chart.getDatasetMeta(i);
         if (meta.hidden) return;
         const y = findCurrentY(ds.data, cursorVal);
         if (y === null) return;
-        const py = chart.scales.y.getPixelForValue(y);
-        ctx.fillStyle = ds.borderColor ?? "#fff";
-        ctx.fillText(" " + (ds.label ?? ""), cursorX, py);
+        labels.push({
+          text: " " + (ds.label ?? ""),
+          color: ds.borderColor ?? "#fff",
+          y: chart.scales.y.getPixelForValue(y),
+        });
       });
+
+      // Sort top-to-bottom by natural Y.
+      labels.sort((a, b) => a.y - b.y);
+
+      // Top-down pass: push each label down until it clears the one above.
+      for (let i = 1; i < labels.length; i++) {
+        if (labels[i].y - labels[i - 1].y < lineHeight) {
+          labels[i].y = labels[i - 1].y + lineHeight;
+        }
+      }
+
+      // If the chain overflowed past the chart bottom, pin the last label
+      // to area.bottom and bubble the constraint upward.
+      if (labels.length > 0 && labels[labels.length - 1].y > area.bottom) {
+        labels[labels.length - 1].y = area.bottom;
+        for (let i = labels.length - 2; i >= 0; i--) {
+          if (labels[i + 1].y - labels[i].y < lineHeight) {
+            labels[i].y = labels[i + 1].y - lineHeight;
+          } else break;
+        }
+      }
+
+      ctx.font = "11px 'Roboto Mono', monospace";
+      ctx.textBaseline = "middle";
+      ctx.textAlign = "left";
+      for (const l of labels) {
+        ctx.fillStyle = l.color;
+        ctx.fillText(l.text, cursorX, l.y);
+      }
       ctx.restore();
 
       // Fall trails (skulls) on drop-out and launch trails (rockets) on entry.
@@ -337,6 +456,7 @@ if (typeof Chart !== "undefined") {
       applyWindow(c);
       const btn = btnId ? document.getElementById(btnId) : null;
       if (btn) btn.textContent = "Pause";
+      c.canvas.style.cursor = "";
       startTickLoop(c);
     },
     pause(id, btnId) {
@@ -345,6 +465,7 @@ if (typeof Chart !== "undefined") {
       c.$race.playing = false;
       const btn = btnId ? document.getElementById(btnId) : null;
       if (btn) btn.textContent = "Play";
+      c.canvas.style.cursor = "grab";
     },
     toggle(id, btnId) {
       const c = Chart.getChart(id);
@@ -360,6 +481,7 @@ if (typeof Chart !== "undefined") {
       applyWindow(c);
       const btn = btnId ? document.getElementById(btnId) : null;
       if (btn) btn.textContent = "Play";
+      c.canvas.style.cursor = "grab";
       c.update("none");
     },
   };

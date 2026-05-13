@@ -104,7 +104,7 @@ async function page(
     ],
   };
 
-  const lineChartRaceTopN = 10;
+  const lineChartRaceTopN = 100;
   const lineChartRace = MatchStatistics.getLineChartRace(
     matches,
     ratingSystem,

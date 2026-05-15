@@ -78,14 +78,6 @@ async function page(
     true,
   );
 
-  // const gameResults = MatchStatistics.winsByResult(matches);
-  // const decisiveMatches = matches.filter((m) => m.result !== "Draw");
-  // const bigWins = decisiveMatches.filter((m) => m.scoreDiff >= 50).length;
-  // const smallWins = decisiveMatches.length - bigWins;
-  // const winTypePct = (n: number) =>
-  //   gameResults.totalGames > 0
-  //     ? ((n / gameResults.totalGames) * 100).toFixed(2)
-  //     : "0.00";
   console.log("metrics took ", performance.now() - now + "ms  to run");
   const gameResults = MatchStatistics.winsByResult(matches);
 

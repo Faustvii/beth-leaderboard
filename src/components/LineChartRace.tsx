@@ -139,7 +139,7 @@ if (typeof Chart !== "undefined") {
   function startTickLoop(chart: RaceChart): void {
     function tick() {
       const s = chart.$race;
-      if (!s || !s.playing) return;
+      if (!s?.playing) return;
       const now = performance.now();
       const dt = now - s.lastFrame;
       s.lastFrame = now;

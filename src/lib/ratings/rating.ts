@@ -325,7 +325,7 @@ export function getTimeIntervalRatingDiff<TRating>(
 export interface LineChartRaceSeries {
   playerId: string;
   name: string;
-  points: { x: number; y: number | null }[];
+  points: { x: number; y: number | null; active?: boolean }[];
 }
 
 export function getLineChartRaceHistory<TRating>(
@@ -341,7 +341,7 @@ export function getLineChartRaceHistory<TRating>(
 
   interface SeriesAccumulator {
     name: string;
-    points: { x: number; y: number | null }[];
+    points: { x: number; y: number | null; active?: boolean }[];
     lastY: number | null;
   }
 
@@ -362,17 +362,30 @@ export function getLineChartRaceHistory<TRating>(
       const currentY: number | null =
         rank <= topN ? system.toNumber(entry.rating) : null;
       const existing = seriesByPlayerId[entry.player.id];
+      const isParticipant = hasPlayer(match, entry.player.id);
 
       if (!existing) {
         if (currentY !== null) {
           seriesByPlayerId[entry.player.id] = {
             name: entry.player.name,
-            points: [{ x, y: currentY }],
+            points: [{ x, y: currentY, active: isParticipant }],
             lastY: currentY,
           };
         }
       } else if (existing.lastY !== currentY) {
-        existing.points.push({ x, y: currentY });
+        const isExit = existing.lastY !== null && currentY === null;
+        const isEntry = existing.lastY === null && currentY !== null;
+
+        if (isExit) {
+          // Shoulder = the actual exit event; carries the active/passive flag.
+          existing.points.push({ x, y: existing.lastY, active: isParticipant });
+          existing.points.push({ x, y: null });
+        } else if (isEntry) {
+          existing.points.push({ x, y: currentY, active: isParticipant });
+        } else {
+          // Pure rating change within top-N — not an entry or exit event.
+          existing.points.push({ x, y: currentY });
+        }
         existing.lastY = currentY;
       }
     });

@@ -4,6 +4,7 @@
 interface LineRacePoint {
   x: number;
   y: number | null;
+  active?: boolean;
 }
 
 interface ChartScale {
@@ -47,6 +48,7 @@ interface RaceMarker {
   y: number;
   color: string;
   datasetIndex: number;
+  active: boolean;
 }
 
 interface RaceState {
@@ -294,6 +296,7 @@ if (typeof Chart !== "undefined") {
             y: p.y,
             color,
             datasetIndex: di,
+            active: !!p.active,
           });
         }
       });
@@ -363,7 +366,7 @@ if (typeof Chart !== "undefined") {
           if (li === 0) ctx.textAlign = "left";
           else if (li === labelCount - 1) ctx.textAlign = "right";
           else ctx.textAlign = "center";
-          ctx.fillText(label, lpx, area.bottom + 6);
+          ctx.fillText(label, lpx, area.bottom + 14);
         }
         ctx.restore();
       }
@@ -453,7 +456,8 @@ if (typeof Chart !== "undefined") {
           ctx.moveTo(trailPx, trailPy);
           ctx.lineTo(endX, endY);
           ctx.stroke();
-          ctx.fillText("\u{1F480}", endX, endY);
+          // Active exit = lost a game and fell out (skull). Passive = overtaken (poop).
+          ctx.fillText(m.active ? "\u{1F480}" : "\u{1F4A9}", endX, endY);
         } else {
           const startX = trailPx - trailDx;
           const startY = Math.min(area.bottom + 6, trailPy + trailDy);
@@ -461,7 +465,8 @@ if (typeof Chart !== "undefined") {
           ctx.moveTo(startX, startY);
           ctx.lineTo(trailPx, trailPy);
           ctx.stroke();
-          ctx.fillText("\u{1F680}", startX, startY);
+          // Active entry = won and climbed in (rocket). Passive = someone above slipped (ninja).
+          ctx.fillText(m.active ? "\u{1F680}" : "\u{1F977}", startX, startY);
         }
       }
       ctx.restore();

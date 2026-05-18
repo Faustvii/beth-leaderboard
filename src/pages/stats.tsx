@@ -125,7 +125,7 @@ async function page(
       responsive: true,
       maintainAspectRatio: false,
       animation: false,
-      layout: { padding: { right: 110, bottom: 24 } },
+      layout: { padding: { right: 110, bottom: 32 } },
       scales: {
         x: {
           type: "linear",

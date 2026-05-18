@@ -14,6 +14,7 @@ export enum RESULT {
   DRAW = "DRAW",
 }
 
+// Arbitrary threshold separating convincing wins from close games.
 const BIG_WIN_SCORE_DIFF = 50;
 
 class MatchStatistics {

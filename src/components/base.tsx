@@ -29,7 +29,6 @@ export const BaseHtml = ({ children }: PropsWithChildren) => {
           <script src="https://unpkg.com/htmx.org@1.9.6/dist/ext/response-targets.js"></script>
           <script src="https://unpkg.com/hyperscript.org@0.9.11"></script>
           <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-          <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
           <script src="/static/LineChartRace.js"></script>
           <link href="/static/styles.css" rel="stylesheet" />
           <link rel="icon" type="image/x-icon" href="/static/favicon.ico" />

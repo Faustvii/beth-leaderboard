@@ -96,7 +96,7 @@ async function page(
     ],
   };
 
-  const lineChartRaceTopN = 100;
+  const lineChartRaceTopN = 10;
   const lineChartRace = MatchStatistics.getLineChartRace(
     matches,
     ratingSystem,
@@ -149,7 +149,7 @@ async function page(
       plugins: {
         legend: { display: false },
         tooltip: { enabled: false },
-        // @ts-expect-error custom plugin registered in base.tsx
+        // @ts-expect-error custom plugin registered in src/components/LineChartRace.tsx
         lineChartRace: {
           enabled: true,
           autoplay: false,
@@ -260,7 +260,7 @@ async function page(
               <span class="text-md">
                 {gameResults.bigWins.procentage.toFixed(2)}%
               </span>
-              <span class="text-xl">Wins farmed</span>
+              <span class="text-xl">Big wins (50+)</span>
             </div>
             <div class="flex flex-col items-center justify-center gap-1">
               <span class="text-5xl">{gameResults.smallWins.wins}</span>

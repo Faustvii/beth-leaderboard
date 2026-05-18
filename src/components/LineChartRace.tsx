@@ -1,5 +1,5 @@
-// Compiled to public/lineChartRace.js via `bun client:build`.
-// Served from /static/lineChartRace.js, loaded once in base.tsx.
+// Compiled to public/LineChartRace.js via `bun client:build`.
+// Served from /static/LineChartRace.js, loaded once in base.tsx.
 
 interface LineRacePoint {
   x: number;
@@ -41,6 +41,14 @@ interface RaceChart {
   $race?: RaceState;
 }
 
+interface RaceMarker {
+  kind: "dropout" | "entry";
+  x: number;
+  y: number;
+  color: string;
+  datasetIndex: number;
+}
+
 interface RaceState {
   cursorX: number;
   velocity: number;
@@ -50,6 +58,7 @@ interface RaceState {
   dataMax: number;
   windowDuration: number;
   playButtonId?: string;
+  markers: RaceMarker[];
 }
 
 interface RacePluginOptions {
@@ -162,6 +171,11 @@ if (typeof Chart !== "undefined") {
       canvas.style.cursor = canScroll() ? "grab" : "";
     }
 
+    // Window-level mouse listeners are attached only for the duration of a
+    // drag and removed on release, so we never leak listeners between drags
+    // (or accumulate them if the chart is ever re-rendered via htmx swap).
+    const onWindowMouseMove = (e: MouseEvent) => onMove(e.clientX);
+
     function onStart(clientX: number): boolean {
       if (!canScroll()) return false;
       const s = chart.$race!;
@@ -169,6 +183,8 @@ if (typeof Chart !== "undefined") {
       dragStartClientX = clientX;
       dragStartCursorX = s.cursorX;
       canvas.style.cursor = "grabbing";
+      window.addEventListener("mousemove", onWindowMouseMove);
+      window.addEventListener("mouseup", onEnd);
       return true;
     }
 
@@ -196,13 +212,13 @@ if (typeof Chart !== "undefined") {
       if (!isDragging) return;
       isDragging = false;
       canvas.style.cursor = canScroll() ? "grab" : "";
+      window.removeEventListener("mousemove", onWindowMouseMove);
+      window.removeEventListener("mouseup", onEnd);
     }
 
     canvas.addEventListener("mousedown", (e) => {
       if (onStart(e.clientX)) e.preventDefault();
     });
-    window.addEventListener("mousemove", (e) => onMove(e.clientX));
-    window.addEventListener("mouseup", onEnd);
 
     canvas.addEventListener(
       "touchstart",
@@ -253,6 +269,35 @@ if (typeof Chart !== "undefined") {
       const windowFraction = Math.min(1, ws / xValues.length);
       const windowDuration = (dataMax - dataMin) * windowFraction;
 
+      // Drop-out/entry markers are a property of the data, not the cursor,
+      // so we compute them once here and the draw loop just filters by x.
+      const markers: RaceMarker[] = [];
+      chart.data.datasets.forEach((ds, di) => {
+        const pts = ds.data;
+        const color = ds.borderColor ?? "#fff";
+        for (let pi = 0; pi < pts.length; pi++) {
+          const p = pts[pi];
+          if (p?.y === null) continue;
+          const prevP = pi > 0 ? pts[pi - 1] : null;
+          const nextP = pi < pts.length - 1 ? pts[pi + 1] : null;
+
+          const isDropOut = !!prevP && prevP.y !== null && nextP?.y === null;
+          const isReentry = prevP?.y === null && !!nextP && nextP.y !== null;
+          const isFirstAppearance =
+            pi === 0 && p.x > dataMin && !!nextP && nextP.y !== null;
+          const isEntry = isReentry || isFirstAppearance;
+
+          if (!isDropOut && !isEntry) continue;
+          markers.push({
+            kind: isDropOut ? "dropout" : "entry",
+            x: p.x,
+            y: p.y,
+            color,
+            datasetIndex: di,
+          });
+        }
+      });
+
       chart.$race = {
         cursorX: opts.autoplay ? dataMin : dataMax,
         velocity: (dataMax - dataMin) / totalRaceMs,
@@ -262,6 +307,7 @@ if (typeof Chart !== "undefined") {
         dataMax,
         windowDuration,
         playButtonId: opts.playButtonId,
+        markers,
       };
       setupScrollHandler(chart);
       applyWindow(chart);
@@ -380,66 +426,42 @@ if (typeof Chart !== "undefined") {
       ctx.restore();
 
       // Fall trails (skulls) on drop-out and launch trails (rockets) on entry.
-      // Both require a connected segment on the chart side — i.e. the neighbor
-      // in the relevant direction must also be in top N — so we don't render
-      // emojis next to invisible single-point "blip" entries or exits.
+      // Markers are precomputed in afterInit; we just filter by visible range.
       ctx.save();
       ctx.lineWidth = 2;
       const trailDx = 12;
       const trailDy = 26;
       const emojiFont =
         "16px 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif";
+      ctx.font = emojiFont;
+      ctx.textBaseline = "middle";
+      ctx.textAlign = "center";
 
-      for (let di = 0; di < chart.data.datasets.length; di++) {
-        const ds2 = chart.data.datasets[di];
-        const meta2 = chart.getDatasetMeta(di);
-        if (!meta2 || meta2.hidden) continue;
-        const pts = ds2.data;
+      for (const m of s.markers) {
+        if (chart.getDatasetMeta(m.datasetIndex).hidden) continue;
+        const trailPx = chart.scales.x.getPixelForValue(m.x);
+        if (trailPx < area.left || trailPx > cursorX) continue;
+        const trailPy = chart.scales.y.getPixelForValue(m.y);
 
-        for (let pi = 0; pi < pts.length; pi++) {
-          const p = pts[pi];
-          if (p?.y === null) continue;
-          const prevP = pi > 0 ? pts[pi - 1] : null;
-          const nextP = pi < pts.length - 1 ? pts[pi + 1] : null;
+        ctx.strokeStyle = m.color;
+        ctx.fillStyle = m.color;
 
-          const isDropOut =
-            !!prevP && prevP.y !== null && !!nextP && nextP.y === null;
-          const isReentry =
-            !!prevP && prevP.y === null && !!nextP && nextP.y !== null;
-          const isFirstAppearance =
-            pi === 0 && p.x > s.dataMin && !!nextP && nextP.y !== null;
-          const isEntry = isReentry || isFirstAppearance;
-
-          if (!isDropOut && !isEntry) continue;
-
-          const trailPx = chart.scales.x.getPixelForValue(p.x);
-          if (trailPx < area.left || trailPx > cursorX) continue;
-          const trailPy = chart.scales.y.getPixelForValue(p.y);
-
-          const color = ds2.borderColor ?? "#fff";
-          ctx.strokeStyle = color;
-          ctx.fillStyle = color;
-          ctx.font = emojiFont;
-          ctx.textBaseline = "middle";
-          ctx.textAlign = "center";
-
-          if (isDropOut) {
-            const endX = trailPx + trailDx;
-            const endY = Math.min(area.bottom + 6, trailPy + trailDy);
-            ctx.beginPath();
-            ctx.moveTo(trailPx, trailPy);
-            ctx.lineTo(endX, endY);
-            ctx.stroke();
-            ctx.fillText("\u{1F480}", endX, endY);
-          } else {
-            const startX = trailPx - trailDx;
-            const startY = Math.min(area.bottom + 6, trailPy + trailDy);
-            ctx.beginPath();
-            ctx.moveTo(startX, startY);
-            ctx.lineTo(trailPx, trailPy);
-            ctx.stroke();
-            ctx.fillText("\u{1F680}", startX, startY);
-          }
+        if (m.kind === "dropout") {
+          const endX = trailPx + trailDx;
+          const endY = Math.min(area.bottom + 6, trailPy + trailDy);
+          ctx.beginPath();
+          ctx.moveTo(trailPx, trailPy);
+          ctx.lineTo(endX, endY);
+          ctx.stroke();
+          ctx.fillText("\u{1F480}", endX, endY);
+        } else {
+          const startX = trailPx - trailDx;
+          const startY = Math.min(area.bottom + 6, trailPy + trailDy);
+          ctx.beginPath();
+          ctx.moveTo(startX, startY);
+          ctx.lineTo(trailPx, trailPy);
+          ctx.stroke();
+          ctx.fillText("\u{1F680}", startX, startY);
         }
       }
       ctx.restore();
@@ -450,6 +472,8 @@ if (typeof Chart !== "undefined") {
     play(id, btnId) {
       const c = Chart.getChart(id);
       if (!c?.$race) return;
+      // Auto-rewind when the cursor sits at the end: tick() pauses at dataMax
+      // (see startTickLoop), so the next Play press restarts from dataMin.
       if (c.$race.cursorX >= c.$race.dataMax) c.$race.cursorX = c.$race.dataMin;
       c.$race.playing = true;
       c.$race.lastFrame = performance.now();

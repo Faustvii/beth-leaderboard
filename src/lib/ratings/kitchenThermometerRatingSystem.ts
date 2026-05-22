@@ -5,9 +5,9 @@ import {
   type RatingSystem,
 } from "./rating";
 
-export type MoodRingRating = number;
+export type KitchenThermometerRating = number;
 
-export interface MoodRingConfig {
+export interface KitchenThermometerConfig {
   winHeat: number;
   blowoutThreshold: number;
   blowoutBonus: number;
@@ -16,11 +16,11 @@ export interface MoodRingConfig {
   minHeat: number;
 }
 
-export function moodRing(
-  config?: MoodRingConfig,
-): RatingSystem<MoodRingRating> {
+export function kitchenThermometer(
+  config?: KitchenThermometerConfig,
+): RatingSystem<KitchenThermometerRating> {
   /*
-    A momentum-based rating system inspired by mood rings.
+    A momentum-based rating system inspired by a kitchen thermometer.
 
     Each player carries "heat" that rises with wins and falls with losses.
 
@@ -28,7 +28,7 @@ export function moodRing(
     score difference does not matter.
   */
 
-  const selectedConfig: MoodRingConfig = config ?? {
+  const selectedConfig: KitchenThermometerConfig = config ?? {
     winHeat: 15,
     blowoutThreshold: 100,
     blowoutBonus: 10,
@@ -38,10 +38,10 @@ export function moodRing(
   };
 
   function applyHeatChange(
-    currentHeat: MoodRingRating,
+    currentHeat: KitchenThermometerRating,
     outcome: "win" | "loss" | "draw",
     scoreDiff: number,
-  ): MoodRingRating {
+  ): KitchenThermometerRating {
     const {
       winHeat,
       blowoutThreshold,
@@ -67,10 +67,10 @@ export function moodRing(
   }
 
   function ratePlayer(
-    player: PlayerWithRating<MoodRingRating>,
+    player: PlayerWithRating<KitchenThermometerRating>,
     outcome: "win" | "loss" | "draw",
     scoreDiff: number,
-  ): PlayerWithRating<MoodRingRating> {
+  ): PlayerWithRating<KitchenThermometerRating> {
     return {
       player: player.player,
       rating: applyHeatChange(player.rating, outcome, scoreDiff),
@@ -78,12 +78,12 @@ export function moodRing(
   }
 
   return {
-    type: "moodRing",
+    type: "kitchenThermometer",
     defaultRating: 0,
 
     rateMatch(
-      match: MatchWithRatings<MoodRingRating>,
-    ): PlayerWithRating<MoodRingRating>[] {
+      match: MatchWithRatings<KitchenThermometerRating>,
+    ): PlayerWithRating<KitchenThermometerRating>[] {
       const whiteTeam = [match.whitePlayerOne, match.whitePlayerTwo].filter(
         isDefined,
       );
@@ -110,11 +110,11 @@ export function moodRing(
       ];
     },
 
-    toNumber(rating: MoodRingRating) {
+    toNumber(rating: KitchenThermometerRating) {
       return rating;
     },
 
-    toString(heat: MoodRingRating) {
+    toString(heat: KitchenThermometerRating) {
       if (heat >= 220) return "Roasted";
       if (heat >= 180) return "Flash Fried";
       if (heat >= 140) return "Broiling";
@@ -127,7 +127,10 @@ export function moodRing(
       return "Deep Freeze";
     },
 
-    equals(a: MoodRingRating | undefined, b: MoodRingRating | undefined) {
+    equals(
+      a: KitchenThermometerRating | undefined,
+      b: KitchenThermometerRating | undefined,
+    ) {
       return a === b;
     },
   };

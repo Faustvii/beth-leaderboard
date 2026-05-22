@@ -67,7 +67,7 @@ export const LeaderboardRowHtml = ({
         </div>
       </td>
       <td class="px-1 py-4 md:px-3 lg:px-6">
-        <span>{ratingSystem.toNumber(rating)}</span>
+        <span>{ratingSystem.toString(rating)}</span>
         <DiffIcon
           before={
             ratingBefore !== undefined

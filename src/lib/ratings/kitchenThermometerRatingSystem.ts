@@ -29,11 +29,11 @@ export function kitchenThermometer(
   */
 
   const selectedConfig: KitchenThermometerConfig = config ?? {
-    winHeat: 15,
+    winHeat: 30,
     blowoutThreshold: 100,
-    blowoutBonus: 10,
+    blowoutBonus: 30,
     decayRate: 0.1,
-    lossDecayRate: 0.3,
+    lossDecayRate: 0.2,
     minHeat: 0,
   };
 
@@ -115,15 +115,15 @@ export function kitchenThermometer(
     },
 
     toString(heat: KitchenThermometerRating) {
-      if (heat >= 220) return "Roasted";
-      if (heat >= 180) return "Flash Fried";
+      if (heat >= 200) return "Roasted";
+      if (heat >= 175) return "Flash Fried";
       if (heat >= 140) return "Broiling";
-      if (heat >= 100) return "Boiling Point";
-      if (heat >= 75) return "Sizzling";
-      if (heat >= 50) return "Simmering";
-      if (heat >= 30) return "Lukewarm";
-      if (heat >= 15) return "Room Temp";
-      if (heat >= 5) return "Chilled";
+      if (heat >= 110) return "Boiling Point";
+      if (heat >= 90) return "Sizzling";
+      if (heat >= 75) return "Simmering";
+      if (heat >= 45) return "Lukewarm";
+      if (heat >= 20) return "Room Temp";
+      if (heat >= 15) return "Chilled";
       return "Deep Freeze";
     },
 

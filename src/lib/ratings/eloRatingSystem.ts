@@ -132,6 +132,10 @@ export function elo(config?: EloConfig): RatingSystem<EloRating> {
       return Math.floor(score);
     },
 
+    toString(score: EloRating) {
+      return this.toNumber(score).toString();
+    },
+
     equals(a: EloRating | undefined, b: EloRating | undefined) {
       return a === b;
     },

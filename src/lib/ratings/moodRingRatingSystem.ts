@@ -7,8 +7,6 @@ import {
 
 export type MoodRingRating = number;
 
-export type Mood = "cold" | "mid" | "onFire" | "cooking";
-
 export interface MoodRingConfig {
   winHeat: number;
   lossHeat: number;
@@ -16,26 +14,6 @@ export interface MoodRingConfig {
   blowoutBonus: number;
   decayRate: number;
   minHeat: number;
-}
-
-export function getMoodFromHeat(heat: MoodRingRating): Mood {
-  if (heat >= 80) return "cooking";
-  if (heat >= 50) return "onFire";
-  if (heat >= 20) return "mid";
-  return "cold";
-}
-
-export function prettyMood(mood: Mood): string {
-  switch (mood) {
-    case "cold":
-      return "Cold";
-    case "mid":
-      return "Mid";
-    case "onFire":
-      return "On Fire";
-    case "cooking":
-      return "Cooking";
-  }
 }
 
 export function moodRing(
@@ -133,6 +111,13 @@ export function moodRing(
 
     toNumber(rating: MoodRingRating) {
       return rating;
+    },
+
+    toString(heat: MoodRingRating) {
+      if (heat >= 80) return "Cooking";
+      if (heat >= 50) return "On Fire";
+      if (heat >= 20) return "Mid";
+      return "Cold";
     },
 
     equals(a: MoodRingRating | undefined, b: MoodRingRating | undefined) {

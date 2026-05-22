@@ -61,6 +61,10 @@ export function scoreAvg(): RatingSystem<ScoreAvgRating> {
       return rating.count === 0 ? 0 : Math.floor(rating.diff / rating.count);
     },
 
+    toString(rating: ScoreAvgRating) {
+      return this.toNumber(rating).toString();
+    },
+
     equals(a: ScoreAvgRating | undefined, b: ScoreAvgRating | undefined) {
       if (a === undefined && b === undefined) return true;
       if (a === undefined || b === undefined) return false;

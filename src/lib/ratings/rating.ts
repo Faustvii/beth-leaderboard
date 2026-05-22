@@ -37,6 +37,7 @@ export interface RatingSystem<TRating> {
   defaultRating: TRating;
   rateMatch: (match: MatchWithRatings<TRating>) => PlayerWithRating<TRating>[];
   toNumber: (rating: TRating) => number;
+  toString: (rating: TRating) => string;
   equals: (a: TRating | undefined, b: TRating | undefined) => boolean;
 }
 

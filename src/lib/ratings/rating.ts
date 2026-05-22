@@ -3,6 +3,7 @@ import { getDatePartFromDate, subtractDays } from "../dateUtils";
 import { isDefined } from "../utils";
 import { elo, type EloRating } from "./eloRatingSystem";
 import { gameCount, type GameCountRating } from "./gameCountRatingSystem";
+import { moodRing, type MoodRingRating } from "./moodRingRatingSystem";
 import { openskill, type OpenskillRating } from "./openskillRatingSystem";
 import { scoreAvg, type ScoreAvgRating } from "./scoreAvgRatingSystem";
 import { scoreDiff, type ScoreDiffRating } from "./scoreDiffRatingSystem";
@@ -27,7 +28,8 @@ export type Rating =
   | StreakMultiplierRating
   | UnderdogRating
   | GameCountRating
-  | UniqueOpponentsBeatenRating;
+  | UniqueOpponentsBeatenRating
+  | MoodRingRating;
 /* eslint-enable @typescript-eslint/no-duplicate-type-constituents */
 
 export interface RatingSystem<TRating> {
@@ -249,6 +251,8 @@ export function getRatingSystem(type: RatingSystemType): RatingSystem<Rating> {
       return uniqueOpponentsBeaten() as RatingSystem<Rating>;
     case "elo":
       return elo() as RatingSystem<Rating>;
+    case "moodRing":
+      return moodRing() as RatingSystem<Rating>;
   }
 }
 
@@ -272,6 +276,8 @@ export function prettyRatingSystemType(ratingSystem: RatingSystemType): string {
       return "Game Count";
     case "uniqueOpponentsBeaten":
       return "Unique Opponents Beaten";
+    case "moodRing":
+      return "Mood Ring";
   }
 }
 

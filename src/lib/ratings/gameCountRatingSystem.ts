@@ -31,6 +31,10 @@ export function gameCount(): RatingSystem<GameCountRating> {
       return rating;
     },
 
+    toString(rating: GameCountRating) {
+      return this.toNumber(rating).toString();
+    },
+
     equals(a: GameCountRating | undefined, b: GameCountRating | undefined) {
       return a === b;
     },

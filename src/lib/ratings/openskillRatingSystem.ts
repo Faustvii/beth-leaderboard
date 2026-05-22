@@ -82,6 +82,10 @@ export function openskill(options?: Options): RatingSystem<OpenskillRating> {
       return Math.floor(ordinal(rating, selectedOptions));
     },
 
+    toString(rating: OpenskillRating) {
+      return this.toNumber(rating).toString();
+    },
+
     equals(a: OpenskillRating | undefined, b: OpenskillRating | undefined) {
       if (a === undefined && b === undefined) return true;
       if (a === undefined || b === undefined) return false;

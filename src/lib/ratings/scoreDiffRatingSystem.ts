@@ -56,6 +56,10 @@ export function scoreDiff(): RatingSystem<ScoreDiffRating> {
       return rating;
     },
 
+    toString(rating: ScoreDiffRating) {
+      return this.toNumber(rating).toString();
+    },
+
     equals(a: ScoreDiffRating | undefined, b: ScoreDiffRating | undefined) {
       return a === b;
     },

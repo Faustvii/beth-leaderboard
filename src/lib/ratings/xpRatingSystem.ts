@@ -105,6 +105,10 @@ export function xp(config?: XPConfig): RatingSystem<XPRating> {
       return calculateLevel(xp);
     },
 
+    toString(xp: XPRating) {
+      return this.toNumber(xp).toString();
+    },
+
     equals(a: XPRating | undefined, b: XPRating | undefined) {
       return a === b;
     },

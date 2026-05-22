@@ -107,6 +107,10 @@ export function streakMultiplier(
       return rating.points;
     },
 
+    toString(rating: StreakMultiplierRating) {
+      return this.toNumber(rating).toString();
+    },
+
     equals(
       a: StreakMultiplierRating | undefined,
       b: StreakMultiplierRating | undefined,

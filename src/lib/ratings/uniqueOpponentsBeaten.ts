@@ -48,6 +48,10 @@ export function uniqueOpponentsBeaten(): RatingSystem<UniqueOpponentsBeatenRatin
       return rating.length;
     },
 
+    toString(rating: UniqueOpponentsBeatenRating) {
+      return this.toNumber(rating).toString();
+    },
+
     equals(
       a: UniqueOpponentsBeatenRating | undefined,
       b: UniqueOpponentsBeatenRating | undefined,

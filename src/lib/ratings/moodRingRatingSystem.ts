@@ -29,9 +29,9 @@ export function moodRing(
   */
 
   const selectedConfig: MoodRingConfig = config ?? {
-    winHeat: 10,
+    winHeat: 15,
     blowoutThreshold: 100,
-    blowoutBonus: 5,
+    blowoutBonus: 10,
     decayRate: 0.1,
     lossDecayRate: 0.3,
     minHeat: 0,
@@ -115,10 +115,16 @@ export function moodRing(
     },
 
     toString(heat: MoodRingRating) {
-      if (heat >= 80) return "Cooking";
-      if (heat >= 50) return "On Fire";
-      if (heat >= 20) return "Mid";
-      return "Cold";
+      if (heat >= 220) return "Roasted";
+      if (heat >= 180) return "Flash Fried";
+      if (heat >= 140) return "Broiling";
+      if (heat >= 100) return "Boiling Point";
+      if (heat >= 75) return "Sizzling";
+      if (heat >= 50) return "Simmering";
+      if (heat >= 30) return "Lukewarm";
+      if (heat >= 15) return "Room Temp";
+      if (heat >= 5) return "Chilled";
+      return "Deep Freeze";
     },
 
     equals(a: MoodRingRating | undefined, b: MoodRingRating | undefined) {

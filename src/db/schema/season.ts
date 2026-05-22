@@ -24,7 +24,7 @@ export const ratingSystemTypes = [
   "underdog",
   "gameCount",
   "uniqueOpponentsBeaten",
-  "moodRing",
+  "kitchenThermometer",
 ] as const;
 
 export const seasonsTbl = sqliteTable(

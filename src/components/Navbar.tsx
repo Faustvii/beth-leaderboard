@@ -6,7 +6,6 @@ import { config } from "../config";
 import { getIsItChristmas } from "../controllers/holidays/christmas";
 import { cn } from "../lib/utils";
 import { HxButton } from "./HxButton";
-import { NewsBanner } from "./news-banner";
 
 export type Page =
   | "leaderboard"
@@ -210,11 +209,11 @@ export const NavbarHtml = async ({ session, activePage }: Props) => {
         </div>
       </nav>
 
-      <NewsBanner
+      {/* <NewsBanner
         description={
           'Grundet migrationer i Azure vil du muligvis få en ny bruger når du logger ind. En admin kan fikse dette, men først EFTER du er logget ind. Du kan se en liste af admins på "Help" siden.'
         }
-      />
+      /> */}
     </>
   );
 };

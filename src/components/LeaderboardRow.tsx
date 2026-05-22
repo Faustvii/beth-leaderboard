@@ -1,6 +1,7 @@
 import { getIsItChristmas } from "../controllers/holidays/christmas";
 import { isDateOlderThanNDays } from "../lib/dateUtils";
 import { RESULT } from "../lib/matchStatistics";
+import { type Rating, type RatingSystem } from "../lib/ratings/rating";
 import { cn, hashCode } from "../lib/utils";
 import { DiffIcon } from "./DiffIcon";
 import { HxButton } from "./HxButton";
@@ -12,6 +13,7 @@ export const LeaderboardRowHtml = ({
   name,
   rating,
   ratingBefore,
+  ratingSystem,
   rankBefore,
   lastPlayed,
   latestPlayerResults,
@@ -21,8 +23,9 @@ export const LeaderboardRowHtml = ({
   userId: string;
   rank: number;
   name: string;
-  rating: number;
-  ratingBefore?: number;
+  rating: Rating;
+  ratingBefore?: Rating;
+  ratingSystem: RatingSystem<Rating>;
   rankBefore?: number;
   lastPlayed: Date;
   latestPlayerResults: {
@@ -64,8 +67,16 @@ export const LeaderboardRowHtml = ({
         </div>
       </td>
       <td class="px-1 py-4 md:px-3 lg:px-6">
-        <span>{rating}</span>
-        <DiffIcon before={ratingBefore} after={rating} isHigherBetter={true} />
+        <span>{ratingSystem.toNumber(rating)}</span>
+        <DiffIcon
+          before={
+            ratingBefore !== undefined
+              ? ratingSystem.toNumber(ratingBefore)
+              : undefined
+          }
+          after={ratingSystem.toNumber(rating)}
+          isHigherBetter={true}
+        />
       </td>
     </tr>
   );

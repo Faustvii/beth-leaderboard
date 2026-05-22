@@ -9,10 +9,10 @@ export type MoodRingRating = number;
 
 export interface MoodRingConfig {
   winHeat: number;
-  lossHeat: number;
   blowoutThreshold: number;
   blowoutBonus: number;
   decayRate: number;
+  lossDecayRate: number;
   minHeat: number;
 }
 
@@ -30,10 +30,10 @@ export function moodRing(
 
   const selectedConfig: MoodRingConfig = config ?? {
     winHeat: 10,
-    lossHeat: 8,
     blowoutThreshold: 100,
     blowoutBonus: 5,
-    decayRate: 0.9,
+    decayRate: 0.1,
+    lossDecayRate: 0.3,
     minHeat: 0,
   };
 
@@ -44,22 +44,23 @@ export function moodRing(
   ): MoodRingRating {
     const {
       winHeat,
-      lossHeat,
       blowoutThreshold,
       blowoutBonus,
       decayRate,
+      lossDecayRate,
       minHeat,
     } = selectedConfig;
 
-    let heat = currentHeat * decayRate;
+    let heat = currentHeat;
+
+    const percentLoss = outcome === "loss" ? lossDecayRate : decayRate;
+    heat *= 1 - percentLoss;
 
     if (outcome === "win") {
       heat += winHeat;
       if (scoreDiff > blowoutThreshold) {
         heat += blowoutBonus;
       }
-    } else if (outcome === "loss") {
-      heat -= lossHeat;
     }
 
     return Math.max(minHeat, Math.round(heat));

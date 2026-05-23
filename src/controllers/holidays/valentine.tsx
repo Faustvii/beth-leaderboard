@@ -5,6 +5,10 @@ export function getIsItValentine() {
 }
 
 export function updateIsItValentine() {
+  if (process.env.TEST_OVERRIDE_IS_VALENTINE !== undefined) {
+    process.env.IS_VALENTINE = process.env.TEST_OVERRIDE_IS_VALENTINE;
+    return;
+  }
   // getMonth is zero indexed
   if (new Date().getMonth() === 1 && new Date().getDate() <= 14) {
     process.env.IS_VALENTINE = "true";

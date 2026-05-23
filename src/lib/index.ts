@@ -23,6 +23,11 @@ export function redirect(
   }
 }
 
+export function isMobileRequest(headers: Record<string, string | null>) {
+  const ua = headers["user-agent"] ?? "";
+  return /Mobile|Android|iPhone|iPad|iPod|BlackBerry|Windows Phone/i.test(ua);
+}
+
 export function isHxRequest(headers: Record<string, string | null>) {
   if (headers["hx-request"]) {
     return headers["hx-request"] === "true";

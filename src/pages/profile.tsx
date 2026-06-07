@@ -1,7 +1,6 @@
 import { type ChartConfiguration } from "chart.js";
 import { eq } from "drizzle-orm";
 import Elysia, { t } from "elysia";
-import { type Session } from "lucia";
 import { Chart } from "../components/Chart";
 import { FoldableCard } from "../components/FoldableCard";
 import { HeaderHtml } from "../components/header";
@@ -30,42 +29,36 @@ import {
   type Rating,
   type RatingSystem,
 } from "../lib/ratings/rating";
+import { getCurrentUser } from "../lib/store";
 import { cn } from "../lib/utils";
 
 export const profile = new Elysia({
   prefix: "/profile",
 })
   .use(ctx)
-  .get("/", async ({ html, session, headers, season, ratingSystem }) => {
+  .get("/", async ({ html, headers, season, ratingSystem }) => {
+    const user = getCurrentUser();
     return html(() =>
-      profilePage(
-        session,
-        headers,
-        session?.user?.id ?? "",
-        season,
-        ratingSystem,
-      ),
+      profilePage(headers, user?.id ?? "", season, ratingSystem),
     );
   })
-  .get(
-    "/:userId",
-    async ({ html, params, headers, session, season, ratingSystem }) => {
-      return html(() =>
-        profilePage(session, headers, params.userId, season, ratingSystem),
-      );
-    },
-  )
+  .get("/:userId", async ({ html, params, headers, season, ratingSystem }) => {
+    return html(() =>
+      profilePage(headers, params.userId, season, ratingSystem),
+    );
+  })
   .put(
     "/",
-    async ({ set, headers, body: { nickname }, writeDb, session }) => {
-      if (!session?.user) return;
+    async ({ set, headers, body: { nickname }, writeDb }) => {
+      const user = getCurrentUser();
+      if (!user) return;
       await writeDb
         .update(userTbl)
         .set({ nickname: nickname })
-        .where(eq(userTbl.id, session.user.id));
+        .where(eq(userTbl.id, user.id));
       await syncIfLocal();
 
-      redirect({ headers, set }, `/profile/${session.user.id}`);
+      redirect({ headers, set }, `/profile/${user.id}`);
     },
     {
       beforeHandle: (_) => undefined,
@@ -76,7 +69,6 @@ export const profile = new Elysia({
   );
 
 async function profilePage(
-  session: Session | null,
   headers: Record<string, string | null>,
   userId: string,
   season: Season,
@@ -84,31 +76,31 @@ async function profilePage(
 ) {
   return (
     <LayoutHtml headers={headers}>
-      {page(session, userId, season, ratingSystem)}
+      {page(userId, season, ratingSystem)}
     </LayoutHtml>
   );
 }
 
 async function page(
-  session: Session | null,
   userId: string,
   season: Season,
   ratingSystem: RatingSystem<Rating>,
 ) {
+  const currentUser = getCurrentUser();
   const { elaspedTimeMs, result: matches } = await measure(() =>
-    getMatches(season, !!session?.user),
+    getMatches(season, !!currentUser),
   );
   console.log(`player stats took ${elaspedTimeMs}ms to get from db`);
   const activeQuestsForProfile = await getActiveQuestsForPlayer(userId);
-  const user = await getUser(userId, !!session?.user);
+  const user = await getUser(userId, !!currentUser);
   let profileName = `Your stats - ${user?.nickname}`;
-  if (!session || (session && session.user.id !== userId)) {
+  if (!currentUser || (currentUser && currentUser.id !== userId)) {
     if (user) {
       profileName = `${user.name}'s stats`;
     }
   }
   const header = profileName;
-  const isOwnProfile = session?.user.id === userId;
+  const isOwnProfile = currentUser?.id === userId;
 
   return (
     <>

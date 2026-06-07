@@ -1,7 +1,6 @@
 import clsx from "clsx";
 import { eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
-import { type Session } from "lucia";
 import { HeaderHtml } from "../../components/header";
 import { LayoutHtml } from "../../components/Layout";
 import { NavbarHtml } from "../../components/Navbar";
@@ -19,8 +18,8 @@ export const EditUser = new Elysia({
   prefix: "/edit-user",
 })
   .use(ctx)
-  .get("/", async ({ html, session, headers }) => {
-    return html(() => editUserPage(session, headers));
+  .get("/", async ({ html, headers }) => {
+    return html(() => editUserPage(headers));
   })
   .get(
     "/search",
@@ -80,11 +79,8 @@ export const EditUser = new Elysia({
     },
   );
 
-async function editUserPage(
-  session: Session | null,
-  headers: Record<string, string | null>,
-) {
-  return <LayoutHtml headers={headers}>{await page(session)}</LayoutHtml>;
+async function editUserPage(headers: Record<string, string | null>) {
+  return <LayoutHtml headers={headers}>{await page()}</LayoutHtml>;
 }
 
 async function page() {

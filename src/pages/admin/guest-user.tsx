@@ -1,5 +1,4 @@
 import { Elysia, t } from "elysia";
-import { type Session } from "lucia";
 import { generateRandomString } from "lucia/utils";
 import { HeaderHtml } from "../../components/header";
 import { LayoutHtml } from "../../components/Layout";
@@ -14,8 +13,8 @@ export const GuestUser = new Elysia({
   prefix: "/guest-user",
 })
   .use(ctx)
-  .get("/", async ({ html, session, headers }) => {
-    return html(() => guestUserPage(session, headers));
+  .get("/", async ({ html, headers }) => {
+    return html(() => guestUserPage(headers));
   })
   .put(
     "/",
@@ -46,11 +45,8 @@ export const GuestUser = new Elysia({
     },
   );
 
-export async function guestUserPage(
-  session: Session | null,
-  headers: Record<string, string | null>,
-) {
-  return <LayoutHtml headers={headers}>{page(session)}</LayoutHtml>;
+export async function guestUserPage(headers: Record<string, string | null>) {
+  return <LayoutHtml headers={headers}>{page()}</LayoutHtml>;
 }
 
 async function page() {

@@ -5,17 +5,11 @@ import { LeaderboardPage } from "./leaderboard";
 
 export const home = new Elysia()
   .use(ctx)
-  .get("/", async ({ html, headers, session, season, ratingSystem, query }) => {
+  .get("/", async ({ html, headers, season, ratingSystem, query }) => {
     const parsedTimeInterval = parseTimeInterval(
       query.interval as string | undefined,
     );
     return html(() =>
-      LeaderboardPage(
-        session,
-        headers,
-        season,
-        ratingSystem,
-        parsedTimeInterval,
-      ),
+      LeaderboardPage(headers, season, ratingSystem, parsedTimeInterval),
     );
   });

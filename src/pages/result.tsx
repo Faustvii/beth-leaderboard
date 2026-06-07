@@ -1,6 +1,5 @@
 import { type PropsWithChildren } from "@kitajs/html";
 import Elysia from "elysia";
-import { type Session } from "lucia";
 import { DiffIcon } from "../components/DiffIcon";
 import { HeaderHtml } from "../components/header";
 import { HxButton } from "../components/HxButton";
@@ -20,34 +19,32 @@ import {
   type Rating,
   type RatingSystem,
 } from "../lib/ratings/rating";
+import { getCurrentUser } from "../lib/store";
 import { isDefined } from "../lib/utils";
 
 export const matchResult = new Elysia({
   prefix: "/result",
 })
   .use(ctx)
-  .get(
-    "/:matchId",
-    ({ html, params, session, query, ratingSystem, headers }) => {
-      // Cannot use "season" from context/middleware as we don't want the "current" season
-      const seasonId = query.season ? parseInt(query.season, 10) : undefined;
-      const matchId = parseInt(params.matchId, 10);
-      return html(() => (
-        <LayoutHtml headers={headers}>
-          {page(session, matchId, seasonId, ratingSystem)}
-        </LayoutHtml>
-      ));
-    },
-  );
+  .get("/:matchId", ({ html, params, query, ratingSystem, headers }) => {
+    // Cannot use "season" from context/middleware as we don't want the "current" season
+    const seasonId = query.season ? parseInt(query.season, 10) : undefined;
+    const matchId = parseInt(params.matchId, 10);
+    return html(() => (
+      <LayoutHtml headers={headers}>
+        {page(matchId, seasonId, ratingSystem)}
+      </LayoutHtml>
+    ));
+  });
 
 async function page(
-  session: Session | null,
   matchId: number,
   seasonId: number | undefined,
   ratingSystem: RatingSystem<Rating>,
 ) {
   await syncIfLocal();
-  const match = await getMatch(matchId, !!session?.user);
+  const user = getCurrentUser();
+  const match = await getMatch(matchId, !!user);
   if (!match) {
     return <>Match does not exist</>;
   }
@@ -77,7 +74,6 @@ async function page(
       </div>
       <MatchDescription match={match} />
       <RatingDiff
-        session={session}
         match={match}
         seasonId={seasonId ?? match.seasonId}
         ratingSystem={ratingSystem}
@@ -87,12 +83,10 @@ async function page(
 }
 
 async function RatingDiff({
-  session,
   match,
   seasonId,
   ratingSystem,
 }: {
-  session: Session | null;
   match: Match;
   seasonId: number;
   ratingSystem: RatingSystem<Rating>;
@@ -102,7 +96,8 @@ async function RatingDiff({
     return <>Season not found</>;
   }
 
-  const allMatchesInSeason = await getMatches(season, !!session?.user);
+  const user = getCurrentUser();
+  const allMatchesInSeason = await getMatches(season, !!user);
 
   if (!allMatchesInSeason.find((x) => x.id === match.id)) {
     return <>Match not in season</>;

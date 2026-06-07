@@ -1,6 +1,5 @@
 import { type ChartConfiguration } from "chart.js";
 import { Elysia } from "elysia";
-import { type Session } from "lucia";
 import { Chart } from "../components/Chart";
 import { HeaderHtml } from "../components/header";
 import { LayoutHtml } from "../components/Layout";
@@ -16,26 +15,27 @@ import { skibidiInBetweenText } from "../lib/addMatchSummary.tsx";
 import { getDatePartFromDate } from "../lib/dateUtils";
 import MatchStatistics from "../lib/matchStatistics";
 import { type Match } from "../lib/ratings/rating";
+import { getCurrentUser } from "../lib/store.ts";
 
 export const stats = new Elysia({
   prefix: "/stats",
 })
   .use(ctx)
-  .get("/", async ({ html, session, headers, season }) => {
-    return html(() => statsPage(session, headers, season));
+  .get("/", async ({ html, headers, season }) => {
+    return html(() => statsPage(headers, season));
   });
 
 async function statsPage(
-  session: Session | null,
   headers: Record<string, string | null>,
   season: Season,
 ) {
-  return <LayoutHtml headers={headers}>{page(session, season)}</LayoutHtml>;
+  return <LayoutHtml headers={headers}>{page(season)}</LayoutHtml>;
 }
 
-async function page(session: Session | null, season: Season) {
+async function page(season: Season) {
+  const user = getCurrentUser();
   const { elaspedTimeMs, result: matches } = await measure(async () => {
-    return await getMatches(season, !!session?.user);
+    return await getMatches(season, !!user);
   });
   console.log("stats page database calls", elaspedTimeMs, "ms");
 

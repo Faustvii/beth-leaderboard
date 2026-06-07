@@ -1,11 +1,11 @@
 import { Elysia } from "elysia";
-import { type Session } from "lucia";
 import { ActionCard } from "../../components/ActionCard";
 import { HeaderHtml } from "../../components/header";
 import { LayoutHtml } from "../../components/Layout";
 import { NavbarHtml } from "../../components/Navbar";
 import { ctx } from "../../context";
 import { redirect } from "../../lib";
+import { getCurrentUser } from "../../lib/store";
 import { EditUser } from "./edit-user";
 import { GuestUser } from "./guest-user";
 import { Match } from "./match";
@@ -16,8 +16,9 @@ export const Admin = new Elysia({
   prefix: "/admin",
 })
   .use(ctx)
-  .onBeforeHandle(({ session, headers, set, userRoles }) => {
-    if (!session?.user) {
+  .onBeforeHandle(({ headers, set, userRoles }) => {
+    const user = getCurrentUser();
+    if (!user) {
       redirect({ set, headers }, "/api/auth/signin/azure");
       return true;
     }
@@ -31,15 +32,12 @@ export const Admin = new Elysia({
   .use(GuestUser)
   .use(Match)
   .use(MergeUsers)
-  .get("/", async ({ html, session, headers }) => {
-    return html(() => adminPage(session, headers));
+  .get("/", async ({ html, headers }) => {
+    return html(() => adminPage(headers));
   });
 
-async function adminPage(
-  session: Session | null,
-  headers: Record<string, string | null>,
-) {
-  return <LayoutHtml headers={headers}>{page(session)}</LayoutHtml>;
+async function adminPage(headers: Record<string, string | null>) {
+  return <LayoutHtml headers={headers}>{page()}</LayoutHtml>;
 }
 
 async function page() {

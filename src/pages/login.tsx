@@ -6,10 +6,10 @@ import { ctx } from "../context";
 
 export const login = new Elysia({ prefix: "/login" })
   .use(ctx)
-  .get("/", async ({ html, session, headers }) => {
+  .get("/", async ({ html, headers }) => {
     return html(() => (
       <LayoutHtml headers={headers}>
-        <NavbarHtml session={session} activePage="leaderboard" />
+        <NavbarHtml activePage="leaderboard" />
         <HeaderHtml title="Leaderboard" />
 
         <a hx-boost="false" href="/api/auth/signin/google">

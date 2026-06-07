@@ -138,7 +138,7 @@ async function page(session: Session | null) {
     .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   return (
     <>
-      <NavbarHtml session={session} activePage="admin" />
+      <NavbarHtml activePage="admin" />
       <HeaderHtml title="Latest games" />
       <div class="flex w-full flex-col flex-wrap justify-between lg:flex-row">
         {globalMatchHistory.length !== 0 ? (

@@ -107,7 +107,7 @@ async function page(session: Session | null, season: Season) {
 
   return (
     <>
-      <NavbarHtml session={session} activePage="stats" />
+      <NavbarHtml activePage="stats" />
       <div class="flex flex-row items-center justify-between">
         <HeaderHtml title="Statistics" />
         <div class="flex-shrink-0">

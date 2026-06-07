@@ -87,12 +87,12 @@ async function editUserPage(
   return <LayoutHtml headers={headers}>{await page(session)}</LayoutHtml>;
 }
 
-async function page(session: Session | null) {
+async function page() {
   const allUsers = await listAllUsers();
 
   return (
     <>
-      <NavbarHtml session={session} activePage="admin" />
+      <NavbarHtml activePage="admin" />
       <HeaderHtml title="Edit user" />
       <div class="flex w-full flex-col gap-3 p-6">
         <div class="group relative w-full">

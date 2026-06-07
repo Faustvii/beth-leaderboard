@@ -74,10 +74,10 @@ export async function mergeUsersPage(
   return <LayoutHtml headers={headers}>{page(session)}</LayoutHtml>;
 }
 
-async function page(session: Session | null) {
+async function page() {
   return (
     <>
-      <NavbarHtml session={session} activePage="admin" />
+      <NavbarHtml activePage="admin" />
       <HeaderHtml title="Merge Users" />
       <div class="pl-5">
         <ul class="list-inside list-disc pl-5">

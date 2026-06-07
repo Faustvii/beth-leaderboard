@@ -1,9 +1,9 @@
 import { type PropsWithChildren } from "@kitajs/html";
-import { type Session } from "lucia";
 import { AnchorButtonHtml } from "./Button";
 import "@kitajs/html/register";
 import { config } from "../config";
 import { getIsItChristmas } from "../controllers/holidays/christmas";
+import { getCurrentUser } from "../lib/store";
 import { cn } from "../lib/utils";
 import { HxButton } from "./HxButton";
 
@@ -17,7 +17,6 @@ export type Page =
   | "result";
 
 interface Props extends PropsWithChildren {
-  session: Session | null;
   activePage: Page;
 }
 
@@ -40,8 +39,9 @@ const profileRoutes: NavbarRoute[] = [
   { name: "Profile", page: "profile", route: "/profile" },
 ];
 
-export const NavbarHtml = async ({ session, activePage }: Props) => {
-  const userRoles = session?.user.roles?.split(",") ?? [];
+export const NavbarHtml = async ({ activePage }: Props) => {
+  const user = getCurrentUser();
+  const userRoles = user?.roles?.split(",") ?? [];
   const routes = pageRoutes.filter(
     (x) => !x.roles || x.roles?.every((x) => userRoles.includes(x)),
   );
@@ -107,7 +107,7 @@ export const NavbarHtml = async ({ session, activePage }: Props) => {
               </div>
             </div>
             <div class="absolute inset-y-0 right-0 flex items-center pr-2 lg:static lg:inset-auto lg:ml-6 lg:pr-0">
-              {session ? (
+              {user ? (
                 <>
                   <div class="relative ml-3">
                     <div>
@@ -121,7 +121,7 @@ export const NavbarHtml = async ({ session, activePage }: Props) => {
                         <img
                           class="h-8 w-8 rounded-full"
                           loading="lazy"
-                          src={`/static/user/${session.user.id}/small`}
+                          src={`/static/user/${user?.id}/small`}
                           alt="Pic"
                         />
                       </button>

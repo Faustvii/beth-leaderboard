@@ -42,10 +42,10 @@ async function adminPage(
   return <LayoutHtml headers={headers}>{page(session)}</LayoutHtml>;
 }
 
-async function page(session: Session | null) {
+async function page() {
   return (
     <>
-      <NavbarHtml session={session} activePage="admin" />
+      <NavbarHtml activePage="admin" />
       <HeaderHtml title="With great power comes great responsibility" />
       <div class="grid grid-cols-1 gap-4 p-6 md:grid-cols-2">
         <ActionCard title="Manage Seasons" icon="🗓️" action="/admin/season">

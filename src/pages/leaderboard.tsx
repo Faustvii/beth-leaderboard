@@ -130,7 +130,7 @@ async function LeaderboardTable(
 
   return (
     <>
-      <NavbarHtml session={session} activePage="leaderboard" />
+      <NavbarHtml activePage="leaderboard" />
       <div class="flex flex-row justify-between">
         <HeaderHtml title="Leaderboard" />
         <FilterBar

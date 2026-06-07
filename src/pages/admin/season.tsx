@@ -126,12 +126,12 @@ async function seasonPage(
   return <LayoutHtml headers={headers}>{page(session)}</LayoutHtml>;
 }
 
-async function page(session: Session | null) {
+async function page() {
   const seasons = await getSeasons();
 
   return (
     <>
-      <NavbarHtml session={session} activePage="admin" />
+      <NavbarHtml activePage="admin" />
       <HeaderHtml title="Seasons" />
 
       <div class="flex w-full flex-col gap-3">

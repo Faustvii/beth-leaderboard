@@ -182,10 +182,10 @@ function MatchPage(
   return <LayoutHtml headers={headers}>{LogMatchPage(session)}</LayoutHtml>;
 }
 
-function LogMatchPage(session: Session | null) {
+function LogMatchPage() {
   return (
     <>
-      <NavbarHtml session={session} activePage="match" />
+      <NavbarHtml activePage="match" />
       <HeaderHtml title="Log match" />
       <MatchForm
         formId="log-match-form"

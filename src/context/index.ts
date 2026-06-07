@@ -5,6 +5,7 @@ import { readAuth, writeAuth } from "../auth";
 import { config } from "../config";
 import { readClient, readDb, writeDb } from "../db";
 import { getActiveSeason, getSeason } from "../db/queries/seasonQueries";
+import { getUser } from "../db/queries/userQueries";
 import {
   allTimeSeason,
   ratingSystemTypes,
@@ -13,6 +14,7 @@ import {
 import { redirect } from "../lib";
 import { getRatingSystem } from "../lib/ratings/rating";
 import { htmlRender } from "../lib/render";
+import { initializeCurrentUserStore, setCurrentUser } from "../lib/store";
 
 export const ctx = new Elysia({
   name: "@app/ctx",
@@ -27,6 +29,9 @@ export const ctx = new Elysia({
   .decorate("redirect", redirect)
   // .use(html())
   .use(htmlRender())
+  .onRequest(() => {
+    initializeCurrentUserStore();
+  })
   .use(
     // @ts-expect-error ts can't figure out types
     config.env.DATABASE_CONNECTION_TYPE === "local-replica"
@@ -47,8 +52,14 @@ export const ctx = new Elysia({
   .derive(async (ctx) => {
     const authRequest = ctx.readAuth.handleRequest(ctx);
     const session = await authRequest.validate();
-    const userRoles = session?.user.roles?.split(",") ?? [];
-    return { session, userRoles };
+    const user = session?.user
+      ? await getUser(session.user.id, true)
+      : undefined;
+    const userRoles = user?.roles?.split(",") ?? [];
+
+    setCurrentUser(user);
+
+    return { session, user, userRoles };
   })
   .derive(async ({ query }) => {
     // Get season with the following priority:

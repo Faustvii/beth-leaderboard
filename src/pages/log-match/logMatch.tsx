@@ -1,6 +1,5 @@
 import { eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
-import { type Session } from "lucia";
 import { syncIfLocal } from "../../../src/lib/dbHelpers.ts";
 import { HeaderHtml } from "../../components/header";
 import { LayoutHtml } from "../../components/Layout";
@@ -17,20 +16,22 @@ import { redirect } from "../../lib";
 import { addMatchSummary } from "../../lib/addMatchSummary";
 import { handleQuestsAfterLoggedMatch } from "../../lib/quest";
 import { toInsertRatingEvent } from "../../lib/ratingEvent";
+import { getCurrentUser } from "../../lib/store.ts";
 import { isDefined } from "../../lib/utils";
 
 export const match = new Elysia({
   prefix: "/match",
 })
   .use(ctx)
-  .onBeforeHandle(({ session, headers, set }) => {
-    if (!session?.user) {
+  .onBeforeHandle(({ headers, set }) => {
+    const user = getCurrentUser();
+    if (!user) {
       redirect({ set, headers }, "/api/auth/signin/azure");
       return true;
     }
   })
-  .get("/", async ({ html, session, headers }) => {
-    return html(() => MatchPage(session, headers));
+  .get("/", async ({ html, headers }) => {
+    return html(() => MatchPage(headers));
   })
   .get(
     "/search",
@@ -175,11 +176,8 @@ export const match = new Elysia({
     },
   );
 
-function MatchPage(
-  session: Session | null,
-  headers: Record<string, string | null>,
-) {
-  return <LayoutHtml headers={headers}>{LogMatchPage(session)}</LayoutHtml>;
+function MatchPage(headers: Record<string, string | null>) {
+  return <LayoutHtml headers={headers}>{LogMatchPage()}</LayoutHtml>;
 }
 
 function LogMatchPage() {

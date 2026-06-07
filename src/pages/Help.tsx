@@ -1,29 +1,27 @@
 import Elysia from "elysia";
-import { type Session } from "lucia";
 import { HeaderHtml } from "../components/header";
 import { LayoutHtml } from "../components/Layout";
 import { NavbarHtml } from "../components/Navbar";
 import { StatsCardHtml } from "../components/StatsCard";
 import { ctx } from "../context";
 import { getCurrentAdmins } from "../db/queries/userQueries";
+import { getCurrentUser } from "../lib/store";
 
 export const Help = new Elysia({
   prefix: "/help",
 })
   .use(ctx)
-  .get("/", async ({ html, session, headers }) => {
-    return html(() => helpPage(session, headers));
+  .get("/", async ({ html, headers }) => {
+    return html(() => helpPage(headers));
   });
 
-async function helpPage(
-  session: Session | null,
-  headers: Record<string, string | null>,
-) {
-  return <LayoutHtml headers={headers}>{page(session)}</LayoutHtml>;
+async function helpPage(headers: Record<string, string | null>) {
+  return <LayoutHtml headers={headers}>{page()}</LayoutHtml>;
 }
 
-async function page(session: Session | null) {
-  const admins = await getCurrentAdmins(!!session?.user);
+async function page() {
+  const user = getCurrentUser();
+  const admins = await getCurrentAdmins(!!user);
 
   return (
     <>

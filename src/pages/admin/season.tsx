@@ -1,6 +1,5 @@
 import { eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
-import { type Session } from "lucia";
 import { HeaderHtml } from "../../components/header";
 import { LayoutHtml } from "../../components/Layout";
 import { NavbarHtml } from "../../components/Navbar";
@@ -26,8 +25,8 @@ export const Season = new Elysia({
   prefix: "/season",
 })
   .use(ctx)
-  .get("/", async ({ html, session, headers }) => {
-    return html(() => seasonPage(session, headers));
+  .get("/", async ({ html, headers }) => {
+    return html(() => seasonPage(headers));
   })
   .get(":id", async ({ params: { id } }) => {
     const seasonToEdit = await getSeason(Number(id));
@@ -114,16 +113,13 @@ export const Season = new Elysia({
     },
   )
 
-  .delete(":id", async ({ params: { id }, session }) => {
+  .delete(":id", async ({ params: { id } }) => {
     await deleteSeason(parseInt(id));
-    return page(session);
+    return page();
   });
 
-async function seasonPage(
-  session: Session | null,
-  headers: Record<string, string | null>,
-) {
-  return <LayoutHtml headers={headers}>{page(session)}</LayoutHtml>;
+async function seasonPage(headers: Record<string, string | null>) {
+  return <LayoutHtml headers={headers}>{page()}</LayoutHtml>;
 }
 
 async function page() {

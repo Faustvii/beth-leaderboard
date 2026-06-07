@@ -1,6 +1,5 @@
 import { Html } from "@kitajs/html";
 import { Elysia } from "elysia";
-import { type Session } from "lucia";
 import { FilterBar } from "../components/FilterBar";
 import { HeaderHtml } from "../components/header";
 import { LayoutHtml } from "../components/Layout";
@@ -20,6 +19,7 @@ import {
   type RatingSystem,
   type TimeInterval,
 } from "../lib/ratings/rating";
+import { getCurrentUser } from "../lib/store";
 
 const playerQuery = async (
   season: Season,
@@ -84,23 +84,16 @@ export const leaderboard = new Elysia({
   prefix: "/leaderboard",
 })
   .use(ctx)
-  .get("/", async ({ html, session, headers, season, ratingSystem, query }) => {
+  .get("/", async ({ html, headers, season, ratingSystem, query }) => {
     const parsedTimeInterval = parseTimeInterval(
       query.interval as string | undefined,
     );
     return html(() =>
-      LeaderboardPage(
-        session,
-        headers,
-        season,
-        ratingSystem,
-        parsedTimeInterval,
-      ),
+      LeaderboardPage(headers, season, ratingSystem, parsedTimeInterval),
     );
   });
 
 export async function LeaderboardPage(
-  session: Session | null,
   headers: Record<string, string | null>,
   season: Season,
   ratingSystem: RatingSystem<Rating>,
@@ -108,18 +101,18 @@ export async function LeaderboardPage(
 ) {
   return (
     <LayoutHtml headers={headers}>
-      {LeaderboardTable(session, season, ratingSystem, timeInterval)}
+      {LeaderboardTable(season, ratingSystem, timeInterval)}
     </LayoutHtml>
   );
 }
 
 async function LeaderboardTable(
-  session: Session | null,
   season: Season,
   ratingSystem: RatingSystem<Rating>,
   timeInterval: TimeInterval | undefined,
 ): Promise<JSX.Element> {
-  const isAuthenticated = !!session?.user;
+  const user = getCurrentUser();
+  const isAuthenticated = !!user;
   const rows = await playerQuery(
     season,
     ratingSystem,

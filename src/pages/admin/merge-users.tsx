@@ -3,7 +3,6 @@ import { eq, type ExtractTablesWithRelations } from "drizzle-orm";
 import { type LibSQLDatabase } from "drizzle-orm/libsql";
 import { type SQLiteTransaction } from "drizzle-orm/sqlite-core";
 import { Elysia, t } from "elysia";
-import { type Session } from "lucia";
 import { HeaderHtml } from "../../components/header";
 import { LayoutHtml } from "../../components/Layout";
 import { NavbarHtml } from "../../components/Navbar";
@@ -33,8 +32,8 @@ export const MergeUsers = new Elysia({
   prefix: "/merge-users",
 })
   .use(ctx)
-  .get("/", async ({ html, session, headers }) => {
-    return html(() => mergeUsersPage(session, headers));
+  .get("/", async ({ html, headers }) => {
+    return html(() => mergeUsersPage(headers));
   })
   .post(
     "/",
@@ -67,11 +66,8 @@ export const MergeUsers = new Elysia({
     },
   );
 
-export async function mergeUsersPage(
-  session: Session | null,
-  headers: Record<string, string | null>,
-) {
-  return <LayoutHtml headers={headers}>{page(session)}</LayoutHtml>;
+export async function mergeUsersPage(headers: Record<string, string | null>) {
+  return <LayoutHtml headers={headers}>{page()}</LayoutHtml>;
 }
 
 async function page() {

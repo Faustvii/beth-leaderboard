@@ -1,6 +1,5 @@
 import { eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
-import { type Session } from "lucia";
 import { HeaderHtml } from "../../components/header";
 import { LayoutHtml } from "../../components/Layout";
 import { NavbarHtml } from "../../components/Navbar";
@@ -14,6 +13,7 @@ import { matches } from "../../db/schema";
 import { allTimeSeason } from "../../db/schema/season";
 import { redirect } from "../../lib";
 import { fromTimezoneToUTC } from "../../lib/dateUtils";
+import { getCurrentUser } from "../../lib/store";
 import { EditMatchModal } from "./components/EditMatchModal";
 import { MatchCard } from "./components/MatchCard";
 
@@ -21,11 +21,12 @@ export const Match = new Elysia({
   prefix: "/match",
 })
   .use(ctx)
-  .get("/", async ({ html, session, headers }) => {
-    return html(() => matchPage(session, headers));
+  .get("/", async ({ html, headers }) => {
+    return html(() => matchPage(headers));
   })
-  .get("/:id", async ({ params: { id }, session }) => {
-    const matchToEdit = await getMatch(Number(id), !!session?.user);
+  .get("/:id", async ({ params: { id } }) => {
+    const user = getCurrentUser();
+    const matchToEdit = await getMatch(Number(id), !!user);
     if (!matchToEdit) return;
     return <EditMatchModal match={matchToEdit} />;
   })
@@ -118,20 +119,18 @@ export const Match = new Elysia({
       }),
     },
   )
-  .delete("/:id", async ({ params: { id }, session }) => {
+  .delete("/:id", async ({ params: { id } }) => {
     await deleteMatch(parseInt(id));
-    return page(session);
+    return page();
   });
 
-export async function matchPage(
-  session: Session | null,
-  headers: Record<string, string | null>,
-) {
-  return <LayoutHtml headers={headers}>{page(session)}</LayoutHtml>;
+export async function matchPage(headers: Record<string, string | null>) {
+  return <LayoutHtml headers={headers}>{page()}</LayoutHtml>;
 }
 
-async function page(session: Session | null) {
-  const matchesWithPlayers = await getMatches(allTimeSeason, !!session?.user);
+async function page() {
+  const user = getCurrentUser();
+  const matchesWithPlayers = await getMatches(allTimeSeason, !!user);
   const globalMatchHistory = matchesWithPlayers
     .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
     .slice(0, 15)

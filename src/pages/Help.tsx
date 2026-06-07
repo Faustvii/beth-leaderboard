@@ -27,7 +27,7 @@ async function page(session: Session | null) {
 
   return (
     <>
-      <NavbarHtml session={session} activePage="help" />
+      <NavbarHtml activePage="help" />
       <HeaderHtml title="Help" />
       <p class="pl-5">
         If you need help deleting or editing a match, you can write one of the

@@ -59,7 +59,7 @@ async function page(
 
   return (
     <>
-      <NavbarHtml session={session} activePage="result" />
+      <NavbarHtml activePage="result" />
       <div class="flex flex-row items-center justify-between">
         <HeaderHtml className="px-0" title="Match result" />
         <div class="flex flex-row items-center gap-2 p-5">

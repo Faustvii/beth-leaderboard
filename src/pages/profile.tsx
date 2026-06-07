@@ -112,7 +112,7 @@ async function page(
 
   return (
     <>
-      <NavbarHtml session={session} activePage="profile" />
+      <NavbarHtml activePage="profile" />
       <div class="flex flex-row items-center justify-between">
         {isOwnProfile && user ? (
           <FoldableCard title={header} doubleSize>

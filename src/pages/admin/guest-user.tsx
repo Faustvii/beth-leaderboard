@@ -53,10 +53,10 @@ export async function guestUserPage(
   return <LayoutHtml headers={headers}>{page(session)}</LayoutHtml>;
 }
 
-async function page(session: Session | null) {
+async function page() {
   return (
     <>
-      <NavbarHtml session={session} activePage="admin" />
+      <NavbarHtml activePage="admin" />
       <HeaderHtml title="Create guest user" />
       <div class="flex w-full flex-col gap-3">
         <UserForm formId="createGuestUser"></UserForm>

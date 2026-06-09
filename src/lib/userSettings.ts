@@ -6,6 +6,7 @@ export type SettingValue = boolean | string | undefined;
 
 export interface UserSettings {
   showHolidays?: boolean;
+  theme?: "default" | "itminds-2026";
 }
 
 export interface CheckboxSettingDefinition {
@@ -29,6 +30,7 @@ export type SettingDefinition =
 
 export const userSettingsDefaults: UserSettings = {
   showHolidays: true,
+  theme: "default",
 };
 
 export const settingDefinitions: SettingDefinition[] = [
@@ -36,6 +38,12 @@ export const settingDefinitions: SettingDefinition[] = [
     key: "showHolidays",
     label: "Show Holidays",
     type: "checkbox",
+  },
+  {
+    key: "theme",
+    label: "Theme",
+    type: "select",
+    options: ["default", "itminds-2026"],
   },
 ];
 
@@ -65,6 +73,10 @@ export async function updateUserSettings(
 
   if (settings.showHolidays !== undefined) {
     settingsToSave.showHolidays = settings.showHolidays;
+  }
+
+  if (settings.theme !== undefined) {
+    settingsToSave.theme = settings.theme;
   }
 
   if (Object.keys(settingsToSave).length > 0) {

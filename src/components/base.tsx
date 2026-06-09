@@ -4,15 +4,20 @@ import { FridayHtml } from "../controllers/holidays/friday";
 import { HalloweenHtml } from "../controllers/holidays/halloween";
 import { getCurrentHolidays } from "../controllers/holidays/holidayController";
 import { ValentineHtml } from "../controllers/holidays/valentine";
+import { getCurrentUser } from "../lib/store";
 import { GitHubLinkHtml } from "./GitHubLink";
 import { LoadingBarHtml } from "./LoadingBar";
 
-export const BaseHtml = ({ children }: PropsWithChildren) => {
+export const BaseHtml = async ({ children }: PropsWithChildren) => {
   const holiday = getCurrentHolidays();
   const isItChristmas = holiday.christmas;
   const isItValentine = holiday.valentine;
   const isItHalloween = holiday.halloween;
   const isItFriday = holiday.friday;
+
+  const user = getCurrentUser();
+  const showHolidays = user?.settings?.showHolidays ?? true;
+
   return (
     <>
       {"<!DOCTYPE html>"}
@@ -50,16 +55,30 @@ export const BaseHtml = ({ children }: PropsWithChildren) => {
         text-white
         "
         >
-          {isItChristmas && <ChristmasHtml renderLayer="background" />}
-          {isItFriday && <FridayHtml renderLayer="background" />}
-          {isItValentine && <ValentineHtml renderLayer="background" />}
-          {isItHalloween && <HalloweenHtml renderLayer="background" />}
+          {showHolidays && isItChristmas && (
+            <ChristmasHtml renderLayer="background" />
+          )}
+          {showHolidays && isItFriday && (
+            <FridayHtml renderLayer="background" />
+          )}
+          {showHolidays && isItValentine && (
+            <ValentineHtml renderLayer="background" />
+          )}
+          {showHolidays && isItHalloween && (
+            <HalloweenHtml renderLayer="background" />
+          )}
           <LoadingBarHtml />
           <div style="position: relative;">{children}</div>
           {/* {isItFriday && <FridayHtml renderLayer="effects" />} REENABLE EFTER JUL*/}
-          {isItHalloween && <HalloweenHtml renderLayer="effects" />}
-          {isItValentine && <ValentineHtml renderLayer="effects" />}
-          {isItChristmas && <ChristmasHtml renderLayer="effects" />}
+          {showHolidays && isItHalloween && (
+            <HalloweenHtml renderLayer="effects" />
+          )}
+          {showHolidays && isItValentine && (
+            <ValentineHtml renderLayer="effects" />
+          )}
+          {showHolidays && isItChristmas && (
+            <ChristmasHtml renderLayer="effects" />
+          )}
           <GitHubLinkHtml />
         </body>
       </html>

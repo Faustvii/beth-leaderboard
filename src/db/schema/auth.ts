@@ -1,4 +1,5 @@
 import { blob, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { type UserSettings } from "../../lib/userSettings";
 
 export const userTbl = sqliteTable("user", {
   id: text("id").primaryKey(),
@@ -9,6 +10,7 @@ export const userTbl = sqliteTable("user", {
     .$defaultFn(() => "/static/crokinole.svg"),
   roles: text("roles"),
   nickname: text("nickname").notNull().default(""),
+  settings: text("settings", { mode: "json" }).$type<UserSettings>(),
 });
 
 export const session = sqliteTable("user_session", {

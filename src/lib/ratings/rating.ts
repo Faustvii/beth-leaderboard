@@ -3,6 +3,10 @@ import { getDatePartFromDate, subtractDays } from "../dateUtils";
 import { isDefined } from "../utils";
 import { elo, type EloRating } from "./eloRatingSystem";
 import { gameCount, type GameCountRating } from "./gameCountRatingSystem";
+import {
+  kitchenThermometer,
+  type KitchenThermometerRating,
+} from "./kitchenThermometerRatingSystem";
 import { openskill, type OpenskillRating } from "./openskillRatingSystem";
 import { scoreAvg, type ScoreAvgRating } from "./scoreAvgRatingSystem";
 import { scoreDiff, type ScoreDiffRating } from "./scoreDiffRatingSystem";
@@ -27,7 +31,8 @@ export type Rating =
   | StreakMultiplierRating
   | UnderdogRating
   | GameCountRating
-  | UniqueOpponentsBeatenRating;
+  | UniqueOpponentsBeatenRating
+  | KitchenThermometerRating;
 /* eslint-enable @typescript-eslint/no-duplicate-type-constituents */
 
 export interface RatingSystem<TRating> {
@@ -35,6 +40,7 @@ export interface RatingSystem<TRating> {
   defaultRating: TRating;
   rateMatch: (match: MatchWithRatings<TRating>) => PlayerWithRating<TRating>[];
   toNumber: (rating: TRating) => number;
+  toString: (rating: TRating) => string;
   equals: (a: TRating | undefined, b: TRating | undefined) => boolean;
 }
 
@@ -249,6 +255,8 @@ export function getRatingSystem(type: RatingSystemType): RatingSystem<Rating> {
       return uniqueOpponentsBeaten() as RatingSystem<Rating>;
     case "elo":
       return elo() as RatingSystem<Rating>;
+    case "kitchenThermometer":
+      return kitchenThermometer() as RatingSystem<Rating>;
   }
 }
 
@@ -272,6 +280,8 @@ export function prettyRatingSystemType(ratingSystem: RatingSystemType): string {
       return "Game Count";
     case "uniqueOpponentsBeaten":
       return "Unique Opponents Beaten";
+    case "kitchenThermometer":
+      return "Kitchen Thermometer";
   }
 }
 

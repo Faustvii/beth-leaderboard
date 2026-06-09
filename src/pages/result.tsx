@@ -1,6 +1,7 @@
 import { type PropsWithChildren } from "@kitajs/html";
 import Elysia from "elysia";
 import { type Session } from "lucia";
+import { DiffIcon } from "../components/DiffIcon";
 import { HeaderHtml } from "../components/header";
 import { HxButton } from "../components/HxButton";
 import { LayoutHtml } from "../components/Layout";
@@ -119,10 +120,8 @@ async function RatingDiff({
     .map((x) => ({
       playerId: x.player.id,
       playerName: x.player.name,
-      ratingBefore: isDefined(x.ratingBefore)
-        ? ratingSystem.toNumber(x.ratingBefore)
-        : undefined,
-      ratingAfter: ratingSystem.toNumber(x.ratingAfter),
+      ratingAfter: x.ratingAfter,
+      ratingBefore: x.ratingBefore,
       rankBefore: x.rankBefore,
       rankAfter: x.rankAfter,
     }))
@@ -131,7 +130,7 @@ async function RatingDiff({
   return (
     <RatingDiffTable>
       {matchDiff.map((playerDiff) => (
-        <RatingDiffTableRow {...playerDiff} />
+        <RatingDiffTableRow {...playerDiff} ratingSystem={ratingSystem} />
       ))}
     </RatingDiffTable>
   );
@@ -167,15 +166,17 @@ function RatingDiffTable({ children }: PropsWithChildren): JSX.Element {
 function RatingDiffTableRow({
   playerId,
   playerName,
-  ratingBefore,
   ratingAfter,
+  ratingBefore,
+  ratingSystem,
   rankBefore,
   rankAfter,
 }: {
   playerId: string;
   playerName: string;
-  ratingBefore: number | undefined;
-  ratingAfter: number;
+  ratingAfter: Rating;
+  ratingBefore: Rating | undefined;
+  ratingSystem: RatingSystem<Rating>;
   rankBefore: number | undefined;
   rankAfter: number;
 }): JSX.Element {
@@ -214,43 +215,18 @@ function RatingDiffTableRow({
           </div>
         </th>
         <td class="px-1 py-4 md:px-3 lg:px-6">
-          <span class="inline-block	w-8">{ratingAfter}</span>
+          <span class="inline-block">{ratingSystem.toString(ratingAfter)}</span>
           <DiffIcon
-            before={ratingBefore}
-            after={ratingAfter}
+            before={
+              isDefined(ratingBefore)
+                ? ratingSystem.toNumber(ratingBefore)
+                : undefined
+            }
+            after={ratingSystem.toNumber(ratingAfter)}
             isHigherBetter={true}
           />
         </td>
       </tr>
     </>
-  );
-}
-
-function DiffIcon({
-  before,
-  after,
-  isHigherBetter,
-}: {
-  before: number | undefined;
-  after: number;
-  isHigherBetter: boolean;
-}): JSX.Element {
-  const areDefined = isDefined(before) && isDefined(after);
-  const areEqual = before === after;
-  const shouldDisplay = areDefined && !areEqual;
-
-  if (!shouldDisplay) {
-    return <></>;
-  }
-
-  const difference = after - before;
-  const isPositive = difference > 0;
-  const isImproved = isHigherBetter ? isPositive : !isPositive;
-
-  return (
-    <span class={["pl-1", isImproved ? "text-green-500" : "text-red-500"]}>
-      {isImproved ? "▲" : "▼"}
-      {Math.abs(difference)}
-    </span>
   );
 }

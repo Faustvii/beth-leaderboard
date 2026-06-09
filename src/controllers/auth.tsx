@@ -45,6 +45,7 @@ export const authController = new Elysia({
 
       // Check if the user exists
       const existingUser = await readDb.query.userTbl.findFirst({
+        columns: { picture: false },
         where: eq(userSchema.email, email),
       });
 
@@ -97,7 +98,7 @@ export const authController = new Elysia({
     "/azure/callback",
     async ({ set, query, headers, writeAuth, redirect, readDb }) => {
       const { code, state } = query;
-      const cookies = parseCookie(headers.cookie || "");
+      const cookies = parseCookie(headers.cookie ?? "");
       const state_cookie = cookies.azure_auth_state;
       const verifier_cookie = cookies.azure_auth_code_verifier;
 
@@ -146,6 +147,7 @@ export const authController = new Elysia({
           if (normalizedAzureUser.email) {
             console.log("linking existing user with azureAd");
             const existingDbUser = await readDb.query.userTbl.findFirst({
+              columns: { picture: false },
               where: eq(userSchema.email, normalizedAzureUser.email),
             });
 

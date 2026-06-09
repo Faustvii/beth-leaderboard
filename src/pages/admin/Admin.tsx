@@ -6,6 +6,7 @@ import { LayoutHtml } from "../../components/Layout";
 import { NavbarHtml } from "../../components/Navbar";
 import { ctx } from "../../context";
 import { redirect } from "../../lib";
+import { EditUser } from "./edit-user";
 import { GuestUser } from "./guest-user";
 import { Match } from "./match";
 import { MergeUsers } from "./merge-users";
@@ -16,7 +17,7 @@ export const Admin = new Elysia({
 })
   .use(ctx)
   .onBeforeHandle(({ session, headers, set, userRoles }) => {
-    if (!session || !session.user) {
+    if (!session?.user) {
       redirect({ set, headers }, "/api/auth/signin/azure");
       return true;
     }
@@ -26,6 +27,7 @@ export const Admin = new Elysia({
     }
   })
   .use(Season)
+  .use(EditUser)
   .use(GuestUser)
   .use(Match)
   .use(MergeUsers)
@@ -48,6 +50,9 @@ async function page(session: Session | null) {
       <div class="grid grid-cols-1 gap-4 p-6 md:grid-cols-2">
         <ActionCard title="Manage Seasons" icon="🗓️" action="/admin/season">
           Start a new season or manage and configure settings.
+        </ActionCard>
+        <ActionCard title="Edit User" icon="✏️" action="/admin/edit-user">
+          Change a user&apos;s full name or nickname.
         </ActionCard>
         <ActionCard
           title="Create Guest User"

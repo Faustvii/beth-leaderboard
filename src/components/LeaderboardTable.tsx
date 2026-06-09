@@ -1,24 +1,27 @@
 import { type RESULT } from "../lib/matchStatistics";
+import { type Rating, type RatingSystem } from "../lib/ratings/rating";
 import { LeaderboardRowHtml } from "./LeaderboardRow";
 
 export const LeaderboardTableHtml = ({
   rows,
+  ratingSystem,
   isCurrentSeason,
 }: {
   rows: {
     userId: string;
     rank: number;
     name: string;
-    rating: number;
-    ratingBefore?: number;
+    rating: Rating;
+    ratingBefore?: Rating;
     rankBefore?: number;
     lastPlayed: Date;
     latestPlayerResults: {
       winStreak: number;
       loseStreak: number;
       results: RESULT[];
-    } | null;
+    };
   }[];
+  ratingSystem: RatingSystem<Rating>;
   isCurrentSeason: boolean;
 }) => (
   <>
@@ -42,6 +45,7 @@ export const LeaderboardTableHtml = ({
             {rows.map((row) => (
               <LeaderboardRowHtml
                 {...row}
+                ratingSystem={ratingSystem}
                 isCurrentSeason={isCurrentSeason}
                 isLowestRanked={row.rank === rows.length}
               />

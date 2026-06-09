@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-empty-interface */
 /* eslint-disable @typescript-eslint/consistent-type-imports */
 /// <reference types="lucia" />
 declare namespace Lucia {
@@ -10,5 +9,6 @@ declare namespace Lucia {
     picture?: string | null;
     roles?: string | null;
   }
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type -- Lucia module augmentation hook
   interface DatabaseSessionAttributes {}
 }

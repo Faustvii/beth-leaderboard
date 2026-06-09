@@ -16,7 +16,7 @@ if (config.env.DATABASE_CONNECTION_TYPE === "local") {
 const options = {
   local: { url: "file:data/local.sqlite" },
   remote: {
-    url: config.env.DATABASE_URL || "",
+    url: config.env.DATABASE_URL ?? "",
     authToken: config.env.DATABASE_AUTH_TOKEN!,
   },
   "local-replica": {
@@ -30,7 +30,7 @@ const options = {
 export const readClient = createClient(options[DATABASE_CONNECTION_TYPE]);
 
 const remoteOptions = {
-  url: config.env.DATABASE_URL || "",
+  url: config.env.DATABASE_URL ?? "",
   authToken: config.env.DATABASE_AUTH_TOKEN!,
 };
 let remoteDbClient = readClient;

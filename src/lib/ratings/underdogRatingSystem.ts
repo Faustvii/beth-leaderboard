@@ -162,6 +162,10 @@ export function underdog(
       return rating;
     },
 
+    toString(rating: UnderdogRating) {
+      return this.toNumber(rating).toString();
+    },
+
     equals(a: UnderdogRating | undefined, b: UnderdogRating | undefined) {
       return a === b;
     },

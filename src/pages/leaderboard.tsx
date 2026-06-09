@@ -70,16 +70,12 @@ const playerQuery = async (
       rankBefore:
         changes?.rankBefore !== undefined ? changes.rankBefore + 1 : undefined,
       name: player.player.name,
-      rating: ratingSystem.toNumber(player.rating),
-      ratingBefore: changes?.ratingBefore
-        ? ratingSystem.toNumber(changes.ratingBefore)
-        : undefined,
+      rating: player.rating,
+      ratingBefore: changes?.ratingBefore,
       lastPlayed:
         lastPlayed.find((match) => match.player.id === player.player.id)
-          ?.lastPlayed || new Date(0),
-      latestPlayerResults: latestResults[player.player.id]
-        ? latestResults[player.player.id]
-        : null,
+          ?.lastPlayed ?? new Date(0),
+      latestPlayerResults: latestResults[player.player.id] ?? [],
     };
   });
 };
@@ -146,6 +142,7 @@ async function LeaderboardTable(
       </div>
       <LeaderboardTableHtml
         rows={rows}
+        ratingSystem={ratingSystem}
         isCurrentSeason={isCurrentSeason(season.id, seasons)}
       />
     </>

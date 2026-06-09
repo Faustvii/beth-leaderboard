@@ -10,6 +10,7 @@ import { NavbarHtml } from "../components/Navbar";
 import { ProfileForm } from "../components/ProfileForm";
 import { QuestDescription } from "../components/QuestDescription";
 import { SeasonPicker } from "../components/SeasonPicker";
+import { SettingsForm } from "../components/SettingsForm";
 import { StatsCardHtml } from "../components/StatsCard";
 import { ctx } from "../context";
 import { getMatches } from "../db/queries/matchQueries";
@@ -92,7 +93,11 @@ async function page(
   );
   console.log(`player stats took ${elaspedTimeMs}ms to get from db`);
   const activeQuestsForProfile = await getActiveQuestsForPlayer(userId);
-  const user = await getUser(userId, !!currentUser);
+  const isOwnProfile = currentUser?.id === userId;
+  const user = isOwnProfile
+    ? currentUser
+    : await getUser(userId, !!currentUser);
+  const userSettings = user?.settings ?? {};
   let profileName = `Your stats - ${user?.nickname}`;
   if (!currentUser || (currentUser && currentUser.id !== userId)) {
     if (user) {
@@ -100,7 +105,6 @@ async function page(
     }
   }
   const header = profileName;
-  const isOwnProfile = currentUser?.id === userId;
 
   return (
     <>
@@ -119,6 +123,13 @@ async function page(
           <SeasonPicker basePath={`/profile/${userId}`} season={season} />
         </div>
       </div>
+      {isOwnProfile && user ? (
+        <FoldableCard title="Settings" doubleSize>
+          <div class="flex w-full flex-col flex-wrap justify-between lg:flex-row">
+            <SettingsForm settings={userSettings}></SettingsForm>
+          </div>
+        </FoldableCard>
+      ) : null}
       {profileQuests(activeQuestsForProfile)}
       {profileStats(matches, userId, ratingSystem)}
     </>

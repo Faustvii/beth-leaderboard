@@ -26,6 +26,7 @@ export const GuestUser = new Elysia({
         email: null,
         roles: null,
         nickname: nickname,
+        settings: null,
       };
 
       const [{ id: userId }] = await writeDb

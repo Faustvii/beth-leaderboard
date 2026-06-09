@@ -332,6 +332,90 @@ export function getTimeIntervalRatingDiff<TRating>(
   return diffRatings(ratingsBefore, ratingsAfter, allPlayerIds, system);
 }
 
+export interface LineChartRaceSeries {
+  playerId: string;
+  name: string;
+  points: { x: number; y: number | null; active?: boolean }[];
+}
+
+export function getLineChartRaceHistory<TRating>(
+  matches: Match[],
+  system: RatingSystem<TRating>,
+  topN = 10,
+): LineChartRaceSeries[] {
+  if (matches.length === 0) return [];
+
+  const sortedMatches = matches.toSorted(
+    (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),
+  );
+
+  interface SeriesAccumulator {
+    name: string;
+    points: { x: number; y: number | null; active?: boolean }[];
+    lastY: number | null;
+  }
+
+  const seriesByPlayerId: Record<string, SeriesAccumulator> = {};
+  let ratings: Record<string, PlayerWithRating<TRating>> = {};
+
+  for (const match of sortedMatches) {
+    ratings = getRatingsAfterMatch(ratings, match, system);
+
+    const ranked = Object.values(ratings).toSorted(
+      (a, b) => system.toNumber(b.rating) - system.toNumber(a.rating),
+    );
+
+    const x = match.createdAt.getTime();
+
+    ranked.forEach((entry, index) => {
+      const rank = index + 1;
+      const currentY: number | null =
+        rank <= topN ? system.toNumber(entry.rating) : null;
+      const existing = seriesByPlayerId[entry.player.id];
+      const isParticipant = hasPlayer(match, entry.player.id);
+
+      if (!existing) {
+        if (currentY !== null) {
+          seriesByPlayerId[entry.player.id] = {
+            name: entry.player.name,
+            points: [{ x, y: currentY, active: isParticipant }],
+            lastY: currentY,
+          };
+        }
+      } else if (existing.lastY !== currentY) {
+        const isExit = existing.lastY !== null && currentY === null;
+        const isEntry = existing.lastY === null && currentY !== null;
+
+        if (isExit) {
+          // Shoulder = the actual exit event; carries the active/passive flag.
+          existing.points.push({ x, y: existing.lastY, active: isParticipant });
+          existing.points.push({ x, y: null });
+        } else if (isEntry) {
+          existing.points.push({ x, y: currentY, active: isParticipant });
+        } else {
+          // Pure rating change within top-N — not an entry or exit event.
+          existing.points.push({ x, y: currentY });
+        }
+        existing.lastY = currentY;
+      }
+    });
+  }
+
+  const finalX = sortedMatches[sortedMatches.length - 1].createdAt.getTime();
+  for (const entry of Object.values(seriesByPlayerId)) {
+    const last = entry.points[entry.points.length - 1];
+    if (last.x !== finalX) {
+      entry.points.push({ x: finalX, y: entry.lastY });
+    }
+  }
+
+  return Object.entries(seriesByPlayerId).map(([playerId, entry]) => ({
+    playerId,
+    name: entry.name,
+    points: entry.points,
+  }));
+}
+
 export type TimeInterval = "today" | "daily" | "weekly" | "monthly";
 
 export function getTimeIntervalCutoffDate(interval: TimeInterval): Date {

@@ -1,6 +1,7 @@
 import { notEmpty, unique } from ".";
 import { getDatePartFromDate } from "./dateUtils";
 import {
+  getLineChartRaceHistory,
   getPlayerRatingHistory,
   type Match,
   type Rating,
@@ -12,6 +13,9 @@ export enum RESULT {
   LOSS = "LOSS",
   DRAW = "DRAW",
 }
+
+// Arbitrary threshold separating convincing wins from close games.
+const BIG_WIN_SCORE_DIFF = 50;
 
 class MatchStatistics {
   static getMatchHistory(matches: Match[], userId: string) {
@@ -136,6 +140,14 @@ class MatchStatistics {
           highestLoseStreak: playerStreak.highestLoseStreak,
         }
       : { highestStreak: 0, loseStreak: 0 };
+  }
+
+  static getLineChartRace(
+    matches: Match[],
+    ratingSystem: RatingSystem<Rating>,
+    topN?: number,
+  ) {
+    return getLineChartRaceHistory(matches, ratingSystem, topN);
   }
 
   static getRatingHistory(
@@ -654,17 +666,22 @@ class MatchStatistics {
     const blackWins = matches.filter((mt) => mt.result === "Black").length;
     const totalGames = matches.length;
     const numOfDraws = matches.filter((mt) => mt.result === "Draw").length;
-    const whiteWinPercentage = (whiteWins / totalGames) * 100;
-    const blackWinPercentage = (blackWins / totalGames) * 100;
+
+    const matchesWithWinner = matches.filter((mt) => mt.result !== "Draw");
+    const bigWins = matchesWithWinner.filter(
+      (mt) => mt.scoreDiff >= BIG_WIN_SCORE_DIFF,
+    ).length;
+    const smallWins = matchesWithWinner.length - bigWins;
+
+    const pct = (n: number) => (totalGames > 0 ? (n / totalGames) * 100 : 0);
 
     return {
-      blackWins: { wins: blackWins, procentage: blackWinPercentage },
-      whiteWins: { wins: whiteWins, procentage: whiteWinPercentage },
+      blackWins: { wins: blackWins, procentage: pct(blackWins) },
+      whiteWins: { wins: whiteWins, procentage: pct(whiteWins) },
       totalGames: totalGames,
-      numOfDraws: {
-        draws: numOfDraws,
-        procentage: (numOfDraws / totalGames) * 100,
-      },
+      numOfDraws: { draws: numOfDraws, procentage: pct(numOfDraws) },
+      bigWins: { wins: bigWins, procentage: pct(bigWins) },
+      smallWins: { wins: smallWins, procentage: pct(smallWins) },
     };
   }
 

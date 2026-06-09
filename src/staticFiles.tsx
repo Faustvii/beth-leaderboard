@@ -16,6 +16,11 @@ export const staticController = new Elysia({
     const file = Bun.file(fileName);
     return etagFileServe(file, fileName, ctx.set, ctx.headers);
   })
+  .get("/LineChartRace.js", (ctx) => {
+    const fileName = "public/LineChartRace.js";
+    const file = Bun.file(fileName);
+    return etagFileServe(file, fileName, ctx.set, ctx.headers);
+  })
   .get("/favicon.ico", (ctx) => {
     const fileName = "public/favicon.ico";
     const file = Bun.file(fileName);

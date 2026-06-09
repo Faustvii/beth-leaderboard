@@ -6,6 +6,7 @@ import { HeaderHtml } from "../components/header";
 import { LayoutHtml } from "../components/Layout";
 import { MatchResultLink } from "../components/MatchResultLink";
 import { NavbarHtml } from "../components/Navbar";
+import { RatingSystemPicker } from "../components/RatingSystemPicker";
 import { SeasonPicker } from "../components/SeasonPicker";
 import { StatsCardHtml } from "../components/StatsCard";
 import { ctx } from "../context";
@@ -15,25 +16,38 @@ import { measure, notEmpty } from "../lib";
 import { skibidiInBetweenText } from "../lib/addMatchSummary.tsx";
 import { getDatePartFromDate } from "../lib/dateUtils";
 import MatchStatistics from "../lib/matchStatistics";
-import { type Match } from "../lib/ratings/rating";
+import {
+  type Match,
+  type Rating,
+  type RatingSystem,
+} from "../lib/ratings/rating";
 
 export const stats = new Elysia({
   prefix: "/stats",
 })
   .use(ctx)
-  .get("/", async ({ html, session, headers, season }) => {
-    return html(() => statsPage(session, headers, season));
+  .get("/", async ({ html, session, headers, season, ratingSystem }) => {
+    return html(() => statsPage(session, headers, season, ratingSystem));
   });
 
 async function statsPage(
   session: Session | null,
   headers: Record<string, string | null>,
   season: Season,
+  ratingSystem: RatingSystem<Rating>,
 ) {
-  return <LayoutHtml headers={headers}>{page(session, season)}</LayoutHtml>;
+  return (
+    <LayoutHtml headers={headers}>
+      {page(session, season, ratingSystem)}
+    </LayoutHtml>
+  );
 }
 
-async function page(session: Session | null, season: Season) {
+async function page(
+  session: Session | null,
+  season: Season,
+  ratingSystem: RatingSystem<Rating>,
+) {
   const { elaspedTimeMs, result: matches } = await measure(async () => {
     return await getMatches(season, !!session?.user);
   });
@@ -64,23 +78,87 @@ async function page(session: Session | null, season: Season) {
     true,
   );
 
-  const gameResults = MatchStatistics.winsByResult(matches);
   console.log("metrics took ", performance.now() - now + "ms  to run");
+  const gameResults = MatchStatistics.winsByResult(matches);
 
   const data = {
-    labels: ["White win", "Black win", "Draw"],
+    labels: ["Wins", "Draw"],
     datasets: [
       {
         label: "Matches",
         data: [
-          gameResults.whiteWins.wins,
-          gameResults.blackWins.wins,
+          gameResults.whiteWins.wins + gameResults.blackWins.wins,
           gameResults.numOfDraws.draws,
         ],
-        backgroundColor: ["#fffffe", "rgb(35, 43, 43)", "#D3D3D3"],
+        backgroundColor: ["#ff8906", "#fffffe"],
         hoverOffset: 4,
       },
     ],
+  };
+
+  const lineChartRaceTopN = 10;
+  const lineChartRace = MatchStatistics.getLineChartRace(
+    matches,
+    ratingSystem,
+    lineChartRaceTopN,
+  );
+
+  const lineChartRaceConfig: ChartConfiguration = {
+    type: "line",
+    data: {
+      datasets: lineChartRace.map((series) => {
+        const color = colorForPlayerId(series.playerId);
+        return {
+          label: series.name,
+          // Chart.js types require y: number, but at runtime y: null marks
+          // a gap in the line when used with parsing: false.
+          data: series.points as unknown as { x: number; y: number }[],
+          borderColor: color,
+          backgroundColor: color,
+          borderWidth: 2,
+          pointRadius: 0,
+        };
+      }),
+    },
+    options: {
+      parsing: false,
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: false,
+      layout: { padding: { right: 110, bottom: 32 } },
+      scales: {
+        x: {
+          type: "linear",
+          ticks: { display: false },
+          grid: { color: "rgba(255,255,255,0.05)" },
+        },
+        y: {
+          ticks: {
+            color: "#fffffe",
+            autoSkip: true,
+            maxTicksLimit: 8,
+          },
+          grid: { color: "rgba(255,255,255,0.05)" },
+          title: {
+            display: true,
+            text: "Rating",
+            color: "rgba(255,255,255,0.55)",
+          },
+        },
+      },
+      plugins: {
+        legend: { display: false },
+        tooltip: { enabled: false },
+        // @ts-expect-error custom plugin registered in src/components/LineChartRace.tsx
+        lineChartRace: {
+          enabled: true,
+          autoplay: false,
+          totalRaceMs: 75000,
+          windowSize: 50,
+          playButtonId: "lineRacePlayBtn",
+        },
+      },
+    },
   };
 
   const config: ChartConfiguration = {
@@ -110,11 +188,49 @@ async function page(session: Session | null, season: Season) {
       <NavbarHtml session={session} activePage="stats" />
       <div class="flex flex-row items-center justify-between">
         <HeaderHtml title="Statistics" />
-        <div class="flex-shrink-0">
+        <div class="flex flex-shrink-0 gap-2">
+          <RatingSystemPicker
+            basePath="/stats"
+            season={season}
+            ratingSystem={ratingSystem}
+          />
           <SeasonPicker basePath="/stats" season={season} />
         </div>
       </div>
       <div class="grid grid-cols-6 gap-3 md:grid-cols-12">
+        <StatsCardHtml title="Season Progress" doubleSize>
+          <div class="flex w-full flex-col gap-3">
+            {lineChartRace.length > 0 ? (
+              <>
+                <div class="flex flex-row gap-2">
+                  <button
+                    id="lineRacePlayBtn"
+                    type="button"
+                    class="rounded-lg bg-blue-500 px-3 py-1 text-sm transition duration-200 hover:bg-blue-600"
+                    _="on click call window.__lineRace.toggle('chartLineRace', 'lineRacePlayBtn')"
+                  >
+                    Play
+                  </button>
+                  <button
+                    type="button"
+                    class="rounded-lg bg-slate-600 px-3 py-1 text-sm transition duration-200 hover:bg-slate-500"
+                    _="on click call window.__lineRace.reset('chartLineRace', 'lineRacePlayBtn')"
+                  >
+                    Reset
+                  </button>
+                </div>
+                <div class="h-96 w-full">
+                  <Chart
+                    id="chartLineRace"
+                    config={lineChartRaceConfig}
+                  ></Chart>
+                </div>
+              </>
+            ) : (
+              <span class="text-sm">No matches yet</span>
+            )}
+          </div>
+        </StatsCardHtml>
         <StatsCardHtml title="Games">
           <>
             <div class="flex flex-col items-center justify-center gap-2">
@@ -137,28 +253,28 @@ async function page(session: Session | null, season: Season) {
             <Chart id="chartDoughnut" config={config}></Chart>
           </div>
         </StatsCardHtml>
-        <StatsCardHtml title="Winrate By Color">
+        <StatsCardHtml title="Types of wins">
           <>
             <div class="flex flex-col items-center justify-center gap-1">
-              <span class="text-5xl">{gameResults.whiteWins.wins}</span>
+              <span class="text-5xl">{gameResults.bigWins.wins}</span>
               <span class="text-md">
-                {gameResults.whiteWins.procentage.toFixed(2)}%
+                {gameResults.bigWins.procentage.toFixed(2)}%
               </span>
-              <span class="text-xl">White wins</span>
+              <span class="text-xl">Big wins (50+)</span>
             </div>
             <div class="flex flex-col items-center justify-center gap-1">
+              <span class="text-5xl">{gameResults.smallWins.wins}</span>
+              <span class="text-md">
+                {gameResults.smallWins.procentage.toFixed(2)}%
+              </span>
+              <span class="text-xl">Close games</span>
+            </div>
+            <div class="flex h-full flex-col items-center justify-center gap-1">
               <span class="text-5xl">{gameResults.numOfDraws.draws}</span>
               <span class="text-md">
                 {gameResults.numOfDraws.procentage.toFixed(2)}%
               </span>
               <span class="text-xl">Draws</span>
-            </div>
-            <div class="flex h-full flex-col items-center justify-center gap-1">
-              <span class="text-5xl">{gameResults.blackWins.wins}</span>
-              <span class="text-md">
-                {gameResults.blackWins.procentage.toFixed(2)}%
-              </span>
-              <span class="text-xl">Black wins</span>
             </div>
           </>
         </StatsCardHtml>
@@ -243,6 +359,14 @@ async function page(session: Session | null, season: Season) {
       <div class="flex flex-col items-center"></div>
     </>
   );
+}
+
+function colorForPlayerId(id: string) {
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) {
+    hash = (hash * 31 + id.charCodeAt(i)) >>> 0;
+  }
+  return `hsl(${hash % 360}, 70%, 60%)`;
 }
 
 async function biggestWin(matches: Match[]) {

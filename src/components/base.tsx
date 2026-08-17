@@ -5,6 +5,7 @@ import { HalloweenHtml } from "../controllers/holidays/halloween";
 import { getCurrentHolidays } from "../controllers/holidays/holidayController";
 import { ValentineHtml } from "../controllers/holidays/valentine";
 import { getCurrentUser } from "../lib/store";
+import { cssVariables, toCssBlock } from "../styles/theme-styles";
 import { GitHubLinkHtml } from "./GitHubLink";
 import { LoadingBarHtml } from "./LoadingBar";
 
@@ -42,73 +43,7 @@ export const BaseHtml = async ({ children }: PropsWithChildren) => {
             href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@100;300;400;500;600;700&display=swap"
             rel="stylesheet"
           />
-          <style>
-            {`
-              :root {
-                /* Background */
-                --color-bg-base: 15, 23, 42;
-                --color-bg-gradient-from: 51, 65, 85;
-                --color-bg-gradient-via: 30, 41, 59;
-                --color-bg-gradient-to: 17, 24, 39;
-
-                /* Surface (cards, panels, modals) */
-                --color-surface: 30, 41, 59;
-                --color-surface-elevated: 31, 41, 55;
-                --color-surface-hover: 51, 65, 85;
-                --color-surface-input: 71, 85, 105;
-
-                /* Text */
-                --color-text-primary: 255, 255, 255;
-                --color-text-secondary: 209, 213, 219;
-                --color-text-muted: 156, 163, 175;
-                --color-text-subtle: 107, 114, 128;
-                --color-text-disabled: 75, 85, 99;
-
-                /* Border */
-                --color-border-default: 55, 65, 81;
-                --color-border-light: 100, 116, 139;
-                --color-border-input: 75, 85, 99;
-                --color-border-input-light: 209, 213, 219;
-
-                /* Primary */
-                --color-primary: 255, 137, 6;
-
-                /* Semantic Colors */
-                --color-action: 59, 130, 246;
-                --color-action-hover: 37, 99, 235;
-                --color-action-focus: 96, 165, 250;
-                --color-action-dark: 30, 64, 175;
-
-                --color-success: 15, 118, 110;
-
-                --color-danger: 239, 68, 68;
-                --color-danger-hover: 185, 28, 28;
-
-                --color-warning: 250, 204, 21;
-                --color-warning-hover: 253, 224, 71;
-
-                /* Ring */
-                --color-ring-black: 0, 0, 0;
-                --color-ring-gray: 55, 65, 81;
-
-                /* Border Radius */
-                --radius-sm: 0.125rem;
-                --radius-md: 0.375rem;
-                --radius-lg: 0.5rem;
-                --radius-xl: 0.75rem;
-                --radius-full: 9999px;
-
-                /* Shadows */
-                --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-                --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-
-                /* Transitions */
-                --transition-fast: 150ms;
-                --transition-normal: 200ms;
-                --transition-slow: 300ms;
-              }
-            `}
-          </style>
+          <style>{toCssBlock(cssVariables)}</style>
         </head>
         <body
           hx-boost="true"

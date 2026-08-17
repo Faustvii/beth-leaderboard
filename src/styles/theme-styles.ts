@@ -55,6 +55,9 @@ interface CssVariables {
   transitionFast: string;
   transitionNormal: string;
   transitionSlow: string;
+  // Typography
+  fontFamilyUrl: string;
+  fontFamily: string;
 }
 
 const rgb = ({ r, g, b }: Rgb) => `${r}, ${g}, ${b}`;
@@ -101,6 +104,9 @@ export const classicTheme: CssVariables = {
   transitionFast: "150ms",
   transitionNormal: "200ms",
   transitionSlow: "300ms",
+  fontFamilyUrl:
+    "https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@100;300;400;500;600;700&display=swap",
+  fontFamily: "Roboto Mono, monospace",
 };
 
 export const claudeTheme: CssVariables = {
@@ -145,6 +151,9 @@ export const claudeTheme: CssVariables = {
   transitionFast: "150ms",
   transitionNormal: "200ms",
   transitionSlow: "300ms",
+  fontFamilyUrl:
+    "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&display=swap",
+  fontFamily: '"Cormorant Garamond", Garamond, "Times New Roman", serif',
 };
 
 export function toCssBlock(v: CssVariables): string {
@@ -188,5 +197,6 @@ export function toCssBlock(v: CssVariables): string {
   --transition-fast: ${v.transitionFast};
   --transition-normal: ${v.transitionNormal};
   --transition-slow: ${v.transitionSlow};
+  --font-family: ${v.fontFamily};
 }`;
 }

@@ -156,6 +156,53 @@ export const claudeTheme: CssVariables = {
   fontFamily: '"Cormorant Garamond", Garamond, "Times New Roman", serif',
 };
 
+export const sillyTheme: CssVariables = {
+  bgBase: { r: 255, g: 255, b: 255 },
+  bgGradientFrom: { r: 255, g: 0, b: 128 },
+  bgGradientVia: { r: 255, g: 255, b: 0 },
+  bgGradientTo: { r: 0, g: 255, b: 255 },
+  surface: { r: 255, g: 255, b: 200 },
+  surfaceElevated: { r: 255, g: 255, b: 220 },
+  surfaceHover: { r: 255, g: 200, b: 200 },
+  surfaceInput: { r: 255, g: 255, b: 230 },
+  textPrimary: { r: 128, g: 0, b: 128 },
+  textSecondary: { r: 255, g: 69, b: 0 },
+  textMuted: { r: 255, g: 105, b: 180 },
+  textSubtle: { r: 255, g: 140, b: 0 },
+  textDisabled: { r: 219, g: 112, b: 147 },
+  borderDefault: { r: 255, g: 182, b: 193 },
+  borderLight: { r: 255, g: 192, b: 203 },
+  borderInput: { r: 255, g: 105, b: 180 },
+  borderInputLight: { r: 255, g: 182, b: 193 },
+  primary: { r: 255, g: 0, b: 255 },
+  action: { r: 0, g: 255, b: 128 },
+  actionHover: { r: 0, g: 200, b: 100 },
+  actionFocus: { r: 100, g: 255, b: 180 },
+  actionDark: { r: 0, g: 150, b: 80 },
+  success: { r: 50, g: 255, b: 50 },
+  danger: { r: 255, g: 0, b: 100 },
+  dangerHover: { r: 200, g: 0, b: 80 },
+  warning: { r: 255, g: 215, b: 0 },
+  warningHover: { r: 255, g: 180, b: 0 },
+  ringBlack: { r: 128, g: 0, b: 128 },
+  ringGray: { r: 255, g: 105, b: 180 },
+  radiusSm: 0.5,
+  radiusMd: 1,
+  radiusLg: 1.5,
+  radiusXl: 2,
+  radiusFull: 9999,
+  shadowMd:
+    "0 8px 16px -4px rgb(255 0 128 / 0.3), 0 4px 8px -2px rgb(255 255 0 / 0.2)",
+  shadowLg:
+    "0 16px 32px -8px rgb(255 0 255 / 0.4), 0 8px 16px -4px rgb(0 255 128 / 0.3)",
+  transitionFast: "250ms",
+  transitionNormal: "350ms",
+  transitionSlow: "500ms",
+  fontFamilyUrl:
+    "https://fonts.googleapis.com/css2?family=Comic+Relief:wght@300;400;500;600;700&display=swap",
+  fontFamily: '"Comic Relief", cursive',
+};
+
 export function toCssBlock(v: CssVariables): string {
   return `:root {
   --color-bg-base: ${rgb(v.bgBase)};

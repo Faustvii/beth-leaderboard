@@ -5,7 +5,12 @@ import { HalloweenHtml } from "../controllers/holidays/halloween";
 import { getCurrentHolidays } from "../controllers/holidays/holidayController";
 import { ValentineHtml } from "../controllers/holidays/valentine";
 import { getCurrentUser } from "../lib/store";
-import { classicTheme, claudeTheme, toCssBlock } from "../styles/theme-styles";
+import {
+  classicTheme,
+  claudeTheme,
+  sillyTheme,
+  toCssBlock,
+} from "../styles/theme-styles";
 import { GitHubLinkHtml } from "./GitHubLink";
 import { LoadingBarHtml } from "./LoadingBar";
 
@@ -19,7 +24,12 @@ export const BaseHtml = async ({ children }: PropsWithChildren) => {
   const user = getCurrentUser();
   const showHolidays = user?.settings?.showHolidays ?? true;
   const theme = user?.settings?.theme ?? "classic";
-  const selectedTheme = theme === "claude" ? claudeTheme : classicTheme;
+  const selectedTheme =
+    theme === "claude"
+      ? claudeTheme
+      : theme === "silly"
+        ? sillyTheme
+        : classicTheme;
 
   return (
     <>

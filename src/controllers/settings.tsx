@@ -40,7 +40,7 @@ export const settingsController = new Elysia({
 
       const settingsToUpdate: UserSettings = {
         showHolidays: body.showHolidays === "true",
-        theme: (["classic", "claude"].includes(body.theme ?? "")
+        theme: (["classic", "claude", "silly"].includes(body.theme ?? "")
           ? body.theme
           : "classic") as UserSettings["theme"],
       };

@@ -59,10 +59,9 @@ export const BaseHtml = async ({ children }: PropsWithChildren) => {
           class="
         background-animate
         bg-bg-base
-        bg-gradient-to-b
-        from-bg-gradient-from via-bg-gradient-via to-bg-gradient-to font-roboto-mono
         text-text-primary
         "
+          style="background-image: var(--bg-gradient);"
         >
           {showHolidays && isItChristmas && (
             <ChristmasHtml renderLayer="background" />

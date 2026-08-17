@@ -8,9 +8,7 @@ type Rem = number;
 interface CssVariables {
   // Background
   bgBase: Rgb;
-  bgGradientFrom: Rgb;
-  bgGradientVia: Rgb;
-  bgGradientTo: Rgb;
+  bgGradient: string;
   // Surface
   surface: Rgb;
   surfaceElevated: Rgb;
@@ -65,9 +63,8 @@ const rem = (value: Rem) => `${value}rem`;
 
 export const classicTheme: CssVariables = {
   bgBase: { r: 15, g: 23, b: 42 },
-  bgGradientFrom: { r: 51, g: 65, b: 85 },
-  bgGradientVia: { r: 30, g: 41, b: 59 },
-  bgGradientTo: { r: 17, g: 24, b: 39 },
+  bgGradient:
+    "linear-gradient(to bottom, rgb(51 65 85), rgb(30 41 59), rgb(17 24 39))",
   surface: { r: 30, g: 41, b: 59 },
   surfaceElevated: { r: 31, g: 41, b: 55 },
   surfaceHover: { r: 51, g: 65, b: 85 },
@@ -111,9 +108,8 @@ export const classicTheme: CssVariables = {
 
 export const claudeTheme: CssVariables = {
   bgBase: { r: 250, g: 249, b: 245 },
-  bgGradientFrom: { r: 250, g: 249, b: 245 },
-  bgGradientVia: { r: 245, g: 240, b: 232 },
-  bgGradientTo: { r: 245, g: 240, b: 232 },
+  bgGradient:
+    "linear-gradient(to bottom, rgb(250 249 245), rgb(245 240 232), rgb(245 240 232))",
   surface: { r: 239, g: 233, b: 222 },
   surfaceElevated: { r: 245, g: 240, b: 232 },
   surfaceHover: { r: 232, g: 224, b: 210 },
@@ -157,10 +153,9 @@ export const claudeTheme: CssVariables = {
 };
 
 export const sillyTheme: CssVariables = {
-  bgBase: { r: 255, g: 255, b: 255 },
-  bgGradientFrom: { r: 255, g: 0, b: 128 },
-  bgGradientVia: { r: 255, g: 255, b: 0 },
-  bgGradientTo: { r: 0, g: 255, b: 255 },
+  bgBase: { r: 255, g: 182, b: 193 },
+  bgGradient:
+    "repeating-linear-gradient(45deg, rgb(255 0 128) 0px, rgb(255 200 0) 40px, rgb(0 255 128) 80px, rgb(0 200 255) 120px, rgb(128 0 255) 160px, rgb(255 0 128) 200px)",
   surface: { r: 255, g: 255, b: 200 },
   surfaceElevated: { r: 255, g: 255, b: 220 },
   surfaceHover: { r: 255, g: 200, b: 200 },
@@ -206,9 +201,7 @@ export const sillyTheme: CssVariables = {
 export function toCssBlock(v: CssVariables): string {
   return `:root {
   --color-bg-base: ${rgb(v.bgBase)};
-  --color-bg-gradient-from: ${rgb(v.bgGradientFrom)};
-  --color-bg-gradient-via: ${rgb(v.bgGradientVia)};
-  --color-bg-gradient-to: ${rgb(v.bgGradientTo)};
+  --bg-gradient: ${v.bgGradient};
   --color-surface: ${rgb(v.surface)};
   --color-surface-elevated: ${rgb(v.surfaceElevated)};
   --color-surface-hover: ${rgb(v.surfaceHover)};

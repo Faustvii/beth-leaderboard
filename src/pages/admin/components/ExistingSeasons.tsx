@@ -54,8 +54,8 @@ export const ExistingSeasons = ({ seasons }: ExistingSeasonsProps) => {
               hx-swap="afterend"
               class={cn(
                 "flex w-1/2 justify-center gap-3 rounded-l-lg p-2",
-                "md:bg-transparent md:hover:bg-transparent md:hover:text-teal-600",
-                "bg-teal-700 hover:bg-teal-700/85 hover:text-gray-300",
+                "md:bg-transparent md:hover:bg-transparent md:hover:text-success",
+                "bg-success hover:bg-success/85 hover:text-text-secondary",
               )}
               _={`on htmx:afterSettle js htmx.process(document.body) end`}
             >
@@ -66,8 +66,8 @@ export const ExistingSeasons = ({ seasons }: ExistingSeasonsProps) => {
               type="button"
               class={cn(
                 "flex w-1/2 justify-center gap-3 rounded-r-lg p-2",
-                "bg-red-700 hover:bg-red-700/85 hover:text-gray-300",
-                "md:bg-transparent md:hover:bg-transparent md:hover:text-red-600 md:disabled:text-gray-600",
+                "bg-danger-hover hover:bg-danger-hover/85 hover:text-text-secondary",
+                "md:bg-transparent md:hover:bg-transparent md:hover:text-danger md:disabled:text-text-disabled",
               )}
               hx-indicator=".progress-bar"
               hx-target="#mainContainer"

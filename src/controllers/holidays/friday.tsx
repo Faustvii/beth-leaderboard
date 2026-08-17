@@ -49,7 +49,7 @@ export const FridayHtml = ({ renderLayer }: { renderLayer?: string }) => {
       <>
         {/* mute button */}
         <div
-          class="fixed bottom-4 left-4 hidden rounded-full bg-slate-700 p-2 transition-colors hover:bg-slate-600 lg:block"
+          class="fixed bottom-4 left-4 hidden rounded-full bg-surface-hover p-2 transition-colors hover:bg-surface lg:block"
           _="on click remove #friday-music then remove me"
         >
           <svg

@@ -42,8 +42,8 @@ export const UserLookUp = ({
       autocomplete="off"
       class={clsx([
         "peer block w-full appearance-none px-0 py-2.5 pl-10 text-sm",
-        "border-0 border-b-2 border-gray-300 bg-transparent",
-        "focus:border-blue-500 focus:outline-none focus:ring-0",
+        "border-border-input-light border-0 border-b-2 bg-transparent",
+        "focus:border-action focus:outline-none focus:ring-0",
       ])}
       {...props}
       _={`on focus remove @hidden from #${input}-results`}
@@ -51,10 +51,10 @@ export const UserLookUp = ({
     <label
       for={`${input}-input`}
       class={clsx([
-        "absolute top-3 -z-10 origin-[0] pl-10 text-sm text-gray-400",
+        "absolute top-3 -z-10 origin-[0] pl-10 text-sm text-text-muted",
         "-translate-y-6 scale-75 transform duration-300",
         "peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100",
-        "peer-focus:left-0 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:pl-0 peer-focus:font-medium peer-focus:text-blue-500",
+        "peer-focus:left-0 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:pl-0 peer-focus:font-medium peer-focus:text-action",
       ])}
     >
       {label}
@@ -63,7 +63,7 @@ export const UserLookUp = ({
     <div
       id={`${input}-results`}
       class={clsx([
-        "bg-slate-600",
+        "bg-surface-input",
         "rounded-b-lg shadow-md shadow-slate-900/5",
         "absolute z-50 w-full",
       ])}

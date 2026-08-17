@@ -5,6 +5,12 @@ import { HalloweenHtml } from "../controllers/holidays/halloween";
 import { getCurrentHolidays } from "../controllers/holidays/holidayController";
 import { ValentineHtml } from "../controllers/holidays/valentine";
 import { getCurrentUser } from "../lib/store";
+import {
+  classicTheme,
+  claudeTheme,
+  sillyTheme,
+  toCssBlock,
+} from "../styles/theme-styles";
 import { GitHubLinkHtml } from "./GitHubLink";
 import { LoadingBarHtml } from "./LoadingBar";
 
@@ -17,6 +23,13 @@ export const BaseHtml = async ({ children }: PropsWithChildren) => {
 
   const user = getCurrentUser();
   const showHolidays = user?.settings?.showHolidays ?? true;
+  const theme = user?.settings?.theme ?? "classic";
+  const selectedTheme =
+    theme === "claude"
+      ? claudeTheme
+      : theme === "silly"
+        ? sillyTheme
+        : classicTheme;
 
   return (
     <>
@@ -38,22 +51,17 @@ export const BaseHtml = async ({ children }: PropsWithChildren) => {
           <link rel="icon" type="image/x-icon" href="/static/favicon.ico" />
           <link rel="preconnect" href="https://fonts.googleapis.com" />
           <link rel="preconnect" href="https://fonts.gstatic.com" />
-          <link
-            href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@100;300;400;500;600;700&display=swap"
-            rel="stylesheet"
-          />
+          <link href={selectedTheme.fontFamilyUrl} rel="stylesheet" />
+          <style>{toCssBlock(selectedTheme)}</style>
         </head>
         <body
           hx-boost="true"
           class="
         background-animate
-        h-screen
-        w-full
-        bg-slate-800
-        bg-gradient-to-b
-        from-slate-700 via-slate-800 to-gray-900 font-roboto-mono
-        text-white
+        bg-bg-base
+        text-text-primary
         "
+          style="background-image: var(--bg-gradient);"
         >
           {showHolidays && isItChristmas && (
             <ChristmasHtml renderLayer="background" />

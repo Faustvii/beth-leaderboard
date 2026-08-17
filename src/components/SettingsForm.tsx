@@ -20,11 +20,11 @@ const SettingField = ({ settingDefinition, value }: SettingFieldProps) => {
           id={settingDefinition.key}
           value="true"
           checked={value as boolean}
-          class="h-4 w-4 rounded border-gray-600 bg-gray-700 text-teal-700 focus:ring-teal-700"
+          class="h-4 w-4 rounded border-border-input bg-surface-hover text-success focus:ring-success"
         />
         <label
           for={settingDefinition.key}
-          class="text-sm font-medium text-gray-300"
+          class="text-sm font-medium text-text-secondary"
         >
           {settingDefinition.label}
         </label>
@@ -37,14 +37,14 @@ const SettingField = ({ settingDefinition, value }: SettingFieldProps) => {
       <div class="mb-4">
         <label
           for={settingDefinition.key}
-          class="block text-sm font-medium text-gray-300"
+          class="block text-sm font-medium text-text-secondary"
         >
           {settingDefinition.label}
         </label>
         <select
           name={settingDefinition.key}
           id={settingDefinition.key}
-          class="mt-1 w-full rounded-lg border-gray-600 bg-gray-700 p-2 text-gray-300 focus:border-teal-700 focus:ring-teal-700"
+          class="mt-1 w-full rounded-lg border-border-input bg-surface-hover p-2 text-text-secondary focus:border-success focus:ring-success"
         >
           {settingDefinition.options.map((option) => (
             <option value={option} selected={value === option}>
@@ -91,13 +91,13 @@ export const SettingsForm = ({
         <button
           hx-put="/api/settings"
           type="submit"
-          class="rounded-lg bg-teal-700 p-2"
+          class="rounded-lg bg-success p-2"
           hx-indicator=".progress-bar"
           _="on click set my.innerText to 'Saving...'"
         >
           Save Settings
         </button>
-        <div id="settings-errors" class="text-red-500"></div>
+        <div id="settings-errors" class="text-danger"></div>
         {showSuccessMessage && (
           <div class="text-green-500">Settings saved successfully!</div>
         )}

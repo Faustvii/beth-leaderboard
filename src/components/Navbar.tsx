@@ -58,7 +58,7 @@ export const NavbarHtml = async ({ activePage }: Props) => {
               <button
                 type="button"
                 id="mobile-menu-button"
-                class="group relative inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
+                class="group relative inline-flex items-center justify-center rounded-md p-2 text-text-muted hover:bg-surface-hover hover:text-text-primary focus:outline-none focus:ring-2 focus:ring-inset focus:ring-text-primary"
                 _={toggleMobileMenuHyperscript}
               >
                 <span class="absolute -inset-0.5"></span>
@@ -113,7 +113,7 @@ export const NavbarHtml = async ({ activePage }: Props) => {
                     <div>
                       <button
                         type="button"
-                        class="relative flex rounded-full bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800"
+                        class="relative flex rounded-full bg-surface-elevated text-sm focus:outline-none focus:ring-2 focus:ring-text-primary focus:ring-offset-2 focus:ring-offset-surface-elevated"
                         id="user-menu-button"
                         _={toggleUserMenuHyperscript}
                       >
@@ -127,7 +127,7 @@ export const NavbarHtml = async ({ activePage }: Props) => {
                       </button>
                     </div>
                     <div
-                      class="absolute right-0 z-10 mt-2 hidden w-28 origin-top-right rounded-md bg-gray-800 py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
+                      class="absolute right-0 z-10 mt-2 hidden w-28 origin-top-right rounded-md bg-surface-elevated py-1 shadow-lg ring-1 ring-ring-black ring-opacity-5 focus:outline-none"
                       role="menu"
                       id="user-menu"
                       aria-orientation="vertical"
@@ -164,7 +164,7 @@ export const NavbarHtml = async ({ activePage }: Props) => {
               ) : (
                 <>
                   <AnchorButtonHtml
-                    class="relative flex rounded-full text-sm text-gray-400 hover:bg-gray-700 hover:text-white focus:text-white "
+                    class="relative flex rounded-full text-sm text-text-muted hover:bg-surface-hover hover:text-text-primary focus:text-text-primary "
                     href={
                       config.env.NODE_ENV === "development"
                         ? "/login"

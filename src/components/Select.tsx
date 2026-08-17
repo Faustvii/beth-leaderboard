@@ -4,13 +4,13 @@ export const SelectHtml = ({ children }: PropsWithChildren) => (
   <>
     <label
       for="countries"
-      class="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+      class="mb-2 block text-sm font-medium text-gray-900 dark:text-text-primary"
     >
       Select an option
     </label>
     <select
       id="countries"
-      class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+      class="border-border-input-light block w-full rounded-lg border bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-action focus:ring-action dark:border-border-input dark:bg-surface-hover dark:text-text-primary dark:placeholder-text-muted dark:focus:border-action dark:focus:ring-action"
     >
       <option selected={true}>Choose a country</option>
       <option value="US">United States</option>

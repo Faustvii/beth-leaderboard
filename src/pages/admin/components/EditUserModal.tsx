@@ -23,7 +23,7 @@ export const EditUserModal = ({ user }: EditUserModalProps) => {
         class="absolute bottom-0 left-0 right-0 top-0 -z-50"
         _="on click trigger closeEditModal"
       />
-      <div class="-z-20 w-[80%] max-w-[600px] rounded-md bg-slate-800 p-4 text-white shadow-md lg:p-8">
+      <div class="-z-20 w-[80%] max-w-[600px] rounded-md bg-surface p-4 text-text-primary shadow-md lg:p-8">
         <h1 class="mb-4 text-2xl font-semibold">Edit user</h1>
         <form
           class="flex w-full flex-col"
@@ -47,11 +47,11 @@ export const EditUserModal = ({ user }: EditUserModalProps) => {
               placeholder=" "
               required={true}
               value={user.name}
-              class="peer block w-full appearance-none border-0 border-b-2 border-gray-400 bg-transparent px-0 py-2.5 text-sm text-white placeholder:text-gray-500 focus:border-blue-500 focus:outline-none focus:ring-0"
+              class="peer block w-full appearance-none border-0 border-b-2 border-border-input bg-transparent px-0 py-2.5 text-sm text-text-primary placeholder:text-text-subtle focus:border-action focus:outline-none focus:ring-0"
             />
             <label
               for={`${formId}-fullName`}
-              class="absolute top-3 -z-10 origin-[0] -translate-y-6 scale-75 transform text-sm text-gray-400 duration-300 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:left-0 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:font-medium peer-focus:text-blue-400"
+              class="absolute top-3 -z-10 origin-[0] -translate-y-6 scale-75 transform text-sm text-text-muted duration-300 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:left-0 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:font-medium peer-focus:text-action-focus"
             >
               Full name
             </label>
@@ -65,11 +65,11 @@ export const EditUserModal = ({ user }: EditUserModalProps) => {
               placeholder=" "
               required={true}
               value={user.nickname}
-              class="peer block w-full appearance-none border-0 border-b-2 border-gray-400 bg-transparent px-0 py-2.5 text-sm text-white placeholder:text-gray-500 focus:border-blue-500 focus:outline-none focus:ring-0"
+              class="peer block w-full appearance-none border-0 border-b-2 border-border-input bg-transparent px-0 py-2.5 text-sm text-text-primary placeholder:text-text-subtle focus:border-action focus:outline-none focus:ring-0"
             />
             <label
               for={`${formId}-nickname`}
-              class="absolute top-3 -z-10 origin-[0] -translate-y-6 scale-75 transform text-sm text-gray-400 duration-300 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:left-0 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:font-medium peer-focus:text-blue-400"
+              class="absolute top-3 -z-10 origin-[0] -translate-y-6 scale-75 transform text-sm text-text-muted duration-300 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:left-0 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:font-medium peer-focus:text-action-focus"
             >
               Nickname
             </label>
@@ -77,7 +77,7 @@ export const EditUserModal = ({ user }: EditUserModalProps) => {
           <div class="mt-3 flex justify-end gap-3">
             <button
               type="button"
-              class="rounded-lg bg-red-700 p-2"
+              class="rounded-lg bg-danger-hover p-2"
               _="on click trigger closeEditModal"
             >
               Cancel
@@ -85,14 +85,14 @@ export const EditUserModal = ({ user }: EditUserModalProps) => {
             <button
               hx-put="/admin/edit-user"
               type="submit"
-              class="rounded-lg bg-teal-700 p-2"
+              class="rounded-lg bg-success p-2"
               hx-indicator=".progress-bar"
               _="on click set my.innerText to 'Saving...' then wait for htmx:afterRequest then set my.innerText to 'Save'"
             >
               Save
             </button>
           </div>
-          <div id="errors" class="mt-2 text-red-400"></div>
+          <div id="errors" class="mt-2 text-danger"></div>
         </form>
       </div>
     </div>

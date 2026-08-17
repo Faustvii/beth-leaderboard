@@ -23,7 +23,7 @@ export const MatchCard = ({ match }: MatchCardProps) => {
           hx-swap="afterend"
           class={cn(
             "mt-2 flex w-1/2 justify-center gap-3 rounded-l-lg",
-            "bg-teal-700 p-2 hover:bg-teal-700/85",
+            "bg-success p-2 hover:bg-success/85",
           )}
           _={`on htmx:afterSettle js htmx.process(document.body) end`}
         >
@@ -34,7 +34,7 @@ export const MatchCard = ({ match }: MatchCardProps) => {
           type="Remove match"
           class={cn(
             "mt-2 flex w-1/2 justify-center gap-3 rounded-r-lg",
-            "bg-red-700 p-2 hover:bg-red-700/85 disabled:bg-gray-600",
+            "bg-danger-hover p-2 hover:bg-danger-hover/85 disabled:bg-text-disabled",
           )}
           hx-indicator=".progress-bar"
           hx-delete={`match/${match.id}`}

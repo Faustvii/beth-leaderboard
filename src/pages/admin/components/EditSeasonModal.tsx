@@ -21,7 +21,7 @@ export const EditSeasonModal = ({ season }: EditSeasonModalProps) => {
         class="absolute bottom-0 left-0 right-0 top-0 -z-50"
         _="on click trigger closeEditModal"
       />
-      <div class="-z-20 w-[80%] max-w-[600px] rounded-md bg-slate-800 p-4 text-white shadow-md lg:p-8">
+      <div class="-z-20 w-[80%] max-w-[600px] rounded-md bg-surface p-4 text-text-primary shadow-md lg:p-8">
         <h1 class="mb-4 text-2xl font-semibold">Edit season</h1>
         <SeasonForm
           formId={`edit-season-${season.id}-form`}
@@ -30,7 +30,7 @@ export const EditSeasonModal = ({ season }: EditSeasonModalProps) => {
             <div class="mt-3 flex justify-end gap-3">
               <button
                 type="button"
-                class="rounded-lg bg-red-700 p-2"
+                class="rounded-lg bg-danger-hover p-2"
                 _="on click trigger closeEditModal"
               >
                 Cancel
@@ -38,7 +38,7 @@ export const EditSeasonModal = ({ season }: EditSeasonModalProps) => {
               <button
                 hx-put="/admin/season"
                 type="submit"
-                class="rounded-lg bg-teal-700 p-2"
+                class="rounded-lg bg-success p-2"
                 hx-indicator=".progress-bar"
                 _="on click set my.innerText to 'Saving...' then wait for htmx:afterRequest then set my.innerText to 'Save'"
               >

@@ -136,8 +136,8 @@ function RatingDiffTable({ children }: PropsWithChildren): JSX.Element {
     <>
       <div class="flex flex-col items-center justify-center">
         <div class="w-full overflow-x-auto rounded-lg shadow-md">
-          <table class="w-full text-left text-sm text-gray-400">
-            <thead class="bg-gray-700 text-xs uppercase text-gray-400">
+          <table class="w-full text-left text-sm text-text-muted">
+            <thead class="bg-surface-hover text-xs uppercase text-text-muted">
               <tr>
                 <th scope="col" class="px-1 py-3 pl-2 md:px-3 lg:px-6">
                   Rank
@@ -181,7 +181,7 @@ function RatingDiffTableRow({
 
   return (
     <>
-      <tr class="border-b border-gray-700 bg-gray-800">
+      <tr class="border-border-default border-b bg-surface-elevated">
         <td class="px-1 py-4 pl-2 md:px-3 lg:px-6">
           <Rank rank={displayRank} />
           <DiffIcon

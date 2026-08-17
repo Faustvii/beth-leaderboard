@@ -41,12 +41,12 @@ export const LeaderboardRowHtml = ({
   const isWinStreak = !!winStreak;
 
   return (
-    <tr class="border-b border-gray-700 bg-gray-800">
+    <tr class="border-border-default border-b bg-surface-elevated">
       <td class="px-1 py-4 pl-2 md:px-3 lg:px-6">
         <Rank rank={rank} isLowestRanked={isLowestRanked} />
         <DiffIcon before={rankBefore} after={rank} isHigherBetter={false} />
       </td>
-      <td class="grid grid-cols-12 items-center gap-3 whitespace-nowrap px-1 py-4 font-medium text-white md:flex md:px-3 lg:px-6">
+      <td class="grid grid-cols-12 items-center gap-3 whitespace-nowrap px-1 py-4 font-medium text-text-primary md:flex md:px-3 lg:px-6">
         <div class="col-span-2">
           <WinLoseStreak
             lastPlayed={lastPlayed}
@@ -100,7 +100,7 @@ const UserIcon = ({ userId }: { userId: string }) => {
             loading="lazy"
           />
           <img
-            class="mr-1 inline-block h-8 w-8 rounded-full ring-2 ring-gray-700 lg:mr-3"
+            class="ring-border-default mr-1 inline-block h-8 w-8 rounded-full ring-2 lg:mr-3"
             src={`/static/user/${userId}/small`}
             loading="lazy"
           />
@@ -121,7 +121,7 @@ const UserIcon = ({ userId }: { userId: string }) => {
           loading="lazy"
         />
         <img
-          class="mr-1 inline-block h-8 w-8 rounded-full ring-2 ring-gray-700 lg:mr-3"
+          class="ring-border-default mr-1 inline-block h-8 w-8 rounded-full ring-2 lg:mr-3"
           src={`/static/user/${userId}/small`}
           loading="lazy"
         />
@@ -131,7 +131,7 @@ const UserIcon = ({ userId }: { userId: string }) => {
 
   return (
     <img
-      class="col-span-2 mr-1 inline-block h-8 w-8 rounded-full ring-2 ring-gray-700 lg:mr-3 lg:h-8 lg:w-8"
+      class="ring-border-default col-span-2 mr-1 inline-block h-8 w-8 rounded-full ring-2 lg:mr-3 lg:h-8 lg:w-8"
       src={`/static/user/${userId}/small`}
       loading="lazy"
     />

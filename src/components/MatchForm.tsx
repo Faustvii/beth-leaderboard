@@ -100,7 +100,7 @@ export const MatchForm = async ({
             name="match_winner"
             form={formId}
             id="match_winner"
-            class="peer block w-full appearance-none border-0 border-b-2 border-gray-300 bg-transparent px-0 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-0 [&>option]:text-gray-900"
+            class="border-border-input-light peer block w-full appearance-none border-0 border-b-2 bg-transparent px-0 py-2.5 text-sm focus:border-action focus:outline-none focus:ring-0 [&>option]:text-gray-900"
             required={true}
           >
             <option disabled value="" selected={match ? false : true}>
@@ -118,7 +118,7 @@ export const MatchForm = async ({
           </select>
           <label
             for="match_winner"
-            class="absolute top-3 origin-[0] -translate-y-6 scale-75 transform bg-gray-900 text-sm text-gray-400 duration-300 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:left-0 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:font-medium peer-focus:text-blue-500"
+            class="absolute top-3 origin-[0] -translate-y-6 scale-75 transform bg-bg-base text-sm text-text-muted duration-300 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:left-0 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:font-medium peer-focus:text-action"
           >
             Match Winner
           </label>
@@ -130,7 +130,7 @@ export const MatchForm = async ({
             form={formId}
             name="point_difference"
             id="point_difference"
-            class="peer block w-full appearance-none border-0 border-b-2 border-gray-600 bg-transparent px-0 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-0"
+            class="peer block w-full appearance-none border-0 border-b-2 border-border-input bg-transparent px-0 py-2.5 text-sm focus:border-action focus:outline-none focus:ring-0"
             placeholder=" "
             required={true}
             min="0"
@@ -139,7 +139,7 @@ export const MatchForm = async ({
           />
           <label
             for="point_difference"
-            class="absolute top-3 -z-10 origin-[0] -translate-y-6 scale-75 transform text-sm text-gray-400 duration-300 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:left-0 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:font-medium peer-focus:text-blue-500"
+            class="absolute top-3 -z-10 origin-[0] -translate-y-6 scale-75 transform text-sm text-text-muted duration-300 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:left-0 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:font-medium peer-focus:text-action"
           >
             Point difference
           </label>
@@ -153,7 +153,7 @@ export const MatchForm = async ({
           />
         )}
         {actionButtons}
-        <div id="errors" class="text-red-500"></div>
+        <div id="errors" class="text-danger"></div>
         {match && (
           <input type="hidden" name="match_id" value={match.id.toString()} />
         )}

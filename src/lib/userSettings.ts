@@ -6,7 +6,7 @@ export type SettingValue = boolean | string | undefined;
 
 export interface UserSettings {
   showHolidays?: boolean;
-  theme?: "default" | "itminds-2026";
+  theme?: "classic" | "claude";
 }
 
 export interface CheckboxSettingDefinition {
@@ -30,7 +30,7 @@ export type SettingDefinition =
 
 export const userSettingsDefaults: UserSettings = {
   showHolidays: true,
-  theme: "default",
+  theme: "classic",
 };
 
 export const settingDefinitions: SettingDefinition[] = [
@@ -43,7 +43,7 @@ export const settingDefinitions: SettingDefinition[] = [
     key: "theme",
     label: "Theme",
     type: "select",
-    options: ["default", "itminds-2026"],
+    options: ["classic", "claude"],
   },
 ];
 

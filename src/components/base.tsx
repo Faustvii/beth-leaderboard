@@ -5,7 +5,7 @@ import { HalloweenHtml } from "../controllers/holidays/halloween";
 import { getCurrentHolidays } from "../controllers/holidays/holidayController";
 import { ValentineHtml } from "../controllers/holidays/valentine";
 import { getCurrentUser } from "../lib/store";
-import { cssVariables, toCssBlock } from "../styles/theme-styles";
+import { classicTheme, claudeTheme, toCssBlock } from "../styles/theme-styles";
 import { GitHubLinkHtml } from "./GitHubLink";
 import { LoadingBarHtml } from "./LoadingBar";
 
@@ -18,6 +18,8 @@ export const BaseHtml = async ({ children }: PropsWithChildren) => {
 
   const user = getCurrentUser();
   const showHolidays = user?.settings?.showHolidays ?? true;
+  const theme = user?.settings?.theme ?? "classic";
+  const selectedTheme = theme === "claude" ? claudeTheme : classicTheme;
 
   return (
     <>
@@ -43,14 +45,12 @@ export const BaseHtml = async ({ children }: PropsWithChildren) => {
             href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@100;300;400;500;600;700&display=swap"
             rel="stylesheet"
           />
-          <style>{toCssBlock(cssVariables)}</style>
+          <style>{toCssBlock(selectedTheme)}</style>
         </head>
         <body
           hx-boost="true"
           class="
         background-animate
-        h-screen
-        w-full
         bg-bg-base
         bg-gradient-to-b
         from-bg-gradient-from via-bg-gradient-via to-bg-gradient-to font-roboto-mono

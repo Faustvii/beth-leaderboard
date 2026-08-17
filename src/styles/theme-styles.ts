@@ -60,7 +60,7 @@ interface CssVariables {
 const rgb = ({ r, g, b }: Rgb) => `${r}, ${g}, ${b}`;
 const rem = (value: Rem) => `${value}rem`;
 
-export const cssVariables: CssVariables = {
+export const classicTheme: CssVariables = {
   bgBase: { r: 15, g: 23, b: 42 },
   bgGradientFrom: { r: 51, g: 65, b: 85 },
   bgGradientVia: { r: 30, g: 41, b: 59 },
@@ -98,6 +98,50 @@ export const cssVariables: CssVariables = {
   shadowMd: "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)",
   shadowLg:
     "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)",
+  transitionFast: "150ms",
+  transitionNormal: "200ms",
+  transitionSlow: "300ms",
+};
+
+export const claudeTheme: CssVariables = {
+  bgBase: { r: 250, g: 249, b: 245 },
+  bgGradientFrom: { r: 250, g: 249, b: 245 },
+  bgGradientVia: { r: 245, g: 240, b: 232 },
+  bgGradientTo: { r: 245, g: 240, b: 232 },
+  surface: { r: 239, g: 233, b: 222 },
+  surfaceElevated: { r: 245, g: 240, b: 232 },
+  surfaceHover: { r: 232, g: 224, b: 210 },
+  surfaceInput: { r: 250, g: 249, b: 245 },
+  textPrimary: { r: 20, g: 20, b: 19 },
+  textSecondary: { r: 61, g: 61, b: 58 },
+  textMuted: { r: 108, g: 106, b: 100 },
+  textSubtle: { r: 142, g: 139, b: 130 },
+  textDisabled: { r: 230, g: 223, b: 216 },
+  borderDefault: { r: 230, g: 223, b: 216 },
+  borderLight: { r: 235, g: 230, b: 223 },
+  borderInput: { r: 230, g: 223, b: 216 },
+  borderInputLight: { r: 235, g: 230, b: 223 },
+  primary: { r: 204, g: 120, b: 92 },
+  action: { r: 204, g: 120, b: 92 },
+  actionHover: { r: 169, g: 88, b: 62 },
+  actionFocus: { r: 230, g: 223, b: 216 },
+  actionDark: { r: 24, g: 23, b: 21 },
+  success: { r: 93, g: 184, b: 114 },
+  danger: { r: 198, g: 69, b: 69 },
+  dangerHover: { r: 169, g: 58, b: 58 },
+  warning: { r: 212, g: 160, b: 23 },
+  warningHover: { r: 185, g: 140, b: 20 },
+  ringBlack: { r: 20, g: 20, b: 19 },
+  ringGray: { r: 142, g: 139, b: 130 },
+  radiusSm: 0.25,
+  radiusMd: 0.5,
+  radiusLg: 0.75,
+  radiusXl: 1,
+  radiusFull: 9999,
+  shadowMd:
+    "0 2px 8px -2px rgb(20 20 19 / 0.08), 0 1px 3px -1px rgb(20 20 19 / 0.04)",
+  shadowLg:
+    "0 8px 20px -4px rgb(20 20 19 / 0.12), 0 4px 8px -4px rgb(20 20 19 / 0.06)",
   transitionFast: "150ms",
   transitionNormal: "200ms",
   transitionSlow: "300ms",

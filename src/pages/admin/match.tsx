@@ -13,6 +13,7 @@ import { matches } from "../../db/schema";
 import { allTimeSeason } from "../../db/schema/season";
 import { redirect } from "../../lib";
 import { fromTimezoneToUTC } from "../../lib/dateUtils";
+import { validateAdminSeats } from "../../lib/seats";
 import { getCurrentUser } from "../../lib/store";
 import { EditMatchModal } from "./components/EditMatchModal";
 import { MatchCard } from "./components/MatchCard";
@@ -36,6 +37,19 @@ export const Match = new Elysia({
       const createdAtFromUser = new Date(
         `${body.date_played}T${body.time_played}`,
       );
+      if (Number.isNaN(createdAtFromUser.getTime())) {
+        return new Response(
+          `<div id="errors" class="text-red-500">Invalid date or time</div>`,
+          { status: 400 },
+        );
+      }
+      const seats = validateAdminSeats(body);
+      if (!seats.ok) {
+        return new Response(
+          `<div id="errors" class="text-red-500">${seats.error}</div>`,
+          { status: 400 },
+        );
+      }
       const createdAt = fromTimezoneToUTC(
         createdAtFromUser,
         "Europe/Copenhagen",
@@ -51,6 +65,7 @@ export const Match = new Elysia({
           result: body.match_winner,
           scoreDiff: Number(body.point_difference),
           createdAt,
+          ...seats.seats,
         })
         .where(eq(matches.id, Number(body.match_id)));
 
@@ -116,6 +131,10 @@ export const Match = new Elysia({
         match_id: t.Number(),
         date_played: t.String(),
         time_played: t.String(),
+        white1Seat: t.Optional(t.String()),
+        white2Seat: t.Optional(t.String()),
+        black1Seat: t.Optional(t.String()),
+        black2Seat: t.Optional(t.String()),
       }),
     },
   )

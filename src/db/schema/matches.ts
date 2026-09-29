@@ -1,5 +1,6 @@
 import { index, integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import { userTbl } from ".";
+import { seatValues } from "../../lib/seats";
 import { seasonsTbl } from "./season";
 
 export const matches = sqliteTable(
@@ -20,6 +21,10 @@ export const matches = sqliteTable(
     seasonId: integer("seasonId")
       .notNull()
       .references(() => seasonsTbl.id),
+    whitePlayerOneSeat: text("white_player_one_seat", { enum: seatValues }),
+    whitePlayerTwoSeat: text("white_player_two_seat", { enum: seatValues }),
+    blackPlayerOneSeat: text("black_player_one_seat", { enum: seatValues }),
+    blackPlayerTwoSeat: text("black_player_two_seat", { enum: seatValues }),
   },
   (table) => {
     return {

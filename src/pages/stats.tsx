@@ -1,12 +1,12 @@
-import { type ChartConfiguration } from "chart.js";
 import { Elysia } from "elysia";
-import { Chart } from "../components/Chart";
 import { HeaderHtml } from "../components/header";
 import { LayoutHtml } from "../components/Layout";
 import { MatchResultLink } from "../components/MatchResultLink";
 import { NavbarHtml } from "../components/Navbar";
 import { SeasonPicker } from "../components/SeasonPicker";
 import { StatsCardHtml } from "../components/StatsCard";
+import { TeamWinrateCard } from "../components/TeamWinrateCard";
+import { TeamWinratePieCard } from "../components/TeamWinratePieCard";
 import { ctx } from "../context";
 import { getMatches } from "../db/queries/matchQueries";
 import { type Season } from "../db/schema/season";
@@ -15,6 +15,7 @@ import { skibidiInBetweenText } from "../lib/addMatchSummary.tsx";
 import { getDatePartFromDate } from "../lib/dateUtils";
 import MatchStatistics from "../lib/matchStatistics";
 import { type Match } from "../lib/ratings/rating";
+import { sideLabel } from "../lib/seats";
 import { getCurrentUser } from "../lib/store.ts";
 
 export const stats = new Elysia({
@@ -65,45 +66,8 @@ async function page(season: Season) {
   );
 
   const gameResults = MatchStatistics.winsByResult(matches);
+  const seatStats = MatchStatistics.winsBySeat(matches);
   console.log("metrics took ", performance.now() - now + "ms  to run");
-
-  const data = {
-    labels: ["White win", "Black win", "Draw"],
-    datasets: [
-      {
-        label: "Matches",
-        data: [
-          gameResults.whiteWins.wins,
-          gameResults.blackWins.wins,
-          gameResults.numOfDraws.draws,
-        ],
-        backgroundColor: ["#fffffe", "rgb(35, 43, 43)", "#D3D3D3"],
-        hoverOffset: 4,
-      },
-    ],
-  };
-
-  const config: ChartConfiguration = {
-    type: "doughnut",
-    data: data,
-    options: {
-      plugins: {
-        legend: {
-          display: false,
-          labels: {
-            color: "#fffffe",
-          },
-          position: "left",
-        },
-      },
-      elements: {
-        arc: {
-          borderWidth: 2,
-          borderColor: "#ff8906",
-        },
-      },
-    },
-  };
 
   return (
     <>
@@ -132,36 +96,8 @@ async function page(season: Season) {
           </>
         </StatsCardHtml>
         <StatsCardHtml title="Biggest win">{biggestWin(matches)}</StatsCardHtml>
-        <StatsCardHtml title="Winrates">
-          <div class="flex h-48 w-full items-center justify-center pt-5">
-            <Chart id="chartDoughnut" config={config}></Chart>
-          </div>
-        </StatsCardHtml>
-        <StatsCardHtml title="Winrate By Color">
-          <>
-            <div class="flex flex-col items-center justify-center gap-1">
-              <span class="text-5xl">{gameResults.whiteWins.wins}</span>
-              <span class="text-md">
-                {gameResults.whiteWins.procentage.toFixed(2)}%
-              </span>
-              <span class="text-xl">White wins</span>
-            </div>
-            <div class="flex flex-col items-center justify-center gap-1">
-              <span class="text-5xl">{gameResults.numOfDraws.draws}</span>
-              <span class="text-md">
-                {gameResults.numOfDraws.procentage.toFixed(2)}%
-              </span>
-              <span class="text-xl">Draws</span>
-            </div>
-            <div class="flex h-full flex-col items-center justify-center gap-1">
-              <span class="text-5xl">{gameResults.blackWins.wins}</span>
-              <span class="text-md">
-                {gameResults.blackWins.procentage.toFixed(2)}%
-              </span>
-              <span class="text-xl">Black wins</span>
-            </div>
-          </>
-        </StatsCardHtml>
+        <TeamWinratePieCard stats={seatStats} />
+        <TeamWinrateCard stats={seatStats} />
         <StatsCardHtml title="Most Games Played">
           {playerWithMostGames && (
             <span class="text-sm">
@@ -269,12 +205,14 @@ async function biggestWin(matches: Match[]) {
           month: "long",
         })}
       </MatchResultLink>
-      , the White team of{" "}
+      , {sideLabel("White", biggestWinMatch)} of{" "}
       <span class="font-bold">{biggestPlayers.white.join(" & ")}</span> faced
-      off against the Black team of{" "}
-      <span class="font-bold">{biggestPlayers.black.join(" & ")}</span>. The{" "}
-      {biggestWinMatch.result.toLowerCase()} team triumphed with a {biggestWin}
-      -point difference.
+      off against {sideLabel("Black", biggestWinMatch)} of{" "}
+      <span class="font-bold">{biggestPlayers.black.join(" & ")}</span>.{" "}
+      {biggestWinMatch.result === "Draw"
+        ? "It was a draw"
+        : `${sideLabel(biggestWinMatch.result, biggestWinMatch)} triumphed`}{" "}
+      with a {biggestWin}-point difference.
     </span>
   );
 }

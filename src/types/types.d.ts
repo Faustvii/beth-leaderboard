@@ -8,6 +8,10 @@ interface MatchWithPlayers {
   scoreDiff: number;
   seasonId: number;
   createdAt: Date;
+  whitePlayerOneSeat: "N" | "E" | "S" | "W" | null;
+  whitePlayerTwoSeat: "N" | "E" | "S" | "W" | null;
+  blackPlayerOneSeat: "N" | "E" | "S" | "W" | null;
+  blackPlayerTwoSeat: "N" | "E" | "S" | "W" | null;
 }
 
 interface Player {

@@ -6,6 +6,14 @@ import {
   type Rating,
   type RatingSystem,
 } from "./ratings/rating";
+import {
+  getPlayerSeat,
+  matchHasSeats,
+  seatValues,
+  TEAM_LABELS,
+  type Seat,
+  type Team,
+} from "./seats";
 
 export enum RESULT {
   WIN = "WIN",
@@ -695,6 +703,92 @@ class MatchStatistics {
         draws: numOfDraws,
         procentage: numOfDraws === 0 ? 0 : (numOfDraws / totalGames) * 100,
       },
+    };
+  }
+
+  /**
+   * Win rates per seat and per seat-axis team, over matches where seating is known. Matches logged
+   * without seats (legacy form, history) are skipped.
+   */
+  static winsBySeat(matches: Match[]) {
+    return MatchStatistics.seatStats(matches.filter(matchHasSeats));
+  }
+
+  static playerWinsBySeat(matches: Match[], userId: string) {
+    return MatchStatistics.seatStats(
+      matches.filter(matchHasSeats).filter(isPlayerInMatchFilter(userId)),
+      userId,
+    );
+  }
+
+  private static seatStats(seated: Match[], userId?: string) {
+    const rate = (wins: number, games: number) =>
+      games === 0 ? 0 : (wins / games) * 100;
+
+    const perSeat = Object.fromEntries(
+      seatValues.map((seat) => [seat, { games: 0, wins: 0, procentage: 0 }]),
+    ) as Record<Seat, { games: number; wins: number; procentage: number }>;
+
+    for (const match of seated) {
+      const occupants: [Seat | null, Team][] = [
+        [match.whitePlayerOneSeat, "White"],
+        [match.whitePlayerTwoSeat, "White"],
+        [match.blackPlayerOneSeat, "Black"],
+        [match.blackPlayerTwoSeat, "Black"],
+      ];
+      for (const [seat, team] of occupants) {
+        if (seat === null) continue;
+        if (userId !== undefined && getPlayerSeat(match, userId) !== seat)
+          continue;
+        perSeat[seat].games++;
+        if (match.result === team) perSeat[seat].wins++;
+      }
+    }
+    for (const seat of seatValues) {
+      perSeat[seat].procentage = rate(perSeat[seat].wins, perSeat[seat].games);
+    }
+
+    const teamGames = (team: Team) =>
+      userId === undefined
+        ? seated.length
+        : seated.filter(
+            (m) => MatchStatistics.getPlayersTeam(m, userId) === team,
+          ).length;
+    const teamWins = (team: Team) =>
+      userId === undefined
+        ? seated.filter((m) => m.result === team).length
+        : seated.filter(
+            (m) =>
+              m.result === team &&
+              MatchStatistics.getPlayersTeam(m, userId) === team,
+          ).length;
+
+    const teams = Object.fromEntries(
+      (["White", "Black"] as const).map((team) => {
+        const games = teamGames(team);
+        const wins = teamWins(team);
+        return [
+          team,
+          {
+            label: TEAM_LABELS[team],
+            games,
+            wins,
+            procentage: rate(wins, seated.length),
+          },
+        ];
+      }),
+    ) as Record<
+      Team,
+      { label: string; games: number; wins: number; procentage: number }
+    >;
+
+    const draws = seated.filter((m) => m.result === "Draw").length;
+
+    return {
+      totalGames: seated.length,
+      seats: perSeat,
+      teams,
+      draws: { count: draws, procentage: rate(draws, seated.length) },
     };
   }
 

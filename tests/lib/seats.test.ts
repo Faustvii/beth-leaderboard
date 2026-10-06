@@ -2,12 +2,11 @@ import { describe, expect, it } from "bun:test";
 import { normalizeLogMatchBody } from "../../src/lib/logMatchBody";
 import {
   getPlayerSeat,
-  matchHasSeats,
+  positionsRecorded,
   seatsToSingles,
   seatsToTeams,
   sideLabel,
   teamLabel,
-  validateAdminSeats,
 } from "../../src/lib/seats";
 
 const seated = {
@@ -15,19 +14,10 @@ const seated = {
   whitePlayerTwo: { id: "b" },
   blackPlayerOne: { id: "c" },
   blackPlayerTwo: { id: "d" },
-  whitePlayerOneSeat: "N",
-  whitePlayerTwoSeat: "S",
-  blackPlayerOneSeat: "E",
-  blackPlayerTwoSeat: "W",
+  positionsRecorded: true,
 } as const;
 
-const unseated = {
-  ...seated,
-  whitePlayerOneSeat: null,
-  whitePlayerTwoSeat: null,
-  blackPlayerOneSeat: null,
-  blackPlayerTwoSeat: null,
-};
+const unseated = { ...seated, positionsRecorded: false };
 
 describe("seatsToTeams", () => {
   it("maps N/S to white and E/W to black", () => {
@@ -36,13 +26,10 @@ describe("seatsToTeams", () => {
     if (!result.ok) return;
     expect(result.teams).toEqual({
       whitePlayerOne: "a",
-      whitePlayerOneSeat: "N",
       whitePlayerTwo: "b",
-      whitePlayerTwoSeat: "S",
       blackPlayerOne: "c",
-      blackPlayerOneSeat: "E",
       blackPlayerTwo: "d",
-      blackPlayerTwoSeat: "W",
+      positionsRecorded: true,
     });
   });
 
@@ -57,59 +44,23 @@ describe("seatsToTeams", () => {
   });
 });
 
-describe("teamLabel / matchHasSeats / getPlayerSeat", () => {
-  it("uses seat names only when seating is known", () => {
-    expect(matchHasSeats(seated)).toBe(true);
+describe("teamLabel / positionsRecorded / getPlayerSeat", () => {
+  it("uses seat names only when positions were recorded", () => {
+    expect(positionsRecorded(seated)).toBe(true);
     expect(teamLabel("White", seated)).toBe("Tog/Kantine team");
     expect(teamLabel("Black", seated)).toBe("Mute/Rønslev team");
-    expect(matchHasSeats(unseated)).toBe(false);
+    expect(positionsRecorded(unseated)).toBe(false);
     expect(teamLabel("White", unseated)).toBe("Team White");
     expect(teamLabel("Black", unseated)).toBe("Team Black");
   });
 
-  it("finds a player's seat", () => {
+  it("derives a player's seat from their column", () => {
+    expect(getPlayerSeat(seated, "a")).toBe("N");
+    expect(getPlayerSeat(seated, "b")).toBe("S");
+    expect(getPlayerSeat(seated, "c")).toBe("E");
     expect(getPlayerSeat(seated, "d")).toBe("W");
     expect(getPlayerSeat(seated, "zzz")).toBeNull();
     expect(getPlayerSeat(unseated, "a")).toBeNull();
-  });
-});
-
-describe("validateAdminSeats", () => {
-  it("accepts all-empty as cleared seats", () => {
-    const result = validateAdminSeats({});
-    expect(result.ok).toBe(true);
-    if (!result.ok) return;
-    expect(result.seats.whitePlayerOneSeat).toBeNull();
-  });
-
-  it("accepts a valid full seating", () => {
-    const result = validateAdminSeats({
-      white1Seat: "S",
-      white2Seat: "N",
-      black1Seat: "W",
-      black2Seat: "E",
-    });
-    expect(result.ok).toBe(true);
-  });
-
-  it("rejects partial, wrong-axis and shared seats", () => {
-    expect(validateAdminSeats({ white1Seat: "N" }).ok).toBe(false);
-    expect(
-      validateAdminSeats({
-        white1Seat: "N",
-        white2Seat: "E",
-        black1Seat: "S",
-        black2Seat: "W",
-      }).ok,
-    ).toBe(false);
-    expect(
-      validateAdminSeats({
-        white1Seat: "N",
-        white2Seat: "N",
-        black1Seat: "E",
-        black2Seat: "W",
-      }).ok,
-    ).toBe(false);
   });
 });
 
@@ -128,7 +79,8 @@ describe("normalizeLogMatchBody", () => {
     expect(result.match.result).toBe("Black");
     expect(result.match.scoreDiff).toBe(45);
     expect(result.match.whitePlayerOne).toBe("a");
-    expect(result.match.blackPlayerTwoSeat).toBe("W");
+    expect(result.match.blackPlayerTwo).toBe("d");
+    expect(result.match.positionsRecorded).toBe(true);
   });
 
   it("requires a winner and four players on the board", () => {
@@ -165,8 +117,7 @@ describe("normalizeLogMatchBody", () => {
     expect(result.match.blackPlayerOne).toBe("b");
     expect(result.match.whitePlayerTwo).toBeNull();
     expect(result.match.result).toBe("Black");
-    expect(result.match.whitePlayerOneSeat).toBeNull();
-    expect(result.match.blackPlayerOneSeat).toBeNull();
+    expect(result.match.positionsRecorded).toBe(false);
   });
 
   it("accepts a 1v1 draw and rejects a team-axis winner for a 1v1", () => {

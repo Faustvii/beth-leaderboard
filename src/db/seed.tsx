@@ -88,12 +88,6 @@ async function SeedMatches(
     const blackPlayerOne = userIds[2].id;
     const blackPlayerTwo = userIds[3].id;
 
-    // Partners sit opposite each other: white on N/S, black on E/W
-    const [whitePlayerOneSeat, whitePlayerTwoSeat] =
-      Math.random() > 0.5 ? (["N", "S"] as const) : (["S", "N"] as const);
-    const [blackPlayerOneSeat, blackPlayerTwoSeat] =
-      Math.random() > 0.5 ? (["E", "W"] as const) : (["W", "E"] as const);
-
     // Generate a date that is evenly distributed between start of season and today and a time between 9:00 and 15:00
     const matchDate =
       activeSeason.startAt.getTime() +
@@ -117,10 +111,8 @@ async function SeedMatches(
       blackPlayerTwo: blackPlayerTwo,
       createdAt: matchTimestamp,
       seasonId: activeSeason?.id ?? 1,
-      whitePlayerOneSeat,
-      whitePlayerTwoSeat,
-      blackPlayerOneSeat,
-      blackPlayerTwoSeat,
+      // Seeded games are 2v2 logged with positions
+      positionsRecorded: true,
     };
 
     await db.insert(matches).values(matchInsert);

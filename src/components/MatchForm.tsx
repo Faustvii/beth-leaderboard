@@ -3,9 +3,7 @@ import {
   isSingles,
   SEAT_NAMES,
   TEAM_LABELS,
-  TEAM_SEATS,
   teamSeatNames,
-  type Seat,
 } from "../lib/seats";
 import { DateAndTimePicker } from "./DateAndTimePicker";
 import { UserLookUp } from "./UserLookup";
@@ -23,7 +21,7 @@ export const MatchForm = async ({
 }: MatchFormProps) => {
   let createdDate = "";
   let createdTime = "";
-  // Seats are only recorded for 2v2 matches; a 1v1 has nothing to edit here.
+  // Positions are only recorded for 2v2 matches; a 1v1 has nothing to edit here.
   const showSeats = match !== undefined && !isSingles(match);
 
   if (match?.createdAt) {
@@ -69,36 +67,20 @@ export const MatchForm = async ({
         <div class="group relative mb-6 w-full">
           <UserLookUp
             formId={formId}
-            label={`${TEAM_LABELS.White} player 1`}
+            label={`${TEAM_LABELS.White} player 1 (seat ${SEAT_NAMES.N})`}
             input="white1"
             user={match?.whitePlayerOne}
             required={true}
           />
         </div>
-        {showSeats && (
-          <SeatSelect
-            formId={formId}
-            name="white1Seat"
-            team="White"
-            value={match.whitePlayerOneSeat}
-          />
-        )}
         <div class="group relative mb-6 w-full">
           <UserLookUp
             formId={formId}
-            label={`${TEAM_LABELS.White} player 2 (optional)`}
+            label={`${TEAM_LABELS.White} player 2 (seat ${SEAT_NAMES.S}, optional)`}
             input="white2"
             user={match?.whitePlayerTwo}
           />
         </div>
-        {showSeats && (
-          <SeatSelect
-            formId={formId}
-            name="white2Seat"
-            team="White"
-            value={match.whitePlayerTwoSeat}
-          />
-        )}
 
         {/* Black side = Mute/Rønslev team (seats 2 + 4) */}
         <div class="group relative mb-6 w-full border-b">
@@ -113,35 +95,39 @@ export const MatchForm = async ({
         <div class="group relative mb-6 w-full">
           <UserLookUp
             formId={formId}
-            label={`${TEAM_LABELS.Black} player 1`}
+            label={`${TEAM_LABELS.Black} player 1 (seat ${SEAT_NAMES.E})`}
             input="black1"
             user={match?.blackPlayerOne}
             required={true}
           />
         </div>
-        {showSeats && (
-          <SeatSelect
-            formId={formId}
-            name="black1Seat"
-            team="Black"
-            value={match.blackPlayerOneSeat}
-          />
-        )}
         <div class="group relative mb-6 w-full">
           <UserLookUp
             formId={formId}
-            label={`${TEAM_LABELS.Black} player 2 (optional)`}
+            label={`${TEAM_LABELS.Black} player 2 (seat ${SEAT_NAMES.W}, optional)`}
             input="black2"
             user={match?.blackPlayerTwo}
           />
         </div>
+
         {showSeats && (
-          <SeatSelect
-            formId={formId}
-            name="black2Seat"
-            team="Black"
-            value={match.blackPlayerTwoSeat}
-          />
+          <label class="mb-6 flex items-center gap-3 text-sm">
+            <input
+              type="checkbox"
+              name="positions_recorded"
+              value="true"
+              form={formId}
+              checked={match.positionsRecorded}
+              class="h-4 w-4 accent-primary"
+            />
+            <span>
+              Positions recorded
+              <span class="block text-xs text-gray-400">
+                Player 1 / player 2 of each team sat in the seats shown in the
+                labels. Untick if the seating is unknown.
+              </span>
+            </span>
+          </label>
         )}
 
         {/* Winner and points */}
@@ -224,43 +210,3 @@ export const MatchForm = async ({
     </>
   );
 };
-
-/**
- * Admin-only seat correction (2v2 only). White players sit N/S, black players E/W; an empty selection on all
- * four clears the seating for the match.
- */
-const SeatSelect = ({
-  formId,
-  name,
-  team,
-  value,
-}: {
-  formId: string;
-  name: string;
-  team: "White" | "Black";
-  value: Seat | null;
-}) => (
-  <div class="group relative -mt-3 mb-6 w-full">
-    <select
-      name={name}
-      id={`${formId}-${name}`}
-      form={formId}
-      class="peer block w-full appearance-none border-0 border-b-2 border-gray-600 bg-transparent px-0 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-0 [&>option]:text-gray-900"
-    >
-      <option value="" selected={value === null}>
-        Seat unknown
-      </option>
-      {TEAM_SEATS[team].map((seat) => (
-        <option value={seat} selected={value === seat}>
-          Seat {SEAT_NAMES[seat]}
-        </option>
-      ))}
-    </select>
-    <label
-      for={`${formId}-${name}`}
-      class="absolute top-3 origin-[0] -translate-y-6 scale-75 transform text-sm text-gray-400"
-    >
-      Seat
-    </label>
-  </div>
-);

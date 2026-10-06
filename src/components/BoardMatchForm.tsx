@@ -20,8 +20,7 @@ const SEAT_GRID: Record<Seat, string> = {
   S: "row-start-3 col-start-2",
 };
 
-
- //Top down board for logging a match
+//Top down board for logging a match
 export const BoardMatchForm = ({ formId }: BoardMatchFormProps) => (
   <form
     class="mx-auto flex w-full max-w-2xl flex-col gap-6"
@@ -36,7 +35,6 @@ export const BoardMatchForm = ({ formId }: BoardMatchFormProps) => (
     hx-params="not name"
     hx-target-400="#board-errors"
   >
-
     <div class="flex flex-col gap-3">
       <div class="group relative w-full">
         <SearchIcon />

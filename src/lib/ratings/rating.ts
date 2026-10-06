@@ -1,6 +1,5 @@
 import { type RatingSystemType } from "../../db/schema/season";
 import { getDatePartFromDate, subtractDays } from "../dateUtils";
-import { type Seat } from "../seats";
 import { isDefined } from "../utils";
 import { elo, type EloRating } from "./eloRatingSystem";
 import { gameCount, type GameCountRating } from "./gameCountRatingSystem";
@@ -70,10 +69,7 @@ export interface Match {
   scoreDiff: number;
   createdAt: Date;
   seasonId: number;
-  whitePlayerOneSeat: Seat | null;
-  whitePlayerTwoSeat: Seat | null;
-  blackPlayerOneSeat: Seat | null;
-  blackPlayerTwoSeat: Seat | null;
+  positionsRecorded: boolean;
 }
 
 export interface MatchWithRatings<TRating> {

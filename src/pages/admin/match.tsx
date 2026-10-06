@@ -13,7 +13,6 @@ import { matches } from "../../db/schema";
 import { allTimeSeason } from "../../db/schema/season";
 import { redirect } from "../../lib";
 import { fromTimezoneToUTC } from "../../lib/dateUtils";
-import { validateAdminSeats } from "../../lib/seats";
 import { getCurrentUser } from "../../lib/store";
 import { EditMatchModal } from "./components/EditMatchModal";
 import { MatchCard } from "./components/MatchCard";
@@ -43,10 +42,13 @@ export const Match = new Elysia({
           { status: 400 },
         );
       }
-      const seats = validateAdminSeats(body);
-      if (!seats.ok) {
+      // Positions can only be recorded for a 2v2; the columns then stand for
+      // seats 1/3 (white) and 2/4 (black).
+      const isDoubles = !!body.white2Id && !!body.black2Id;
+      const positionsRecorded = body.positions_recorded === "true";
+      if (positionsRecorded && !isDoubles) {
         return new Response(
-          `<div id="errors" class="text-red-500">${seats.error}</div>`,
+          `<div id="errors" class="text-red-500">Positions can only be recorded for a 2v2 match</div>`,
           { status: 400 },
         );
       }
@@ -65,7 +67,7 @@ export const Match = new Elysia({
           result: body.match_winner,
           scoreDiff: Number(body.point_difference),
           createdAt,
-          ...seats.seats,
+          positionsRecorded,
         })
         .where(eq(matches.id, Number(body.match_id)));
 
@@ -89,7 +91,7 @@ export const Match = new Elysia({
           body.white2Id,
           body.black1Id,
           body.black2Id,
-        ].filter((id) => id !== "");
+        ].filter((id) => !!id);
 
         const uniqueIds = new Set(userIds);
         if (uniqueIds.size !== userIds.length) {
@@ -131,10 +133,7 @@ export const Match = new Elysia({
         match_id: t.Number(),
         date_played: t.String(),
         time_played: t.String(),
-        white1Seat: t.Optional(t.String()),
-        white2Seat: t.Optional(t.String()),
-        black1Seat: t.Optional(t.String()),
-        black2Seat: t.Optional(t.String()),
+        positions_recorded: t.Optional(t.String()),
       }),
     },
   )

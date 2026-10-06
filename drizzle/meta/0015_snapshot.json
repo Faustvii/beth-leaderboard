@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "25e7b1e7-4f9e-41e5-9408-6440ee2ba15f",
+  "id": "c0c09f32-3e00-4299-bbee-9fbd97325073",
   "prevId": "f188e5ab-9cf2-425b-bb22-57bf96233f1c",
   "tables": {
     "job_queue": {
@@ -180,33 +180,13 @@
           "notNull": true,
           "autoincrement": false
         },
-        "white_player_one_seat": {
-          "name": "white_player_one_seat",
-          "type": "text",
+        "positions_recorded": {
+          "name": "positions_recorded",
+          "type": "integer",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "white_player_two_seat": {
-          "name": "white_player_two_seat",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "black_player_one_seat": {
-          "name": "black_player_one_seat",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "black_player_two_seat": {
-          "name": "black_player_two_seat",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
         }
       },
       "indexes": {

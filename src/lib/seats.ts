@@ -29,6 +29,28 @@ export const SEAT_NAMES: Record<Seat, string> = {
   W: "4",
 };
 
+export type PlayerSlot =
+  | "whitePlayerOne"
+  | "whitePlayerTwo"
+  | "blackPlayerOne"
+  | "blackPlayerTwo";
+
+export const SLOT_SEAT: Record<PlayerSlot, Seat> = {
+  whitePlayerOne: "N",
+  whitePlayerTwo: "S",
+  blackPlayerOne: "E",
+  blackPlayerTwo: "W",
+};
+
+export const SEAT_SLOT: Record<Seat, PlayerSlot> = {
+  N: "whitePlayerOne",
+  S: "whitePlayerTwo",
+  E: "blackPlayerOne",
+  W: "blackPlayerTwo",
+};
+
+const OPPOSITE: Record<Seat, Seat> = { N: "S", S: "N", E: "W", W: "E" };
+
 export function teamSeatNames(team: Team): string {
   return TEAM_SEATS[team]
     .map((seat) => SEAT_NAMES[seat])
@@ -36,11 +58,8 @@ export function teamSeatNames(team: Team): string {
     .join(" + ");
 }
 
-interface SeatedFields {
-  whitePlayerOneSeat: Seat | null;
-  whitePlayerTwoSeat: Seat | null;
-  blackPlayerOneSeat: Seat | null;
-  blackPlayerTwoSeat: Seat | null;
+interface PositionFields {
+  positionsRecorded: boolean;
 }
 
 interface PlayerIdFields {
@@ -58,27 +77,23 @@ export function seatTeam(seat: Seat): Team {
   return SEAT_TEAM[seat];
 }
 
-export function matchHasSeats(match: SeatedFields): boolean {
-  return (
-    match.whitePlayerOneSeat !== null &&
-    match.whitePlayerTwoSeat !== null &&
-    match.blackPlayerOneSeat !== null &&
-    match.blackPlayerTwoSeat !== null
-  );
+export function positionsRecorded(match: PositionFields): boolean {
+  return match.positionsRecorded;
 }
 
-export function teamLabel(team: Team, match: SeatedFields): string {
-  return matchHasSeats(match) ? TEAM_LABELS[team] : `Team ${team}`;
+export function teamLabel(team: Team, match: PositionFields): string {
+  return match.positionsRecorded ? TEAM_LABELS[team] : `Team ${team}`;
 }
 
 export function getPlayerSeat(
-  match: SeatedFields & PlayerIdFields,
+  match: PositionFields & PlayerIdFields,
   userId: string,
 ): Seat | null {
-  if (match.whitePlayerOne.id === userId) return match.whitePlayerOneSeat;
-  if (match.whitePlayerTwo?.id === userId) return match.whitePlayerTwoSeat;
-  if (match.blackPlayerOne.id === userId) return match.blackPlayerOneSeat;
-  if (match.blackPlayerTwo?.id === userId) return match.blackPlayerTwoSeat;
+  if (!match.positionsRecorded) return null;
+  if (match.whitePlayerOne.id === userId) return SLOT_SEAT.whitePlayerOne;
+  if (match.whitePlayerTwo?.id === userId) return SLOT_SEAT.whitePlayerTwo;
+  if (match.blackPlayerOne.id === userId) return SLOT_SEAT.blackPlayerOne;
+  if (match.blackPlayerTwo?.id === userId) return SLOT_SEAT.blackPlayerTwo;
   return null;
 }
 
@@ -87,10 +102,7 @@ export interface SeatedTeams {
   whitePlayerTwo: string;
   blackPlayerOne: string;
   blackPlayerTwo: string;
-  whitePlayerOneSeat: Seat;
-  whitePlayerTwoSeat: Seat;
-  blackPlayerOneSeat: Seat;
-  blackPlayerTwoSeat: Seat;
+  positionsRecorded: true;
 }
 
 export type SeatAssignment = Partial<Record<Seat, string | undefined>>;
@@ -99,17 +111,41 @@ export function filledSeats(seats: SeatAssignment): Seat[] {
   return seatValues.filter((seat) => (seats[seat]?.trim() ?? "") !== "");
 }
 
-const OPPOSITE: Record<Seat, Seat> = { N: "S", S: "N", E: "W", W: "E" };
+export function seatsToTeams(
+  seats: SeatAssignment,
+): { ok: true; teams: SeatedTeams } | { ok: false; error: string } {
+  const ids = seatValues.map((seat) => {
+    const id = seats[seat]?.trim();
+    return id === "" ? undefined : id;
+  });
+  if (ids.some((id) => !isDefined(id))) {
+    return { ok: false, error: "All four seats must have a player" };
+  }
+  if (new Set(ids).size !== ids.length) {
+    return {
+      ok: false,
+      error: "The same player can't participate multiple times",
+    };
+  }
+
+  return {
+    ok: true,
+    teams: {
+      whitePlayerOne: seats.N!,
+      whitePlayerTwo: seats.S!,
+      blackPlayerOne: seats.E!,
+      blackPlayerTwo: seats.W!,
+      positionsRecorded: true,
+    },
+  };
+}
 
 export interface SinglesTeams {
   whitePlayerOne: string;
   whitePlayerTwo: null;
   blackPlayerOne: string;
   blackPlayerTwo: null;
-  whitePlayerOneSeat: null;
-  whitePlayerTwoSeat: null;
-  blackPlayerOneSeat: null;
-  blackPlayerTwoSeat: null;
+  positionsRecorded: false;
   sides: Partial<Record<Seat, Team>>;
 }
 
@@ -145,16 +181,13 @@ export function seatsToSingles(
       whitePlayerTwo: null,
       blackPlayerOne: blackId,
       blackPlayerTwo: null,
-      whitePlayerOneSeat: null,
-      whitePlayerTwoSeat: null,
-      blackPlayerOneSeat: null,
-      blackPlayerTwoSeat: null,
+      positionsRecorded: false,
       sides: { [white]: "White", [black]: "Black" },
     },
   };
 }
 
-interface SidesFields extends SeatedFields {
+interface SidesFields extends PositionFields {
   whitePlayerOne: { name: string };
   blackPlayerOne: { name: string };
   whitePlayerTwo: unknown;
@@ -168,8 +201,7 @@ export function isSingles(match: {
   return match.whitePlayerTwo === null && match.blackPlayerTwo === null;
 }
 
-//Display name of a side, the player's own name for a 1v1
-
+//Display label for a team, either the seat-based names or the colour wording
 export function sideLabel(team: Team, match: SidesFields): string {
   if (isSingles(match)) {
     return team === "White"
@@ -177,93 +209,4 @@ export function sideLabel(team: Team, match: SidesFields): string {
       : match.blackPlayerOne.name;
   }
   return teamLabel(team, match);
-}
-
-export function seatsToTeams(
-  seats: SeatAssignment,
-): { ok: true; teams: SeatedTeams } | { ok: false; error: string } {
-  const ids = seatValues.map((seat) => {
-    const id = seats[seat]?.trim();
-    return id === "" ? undefined : id;
-  });
-  if (ids.some((id) => !isDefined(id))) {
-    return { ok: false, error: "All four seats must have a player" };
-  }
-  if (new Set(ids).size !== ids.length) {
-    return {
-      ok: false,
-      error: "The same player can't participate multiple times",
-    };
-  }
-
-  return {
-    ok: true,
-    teams: {
-      whitePlayerOne: seats.N!,
-      whitePlayerOneSeat: "N",
-      whitePlayerTwo: seats.S!,
-      whitePlayerTwoSeat: "S",
-      blackPlayerOne: seats.E!,
-      blackPlayerOneSeat: "E",
-      blackPlayerTwo: seats.W!,
-      blackPlayerTwoSeat: "W",
-    },
-  };
-}
-
-export interface AdminSeatInput {
-  white1Seat?: string;
-  white2Seat?: string;
-  black1Seat?: string;
-  black2Seat?: string;
-}
-
-export function validateAdminSeats(
-  input: AdminSeatInput,
-): { ok: true; seats: SeatedFields } | { ok: false; error: string } {
-  const raw = [
-    input.white1Seat,
-    input.white2Seat,
-    input.black1Seat,
-    input.black2Seat,
-  ].map((s) => (s === undefined || s === "" ? null : s));
-
-  if (raw.every((s) => s === null)) {
-    return {
-      ok: true,
-      seats: {
-        whitePlayerOneSeat: null,
-        whitePlayerTwoSeat: null,
-        blackPlayerOneSeat: null,
-        blackPlayerTwoSeat: null,
-      },
-    };
-  }
-
-  if (!raw.every(isSeat)) {
-    return { ok: false, error: "Either set all four seats or none" };
-  }
-
-  const [w1, w2, b1, b2] = raw;
-  const whiteOk = seatTeam(w1) === "White" && seatTeam(w2) === "White";
-  const blackOk = seatTeam(b1) === "Black" && seatTeam(b2) === "Black";
-  if (!whiteOk || !blackOk) {
-    return {
-      ok: false,
-      error: `${TEAM_LABELS.White} must sit in seats ${teamSeatNames("White")} and ${TEAM_LABELS.Black} in seats ${teamSeatNames("Black")}`,
-    };
-  }
-  if (w1 === w2 || b1 === b2) {
-    return { ok: false, error: "Two players can't share a seat" };
-  }
-
-  return {
-    ok: true,
-    seats: {
-      whitePlayerOneSeat: w1,
-      whitePlayerTwoSeat: w2,
-      blackPlayerOneSeat: b1,
-      blackPlayerTwoSeat: b2,
-    },
-  };
 }

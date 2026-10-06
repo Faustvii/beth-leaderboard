@@ -111,7 +111,7 @@
   }
 
   var TEAM_SEATS = { NS: ["N", "S"], EW: ["E", "W"] };
-// Highlight the winning team with a gold border
+  // Highlight the winning team with a gold border
   function updateWinnerHighlight() {
     var f = form();
     if (!f) return;

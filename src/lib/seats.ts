@@ -168,8 +168,7 @@ export function isSingles(match: {
   return match.whitePlayerTwo === null && match.blackPlayerTwo === null;
 }
 
-
- //Display name of a side, the player's own name for a 1v1
+//Display name of a side, the player's own name for a 1v1
 
 export function sideLabel(team: Team, match: SidesFields): string {
   if (isSingles(match)) {
@@ -179,7 +178,6 @@ export function sideLabel(team: Team, match: SidesFields): string {
   }
   return teamLabel(team, match);
 }
-
 
 export function seatsToTeams(
   seats: SeatAssignment,

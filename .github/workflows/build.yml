@@ -81,6 +81,7 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
+      deployments: write
     concurrency:
       group: preview-${{ github.event.pull_request.number }}
       cancel-in-progress: true
@@ -95,13 +96,15 @@ jobs:
           PR_NUMBER: ${{ github.event.pull_request.number }}
         run: gh pr edit "$PR_NUMBER" --repo "${{ github.repository }}" --add-label preview
 
-      - name: Wait for the preview to run this commit
-        run: |
-          for _ in $(seq 1 60); do
-            curl -fsSL "https://pr-${{ github.event.pull_request.number }}-leaderboard.${{ vars.PREVIEW_DOMAIN }}/" | grep -q "${{ github.sha }}" && exit 0
-            sleep 10
-          done
-          exit 1
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Wait for Flux to deploy this commit
+        env:
+          DEPLOYMENT_URL: https://pr-${{ github.event.pull_request.number }}-leaderboard.${{ vars.PREVIEW_DOMAIN }}
+          EXPECTED_SHA: ${{ github.sha }}
+        run: bash .github/scripts/wait-for-deployment.sh
 
   production:
     needs: build-and-publish-docker
@@ -114,16 +117,12 @@ jobs:
       name: production
       url: https://leaderboard.faust.space
     steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
       - name: Wait for Flux to deploy this commit
         env:
+          DEPLOYMENT_URL: https://leaderboard.faust.space
           EXPECTED_SHA: ${{ github.sha }}
-        run: |
-          for _ in $(seq 1 90); do
-            if curl --connect-timeout 5 --max-time 10 -fsS \
-              https://leaderboard.faust.space/ | grep -Fq "/commit/$EXPECTED_SHA"; then
-              exit 0
-            fi
-            sleep 10
-          done
-          echo "Production did not serve commit $EXPECTED_SHA within the rollout timeout."
-          exit 1
+        run: bash .github/scripts/wait-for-deployment.sh

@@ -30,3 +30,38 @@
     background-position: 0% 50%;
   }
 }
+
+@media (hover: none) and (pointer: coarse) {
+  .pointer-text {
+    @apply hidden;
+  }
+  .touch-text {
+    @apply inline;
+  }
+}
+.chip-selected {
+  @apply ring-2 ring-primary;
+}
+.seat-filled {
+  @apply border-solid;
+}
+.seat-target {
+  @apply border-solid ring-2 ring-primary/70;
+}
+.mode-singles .seat-team,
+.mode-singles .winner-hint {
+  @apply hidden;
+}
+
+@media (max-width: 639px) {
+  .chip-seated {
+    @apply px-2 text-xs;
+  }
+  .chip-seated .chip-name {
+    @apply line-clamp-2 max-w-none whitespace-normal break-words text-center;
+  }
+}
+
+.seat-winner {
+  @apply border-solid border-amber-400 shadow-[0_0_12px_rgba(251,191,36,0.55)];
+}

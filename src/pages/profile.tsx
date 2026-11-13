@@ -10,8 +10,10 @@ import { NavbarHtml } from "../components/Navbar";
 import { ProfileForm } from "../components/ProfileForm";
 import { QuestDescription } from "../components/QuestDescription";
 import { SeasonPicker } from "../components/SeasonPicker";
+import { SeatWinrateCard } from "../components/SeatWinrateCard";
 import { SettingsForm } from "../components/SettingsForm";
 import { StatsCardHtml } from "../components/StatsCard";
+import { TeamWinrateCard } from "../components/TeamWinrateCard";
 import { ctx } from "../context";
 import { getMatches } from "../db/queries/matchQueries";
 import { getActiveQuestsForPlayer } from "../db/queries/questQueries";
@@ -30,6 +32,7 @@ import {
   type Rating,
   type RatingSystem,
 } from "../lib/ratings/rating";
+import { sideLabel } from "../lib/seats";
 import { getCurrentUser } from "../lib/store";
 import { cn } from "../lib/utils";
 
@@ -177,11 +180,7 @@ const profileStats = (
   const matchesToday = MatchStatistics.gamesToday(playerMatches);
   const matchesYesterday = MatchStatistics.gamesYesterday(playerMatches);
 
-  const colorWinRates = MatchStatistics.playerWinsByResult(
-    playerMatches,
-    userId,
-  );
-  const winRate = MatchStatistics.playerWinRate(playerMatches, userId);
+  const seatStats = MatchStatistics.playerWinsBySeat(playerMatches, userId);
   const { highestLoseStreak, highestWinStreak } =
     MatchStatistics.getPlayersStreak(playerMatches, userId);
 
@@ -200,39 +199,6 @@ const profileStats = (
     0,
     20,
   );
-
-  const colorWinrateData = {
-    labels: ["Won", "Lost", "Draw"],
-    datasets: [
-      {
-        label: "Matches",
-        data: [winRate.wonGames, winRate.lostGames, winRate.draws],
-        backgroundColor: ["#fffffe", "rgb(35, 43, 43)", "#ff8906"],
-        hoverOffset: 4,
-      },
-    ],
-  };
-
-  const winrateConfig: ChartConfiguration = {
-    type: "doughnut",
-    data: colorWinrateData,
-    options: {
-      plugins: {
-        legend: {
-          display: false,
-          labels: {
-            color: "#fffffe",
-          },
-          position: "left",
-        },
-      },
-      elements: {
-        arc: {
-          borderWidth: 0,
-        },
-      },
-    },
-  };
 
   const colorFromPrevious = (cur: number, i: number, arr: number[]) => {
     if (i === 0) {
@@ -330,41 +296,8 @@ const profileStats = (
           )}
         </>
       </StatsCardHtml>
-      <StatsCardHtml title="Winrate">
-        <>
-          <div class="flex h-48 w-full items-center justify-center pt-5">
-            <Chart id="chartDoughnut" config={winrateConfig}></Chart>
-            <span class="pl-3 text-sm">
-              {winRate.winPercentage.toFixed(2)}%
-            </span>
-          </div>
-        </>
-      </StatsCardHtml>
-      <StatsCardHtml title="Winrate By Color">
-        <>
-          <div class="flex flex-col items-center justify-center gap-1">
-            <span class="text-5xl">{colorWinRates.whiteWins.wins}</span>
-            <span class="text-md">
-              {colorWinRates.whiteWins.procentage.toFixed(2)}%
-            </span>
-            <span class="text-xl">White wins</span>
-          </div>
-          <div class="flex flex-col items-center justify-center gap-1">
-            <span class="text-5xl">{colorWinRates.numOfDraws.draws}</span>
-            <span class="text-md">
-              {colorWinRates.numOfDraws.procentage.toFixed(2)}%
-            </span>
-            <span class="text-xl">Draws</span>
-          </div>
-          <div class="flex h-full flex-col items-center justify-center gap-1">
-            <span class="text-5xl">{colorWinRates.blackWins.wins}</span>
-            <span class="text-md">
-              {colorWinRates.blackWins.procentage.toFixed(2)}%
-            </span>
-            <span class="text-xl">Black wins</span>
-          </div>
-        </>
-      </StatsCardHtml>
+      <SeatWinrateCard stats={seatStats} />
+      <TeamWinrateCard stats={seatStats} />
       <StatsCardHtml title="Longest Win Streak">
         <span class="text-sm">Top win streak {highestWinStreak}</span>
       </StatsCardHtml>
@@ -447,17 +380,19 @@ function matchFaceoff(biggestWin: {
           month: "long",
         })}
       </MatchResultLink>
-      , the White team of{" "}
+      , {sideLabel("White", biggestWin.match)} of{" "}
       <span class="font-bold">
         {biggestWin.biggestPlayers.white.join(" & ")}
       </span>{" "}
-      faced off against the Black team of{" "}
+      faced off against {sideLabel("Black", biggestWin.match)} of{" "}
       <span class="font-bold">
         {biggestWin.biggestPlayers.black.join(" & ")}
       </span>
-      . The {biggestWin.match.result.toLowerCase()} team triumphed with a{" "}
-      {biggestWin.match.scoreDiff}
-      -point difference.
+      .{" "}
+      {biggestWin.match.result === "Draw"
+        ? "It was a draw"
+        : `${sideLabel(biggestWin.match.result, biggestWin.match)} triumphed`}{" "}
+      with a {biggestWin.match.scoreDiff}-point difference.
     </span>
   );
 }

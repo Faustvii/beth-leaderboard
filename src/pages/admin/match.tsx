@@ -36,6 +36,22 @@ export const Match = new Elysia({
       const createdAtFromUser = new Date(
         `${body.date_played}T${body.time_played}`,
       );
+      if (Number.isNaN(createdAtFromUser.getTime())) {
+        return new Response(
+          `<div id="errors" class="text-red-500">Invalid date or time</div>`,
+          { status: 400 },
+        );
+      }
+      // Positions can only be recorded for a 2v2; the columns then stand for
+      // seats 1/3 (white) and 2/4 (black).
+      const isDoubles = !!body.white2Id && !!body.black2Id;
+      const positionsRecorded = body.positions_recorded === "true";
+      if (positionsRecorded && !isDoubles) {
+        return new Response(
+          `<div id="errors" class="text-red-500">Positions can only be recorded for a 2v2 match</div>`,
+          { status: 400 },
+        );
+      }
       const createdAt = fromTimezoneToUTC(
         createdAtFromUser,
         "Europe/Copenhagen",
@@ -51,6 +67,7 @@ export const Match = new Elysia({
           result: body.match_winner,
           scoreDiff: Number(body.point_difference),
           createdAt,
+          positionsRecorded,
         })
         .where(eq(matches.id, Number(body.match_id)));
 
@@ -74,7 +91,7 @@ export const Match = new Elysia({
           body.white2Id,
           body.black1Id,
           body.black2Id,
-        ].filter((id) => id !== "");
+        ].filter((id) => !!id);
 
         const uniqueIds = new Set(userIds);
         if (uniqueIds.size !== userIds.length) {
@@ -116,6 +133,7 @@ export const Match = new Elysia({
         match_id: t.Number(),
         date_played: t.String(),
         time_played: t.String(),
+        positions_recorded: t.Optional(t.String()),
       }),
     },
   )

@@ -1,7 +1,7 @@
-import { asc, eq, like } from "drizzle-orm";
+import { asc, desc, eq, inArray, like } from "drizzle-orm";
 import { readDb } from "..";
 import { shortName } from "../../lib/nameUtils";
-import { userTbl } from "../schema";
+import { matches, userTbl } from "../schema";
 import { type User } from "../schema/auth";
 
 export const getUser = async (
@@ -80,4 +80,39 @@ export const listAllUsers = async (): Promise<User[]> => {
     columns: { picture: false },
     orderBy: asc(userTbl.name),
   });
+};
+
+// Players from the most recent matches, most recent first
+export const listRecentlyActiveUsers = async (count = 8): Promise<User[]> => {
+  const recent = await readDb.query.matches.findMany({
+    columns: {
+      whitePlayerOne: true,
+      whitePlayerTwo: true,
+      blackPlayerOne: true,
+      blackPlayerTwo: true,
+    },
+    orderBy: desc(matches.createdAt),
+    limit: count * 3,
+  });
+  const ids: string[] = [];
+  for (const m of recent) {
+    for (const id of [
+      m.whitePlayerOne,
+      m.whitePlayerTwo,
+      m.blackPlayerOne,
+      m.blackPlayerTwo,
+    ]) {
+      if (id && !ids.includes(id)) ids.push(id);
+    }
+    if (ids.length >= count) break;
+  }
+  const wanted = ids.slice(0, count);
+  if (wanted.length === 0) return [];
+  const players = await readDb.query.userTbl.findMany({
+    columns: { picture: false },
+    where: inArray(userTbl.id, wanted),
+  });
+  return wanted
+    .map((id) => players.find((p) => p.id === id))
+    .filter((p): p is User => p !== undefined);
 };

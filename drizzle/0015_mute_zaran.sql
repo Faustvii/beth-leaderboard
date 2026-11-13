@@ -1,0 +1,1 @@
+ALTER TABLE `match` ADD `positions_recorded` integer DEFAULT false NOT NULL;

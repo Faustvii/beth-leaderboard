@@ -4,25 +4,14 @@ on:
     branches:
       - main
   push:
-    paths:
-      - "src/**"
-      - "tests/**"
-      - "drizzle/**"
-      - ".github/**"
-      - "Dockerfile"
-      - "package.json"
-      - "bun.lockdb"
     branches:
       - main
   workflow_dispatch:
-    inputs:
-      target:
-        description: "Deployment target"
-        required: true
-        type: choice
-        options:
-          - production
-        default: production
+
+# Serialize builds so an older build cannot overwrite a newer production image.
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: false
 
 permissions:
   contents: write # to be able to publish a GitHub release
@@ -52,9 +41,8 @@ jobs:
 
   build-and-publish-docker:
     needs: build-and-test
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-    outputs:
-      image_digest: ${{ steps.docker_build.outputs.digest }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -109,20 +97,33 @@ jobs:
 
       - name: Wait for the preview to run this commit
         run: |
-          for i in $(seq 1 60); do
+          for _ in $(seq 1 60); do
             curl -fsSL "https://pr-${{ github.event.pull_request.number }}-leaderboard.${{ vars.PREVIEW_DOMAIN }}/" | grep -q "${{ github.sha }}" && exit 0
             sleep 10
           done
           exit 1
 
-  deploy-prod:
+  production:
     needs: build-and-publish-docker
-    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
-    uses: ./.github/workflows/trigger-deploy.yml
-    with:
-      target: production
-      image: latest@${{ needs.build-and-publish-docker.outputs.image_digest }}
-      source_ref: ${{ github.ref_name }}
-    secrets:
-      CLUSTER_REPO_DISPATCH_TOKEN: ${{ secrets.CLUSTER_REPO_DISPATCH_TOKEN }}
-      CLUSTER_REPO: ${{ secrets.CLUSTER_REPO }}
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      deployments: write
+    environment:
+      name: production
+      url: https://leaderboard.faust.space
+    steps:
+      - name: Wait for Flux to deploy this commit
+        env:
+          EXPECTED_SHA: ${{ github.sha }}
+        run: |
+          for _ in $(seq 1 90); do
+            if curl --connect-timeout 5 --max-time 10 -fsS \
+              https://leaderboard.faust.space/ | grep -Fq "/commit/$EXPECTED_SHA"; then
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "Production did not serve commit $EXPECTED_SHA within the rollout timeout."
+          exit 1

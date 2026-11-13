@@ -1,14 +1,6 @@
 name: Build
 on:
   pull_request:
-    paths:
-      - "src/**"
-      - "tests/**"
-      - "drizzle/**"
-      - ".github/**"
-      - "Dockerfile"
-      - "package.json"
-      - "bun.lockdb"
     branches:
       - main
   push:
@@ -92,18 +84,36 @@ jobs:
             ghcr.io/faustvii/beth-leaderboard:${{ github.ref == 'refs/heads/main' && 'latest' || 'pr-' }}${{ github.ref == 'refs/heads/main' && '' || github.event.number }}${{ github.ref != 'refs/heads/main' && '-latest' || '' }}
             ${{ github.ref == 'refs/heads/main' && 'ghcr.io/faustvii/beth-leaderboard:' || '' }}${{ github.ref == 'refs/heads/main' && github.sha || '' }}
             ${{ github.ref != 'refs/heads/main' && 'ghcr.io/faustvii/beth-leaderboard:' || '' }}${{ github.ref != 'refs/heads/main' && 'pr-latest' || '' }}
+            ${{ github.event_name == 'pull_request' && format('ghcr.io/faustvii/beth-leaderboard:{0}', github.event.pull_request.head.sha) || '' }}
 
-  deploy-preview:
+  preview:
     needs: build-and-publish-docker
     if: github.event_name == 'pull_request'
-    uses: ./.github/workflows/trigger-deploy.yml
-    with:
-      target: preview
-      image: pr-latest@${{ needs.build-and-publish-docker.outputs.image_digest }}
-      source_ref: ${{ github.head_ref || github.ref_name }}
-    secrets:
-      CLUSTER_REPO_DISPATCH_TOKEN: ${{ secrets.CLUSTER_REPO_DISPATCH_TOKEN }}
-      CLUSTER_REPO: ${{ secrets.CLUSTER_REPO }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    concurrency:
+      group: preview-${{ github.event.pull_request.number }}
+      cancel-in-progress: true
+    environment:
+      name: preview/pr-${{ github.event.pull_request.number }}
+      url: https://pr-${{ github.event.pull_request.number }}-leaderboard.${{ vars.PREVIEW_DOMAIN }}
+    steps:
+      # The image exists now, so the label is safe to add.
+      - name: Trigger Flux preview
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: gh pr edit "$PR_NUMBER" --repo "${{ github.repository }}" --add-label preview
+
+      - name: Wait for the preview to run this commit
+        run: |
+          for i in $(seq 1 60); do
+            curl -fsSL "https://pr-${{ github.event.pull_request.number }}-leaderboard.${{ vars.PREVIEW_DOMAIN }}/" | grep -q "${{ github.sha }}" && exit 0
+            sleep 10
+          done
+          exit 1
 
   deploy-prod:
     needs: build-and-publish-docker

@@ -6,7 +6,7 @@ on:
       target:
         required: true
         type: string
-        description: "preview or production"
+        description: "production"
       image:
         required: true
         type: string

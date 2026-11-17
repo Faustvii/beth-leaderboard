@@ -105,9 +105,17 @@
     }
   }
 
+  function searchResults() {
+    var f = form();
+    return f && document.getElementById(f.id + "-search-results");
+  }
+
+  // Dropping the target also closes the player suggestions that belong to it.
   function clearTarget() {
     if (targetSeat) targetSeat.classList.remove("seat-target");
     targetSeat = null;
+    var results = searchResults();
+    if (results) results.setAttribute("hidden", "");
   }
 
   var TEAM_SEATS = { NS: ["N", "S"], EW: ["E", "W"] };
@@ -265,7 +273,15 @@
     }
 
     var seat = target.closest(".seat");
-    if (!seat) return;
+    if (!seat) {
+      // Clicked somewhere else: close the suggestions, unless the click was in
+      // the search field or the suggestion list itself.
+      var inSearch =
+        target.closest(".search-results") ||
+        target.closest('#board-match-form input[name="name"]');
+      if (!inSearch) clearTarget();
+      return;
+    }
     e.preventDefault();
     if (selected) {
       moveTo(selected, seat);

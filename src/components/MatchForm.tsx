@@ -1,4 +1,10 @@
 import { type Match } from "../lib/ratings/rating";
+import {
+  isSingles,
+  SEAT_NAMES,
+  TEAM_LABELS,
+  teamSeatNames,
+} from "../lib/seats";
 import { DateAndTimePicker } from "./DateAndTimePicker";
 import { UserLookUp } from "./UserLookup";
 
@@ -15,6 +21,8 @@ export const MatchForm = async ({
 }: MatchFormProps) => {
   let createdDate = "";
   let createdTime = "";
+  // Positions are only recorded for 2v2 matches; a 1v1 has nothing to edit here.
+  const showSeats = match !== undefined && !isSingles(match);
 
   if (match?.createdAt) {
     const [day, , month, , year, , hour, , minute] = new Intl.DateTimeFormat(
@@ -46,14 +54,20 @@ export const MatchForm = async ({
         hx-target-400="#errors"
       >
         {/* TODO: Use flex with gap instead */}
-        {/* White team */}
+        {/* White side = Tog/Kantine team (seats 1 + 3) */}
         <div class="group relative mb-6 w-full border-b">
-          <span>White team</span>
+          <span>
+            {TEAM_LABELS.White}
+            <span class="text-sm text-gray-400">
+              {" "}
+              · seats {teamSeatNames("White")}
+            </span>
+          </span>
         </div>
         <div class="group relative mb-6 w-full">
           <UserLookUp
             formId={formId}
-            label="White player 1"
+            label={`${TEAM_LABELS.White} player 1 (seat ${SEAT_NAMES.N})`}
             input="white1"
             user={match?.whitePlayerOne}
             required={true}
@@ -62,20 +76,26 @@ export const MatchForm = async ({
         <div class="group relative mb-6 w-full">
           <UserLookUp
             formId={formId}
-            label="White player 2 (optional)"
+            label={`${TEAM_LABELS.White} player 2 (seat ${SEAT_NAMES.S}, optional)`}
             input="white2"
             user={match?.whitePlayerTwo}
           />
         </div>
 
-        {/* Black team */}
+        {/* Black side = Mute/Rønslev team (seats 2 + 4) */}
         <div class="group relative mb-6 w-full border-b">
-          <span>Black team</span>
+          <span>
+            {TEAM_LABELS.Black}
+            <span class="text-sm text-gray-400">
+              {" "}
+              · seats {teamSeatNames("Black")}
+            </span>
+          </span>
         </div>
         <div class="group relative mb-6 w-full">
           <UserLookUp
             formId={formId}
-            label="Black player 1"
+            label={`${TEAM_LABELS.Black} player 1 (seat ${SEAT_NAMES.E})`}
             input="black1"
             user={match?.blackPlayerOne}
             required={true}
@@ -84,11 +104,31 @@ export const MatchForm = async ({
         <div class="group relative mb-6 w-full">
           <UserLookUp
             formId={formId}
-            label="Black player 2 (optional)"
+            label={`${TEAM_LABELS.Black} player 2 (seat ${SEAT_NAMES.W}, optional)`}
             input="black2"
             user={match?.blackPlayerTwo}
           />
         </div>
+
+        {showSeats && (
+          <label class="mb-6 flex items-center gap-3 text-sm">
+            <input
+              type="checkbox"
+              name="positions_recorded"
+              value="true"
+              form={formId}
+              checked={match.positionsRecorded}
+              class="h-4 w-4 accent-primary"
+            />
+            <span>
+              Positions recorded
+              <span class="block text-xs text-gray-400">
+                Player 1 / player 2 of each team sat in the seats shown in the
+                labels. Untick if the seating is unknown.
+              </span>
+            </span>
+          </label>
+        )}
 
         {/* Winner and points */}
         <div class="group relative mb-6 w-full border-b">
@@ -106,13 +146,22 @@ export const MatchForm = async ({
             <option disabled value="" selected={match ? false : true}>
               Select a winner
             </option>
-            <option selected={match?.result === "White" ? true : false}>
-              White
+            <option
+              value="White"
+              selected={match?.result === "White" ? true : false}
+            >
+              {TEAM_LABELS.White}
             </option>
-            <option selected={match?.result === "Black" ? true : false}>
-              Black
+            <option
+              value="Black"
+              selected={match?.result === "Black" ? true : false}
+            >
+              {TEAM_LABELS.Black}
             </option>
-            <option selected={match?.result === "Draw" ? true : false}>
+            <option
+              value="Draw"
+              selected={match?.result === "Draw" ? true : false}
+            >
               Draw
             </option>
           </select>

@@ -8,6 +8,7 @@ interface MatchWithPlayers {
   scoreDiff: number;
   seasonId: number;
   createdAt: Date;
+  positionsRecorded: boolean;
 }
 
 interface Player {

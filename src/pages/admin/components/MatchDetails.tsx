@@ -1,11 +1,13 @@
 interface MatchDetailsProps {
   result: string;
+  winnerLabel: string;
   scoreDiff: number;
   dateLogged: Date;
 }
 
 export const MatchDetails = ({
   result,
+  winnerLabel,
   scoreDiff,
   dateLogged,
 }: MatchDetailsProps) => {
@@ -17,7 +19,7 @@ export const MatchDetails = ({
           <p>Draw</p>
         ) : (
           <p>
-            Team {result} won with {scoreDiff}
+            {winnerLabel} won with {scoreDiff}
           </p>
         )}
       </div>

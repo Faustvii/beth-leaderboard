@@ -111,6 +111,8 @@ async function SeedMatches(
       blackPlayerTwo: blackPlayerTwo,
       createdAt: matchTimestamp,
       seasonId: activeSeason?.id ?? 1,
+      // Seeded games are 2v2 logged with positions
+      positionsRecorded: true,
     };
 
     await db.insert(matches).values(matchInsert);

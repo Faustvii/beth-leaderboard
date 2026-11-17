@@ -28,7 +28,22 @@ permissions:
   deployments: write
 
 jobs:
+  pause-preview:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pause preview updates
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          gh label create preview-pause --repo "$REPO" --force
+          gh pr edit "$PR_NUMBER" --repo "$REPO" --add-label preview-pause
+
   build-and-test:
+    needs: pause-preview
+    if: always() && (github.event_name != 'pull_request' || needs.pause-preview.result == 'success')
     runs-on: ubuntu-latest
     name: Build and test
     steps:
@@ -105,7 +120,15 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
-        run: gh pr edit "$PR_NUMBER" --repo "${{ github.repository }}" --add-label preview
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha }}
+          REPO: ${{ github.repository }}
+        run: |
+          CURRENT_SHA=$(gh pr view "$PR_NUMBER" --repo "$REPO" --json headRefOid --jq .headRefOid)
+          if [ "$CURRENT_SHA" != "$EXPECTED_SHA" ]; then
+            echo "A newer commit exists; leaving the preview paused."
+            exit 1
+          fi
+          gh pr edit "$PR_NUMBER" --repo "$REPO" --add-label preview --remove-label preview-pause
 
       - uses: actions/checkout@v4
         with:

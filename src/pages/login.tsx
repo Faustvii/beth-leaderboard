@@ -2,6 +2,7 @@ import { Elysia } from "elysia";
 import { HeaderHtml } from "../components/header";
 import { LayoutHtml } from "../components/Layout";
 import { NavbarHtml } from "../components/Navbar";
+import { config } from "../config";
 import { ctx } from "../context";
 
 export const login = new Elysia({ prefix: "/login" })
@@ -18,9 +19,13 @@ export const login = new Elysia({ prefix: "/login" })
         <a hx-boost="false" href="/api/auth/signin/azure">
           Login with azure
         </a>
-        <a hx-boost="false" href="/api/auth/signin/local">
-          Login for testing
-        </a>
+        {config.allowLocalLogin ? (
+          <a hx-boost="false" href="/api/auth/signin/local">
+            Login for testing
+          </a>
+        ) : (
+          ""
+        )}
       </LayoutHtml>
     ));
   });

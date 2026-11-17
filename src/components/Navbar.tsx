@@ -166,7 +166,7 @@ export const NavbarHtml = async ({ activePage }: Props) => {
                   <AnchorButtonHtml
                     class="relative flex rounded-full text-sm text-gray-400 hover:bg-gray-700 hover:text-white focus:text-white "
                     href={
-                      config.env.NODE_ENV === "development"
+                      config.allowLocalLogin
                         ? "/login"
                         : "/api/auth/signin/azure"
                     }

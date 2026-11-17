@@ -34,9 +34,9 @@ export const authController = new Elysia({
     redirect(ctx, "/");
   })
   .get("/signin/local/", async ({ set, query, writeAuth, readDb }) => {
-    if (config.env.NODE_ENV !== "development") {
+    if (!config.allowLocalLogin) {
       set.status = "Forbidden";
-      return "Local signin is only allowed in development mode";
+      return "Local signin is only allowed in non-production environments";
     }
 
     try {

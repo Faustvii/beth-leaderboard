@@ -24,33 +24,41 @@ export function daysBetween(start: Date, end: Date) {
 }
 
 export function fromTimezoneToUTC(date: Date, timezone = "Europe/Copenhagen") {
-  const offset = getOffsetMinutes(date, timezone);
-  const dateCopy = new Date(date);
-  dateCopy.setMinutes(dateCopy.getMinutes() - offset);
-  return dateCopy;
-}
-
-function getOffsetMinutes(date: Date, timezone: string) {
-  if (timezone !== "Europe/Copenhagen")
-    throw new Error("Only Europe/Copenhagen is supported for input timezone");
-  const localTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-  if (localTimezone !== "UTC")
-    throw new Error("Only UTC is supported for local timezone");
-
-  const lastSundayInMarch = lastSundayOfMonth(date.getFullYear(), 2);
-  const lastSundayInOctober = lastSundayOfMonth(date.getFullYear(), 9);
-  const isSummertime = date >= lastSundayInMarch && date < lastSundayInOctober;
-
-  return isSummertime ? 120 : 60;
-}
-
-function lastSundayOfMonth(year: number, monthIndex: number): Date {
-  const firstOfNextMonth = new Date(year, monthIndex + 1, 1);
-  const weekday = firstOfNextMonth.getDay();
-  const dayDiff = weekday === 0 ? 7 : weekday;
-  const lastSunday = firstOfNextMonth.setDate(
-    firstOfNextMonth.getDate() - dayDiff,
+  const wallClockAsUtc = Date.UTC(
+    date.getFullYear(),
+    date.getMonth(),
+    date.getDate(),
+    date.getHours(),
+    date.getMinutes(),
+    date.getSeconds(),
   );
+  // The offset depends on the instant (DST), so refine once with the first guess.
+  const guess = wallClockAsUtc - getOffsetMs(wallClockAsUtc, timezone);
+  return new Date(wallClockAsUtc - getOffsetMs(guess, timezone));
+}
 
-  return new Date(lastSunday);
+/** How far `timezone` is ahead of UTC at the given instant, in milliseconds. */
+function getOffsetMs(instant: number, timezone: string) {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: timezone,
+    hourCycle: "h23",
+    year: "numeric",
+    month: "numeric",
+    day: "numeric",
+    hour: "numeric",
+    minute: "numeric",
+    second: "numeric",
+  }).formatToParts(new Date(instant));
+  const get = (type: string) =>
+    Number(parts.find((part) => part.type === type)?.value);
+  const asUtc = Date.UTC(
+    get("year"),
+    get("month") - 1,
+    get("day"),
+    get("hour"),
+    get("minute"),
+    get("second"),
+  );
+  // formatToParts drops milliseconds, so compare against the instant without them.
+  return asUtc - Math.floor(instant / 1000) * 1000;
 }

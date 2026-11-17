@@ -69,6 +69,7 @@ export interface Match {
   scoreDiff: number;
   createdAt: Date;
   seasonId: number;
+  positionsRecorded: boolean;
 }
 
 export interface MatchWithRatings<TRating> {

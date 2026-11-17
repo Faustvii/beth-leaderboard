@@ -20,6 +20,11 @@ export const matches = sqliteTable(
     seasonId: integer("seasonId")
       .notNull()
       .references(() => seasonsTbl.id),
+    // True when logged on the board as a 2v2: player columns then stand for
+    // seats (white one/two = seats 1/3, black one/two = seats 2/4).
+    positionsRecorded: integer("positions_recorded", { mode: "boolean" })
+      .notNull()
+      .default(false),
   },
   (table) => {
     return {

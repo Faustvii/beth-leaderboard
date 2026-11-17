@@ -41,7 +41,7 @@ export const MatchForm = async ({
   return (
     <>
       <form
-        class="flex w-full flex-col"
+        class="flex w-full flex-col max-sm:[&_.group]:mb-4"
         method="post"
         id={formId}
         hx-ext="response-targets"
@@ -67,7 +67,7 @@ export const MatchForm = async ({
         <div class="group relative mb-6 w-full">
           <UserLookUp
             formId={formId}
-            label={`${TEAM_LABELS.White} player 1 (seat ${SEAT_NAMES.N})`}
+            label={`Player 1 · seat ${SEAT_NAMES.N}`}
             input="white1"
             user={match?.whitePlayerOne}
             required={true}
@@ -76,7 +76,7 @@ export const MatchForm = async ({
         <div class="group relative mb-6 w-full">
           <UserLookUp
             formId={formId}
-            label={`${TEAM_LABELS.White} player 2 (seat ${SEAT_NAMES.S}, optional)`}
+            label={`Player 2 · seat ${SEAT_NAMES.S} (optional)`}
             input="white2"
             user={match?.whitePlayerTwo}
           />
@@ -95,7 +95,7 @@ export const MatchForm = async ({
         <div class="group relative mb-6 w-full">
           <UserLookUp
             formId={formId}
-            label={`${TEAM_LABELS.Black} player 1 (seat ${SEAT_NAMES.E})`}
+            label={`Player 1 · seat ${SEAT_NAMES.E}`}
             input="black1"
             user={match?.blackPlayerOne}
             required={true}
@@ -104,14 +104,14 @@ export const MatchForm = async ({
         <div class="group relative mb-6 w-full">
           <UserLookUp
             formId={formId}
-            label={`${TEAM_LABELS.Black} player 2 (seat ${SEAT_NAMES.W}, optional)`}
+            label={`Player 2 · seat ${SEAT_NAMES.W} (optional)`}
             input="black2"
             user={match?.blackPlayerTwo}
           />
         </div>
 
         {showSeats && (
-          <label class="mb-6 flex items-center gap-3 text-sm">
+          <label class="mb-4 flex items-center gap-3 text-sm sm:mb-6">
             <input
               type="checkbox"
               name="positions_recorded"
@@ -122,7 +122,7 @@ export const MatchForm = async ({
             />
             <span>
               Positions recorded
-              <span class="block text-xs text-gray-400">
+              <span class="hidden text-xs text-gray-400 sm:block">
                 Player 1 / player 2 of each team sat in the seats shown in the
                 labels. Untick if the seating is unknown.
               </span>
@@ -131,75 +131,79 @@ export const MatchForm = async ({
         )}
 
         {/* Winner and points */}
-        <div class="group relative mb-6 w-full border-b">
+        <div class="group relative mb-6 w-full border-b max-sm:hidden">
           <span>Match result</span>
         </div>
 
-        <div class="group relative mb-6 w-full">
-          <select
-            name="match_winner"
-            form={formId}
-            id="match_winner"
-            class="peer block w-full appearance-none border-0 border-b-2 border-gray-300 bg-transparent px-0 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-0 [&>option]:text-gray-900"
-            required={true}
-          >
-            <option disabled value="" selected={match ? false : true}>
-              Select a winner
-            </option>
-            <option
-              value="White"
-              selected={match?.result === "White" ? true : false}
+        <div class="grid grid-cols-2 gap-x-4 sm:block">
+          <div class="group relative mb-6 w-full">
+            <select
+              name="match_winner"
+              form={formId}
+              id="match_winner"
+              class="peer block w-full appearance-none border-0 border-b-2 border-gray-300 bg-transparent px-0 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-0 [&>option]:text-gray-900"
+              required={true}
             >
-              {TEAM_LABELS.White}
-            </option>
-            <option
-              value="Black"
-              selected={match?.result === "Black" ? true : false}
+              <option disabled value="" selected={match ? false : true}>
+                Select a winner
+              </option>
+              <option
+                value="White"
+                selected={match?.result === "White" ? true : false}
+              >
+                {TEAM_LABELS.White}
+              </option>
+              <option
+                value="Black"
+                selected={match?.result === "Black" ? true : false}
+              >
+                {TEAM_LABELS.Black}
+              </option>
+              <option
+                value="Draw"
+                selected={match?.result === "Draw" ? true : false}
+              >
+                Draw
+              </option>
+            </select>
+            <label
+              for="match_winner"
+              class="absolute top-3 origin-[0] -translate-y-6 scale-75 transform bg-gray-900 text-sm text-gray-400 duration-300 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:left-0 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:font-medium peer-focus:text-blue-500"
             >
-              {TEAM_LABELS.Black}
-            </option>
-            <option
-              value="Draw"
-              selected={match?.result === "Draw" ? true : false}
+              Match Winner
+            </label>
+          </div>
+          <div class="group relative mb-6 w-full">
+            <input
+              type="number"
+              value={match?.scoreDiff.toString()}
+              form={formId}
+              name="point_difference"
+              id="point_difference"
+              class="peer block w-full appearance-none border-0 border-b-2 border-gray-600 bg-transparent px-0 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-0"
+              placeholder=" "
+              required={true}
+              min="0"
+              max="960"
+              step="5"
+            />
+            <label
+              for="point_difference"
+              class="absolute top-3 -z-10 origin-[0] -translate-y-6 scale-75 transform text-sm text-gray-400 duration-300 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:left-0 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:font-medium peer-focus:text-blue-500"
             >
-              Draw
-            </option>
-          </select>
-          <label
-            for="match_winner"
-            class="absolute top-3 origin-[0] -translate-y-6 scale-75 transform bg-gray-900 text-sm text-gray-400 duration-300 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:left-0 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:font-medium peer-focus:text-blue-500"
-          >
-            Match Winner
-          </label>
-        </div>
-        <div class="group relative mb-6 w-full">
-          <input
-            type="number"
-            value={match?.scoreDiff.toString()}
-            form={formId}
-            name="point_difference"
-            id="point_difference"
-            class="peer block w-full appearance-none border-0 border-b-2 border-gray-600 bg-transparent px-0 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-0"
-            placeholder=" "
-            required={true}
-            min="0"
-            max="960"
-            step="5"
-          />
-          <label
-            for="point_difference"
-            class="absolute top-3 -z-10 origin-[0] -translate-y-6 scale-75 transform text-sm text-gray-400 duration-300 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:left-0 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:font-medium peer-focus:text-blue-500"
-          >
-            Point difference
-          </label>
+              Point difference
+            </label>
+          </div>
         </div>
         {/* Only show date and time picker if editing existing match */}
         {match && (
-          <DateAndTimePicker
-            formId={formId}
-            initialDate={createdDate}
-            initialTime={createdTime}
-          />
+          <div class="grid grid-cols-2 gap-x-4 sm:block">
+            <DateAndTimePicker
+              formId={formId}
+              initialDate={createdDate}
+              initialTime={createdTime}
+            />
+          </div>
         )}
         {actionButtons}
         <div id="errors" class="text-red-500"></div>

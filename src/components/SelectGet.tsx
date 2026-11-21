@@ -17,7 +17,7 @@ export const SelectGet = ({
 }: SelectGetProps) => (
   <select
     class={cn(
-      "block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500",
+      "border-border-input-light block w-full rounded-lg border bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-action focus:ring-action dark:border-border-input dark:bg-surface-hover dark:text-text-primary dark:placeholder-text-muted dark:focus:border-action dark:focus:ring-action",
       selectClass,
     )}
     _={`on change

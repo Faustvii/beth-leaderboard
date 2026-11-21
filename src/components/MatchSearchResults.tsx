@@ -24,7 +24,7 @@ export const MatchSearchResults = ({
         >
           {result.name}
           {includeEmail && (
-            <span class="pl-2 text-sm text-gray-400">{result.email}</span>
+            <span class="pl-2 text-sm text-text-muted">{result.email}</span>
           )}
         </button>
       ))}

@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+* {
+  font-family: var(--font-family);
+}
+
 .progress-bar {
   position: fixed;
   top: 0;

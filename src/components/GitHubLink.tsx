@@ -12,7 +12,7 @@ export const GitHubLinkHtml = () => {
       href={commitUrl}
       target="_blank"
       rel="noopener noreferrer"
-      class="fixed bottom-4 right-4 hidden rounded-full bg-slate-700 p-2 transition-colors hover:bg-slate-600 lg:block"
+      class="fixed bottom-4 right-4 hidden rounded-full bg-surface-hover p-2 transition-colors hover:bg-surface lg:block"
       title={`View commit ${GIT_SHA}`}
     >
       <svg

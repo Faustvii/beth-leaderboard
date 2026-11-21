@@ -17,9 +17,9 @@ export const EditUserCard = ({ user }: EditUserCardProps) => {
     >
       <div class="flex min-h-0 flex-col gap-1">
         <span class="text-lg font-medium leading-tight">{user.name}</span>
-        <span class="text-sm text-gray-500">{user.nickname}</span>
+        <span class="text-sm text-text-subtle">{user.nickname}</span>
         {user.email ? (
-          <span class="truncate text-sm text-gray-400">{user.email}</span>
+          <span class="truncate text-sm text-text-muted">{user.email}</span>
         ) : null}
       </div>
       <button
@@ -29,7 +29,7 @@ export const EditUserCard = ({ user }: EditUserCardProps) => {
         hx-swap="afterend"
         class={cn(
           "mt-auto flex w-full justify-center gap-3 rounded-lg",
-          "bg-teal-700 p-2 hover:bg-teal-700/85",
+          "bg-success p-2 hover:bg-success/85",
         )}
         _={`on htmx:afterSettle js htmx.process(document.body) end`}
       >

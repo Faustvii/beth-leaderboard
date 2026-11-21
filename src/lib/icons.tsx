@@ -2,7 +2,7 @@ export const SearchIcon = () => {
   return (
     <div class="absolute pl-3 pt-3">
       <svg
-        class="h-4 w-4 text-gray-400"
+        class="h-4 w-4 text-text-muted"
         aria-hidden="true"
         xmlns="http://www.w3.org/2000/svg"
         fill="none"

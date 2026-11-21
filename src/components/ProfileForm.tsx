@@ -25,11 +25,11 @@ export const ProfileForm = async ({ formId }: ProfileFormProps) => {
             id="nickname"
             placeholder=" "
             required={true}
-            class="peer block w-full appearance-none border-0 border-b-2 border-gray-600 bg-transparent px-0 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-0"
+            class="peer block w-full appearance-none border-0 border-b-2 border-border-input bg-transparent px-0 py-2.5 text-sm focus:border-action focus:outline-none focus:ring-0"
           />
           <label
             for="nickname"
-            class="absolute top-3 -z-10 origin-[0] -translate-y-6 scale-75 transform text-sm text-gray-400 duration-300 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:left-0 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:font-medium peer-focus:text-blue-500"
+            class="absolute top-3 -z-10 origin-[0] -translate-y-6 scale-75 transform text-sm text-text-muted duration-300 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:left-0 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:font-medium peer-focus:text-action"
           >
             Nickname
           </label>
@@ -37,13 +37,13 @@ export const ProfileForm = async ({ formId }: ProfileFormProps) => {
         <button
           hx-put="/profile/"
           type="submit"
-          class="rounded-lg bg-teal-700 p-2"
+          class="rounded-lg bg-success p-2"
           hx-indicator=".progress-bar"
           _="on click set my.innerText to 'Saving...'"
         >
           Save Nickname
         </button>
-        <div id="errors" class="text-red-500"></div>
+        <div id="errors" class="text-danger"></div>
       </form>
     </>
   );

@@ -1,6 +1,13 @@
 name: Build
 on:
   pull_request:
+    # A pull_request run adds the `preview` label. Listening for `labeled` would
+    # start a second run that rebuilds and retags the same head sha, so Flux never
+    # sees a change and the preview keeps the previous image.
+    types:
+      - opened
+      - synchronize
+      - reopened
     branches:
       - main
   push:
@@ -43,6 +50,10 @@ jobs:
     needs: build-and-test
     if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    env:
+      # A pull_request run builds a throwaway merge commit. Flux deploys the head
+      # commit, so bake and check that sha instead.
+      SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -67,12 +78,12 @@ jobs:
           file: ./Dockerfile
           push: true
           build-args: |
-            GIT_SHA=${{ github.sha }}
+            GIT_SHA=${{ env.SOURCE_SHA }}
           tags: |
             ghcr.io/faustvii/beth-leaderboard:${{ github.ref == 'refs/heads/main' && 'latest' || 'pr-' }}${{ github.ref == 'refs/heads/main' && '' || github.event.number }}${{ github.ref != 'refs/heads/main' && '-latest' || '' }}
             ${{ github.ref == 'refs/heads/main' && 'ghcr.io/faustvii/beth-leaderboard:' || '' }}${{ github.ref == 'refs/heads/main' && github.sha || '' }}
             ${{ github.ref != 'refs/heads/main' && 'ghcr.io/faustvii/beth-leaderboard:' || '' }}${{ github.ref != 'refs/heads/main' && 'pr-latest' || '' }}
-            ${{ github.event_name == 'pull_request' && format('ghcr.io/faustvii/beth-leaderboard:{0}', github.event.pull_request.head.sha) || '' }}
+            ${{ github.event_name == 'pull_request' && format('ghcr.io/faustvii/beth-leaderboard:{0}', env.SOURCE_SHA) || '' }}
 
   preview:
     needs: build-and-publish-docker
@@ -103,7 +114,7 @@ jobs:
       - name: Wait for Flux to deploy this commit
         env:
           DEPLOYMENT_URL: https://pr-${{ github.event.pull_request.number }}-leaderboard.${{ vars.PREVIEW_DOMAIN }}
-          EXPECTED_SHA: ${{ github.sha }}
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: bash .github/scripts/wait-for-deployment.sh
 
   production:

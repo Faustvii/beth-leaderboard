@@ -317,6 +317,18 @@ const profileStats = (
           </div>
         </>
       </StatsCardHtml>
+      <StatsCardHtml title="Winrate">
+        <>
+          <div class="flex h-48 w-full items-center justify-center pt-5">
+            <Chart id="chartDoughnut" config={winrateConfig}></Chart>
+            <span class="pl-3 text-sm">
+              {winRate.winPercentage.toFixed(2)}%
+            </span>
+          </div>
+        </>
+      </StatsCardHtml>
+      <SeatWinrateCard stats={seatStats} />
+      <TeamWinrateCard stats={seatStats} />
       <StatsCardHtml title="Biggest win/loss">
         <>
           {biggestWin ? (
@@ -331,23 +343,11 @@ const profileStats = (
           )}
         </>
       </StatsCardHtml>
-      <StatsCardHtml title="Winrate">
+      <StatsCardHtml title="Longest Win/lose Streak">
         <>
-          <div class="flex h-48 w-full items-center justify-center pt-5">
-            <Chart id="chartDoughnut" config={winrateConfig}></Chart>
-            <span class="pl-3 text-sm">
-              {winRate.winPercentage.toFixed(2)}%
-            </span>
-          </div>
+          <span class="text-sm">Top win streak {highestWinStreak}</span>
+          <span class="text-sm">Top lose streak is {highestLoseStreak}</span>
         </>
-      </StatsCardHtml>
-      <SeatWinrateCard stats={seatStats} />
-      <TeamWinrateCard stats={seatStats} />
-      <StatsCardHtml title="Longest Win Streak">
-        <span class="text-sm">Top win streak {highestWinStreak}</span>
-      </StatsCardHtml>
-      <StatsCardHtml title="Longest Losing Streak">
-        <span class="text-sm">top lose streak is {highestLoseStreak}</span>
       </StatsCardHtml>
       <StatsCardHtml title="Match history">
         <div class="flex max-h-48 snap-x snap-mandatory flex-col gap-2 overflow-y-auto">

@@ -180,6 +180,8 @@ const profileStats = (
   const matchesToday = MatchStatistics.gamesToday(playerMatches);
   const matchesYesterday = MatchStatistics.gamesYesterday(playerMatches);
 
+  const winRate = MatchStatistics.playerWinRate(playerMatches, userId);
+
   const seatStats = MatchStatistics.playerWinsBySeat(playerMatches, userId);
   const { highestLoseStreak, highestWinStreak } =
     MatchStatistics.getPlayersStreak(playerMatches, userId);
@@ -199,6 +201,39 @@ const profileStats = (
     0,
     20,
   );
+
+  const colorWinrateData = {
+    labels: ["Won", "Lost", "Draw"],
+    datasets: [
+      {
+        label: "Matches",
+        data: [winRate.wonGames, winRate.lostGames, winRate.draws],
+        backgroundColor: ["#fffffe", "rgb(35, 43, 43)", "#ff8906"],
+        hoverOffset: 4,
+      },
+    ],
+  };
+
+  const winrateConfig: ChartConfiguration = {
+    type: "doughnut",
+    data: colorWinrateData,
+    options: {
+      plugins: {
+        legend: {
+          display: false,
+          labels: {
+            color: "#fffffe",
+          },
+          position: "left",
+        },
+      },
+      elements: {
+        arc: {
+          borderWidth: 0,
+        },
+      },
+    },
+  };
 
   const colorFromPrevious = (cur: number, i: number, arr: number[]) => {
     if (i === 0) {
@@ -294,6 +329,16 @@ const profileStats = (
           ) : (
             <span class="text-sm">No losses yet</span>
           )}
+        </>
+      </StatsCardHtml>
+      <StatsCardHtml title="Winrate">
+        <>
+          <div class="flex h-48 w-full items-center justify-center pt-5">
+            <Chart id="chartDoughnut" config={winrateConfig}></Chart>
+            <span class="pl-3 text-sm">
+              {winRate.winPercentage.toFixed(2)}%
+            </span>
+          </div>
         </>
       </StatsCardHtml>
       <SeatWinrateCard stats={seatStats} />

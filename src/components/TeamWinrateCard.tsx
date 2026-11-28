@@ -8,29 +8,33 @@ interface Props {
 }
 
 export const TeamWinrateCard = ({ stats }: Props) => (
-  <StatsCardHtml title="Winrate By Team">
+  <StatsCardHtml title="Winrate By Team Position">
     {stats.totalGames === 0 ? (
       <span class="text-sm text-gray-400">No seated matches yet</span>
     ) : (
       <>
-        <div class="flex flex-col items-center justify-center gap-1">
+        <div class="flex flex-1 flex-col items-center justify-center gap-1">
           <span class="text-5xl">{stats.teams.White.wins}</span>
           <span class="text-md">
             {stats.teams.White.procentage.toFixed(2)}%
           </span>
-          <span class="text-xl">{stats.teams.White.label} wins</span>
+          <span class="text-center text-xl">
+            {stats.teams.White.label} wins
+          </span>
         </div>
-        <div class="flex flex-col items-center justify-center gap-1">
+        <div class="flex flex-none flex-col items-center justify-center gap-1">
           <span class="text-5xl">{stats.draws.count}</span>
           <span class="text-md">{stats.draws.procentage.toFixed(2)}%</span>
-          <span class="text-xl">Draws</span>
+          <span class="text-center text-xl">Draws</span>
         </div>
-        <div class="flex h-full flex-col items-center justify-center gap-1">
+        <div class="flex h-full flex-1 flex-col items-center justify-center gap-1">
           <span class="text-5xl">{stats.teams.Black.wins}</span>
           <span class="text-md">
             {stats.teams.Black.procentage.toFixed(2)}%
           </span>
-          <span class="text-xl">{stats.teams.Black.label} wins</span>
+          <span class="text-center text-xl">
+            {stats.teams.Black.label} wins
+          </span>
         </div>
       </>
     )}

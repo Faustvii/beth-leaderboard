@@ -55,7 +55,7 @@ describe("MatchStatistics.winsBySeat", () => {
     expect(stats.totalGames).toBe(4);
     expect(stats.seats.N).toEqual({ games: 4, wins: 2, procentage: 50 });
     expect(stats.seats.E).toEqual({ games: 4, wins: 1, procentage: 25 });
-    expect(stats.teams.White.label).toBe("Tog/Kantine team");
+    expect(stats.teams.White.label).toBe("Tog🚂/Kantine🍔 team");
     expect(stats.teams.White.wins).toBe(2);
     expect(stats.teams.White.procentage).toBe(50);
     expect(stats.teams.Black.wins).toBe(1);

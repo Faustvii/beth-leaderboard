@@ -47,8 +47,8 @@ describe("seatsToTeams", () => {
 describe("teamLabel / positionsRecorded / getPlayerSeat", () => {
   it("uses seat names only when positions were recorded", () => {
     expect(positionsRecorded(seated)).toBe(true);
-    expect(teamLabel("White", seated)).toBe("Tog/Kantine team");
-    expect(teamLabel("Black", seated)).toBe("Mute/Rønslev team");
+    expect(teamLabel("White", seated)).toBe("Tog🚂/Kantine🍔 team");
+    expect(teamLabel("Black", seated)).toBe("Mute🔇/Rønslev🐒 team");
     expect(positionsRecorded(unseated)).toBe(false);
     expect(teamLabel("White", unseated)).toBe("Team White");
     expect(teamLabel("Black", unseated)).toBe("Team Black");
@@ -216,7 +216,7 @@ describe("sideLabel", () => {
       blackPlayerTwo: { id: "d" },
     };
     expect(sideLabel("White", { ...seated, ...doubles })).toBe(
-      "Tog/Kantine team",
+      "Tog🚂/Kantine🍔 team",
     );
     expect(sideLabel("Black", { ...unseated, ...doubles })).toBe("Team Black");
   });

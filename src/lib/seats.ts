@@ -6,8 +6,8 @@ export type Seat = (typeof seatValues)[number];
 export type Team = "White" | "Black";
 // Still using white/black as the spine of the code
 export const TEAM_LABELS: Record<Team, string> = {
-  White: "Tog/Kantine team",
-  Black: "Mute/Rønslev team",
+  White: "Tog🚂/Kantine🍔 team",
+  Black: "Mute🔇/Rønslev🐒 team",
 };
 
 export const SEAT_TEAM: Record<Seat, Team> = {

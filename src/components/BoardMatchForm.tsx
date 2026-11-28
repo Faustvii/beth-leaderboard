@@ -191,11 +191,7 @@ const SeatZone = ({ seat }: { seat: Seat }) => {
     >
       <input type="hidden" name={`seat${seat}`} />
       <span class="flex w-full flex-col items-center text-xs text-gray-400 sm:block">
-        <span class="uppercase tracking-wide">Seat {SEAT_NAMES[seat]}</span>
-        <span class="seat-team max-w-full truncate text-gray-500">
-          <span class="hidden sm:inline"> · </span>
-          {TEAM_LABELS[team]}
-        </span>
+        SEAT {SEAT_NAMES[seat]}
       </span>
       <div class="seat-slot flex min-h-[1.75rem] w-full min-w-0 items-center justify-center" />
     </div>

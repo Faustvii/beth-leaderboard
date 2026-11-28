@@ -23,10 +23,10 @@ export const TEAM_SEATS: Record<Team, readonly [Seat, Seat]> = {
 };
 
 export const SEAT_NAMES: Record<Seat, string> = {
-  N: "1",
-  E: "2",
-  S: "3",
-  W: "4",
+  N: "1 🚂",
+  E: "2 🐒",
+  S: "3 🍔",
+  W: "4 🔇",
 };
 
 export type PlayerSlot =

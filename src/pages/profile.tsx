@@ -180,6 +180,8 @@ const profileStats = (
   const matchesToday = MatchStatistics.gamesToday(playerMatches);
   const matchesYesterday = MatchStatistics.gamesYesterday(playerMatches);
 
+  const winRate = MatchStatistics.playerWinRate(playerMatches, userId);
+
   const seatStats = MatchStatistics.playerWinsBySeat(playerMatches, userId);
   const { highestLoseStreak, highestWinStreak } =
     MatchStatistics.getPlayersStreak(playerMatches, userId);
@@ -199,6 +201,39 @@ const profileStats = (
     0,
     20,
   );
+
+  const colorWinrateData = {
+    labels: ["Won", "Lost", "Draw"],
+    datasets: [
+      {
+        label: "Matches",
+        data: [winRate.wonGames, winRate.lostGames, winRate.draws],
+        backgroundColor: ["#fffffe", "rgb(35, 43, 43)", "#ff8906"],
+        hoverOffset: 4,
+      },
+    ],
+  };
+
+  const winrateConfig: ChartConfiguration = {
+    type: "doughnut",
+    data: colorWinrateData,
+    options: {
+      plugins: {
+        legend: {
+          display: false,
+          labels: {
+            color: "#fffffe",
+          },
+          position: "left",
+        },
+      },
+      elements: {
+        arc: {
+          borderWidth: 0,
+        },
+      },
+    },
+  };
 
   const colorFromPrevious = (cur: number, i: number, arr: number[]) => {
     if (i === 0) {
@@ -282,6 +317,18 @@ const profileStats = (
           </div>
         </>
       </StatsCardHtml>
+      <StatsCardHtml title="Winrate">
+        <>
+          <div class="flex h-48 w-full items-center justify-center pt-5">
+            <Chart id="chartDoughnut" config={winrateConfig}></Chart>
+            <span class="pl-3 text-sm">
+              {winRate.winPercentage.toFixed(2)}%
+            </span>
+          </div>
+        </>
+      </StatsCardHtml>
+      <SeatWinrateCard stats={seatStats} />
+      <TeamWinrateCard stats={seatStats} />
       <StatsCardHtml title="Biggest win/loss">
         <>
           {biggestWin ? (
@@ -296,13 +343,11 @@ const profileStats = (
           )}
         </>
       </StatsCardHtml>
-      <SeatWinrateCard stats={seatStats} />
-      <TeamWinrateCard stats={seatStats} />
-      <StatsCardHtml title="Longest Win Streak">
-        <span class="text-sm">Top win streak {highestWinStreak}</span>
-      </StatsCardHtml>
-      <StatsCardHtml title="Longest Losing Streak">
-        <span class="text-sm">top lose streak is {highestLoseStreak}</span>
+      <StatsCardHtml title="Longest Win/lose Streak">
+        <>
+          <span class="text-sm">Top win streak {highestWinStreak}</span>
+          <span class="text-sm">Top lose streak is {highestLoseStreak}</span>
+        </>
       </StatsCardHtml>
       <StatsCardHtml title="Match history">
         <div class="flex max-h-48 snap-x snap-mandatory flex-col gap-2 overflow-y-auto">

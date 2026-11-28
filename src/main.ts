@@ -1,14 +1,14 @@
 import "@kitajs/html/register";
 import { migrate } from "drizzle-orm/libsql/migrator";
 import { Elysia } from "elysia";
-import { api } from "./controllers/*";
 import {
   holidayCron,
   updateAllHolidays,
 } from "./controllers/holidays/holidayController";
+import { api } from "./controllers/index";
 import { writeDb } from "./db";
 import { SeedDatabase } from "./db/seed";
-import { pages } from "./pages/*";
+import { pages } from "./pages/index";
 import { staticController } from "./staticFiles";
 
 console.log("migrating database");
